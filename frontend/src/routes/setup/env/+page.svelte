@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AdminEnvVars } from "$lib/setup";
+	import type { AdminEnvVars } from "$lib/admin/setup/setup/setup/setup";
 	import Step1 from "./Step1.svelte";
 	import Step2 from "./Step2.svelte";
 	import Step3 from "./Step3.svelte";

@@ -1,9 +1,12 @@
 # TODO
 
 -   Move user contacts to separate model so SMS and Signal can have different phone numbers for the same user for example. Each messenger can be explicitly enabled and has its own options. e.g only send login alerts via SMS, don't send any other types of messages to it
+- Create endpoint for creating a user with a given username. Can then generate a signup link for a user to update their stash and password. That way the user doesn't need to give the admin their password and data, and the admin doesn't need to give their password/session
+- Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
 -   Improve frontend
 -   Rename sessions to something else? In case I add logins and sessions for regular users in the future
 -   Remove userID and publicMessage from logger, it's not worth the complexity and risks
+- Encrypt stashes with an extra key to prevent offline attacks if database is leaked
 -   00:07:52 ERR schedulers\delayFuncs.go:68 unable to create initial PeriodicTask object error="db common [package] error: WithTx error: start transaction error: database [general] error: other error: ent: starting a transaction: SQL logic error: cannot start a transaction within a transaction (1)" periodicTaskName=SEND_ACTIVE_SESSION_REMINDERS
 -   Can cancelling requests make views non-atomic if a view uses multiple transactions? Are there any security risks with this?
 -   Standardise returning errors and using gin.H vs the endpoint specific download struct. That struct applies defaults which the other 2 approaches don't, so it could leak information
@@ -14,9 +17,12 @@
 -   -   Attempting to get an authorisation code when locked should send the unlock date
 -   Repeat password in sign up form
 -   -   Admins should be able to reset it so if there's an unauthorised login, the user can block with a self lock, the admin can reset them and then they can block again without waiting
--   Email messenger
--   Signal messenger? Using that REST API in a separate container over the internal network only so no security required, hosting should be very cheap if it's serverless
--   SMS messenger
+- Implement more messengers:
+- - Email (SendGrid)
+- - ntfy.sh
+- - Matrix?
+- - Probably not SMS or Signal as they require renting a phone number
+- - Not WhatsApp because their business API seems expensive
 -   CSRF?
 -   Move more logic out of endpoints
 -   CC admin (or all users?) when a user receives a login alert

@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { AdminEnvVars } from "$lib/admin/setup/setup/setup/setup";
 	import { fetchJson } from "$lib/api";
-	import type { AdminEnvVars } from "$lib/setup";
 
 	const RANDOM_PASSWORD_LENGTH = 128;
 

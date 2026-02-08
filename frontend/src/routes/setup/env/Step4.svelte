@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AdminEnvVars } from "$lib/setup";
+	import type { AdminEnvVars } from "$lib/admin/setup/setup/setup/setup";
 
 	const {
 		adminEnvVars,

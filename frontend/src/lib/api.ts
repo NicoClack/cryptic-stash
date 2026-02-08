@@ -1,6 +1,8 @@
-import { PUBLIC_API_DOMAIN } from "$env/static/public";
-import { page } from "$app/state";
 import { goto } from "$app/navigation";
+import { resolve } from "$app/paths";
+import { page } from "$app/state";
+import { PUBLIC_API_DOMAIN } from "$env/static/public";
+import { getAdminAuth } from "./admin/AdminAuth.svelte";
 
 class StatusError extends Error {
 	jsonResponse: JsonResponse;
@@ -34,10 +36,13 @@ export class JsonResponse {
 	}
 }
 
+export interface JsonResponseInit extends RequestInit {
+	throwForStatus?: boolean;
+}
 export async function fetchJson(
 	fetch: typeof global.fetch,
 	url: string,
-	init?: RequestInit | undefined,
+	init?: JsonResponseInit | undefined,
 ): Promise<JsonResponse> {
 	const urlObj = new URL(PUBLIC_API_DOMAIN + url);
 	const resp = await fetch(urlObj, init);
@@ -54,8 +59,37 @@ export async function fetchJson(
 			jsonResponse.redirecting = true;
 		}
 	}
+	if (
+		(resp.status === 401 || resp.status === 403) &&
+		page.route.id?.startsWith("/admin") &&
+		!page.route.id?.startsWith("/admin/login")
+	) {
+		goto(resolve("/admin/login"));
+	}
+	if (init?.throwForStatus) {
+		jsonResponse.throwForStatus();
+	}
 
 	return jsonResponse;
+}
+export async function fetchAdminJson(
+	fetch: typeof global.fetch,
+	url: string,
+	init?: JsonResponseInit | undefined,
+): Promise<JsonResponse> {
+	const adminAuth = getAdminAuth();
+	adminAuth.requireAuth();
+
+	const headers = new Headers(init?.headers);
+	const authHeader = adminAuth.getAuthHeader();
+	if (authHeader) {
+		headers.set("Authorization", authHeader);
+	}
+
+	return await fetchJson(fetch, url, {
+		...init,
+		headers: headers,
+	});
 }
 
 export function responseHasErrorCode(response: JsonResponse, errorCode: string): boolean {
@@ -71,11 +105,10 @@ export async function maybeGoToSetup(fetch: typeof global.fetch): Promise<boolea
 	if (setupStatus.data.isComplete) {
 		return false;
 	}
-	// TODO: base URL support?
 	if (!setupStatus.data.isEnvComplete) {
-		goto("/setup/env");
+		goto(resolve("/setup/env/"));
 	} else {
-		goto("/setup/admin-messengers");
+		goto(resolve("/setup/admin-messengers/"));
 	}
 	return true;
 }
