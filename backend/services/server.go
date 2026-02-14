@@ -39,6 +39,7 @@ func NewServer(app *common.App) *Server {
 	if len(app.Env.ALLOWED_ORIGINS) > 0 {
 		corsConfig := cors.DefaultConfig()
 		corsConfig.AllowOrigins = app.Env.ALLOWED_ORIGINS
+		corsConfig.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 		router.Use(cors.New(corsConfig))
 	}
 

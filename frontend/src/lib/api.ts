@@ -61,8 +61,8 @@ export async function fetchJson(
 	}
 	if (
 		(resp.status === 401 || resp.status === 403) &&
-		page.route.id?.startsWith("/admin") &&
-		!page.route.id?.startsWith("/admin/login")
+		((page.route.id?.startsWith("/admin") && page.route.id !== "/admin/login") ||
+			page.route.id === "/setup/admin-messengers")
 	) {
 		goto(resolve("/admin/login"));
 	}

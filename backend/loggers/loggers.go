@@ -540,7 +540,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 }
 
 func (handler *Handler) Shutdown() {
-	go handler.Listen()
+	go handler.Listen() // TODO: is this a race condition?
 	handler.topHandler.shutdownOnce.Do(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), ShutdownTimeout)
 		handler.topHandler.mu.Lock()

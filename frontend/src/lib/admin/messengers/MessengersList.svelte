@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { fetchJson } from "$lib/api";
+	import { fetchAdminJson } from "$lib/api";
 	import Messenger from "./Messenger.svelte";
 
 	const { userID }: { userID: string } = $props();
 
 	let messengersPromise = $derived(
-		fetchJson(fetch, `/admin/users/${userID}/messengers`, {
+		fetchAdminJson(fetch, `/api/v1/admin/users/${userID}/messengers/`, {
 			throwForStatus: true,
 		}),
 	);
 </script>
 
 {#await messengersPromise then response}
-	{#each response.data.messengers as messenger}
+	{#each Object.entries<any>(response.data.messengers) as [versionedName, messenger]}
 		<Messenger
 			name={messenger.name}
 			enabled={messenger.enabled}
