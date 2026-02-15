@@ -48,7 +48,7 @@
 				required
 				type="password"
 				name="password"
-				autocomplete="new-password"
+				autocomplete="current-password"
 				maxlength="256"
 			/>
 		</label> <br />
