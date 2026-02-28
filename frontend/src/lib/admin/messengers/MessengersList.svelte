@@ -12,8 +12,10 @@
 </script>
 
 {#await messengersPromise then response}
-	{#each Object.entries<any>(response.data.messengers) as [versionedName, messenger]}
+	{#each Object.entries<any>(response.data.messengers) as [id, messenger]}
 		<Messenger
+			{id}
+			{userID}
 			name={messenger.name}
 			enabled={messenger.enabled}
 			options={messenger.options}
