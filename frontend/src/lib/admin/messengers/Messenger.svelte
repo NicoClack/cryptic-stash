@@ -1,12 +1,10 @@
 <script lang="ts">
-	import Button from "$lib/components/ui/button/button.svelte";
-	import Card from "$lib/components/ui/card/card.svelte";
 	import CardContent from "$lib/components/ui/card/card-content.svelte";
 	import CardDescription from "$lib/components/ui/card/card-description.svelte";
 	import CardHeader from "$lib/components/ui/card/card-header.svelte";
 	import CardTitle from "$lib/components/ui/card/card-title.svelte";
-	import JsonForm from "$lib/JsonForm/JsonForm.svelte";
-	import { fetchAdminJson } from "$lib/api";
+	import Card from "$lib/components/ui/card/card.svelte";
+	import JsonForm from "$lib/form/JsonForm.svelte";
 	import { cn } from "$lib/utils";
 
 	let {
@@ -14,7 +12,7 @@
 		userID,
 		name,
 		enabled,
-		options = $bindable(),
+		options,
 		optionsSchema,
 	}: {
 		id: string;
@@ -27,7 +25,8 @@
 
 	let isSubmitting = $state(false);
 
-	async function handleSubmit({ value }: { value: any }) {
+	async function handleSubmit(value: unknown) {
+		debugger;
 		isSubmitting = true;
 		try {
 			// TODO
@@ -54,19 +53,8 @@
 		</CardDescription>
 	</CardHeader>
 	<CardContent class="pt-6">
-		<JsonForm schema={optionsSchema} bind:value={options} onSubmit={handleSubmit}>
-			<div class="mt-8 flex justify-end">
-				<Button type="submit" disabled={isSubmitting} class="min-w-[120px]">
-					{#if isSubmitting}
-						<span
-							class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-						></span>
-						Saving...
-					{:else}
-						Save & Enable
-					{/if}
-				</Button>
-			</div>
-		</JsonForm>
+		{#if optionsSchema}
+			<JsonForm schema={optionsSchema} initialValue={options} onSubmit={handleSubmit} />
+		{/if}
 	</CardContent>
 </Card>
