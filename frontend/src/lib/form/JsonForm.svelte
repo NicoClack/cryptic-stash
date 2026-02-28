@@ -16,18 +16,17 @@
 	setShadcnContext();
 
 	function handleSubmit(value: unknown, e: SubmitEvent) {
-		console.log("JsonForm.handleSubmit called", { value, schema, initialValue });
-		try {
-			onSubmit?.(value, e);
-		} catch (error) {
-			console.error("Error in onSubmit:", error);
-			throw error;
-		}
+		onSubmit?.(value, e);
 	}
 
 	let form = $derived.by(() => {
+		let correctedSchema = { ...schema };
+		// Hack: validation always seems to fail for the first submit
+		// if this is specified, at least if it's draft-07
+		delete correctedSchema.$schema;
+
 		return createForm({
-			schema,
+			schema: correctedSchema,
 			uiSchema,
 			initialValue,
 			resolver,
@@ -42,7 +41,5 @@
 </script>
 
 {#if form}
-	{#if form}
-		<BasicForm {form} />
-	{/if}
+	<BasicForm {form} />
 {/if}
