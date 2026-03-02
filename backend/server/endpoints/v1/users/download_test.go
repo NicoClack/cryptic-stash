@@ -54,6 +54,17 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			if stdErr != nil {
 				return nil, stdErr
 			}
+			stdErr = tx.UserMessenger.
+				Create().
+				SetType(app.MockMessenger.Name).
+				SetVersion(1).
+				SetUserID(userOb.ID).
+				SetOptions(nil).
+				SetEnabled(true).
+				Exec(ctx)
+			if stdErr != nil {
+				return nil, stdErr
+			}
 			stdErr = tx.Stash.Create().
 				SetContent(encrypted).
 				SetFileName(filename).
@@ -98,7 +109,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/download",
+		"/api/v1/users/download/",
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
@@ -153,6 +164,17 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			if stdErr != nil {
 				return nil, stdErr
 			}
+			stdErr = tx.UserMessenger.
+				Create().
+				SetType(app.MockMessenger.Name).
+				SetVersion(1).
+				SetUserID(userOb.ID).
+				SetOptions(nil).
+				SetEnabled(true).
+				Exec(ctx)
+			if stdErr != nil {
+				return nil, stdErr
+			}
 			stdErr = tx.Stash.Create().
 				SetContent(encrypted).
 				SetFileName(filename).
@@ -197,7 +219,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/download",
+		"/api/v1/users/download/",
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
@@ -244,6 +266,17 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetSessionsValidFrom(now).
 				SetLockedUntil(now.Add((24 * time.Hour) + time.Nanosecond)).
 				Save(ctx)
+			if stdErr != nil {
+				return nil, stdErr
+			}
+			stdErr = tx.UserMessenger.
+				Create().
+				SetType(app.MockMessenger.Name).
+				SetVersion(1).
+				SetUserID(userOb.ID).
+				SetOptions(nil).
+				SetEnabled(true).
+				Exec(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
@@ -311,7 +344,7 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 	makeRequest := func() *httptest.ResponseRecorder {
 		return testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/download",
+			"/api/v1/users/download/",
 			users.DownloadPayload{
 				Username:          username,
 				Password:          password,
@@ -390,6 +423,17 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			if stdErr != nil {
 				return nil, stdErr
 			}
+			stdErr = tx.UserMessenger.
+				Create().
+				SetType(app.MockMessenger.Name).
+				SetVersion(1).
+				SetUserID(userOb.ID).
+				SetOptions(nil).
+				SetEnabled(true).
+				Exec(ctx)
+			if stdErr != nil {
+				return nil, stdErr
+			}
 			stdErr = tx.Stash.Create().
 				SetContent(encrypted).
 				SetFileName(filename).
@@ -437,7 +481,7 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/download",
+		"/api/v1/users/download/",
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,

@@ -61,6 +61,8 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 					Where(session.And(session.HasUserWith(user.Username(body.Username)), session.Code(givenAuthCodeBytes))).
 					WithUser(func(userQuery *ent.UserQuery) {
 						userQuery.WithStash()
+						userQuery.WithMessengers()
+						userQuery.WithStash()
 					}).
 					WithLoginAlerts().
 					First(ctx)

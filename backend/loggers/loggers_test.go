@@ -147,7 +147,8 @@ func TestLogger_UserIDNoMatch_LogsWarning(t *testing.T) {
 	app.Logger = logger
 	logger.Start()
 
-	logger.Info("created user", "userID", 1)
+	userID := uuid.New()
+	logger.Info("created user", "userID", userID)
 
 	logger.Shutdown()
 	logger.AssertWritten(t, []ExpectedEntry{
@@ -155,7 +156,7 @@ func TestLogger_UserIDNoMatch_LogsWarning(t *testing.T) {
 			Message: "created user",
 			Level:   int(slog.LevelInfo),
 			Attributes: map[string]any{
-				"userID": 1,
+				"userID": userID,
 			},
 		},
 		{
@@ -469,6 +470,7 @@ func TestLogger_RetriesBulkCreateIndividually(t *testing.T) {
 				"so the writes took longer than they should have",
 			Level: int(slog.LevelWarn),
 			Attributes: map[string]any{
+				"entryCount": 2,
 				"error": map[string]any{
 					"categories": []any{
 						"auto wrapped",

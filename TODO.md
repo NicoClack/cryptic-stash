@@ -1,5 +1,6 @@
 # TODO
 
+- Update LoginAlert model to use foreign key to messenger instead of using versionedType?
 -   Move user contacts to separate model so SMS and Signal can have different phone numbers for the same user for example. Each messenger can be explicitly enabled and has its own options. e.g only send login alerts via SMS, don't send any other types of messages to it
 - Create endpoint for creating a user with a given username. Can then generate a signup link for a user to update their stash and password. That way the user doesn't need to give the admin their password and data, and the admin doesn't need to give their password/session
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
