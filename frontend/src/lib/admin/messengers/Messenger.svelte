@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fetchAdminJson } from "$lib/api";
 	import CardContent from "$lib/components/ui/card/card-content.svelte";
 	import CardDescription from "$lib/components/ui/card/card-description.svelte";
 	import CardHeader from "$lib/components/ui/card/card-header.svelte";
@@ -8,14 +9,14 @@
 	import { cn } from "$lib/utils";
 
 	let {
-		id,
+		versionedType,
 		userID,
 		name,
 		enabled,
 		options,
 		optionsSchema,
 	}: {
-		id: string;
+		versionedType: string;
 		userID: string;
 		name: string;
 		enabled: boolean;
@@ -26,10 +27,16 @@
 	let isSubmitting = $state(false);
 
 	async function handleSubmit(value: unknown) {
-		debugger;
 		isSubmitting = true;
 		try {
-			// TODO
+			await fetchAdminJson(fetch, `/api/v1/admin/users/${userID}/messengers/enable/`, {
+				method: "POST",
+				body: JSON.stringify({
+					versionedType,
+					options: value,
+				}),
+				throwForStatus: true,
+			});
 		} finally {
 			isSubmitting = false;
 		}
