@@ -1,4 +1,4 @@
-import { setThemeContext, type ThemeContext } from "@sjsf/shadcn4-theme";
+import { setThemeContext } from "@sjsf/shadcn4-theme";
 
 import Button from "$lib/components/ui/button/button.svelte";
 import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
@@ -46,8 +46,6 @@ import {
 import { ButtonGroup } from "$lib/components/ui/button-group/index.js";
 import { RangeCalendar } from "$lib/components/ui/range-calendar/index.js";
 */
-
-let foo: ThemeContext["components"];
 
 export function setShadcnContext() {
 	setThemeContext({

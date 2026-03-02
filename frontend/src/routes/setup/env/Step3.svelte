@@ -27,7 +27,7 @@
 <main>
 	<h3>Step 3 of 4: Proxy Config</h3>
 	<p>
-		Please use Postman, curl, Node.js or another non-browser HTTP client to make a GET request to{" "}
+		Please use Postman, curl, Node.js or another non-browser HTTP client to make a GET request to
 		<span class="echo-headers-url">
 			{echoHeadersUrlObj.toString()}
 		</span>. Look for headers that contain your public IP address. Once you find a candidate, try

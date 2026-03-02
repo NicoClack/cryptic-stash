@@ -33,7 +33,6 @@ class AdminAuthState {
 		if (browser && !this.isAuthenticated() && !page.route.id?.startsWith("/admin/login")) {
 			const urlObj = new SvelteURL(resolve("/admin/login"), location.origin);
 			urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
-			// eslint-disable-next-line svelte/no-navigation-without-resolve
 			goto(urlObj.toString());
 		}
 	}
@@ -54,7 +53,6 @@ class AdminAuthState {
 		if (redirectTo) {
 			const urlObj = new SvelteURL(redirectTo, location.origin);
 			if (urlObj.origin === location.origin) {
-				// eslint-disable-next-line svelte/no-navigation-without-resolve
 				goto(urlObj.toString());
 				return;
 			}

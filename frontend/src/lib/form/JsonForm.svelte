@@ -10,8 +10,9 @@
 		uiSchema?: UiSchemaRoot;
 		initialValue?: unknown;
 		onSubmit?: (value: unknown, e: SubmitEvent) => void;
+		isDisabled?: boolean;
 	}
-	let { schema, uiSchema, initialValue = {}, onSubmit }: Props = $props();
+	let { schema, uiSchema, initialValue = {}, onSubmit, isDisabled = false }: Props = $props();
 
 	setShadcnContext();
 
@@ -19,13 +20,16 @@
 		onSubmit?.(value, e);
 	}
 
-	let form = $derived.by(() => {
-		let correctedSchema = { ...schema };
+	let correctedSchema = $derived.by(() => {
+		let schemaCopy = { ...schema };
 		// Hack: validation always seems to fail for the first submit
 		// if this is specified, at least if it's draft-07
-		delete correctedSchema.$schema;
+		delete schemaCopy.$schema;
+		return schemaCopy;
+	});
 
-		return createForm({
+	let form = $derived(
+		createForm({
 			schema: correctedSchema,
 			uiSchema,
 			initialValue,
@@ -36,8 +40,9 @@
 			translation,
 			validator,
 			onSubmit: handleSubmit,
-		});
-	});
+			disabled: isDisabled,
+		}),
+	);
 </script>
 
 {#if form}

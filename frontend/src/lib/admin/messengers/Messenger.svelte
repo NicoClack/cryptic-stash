@@ -61,7 +61,12 @@
 	</CardHeader>
 	<CardContent class="pt-6">
 		{#if optionsSchema}
-			<JsonForm schema={optionsSchema} initialValue={options} onSubmit={handleSubmit} />
+			<JsonForm
+				schema={optionsSchema}
+				initialValue={options}
+				onSubmit={handleSubmit}
+				isDisabled={isSubmitting}
+			/>
 		{/if}
 	</CardContent>
 </Card>

@@ -28,16 +28,16 @@
 	environment variables...
 </p>
 
-{#if step === 1}
+{#if step === 1 || !adminEnvVars}
 	<Step1 onComplete={handleStep1Complete}></Step1>
 {:else if step === 2}
 	<Step2
-		totpSecret={adminEnvVars?.envVars.ADMIN_TOTP_SECRET!}
-		totpURL={adminEnvVars?.totpUrl!}
+		totpSecret={adminEnvVars.envVars.ADMIN_TOTP_SECRET}
+		totpURL={adminEnvVars.totpUrl}
 		onComplete={handleStep2Complete}
 	></Step2>
 {:else if step === 3}
 	<Step3 onComplete={handleStep3Complete}></Step3>
 {:else if step === 4}
-	<Step4 adminEnvVars={adminEnvVars!}></Step4>
+	<Step4 {adminEnvVars}></Step4>
 {/if}

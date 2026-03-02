@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from "$app/paths";
 	import type { AdminEnvVars } from "$lib/admin/setup";
 
 	const {
@@ -53,7 +54,7 @@
 	<textarea readonly rows="15" cols="80" value={formattedVars}></textarea> <br />
 
 	<p>Once you're server has restarted, click Next.</p>
-	<a href="/">Next</a>
+	<a href={resolve("/")}>Next</a>
 </main>
 
 <style>

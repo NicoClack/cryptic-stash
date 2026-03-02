@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import type { ResolvedPathname } from "$app/types";
 	import { cn, type WithElementRef } from "$lib/utils.js";
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from "svelte/elements";
 	import { tv, type VariantProps } from "tailwind-variants";
@@ -35,9 +36,10 @@
 	export type ButtonSize = VariantProps<typeof buttonVariants>["size"];
 
 	export type ButtonProps = WithElementRef<HTMLButtonAttributes> &
-		WithElementRef<HTMLAnchorAttributes> & {
+		Omit<WithElementRef<HTMLAnchorAttributes>, "href"> & {
 			variant?: ButtonVariant;
 			size?: ButtonSize;
+			href?: ResolvedPathname;
 		};
 </script>
 

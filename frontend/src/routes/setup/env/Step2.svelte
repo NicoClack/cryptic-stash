@@ -49,7 +49,7 @@
 			<p>Unable to generate QR code</p>
 		{/await}
 	</div>
-	<a target="_blank" href={totpURL}>I have a TOTP app on this device</a> <br />
+	<a target="_blank" rel="external" href={totpURL}>I have a TOTP app on this device</a> <br />
 	<form onsubmit={handleSubmit}>
 		<label>
 			2FA Code:
