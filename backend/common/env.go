@@ -21,8 +21,15 @@ func RequireEnv(name string) string {
 
 func RequireStrArrEnv(name string) []string {
 	rawValue := RequireEnv(name)
-
-	return strings.Split(rawValue, ",")
+	parts := strings.Split(rawValue, ",")
+	var result []string
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }
 
 func RequireIntEnv(name string) int {
