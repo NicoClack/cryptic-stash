@@ -2,7 +2,7 @@ import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 import { PUBLIC_API_DOMAIN } from "$env/static/public";
-import { getAdminAuth } from "./admin/AdminAuth.svelte";
+import { adminAuth } from "./admin/AdminAuth.svelte";
 
 class StatusError extends Error {
 	jsonResponse: JsonResponse;
@@ -77,7 +77,6 @@ export async function fetchAdminJson(
 	url: string,
 	init?: JsonResponseInit | undefined,
 ): Promise<JsonResponse> {
-	const adminAuth = getAdminAuth();
 	adminAuth.requireAuth();
 
 	const headers = new Headers(init?.headers);

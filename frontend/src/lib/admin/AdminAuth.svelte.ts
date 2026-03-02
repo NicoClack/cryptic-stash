@@ -2,13 +2,12 @@ import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
-import { createContext } from "svelte";
 import { SvelteURL } from "svelte/reactivity";
 
 const ADMIN_SESSION_TOKEN_STORAGE_KEY = "adminSessionToken";
 const ADMIN_USER_ID_STORAGE_KEY = "adminUserID";
 
-export class AdminAuthState {
+class AdminAuthState {
 	#sessionToken: string | null = $state(null);
 	#userID: string | null = $state(null);
 
@@ -64,4 +63,4 @@ export class AdminAuthState {
 	}
 }
 
-export const [getAdminAuth, setAdminAuth] = createContext<AdminAuthState>();
+export const adminAuth = new AdminAuthState();

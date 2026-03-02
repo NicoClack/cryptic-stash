@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { getAdminAuth } from "$lib/admin/AdminAuth.svelte";
+	import { adminAuth } from "$lib/admin/AdminAuth.svelte";
 	import { fetchJson } from "$lib/api";
-
-	const adminAuth = getAdminAuth();
 	let isLoading = $state(false);
 
 	let password = $state("");

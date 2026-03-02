@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { getAdminAuth } from "$lib/admin/AdminAuth.svelte";
+	import { adminAuth } from "$lib/admin/AdminAuth.svelte";
 	import MessengersList from "$lib/admin/messengers/MessengersList.svelte";
-
-	const { userID } = getAdminAuth();
 </script>
 
 <div class="mx-auto max-w-3xl py-12 px-6">
@@ -14,9 +12,9 @@
 		</p>
 	</header>
 
-	{#if userID}
+	{#if adminAuth.userID}
 		<div class="space-y-8">
-			<MessengersList {userID} />
+			<MessengersList userID={adminAuth.userID} />
 		</div>
 	{/if}
 </div>
