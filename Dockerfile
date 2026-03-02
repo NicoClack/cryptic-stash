@@ -4,7 +4,7 @@ ARG APP_PORT=8080
 FROM node:24-alpine AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-ENV API_DOMAIN="/"
+ENV PUBLIC_API_DOMAIN=""
 RUN npm ci
 COPY frontend/ ./
 RUN npm run build
