@@ -34,6 +34,6 @@ COPY --from=backend-builder /app/backend/main .
 
 ARG APP_PORT
 ENV PORT=${APP_PORT}
-ENV CORS_ALLOWED_ORIGINS=""
+ENV ALLOWED_ORIGINS=""
 EXPOSE ${APP_PORT}
 CMD ["./main"]
