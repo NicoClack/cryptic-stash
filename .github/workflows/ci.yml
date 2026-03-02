@@ -25,18 +25,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Setup Atlas
         uses: ariga/setup-atlas@v0
         with:
           version: latest
-      - name: Atlas Lint
-        uses: ariga/atlas-action/migrate/lint@v1
-        with:
-          dir: 'file://backend/ent/migrate/migrations'
-          dir-name: 'cryptic-stash'
-          dev-url: 'sqlite://ci-test?mode=memory'
+      - name: Validate migration directory
+        run: atlas migrate validate --dir "file://backend/ent/migrate/migrations"
+      - name: Verify migration hash integrity
+        run: |
+          atlas migrate hash --dir "file://backend/ent/migrate/migrations"
+          git diff --exit-code -- backend/ent/migrate/migrations/atlas.sum
 
   backend-test:
     needs: [backend-lint, backend-migration-lint]

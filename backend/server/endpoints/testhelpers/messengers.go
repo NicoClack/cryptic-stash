@@ -23,7 +23,6 @@ func NewMockMessenger(name string) *MockMessenger {
 }
 
 func (mockMessenger *MockMessenger) Register(registry *messengers.Registry) {
-	type Options struct{}
 	type Body struct {
 		Message SentMessage
 	}
