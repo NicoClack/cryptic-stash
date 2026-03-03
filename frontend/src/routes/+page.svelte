@@ -1,5 +1,25 @@
 <script lang="ts">
+	import { resolve } from "$app/paths";
 	import { Card, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
+
+	const homepageLinks = [
+		{
+			title: "Download your stash",
+			description:
+				"You'll need your password and somewhere to store the authorisation code while you wait",
+			href: resolve("/download-stash"),
+		},
+		{
+			title: "Freeze your account",
+			description: "Temporarily block downloads while you're away",
+			href: resolve("/freeze-account"),
+		},
+		{
+			title: "Admin site",
+			description: "Create, update and lock users",
+			href: resolve("/admin/login"),
+		},
+	];
 </script>
 
 <main>
@@ -12,4 +32,35 @@
 			</CardDescription>
 		</CardHeader>
 	</Card>
+
+	<section class="mx-auto flex w-full max-w-5xl flex-col items-center gap-4">
+		<a href={resolve("/freeze-account")} class="group block w-full no-underline hover:no-underline">
+			<Card>
+				<CardHeader>
+					<CardTitle
+						class="text-center transition-colors group-hover:text-primary group-hover:underline"
+					>
+						I'm being hacked!!!
+					</CardTitle>
+				</CardHeader>
+			</Card>
+		</a>
+
+		<div class="grid w-full gap-4 md:grid-cols-3">
+			{#each homepageLinks as item (item.title)}
+				<a href={item.href} class="group block no-underline hover:no-underline">
+					<Card class="h-full">
+						<CardHeader>
+							<CardTitle
+								class="text-center transition-colors group-hover:text-primary group-hover:underline"
+							>
+								{item.title}
+							</CardTitle>
+							<CardDescription>{item.description}</CardDescription>
+						</CardHeader>
+					</Card>
+				</a>
+			{/each}
+		</div>
+	</section>
 </main>
