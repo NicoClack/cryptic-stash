@@ -44,7 +44,7 @@ export async function fetchJson(
 	url: string,
 	init?: JsonResponseInit | undefined,
 ): Promise<JsonResponse> {
-	const urlObj = new URL(PUBLIC_API_DOMAIN + url);
+	const urlObj = new URL(PUBLIC_API_DOMAIN + url, window.location.origin);
 	const resp = await fetch(urlObj, init);
 	const json = await resp.json();
 
