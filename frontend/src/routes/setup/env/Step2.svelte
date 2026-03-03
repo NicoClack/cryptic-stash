@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { fetchJson } from "$lib/api";
+	import { Button } from "$lib/components/ui/button";
+	import { Input } from "$lib/components/ui/input";
+	import { Label } from "$lib/components/ui/label";
 	import QRCode from "qrcode";
 
 	const {
@@ -50,10 +53,10 @@
 		{/await}
 	</div>
 	<a target="_blank" rel="external" href={totpURL}>I have a TOTP app on this device</a>
-	<form onsubmit={handleSubmit}>
-		<label>
+	<form class="space-y-4" onsubmit={handleSubmit}>
+		<Label>
 			2FA Code
-			<input
+			<Input
 				bind:value={totpCode}
 				required
 				type="text"
@@ -63,7 +66,7 @@
 				pattern="[0-9\s]*"
 				autocomplete="one-time-code"
 			/>
-		</label>
-		<button type="submit" disabled={isLoading}>Next</button>
+		</Label>
+		<Button type="submit" disabled={isLoading}>Next</Button>
 	</form>
 </section>

@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { resolve } from "$app/paths";
 	import type { AdminEnvVars } from "$lib/admin/setup";
+	import { Button } from "$lib/components/ui/button";
+	import { Label } from "$lib/components/ui/label";
+	import { RadioGroup, RadioGroupItem } from "$lib/components/ui/radio-group";
+	import { Textarea } from "$lib/components/ui/textarea";
 
 	const {
 		adminEnvVars,
@@ -27,37 +31,18 @@
 	<p>
 		One last step for the environment setup, update your server to use these environment variables:
 	</p>
-	<div class="flex flex-wrap gap-4">
-		<label class="inline-flex items-center gap-2">
-			<input
-				type="radio"
-				name="displayMode"
-				value="env"
-				checked={displayMode === "env"}
-				onchange={() => {
-					displayMode = "env";
-				}}
-			/>
-			View as .env
-		</label>
-		<label class="inline-flex items-center gap-2">
-			<input
-				type="radio"
-				name="displayMode"
-				value="json"
-				checked={displayMode === "json"}
-				onchange={() => {
-					displayMode = "json";
-				}}
-			/>
-			View as JSON
-		</label>
-	</div>
-	<textarea class="min-h-72 font-mono" readonly rows="15" value={formattedVars}></textarea>
+	<RadioGroup class="grid gap-2" bind:value={displayMode}>
+		<div class="flex items-center gap-2">
+			<RadioGroupItem id="displayMode-env" value="env" />
+			<Label for="displayMode-env">View as .env</Label>
+		</div>
+		<div class="flex items-center gap-2">
+			<RadioGroupItem id="displayMode-json" value="json" />
+			<Label for="displayMode-json">View as JSON</Label>
+		</div>
+	</RadioGroup>
+	<Textarea class="min-h-72 font-mono" readonly rows={15} value={formattedVars} />
 
 	<p>Once your server has restarted, click Next.</p>
-	<a
-		class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-		href={resolve("/")}>Next</a
-	>
+	<Button href={resolve("/")}>Next</Button>
 </section>

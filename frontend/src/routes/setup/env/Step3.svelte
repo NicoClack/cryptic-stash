@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { PUBLIC_API_DOMAIN } from "$env/static/public";
+	import { Button } from "$lib/components/ui/button";
+	import { Input } from "$lib/components/ui/input";
+	import { Label } from "$lib/components/ui/label";
 
 	const {
 		onComplete,
@@ -35,12 +38,12 @@
 		again. If this overwrote the proxy's header or they were combined, try another header. Once you
 		have a header that can't be spoofed by the client, enter its name below.
 	</p>
-	<form onsubmit={handleSubmit}>
-		<label>
+	<form class="space-y-4" onsubmit={handleSubmit}>
+		<Label>
 			Header name
-			<input bind:value={headerName} type="text" name="header-name" />
-		</label>
+			<Input bind:value={headerName} type="text" name="header-name" />
+		</Label>
 		<p>Leave blank if there's no proxy.</p>
-		<button type="submit" disabled={isLoading}>Next</button>
+		<Button type="submit" disabled={isLoading}>Next</Button>
 	</form>
 </section>

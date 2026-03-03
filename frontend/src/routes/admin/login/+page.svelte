@@ -9,6 +9,8 @@
 		CardHeader,
 		CardTitle,
 	} from "$lib/components/ui/card";
+	import { Input } from "$lib/components/ui/input";
+	import { Label } from "$lib/components/ui/label";
 	let isLoading = $state(false);
 
 	let password = $state("");
@@ -47,10 +49,10 @@
 			<CardDescription>Sign in with your admin password and current 2FA code.</CardDescription>
 		</CardHeader>
 		<CardContent>
-			<form onsubmit={handleSubmit}>
-				<label>
+			<form class="space-y-4" onsubmit={handleSubmit}>
+				<Label>
 					Username
-					<input
+					<Input
 						required
 						disabled
 						type="text"
@@ -58,21 +60,21 @@
 						autocomplete="username"
 						value="admin"
 					/>
-				</label>
-				<label>
+				</Label>
+				<Label>
 					Password
-					<input
+					<Input
 						bind:value={password}
 						required
 						type="password"
 						name="password"
 						autocomplete="current-password"
-						maxlength="256"
+						maxlength={256}
 					/>
-				</label>
-				<label>
+				</Label>
+				<Label>
 					2FA Code
-					<input
+					<Input
 						bind:value={totpCode}
 						required
 						type="text"
@@ -82,7 +84,7 @@
 						pattern="[0-9\s]*"
 						autocomplete="one-time-code"
 					/>
-				</label>
+				</Label>
 				<Button type="submit" disabled={isLoading}>Login</Button>
 			</form>
 		</CardContent>

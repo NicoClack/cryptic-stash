@@ -43,23 +43,20 @@
 	}
 </script>
 
-<Card class="mb-6 overflow-hidden border-2 transition-all hover:border-primary/20">
-	<CardHeader class="bg-muted/30">
-		<CardTitle class="text-xl font-bold">{name}</CardTitle>
+<Card>
+	<CardHeader>
+		<CardTitle>{name}</CardTitle>
 		<CardDescription>
 			<span
 				class={cn(
-					"inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
-					enabled
-						? "bg-primary/15 text-primary ring-primary/25"
-						: "bg-muted text-muted-foreground ring-border",
+					"inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset bg-muted text-muted-foreground ring-border",
 				)}
 			>
 				{enabled ? "Enabled" : "Disabled"}
 			</span>
 		</CardDescription>
 	</CardHeader>
-	<CardContent class="pt-6">
+	<CardContent>
 		{#if optionsSchema}
 			<JsonForm
 				schema={optionsSchema}
