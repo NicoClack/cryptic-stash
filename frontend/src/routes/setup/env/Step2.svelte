@@ -36,23 +36,23 @@
 	}
 </script>
 
-<main>
-	<h3>Step 2 of 4: Setup 2FA</h3>
+<section class="space-y-6">
+	<h2>Step 2 of 4: Setup 2FA</h2>
 	<p>
 		Please scan this QR code in your authenticator app (e.g., Google Authenticator, Authy) and enter
 		the 2FA code you see.
 	</p>
-	<div class="qrcode-container">
+	<div class="h-25 w-25 overflow-hidden rounded-md border border-border bg-card p-2">
 		{#await qrcodeUrlPromise then qrcodeUrl}
-			<img class="qrcode" alt="TOTP QR Code" src={qrcodeUrl} width="100" height="100" />
+			<img class="h-full w-full" alt="TOTP QR Code" src={qrcodeUrl} width="100" height="100" />
 		{:catch}
 			<p>Unable to generate QR code</p>
 		{/await}
 	</div>
-	<a target="_blank" rel="external" href={totpURL}>I have a TOTP app on this device</a> <br />
+	<a target="_blank" rel="external" href={totpURL}>I have a TOTP app on this device</a>
 	<form onsubmit={handleSubmit}>
 		<label>
-			2FA Code:
+			2FA Code
 			<input
 				bind:value={totpCode}
 				required
@@ -63,18 +63,7 @@
 				pattern="[0-9\s]*"
 				autocomplete="one-time-code"
 			/>
-		</label> <br />
+		</label>
 		<button type="submit" disabled={isLoading}>Next</button>
 	</form>
-</main>
-
-<style>
-	.qrcode-container {
-		width: 100px;
-		height: 100px;
-	}
-	.qrcode {
-		width: 100%;
-		height: 100%;
-	}
-</style>
+</section>

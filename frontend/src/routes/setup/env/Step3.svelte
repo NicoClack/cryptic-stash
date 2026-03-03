@@ -24,11 +24,11 @@
 	}
 </script>
 
-<main>
-	<h3>Step 3 of 4: Proxy Config</h3>
+<section class="space-y-6">
+	<h2>Step 3 of 4: Proxy Config</h2>
 	<p>
 		Please use Postman, curl, Node.js or another non-browser HTTP client to make a GET request to
-		<span class="echo-headers-url">
+		<span class="rounded-sm bg-muted px-1 py-0.5 font-mono text-foreground">
 			{echoHeadersUrlObj.toString()}
 		</span>. Look for headers that contain your public IP address. Once you find a candidate, try
 		setting that header in your request to some other IP like 42.42.42.42 and make the request
@@ -37,19 +37,10 @@
 	</p>
 	<form onsubmit={handleSubmit}>
 		<label>
-			Header name:
+			Header name
 			<input bind:value={headerName} type="text" name="header-name" />
-		</label> <br />
+		</label>
 		<p>Leave blank if there's no proxy.</p>
 		<button type="submit" disabled={isLoading}>Next</button>
 	</form>
-</main>
-
-<style>
-	.echo-headers-url {
-		font-family: monospace;
-		background-color: #f0f0f0;
-		padding: 0.2em 0.4em;
-		border-radius: 4px;
-	}
-</style>
+</section>

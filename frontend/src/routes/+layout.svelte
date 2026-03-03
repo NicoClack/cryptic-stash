@@ -3,6 +3,8 @@
 	let { children } = $props();
 </script>
 
-<svelte:head></svelte:head>
+<svelte:head />
 
-{@render children()}
+<div class="dark min-h-screen bg-background text-foreground">
+	{@render children()}
+</div>

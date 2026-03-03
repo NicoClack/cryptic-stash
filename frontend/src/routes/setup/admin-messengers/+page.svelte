@@ -8,7 +8,7 @@
 		<h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl">Admin Messenger Setup</h1>
 		<p class="mt-4 text-xl text-muted-foreground">
 			To ensure we can alert you if there's an error, a user session is created or a few other
-			things happen, please set up at least one messenger.
+			things happen, please set up at least one messenger for your admin user.
 		</p>
 	</header>
 

@@ -51,16 +51,16 @@
 	}
 </script>
 
-<main>
-	<h3>Step 1 of 4: Admin Password</h3>
+<section class="space-y-6">
+	<h2>Step 1 of 4: Admin Password</h2>
 	<form onsubmit={handleSubmit}>
 		<label>
-			Username:
+			Username
 			<input required disabled type="text" name="username" autocomplete="username" value="admin" />
-		</label> <br />
-		<div>
+		</label>
+		<div class="space-y-2">
 			<label>
-				Password:
+				Password
 				<input
 					bind:value={password}
 					required
@@ -75,7 +75,7 @@
 			</button>
 		</div>
 		<label>
-			Confirm Password:
+			Confirm Password
 			<input
 				bind:value={confirmPassword}
 				required
@@ -84,7 +84,7 @@
 				autocomplete="new-password"
 				maxlength="256"
 			/>
-		</label> <br />
+		</label>
 		<p>
 			Note: We recommend using the random password button and storing it in your password manager.
 			This allows you to weaken the hashing for admin passwords, reducing server load. If you must
@@ -93,4 +93,4 @@
 		</p>
 		<button type="submit" disabled={isLoading}>Next</button>
 	</form>
-</main>
+</section>

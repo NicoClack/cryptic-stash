@@ -51,8 +51,8 @@
 				class={cn(
 					"inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
 					enabled
-						? "bg-green-100 text-green-700 ring-green-600/20"
-						: "bg-gray-100 text-gray-600 ring-gray-500/10",
+						? "bg-primary/15 text-primary ring-primary/25"
+						: "bg-muted text-muted-foreground ring-border",
 				)}
 			>
 				{enabled ? "Enabled" : "Disabled"}
