@@ -28,8 +28,8 @@
 </script>
 
 <section class="space-y-6">
-	<h2>Step 3 of 4: Proxy Config</h2>
-	<p>
+	<h2 class="text-2xl text-balance font-semibold tracking-tight">Step 3 of 4: Proxy Config</h2>
+	<p class="text-sm text-muted-foreground md:text-base">
 		Please use Postman, curl, Node.js or another non-browser HTTP client to make a GET request to
 		<span class="rounded-sm bg-muted px-1 py-0.5 font-mono text-foreground">
 			{echoHeadersUrlObj.toString()}
@@ -43,7 +43,7 @@
 			Header name
 			<Input bind:value={headerName} type="text" name="header-name" />
 		</Label>
-		<p>Leave blank if there's no proxy.</p>
+		<p class="text-sm text-muted-foreground md:text-base">Leave blank if there's no proxy.</p>
 		<Button type="submit" disabled={isLoading}>Next</Button>
 	</form>
 </section>

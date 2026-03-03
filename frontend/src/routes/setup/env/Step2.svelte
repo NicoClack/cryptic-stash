@@ -40,8 +40,8 @@
 </script>
 
 <section class="space-y-6">
-	<h2>Step 2 of 4: Setup 2FA</h2>
-	<p>
+	<h2 class="text-2xl text-balance font-semibold tracking-tight">Step 2 of 4: Setup 2FA</h2>
+	<p class="text-sm text-muted-foreground md:text-base">
 		Please scan this QR code in your authenticator app (e.g., Google Authenticator, Authy) and enter
 		the 2FA code you see.
 	</p>
@@ -49,10 +49,17 @@
 		{#await qrcodeUrlPromise then qrcodeUrl}
 			<img class="h-full w-full" alt="TOTP QR Code" src={qrcodeUrl} width="100" height="100" />
 		{:catch}
-			<p>Unable to generate QR code</p>
+			<p class="text-sm text-muted-foreground md:text-base">Unable to generate QR code</p>
 		{/await}
 	</div>
-	<a target="_blank" rel="external" href={totpURL}>I have a TOTP app on this device</a>
+	<a
+		target="_blank"
+		rel="external"
+		href={totpURL}
+		class="text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+	>
+		I have a TOTP app on this device
+	</a>
 	<form class="space-y-4" onsubmit={handleSubmit}>
 		<Label>
 			2FA Code

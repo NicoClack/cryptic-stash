@@ -27,8 +27,10 @@
 </script>
 
 <section class="space-y-6">
-	<h2>Step 4 of 4: Use the Generated Environment Variables</h2>
-	<p>
+	<h2 class="text-2xl text-balance font-semibold tracking-tight">
+		Step 4 of 4: Use the Generated Environment Variables
+	</h2>
+	<p class="text-sm text-muted-foreground md:text-base">
 		One last step for the environment setup, update your server to use these environment variables:
 	</p>
 	<RadioGroup class="grid gap-2" bind:value={displayMode}>
@@ -43,6 +45,8 @@
 	</RadioGroup>
 	<Textarea class="min-h-72 font-mono" readonly rows={15} value={formattedVars} />
 
-	<p>Once your server has restarted, click Next.</p>
+	<p class="text-sm text-muted-foreground md:text-base">
+		Once your server has restarted, click Next.
+	</p>
 	<Button href={resolve("/")}>Next</Button>
 </section>

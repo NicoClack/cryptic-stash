@@ -46,5 +46,9 @@
 </script>
 
 {#if form}
-	<BasicForm {form} />
+	<div
+		class="space-y-4 [&_form]:space-y-4 [&_p]:text-sm [&_p]:text-muted-foreground [&_p]:md:text-base"
+	>
+		<BasicForm {form} />
+	</div>
 {/if}

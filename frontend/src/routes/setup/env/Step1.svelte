@@ -55,7 +55,7 @@
 </script>
 
 <section class="space-y-6">
-	<h2>Step 1 of 4: Admin Password</h2>
+	<h2 class="text-2xl text-balance font-semibold tracking-tight">Step 1 of 4: Admin Password</h2>
 	<form class="space-y-4" onsubmit={handleSubmit}>
 		<Label>
 			Username
@@ -88,7 +88,7 @@
 				maxlength={256}
 			/>
 		</Label>
-		<p>
+		<p class="text-sm text-muted-foreground md:text-base">
 			Note: We recommend using the random password button and storing it in your password manager.
 			This allows you to weaken the hashing for admin passwords, reducing server load. If you must
 			use a memorable password, use the correct horse battery staple method and set your admin

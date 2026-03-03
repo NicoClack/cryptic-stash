@@ -22,7 +22,7 @@
 	];
 </script>
 
-<main>
+<main class="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
 	<Card>
 		<CardHeader>
 			<CardTitle class="text-3xl">Welcome to Cryptic Stash</CardTitle>
@@ -34,7 +34,10 @@
 	</Card>
 
 	<section class="mx-auto flex w-full max-w-5xl flex-col items-center gap-4">
-		<a href={resolve("/freeze-account")} class="group block w-full no-underline hover:no-underline">
+		<a
+			href={resolve("/freeze-account")}
+			class="group block w-full no-underline outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+		>
 			<Card>
 				<CardHeader>
 					<CardTitle
@@ -48,7 +51,10 @@
 
 		<div class="grid w-full gap-4 md:grid-cols-3">
 			{#each homepageLinks as item (item.title)}
-				<a href={item.href} class="group block no-underline hover:no-underline">
+				<a
+					href={item.href}
+					class="group block no-underline outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+				>
 					<Card class="h-full">
 						<CardHeader>
 							<CardTitle

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { adminAuth } from "$lib/admin/AdminAuth.svelte";
 	import { fetchJson } from "$lib/api";
+	import PageMain from "$lib/components/PageMain.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import {
 		Card,
@@ -42,7 +43,7 @@
 	}
 </script>
 
-<main>
+<PageMain>
 	<Card>
 		<CardHeader>
 			<CardTitle>Admin Login</CardTitle>
@@ -89,4 +90,4 @@
 			</form>
 		</CardContent>
 	</Card>
-</main>
+</PageMain>

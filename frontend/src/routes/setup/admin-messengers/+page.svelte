@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { adminAuth } from "$lib/admin/AdminAuth.svelte";
 	import MessengersList from "$lib/admin/messengers/MessengersList.svelte";
+	import PageMain from "$lib/components/PageMain.svelte";
 	import {
 		Card,
 		CardContent,
@@ -10,7 +11,7 @@
 	} from "$lib/components/ui/card";
 </script>
 
-<main>
+<PageMain>
 	<Card>
 		<CardHeader>
 			<CardTitle>Admin Messenger Setup</CardTitle>
@@ -27,4 +28,4 @@
 			{/if}
 		</CardContent>
 	</Card>
-</main>
+</PageMain>

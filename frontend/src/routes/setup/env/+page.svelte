@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { AdminEnvVars } from "$lib/admin/setup";
+	import PageMain from "$lib/components/PageMain.svelte";
 	import {
 		Card,
 		CardContent,
@@ -29,7 +30,7 @@
 	}
 </script>
 
-<main>
+<PageMain>
 	<Card>
 		<CardHeader>
 			<CardTitle class="text-3xl">Welcome to Cryptic Stash</CardTitle>
@@ -54,4 +55,4 @@
 			{/if}
 		</CardContent>
 	</Card>
-</main>
+</PageMain>
