@@ -7,7 +7,7 @@ import (
 )
 
 func getLoginAttemptMessageBody(message *common.Message) string {
-	explanation := "If you're reading this, it most likely wasn't you that's logging in! Please self-lock your user " +
+	explanation := "If you're reading this, it most likely wasn't you that's logging in! Please freeze your user " +
 		"ASAP and contact your admin as they can make the lock permanent if you want. If you want to be able to safely " +
 		"unlock your user, you should update your password with help from your admin."
 	return fmt.Sprintf(
@@ -48,7 +48,7 @@ var defaultMessageMap = map[common.MessageType]func(message *common.Message) str
 		return fmt.Sprintf("You have locked your account until %s", message.Time.Format("2006-01-02 15:04:05"))
 	},
 	common.MessageSelfUnlock: func(message *common.Message) string {
-		return "Warning: your self-lock has expired, you (or anyone else) can now try to log in again."
+		return "Warning: your account freeze has expired, you (or anyone else) can now try to log in again."
 	},
 	common.MessageAdminError: func(message *common.Message) string {
 		return "[Admin] An error has occurred! Please investigate the logs and possibly create an issue at " +
