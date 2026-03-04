@@ -371,7 +371,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 	selfLogged := false
 
 	shouldNotifyAdmin := false
-	useFallback := handler.App.Env.ADMIN_USERNAME == ""
+	useFallback := common.AdminUsername == ""
 	for _, entry := range entries {
 		if entry.level >= int(slog.LevelError) && !entry.disableAdminNotification {
 			shouldNotifyAdmin = true
@@ -473,7 +473,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 		stdErr := dbcommon.WithWriteTx(
 			ctx, handler.App.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
-				userOb, stdErr := tx.User.Query().Where(user.Username(handler.App.Env.ADMIN_USERNAME)).Only(ctx)
+				userOb, stdErr := tx.User.Query().Where(user.Username(common.AdminUsername)).Only(ctx)
 				if stdErr != nil {
 					return stdErr
 				}

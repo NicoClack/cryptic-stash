@@ -48,7 +48,6 @@ type Env struct {
 	PASSWORD_HASH_SETTINGS           *PasswordHashSettings
 
 	LOG_STORE_INTERVAL time.Duration
-	ADMIN_USERNAME     string // TODO: remove
 	// How long the server should wait for messengers to succeed before crashing the server to send the message
 	// Note: this time will be exceeded as it's a simple check when the job succeeds and doesn't take into account
 	// when the next retry is.

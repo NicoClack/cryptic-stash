@@ -55,7 +55,6 @@ func LoadEnvironmentVariables() *common.Env {
 		},
 
 		LOG_STORE_INTERVAL:    common.RequireMillisecondsEnv("LOG_STORE_INTERVAL"),
-		ADMIN_USERNAME:        common.RequireEnv("ADMIN_USERNAME"),
 		ADMIN_MESSAGE_TIMEOUT: common.RequireSecondsEnv("ADMIN_MESSAGE_TIMEOUT"),
 		MIN_ADMIN_MESSAGE_GAP: common.RequireSecondsEnv("MIN_ADMIN_MESSAGE_GAP"),
 		MIN_CRASH_SIGNAL_GAP:  common.RequireSecondsEnv("MIN_CRASH_SIGNAL_GAP"),

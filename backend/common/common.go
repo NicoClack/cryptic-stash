@@ -1,5 +1,3 @@
 package common
 
-const (
-	AdminUsername = "admin"
-)
+const AdminUsername = "admin"

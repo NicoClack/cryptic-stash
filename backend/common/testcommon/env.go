@@ -44,7 +44,6 @@ func DefaultEnv() *common.Env {
 		},
 
 		LOG_STORE_INTERVAL:    time.Hour * 999,
-		ADMIN_USERNAME:        "", // The test will need to set this up if required
 		ADMIN_MESSAGE_TIMEOUT: time.Minute,
 		MIN_ADMIN_MESSAGE_GAP: time.Minute * 5,
 		MIN_CRASH_SIGNAL_GAP:  time.Hour * 24,
