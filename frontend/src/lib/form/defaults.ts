@@ -1,13 +1,10 @@
 export { resolver } from "@sjsf/form/resolvers/basic";
-import "@sjsf/basic-theme/extra-widgets/checkboxes-include";
-import "@sjsf/basic-theme/extra-widgets/file-include";
-import "@sjsf/basic-theme/extra-widgets/textarea-include";
 import "@sjsf/form/fields/extra/enum-include";
 import "@sjsf/form/fields/extra/file-include";
 import "@sjsf/form/fields/extra/multi-enum-include";
 import "@sjsf/form/fields/extra/unknown-native-file-include";
 
-export { theme } from "@sjsf/basic-theme";
+export { theme } from "@sjsf/shadcn4-theme";
 
 export { createFormIdBuilder as idBuilder } from "@sjsf/form/id-builders/modern";
 

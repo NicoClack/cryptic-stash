@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { BasicForm, createForm, type Schema, type UiSchemaRoot } from "@sjsf/form";
 	import "@sjsf/shadcn4-theme/styles.css";
-	import { setShadcnContext } from "./theme";
 
 	import { idBuilder, merger, resolver, theme, translation, validator } from "$lib/form/defaults";
+	import { setShadcnContext } from "./theme";
 
 	interface Props {
 		schema: Schema;
