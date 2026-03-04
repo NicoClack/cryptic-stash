@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fetchAdminJson } from "$lib/api";
+	import { Button } from "$lib/components/ui/button";
 	import CardContent from "$lib/components/ui/card/card-content.svelte";
 	import CardDescription from "$lib/components/ui/card/card-description.svelte";
 	import CardHeader from "$lib/components/ui/card/card-header.svelte";
@@ -12,7 +13,7 @@
 		versionedType,
 		userID,
 		name,
-		enabled,
+		enabled = $bindable(false),
 		options,
 		optionsSchema,
 	}: {
@@ -24,10 +25,11 @@
 		optionsSchema: Record<string, any>;
 	} = $props();
 
-	let isSubmitting = $state(false);
+	let isEnabling = $state(false);
+	let isDisabling = $state(false);
 
 	async function handleSubmit(value: unknown) {
-		isSubmitting = true;
+		isEnabling = true;
 		try {
 			await fetchAdminJson(fetch, `/api/v1/admin/users/${userID}/messengers/enable/`, {
 				method: "POST",
@@ -37,8 +39,27 @@
 				}),
 				throwForStatus: true,
 			});
+			enabled = true;
 		} finally {
-			isSubmitting = false;
+			isEnabling = false;
+		}
+	}
+
+	async function handleDisable() {
+		if (isDisabling) return;
+
+		isDisabling = true;
+		try {
+			await fetchAdminJson(fetch, `/api/v1/admin/users/${userID}/messengers/disable/`, {
+				method: "POST",
+				body: JSON.stringify({
+					versionedType,
+				}),
+				throwForStatus: true,
+			});
+			enabled = false;
+		} finally {
+			isDisabling = false;
 		}
 	}
 </script>
@@ -47,13 +68,25 @@
 	<CardHeader>
 		<CardTitle>{name}</CardTitle>
 		<CardDescription>
-			<span
-				class={cn(
-					"inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset bg-muted text-muted-foreground ring-border",
-				)}
-			>
-				{enabled ? "Enabled" : "Disabled"}
-			</span>
+			<div class="flex items-center justify-between gap-2">
+				<span
+					class={cn(
+						"inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset bg-muted text-muted-foreground ring-border",
+					)}
+				>
+					{enabled ? "Enabled" : "Disabled"}
+				</span>
+				{#if enabled}
+					<Button
+						type="button"
+						variant="outline"
+						onclick={handleDisable}
+						disabled={isDisabling || isEnabling}
+					>
+						Disable
+					</Button>
+				{/if}
+			</div>
 		</CardDescription>
 	</CardHeader>
 	<CardContent>
@@ -62,7 +95,7 @@
 				schema={optionsSchema}
 				initialValue={options}
 				onSubmit={handleSubmit}
-				isDisabled={isSubmitting}
+				isDisabled={isEnabling || isDisabling}
 			/>
 		{/if}
 	</CardContent>

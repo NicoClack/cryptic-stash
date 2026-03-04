@@ -17,7 +17,7 @@
 		{
 			title: "Admin site",
 			description: "Create, update and lock users",
-			href: resolve("/admin/login"),
+			href: resolve("/admin/"),
 		},
 	];
 </script>
