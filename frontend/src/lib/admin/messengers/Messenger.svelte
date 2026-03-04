@@ -91,12 +91,16 @@
 	</CardHeader>
 	<CardContent>
 		{#if optionsSchema}
-			<JsonForm
-				schema={optionsSchema}
-				initialValue={options}
-				onSubmit={handleSubmit}
-				isDisabled={isEnabling || isDisabling}
-			/>
+			<!-- TODO: is there a way to remove this #key? It's needed so that the submitLabel updates on submit -->
+			{#key enabled}
+				<JsonForm
+					schema={optionsSchema}
+					initialValue={options}
+					onSubmit={handleSubmit}
+					isDisabled={isEnabling || isDisabling}
+					submitLabel={enabled ? "Update" : "Enable"}
+				/>
+			{/key}
 		{/if}
 	</CardContent>
 </Card>
