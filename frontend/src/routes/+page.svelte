@@ -25,7 +25,9 @@
 <main class="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
 	<Card>
 		<CardHeader>
-			<CardTitle class="text-3xl">Welcome to Cryptic Stash</CardTitle>
+			<CardTitle class="text-3xl">
+				<h1>Welcome to Cryptic Stash</h1>
+			</CardTitle>
 			<CardDescription class="text-base">
 				Securely store and recover your 2FA recovery codes in case you lose access to your devices.
 				If an attacker tries to log in, you'll be notified and can block it.

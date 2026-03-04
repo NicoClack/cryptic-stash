@@ -33,7 +33,9 @@
 <PageMain>
 	<Card>
 		<CardHeader>
-			<CardTitle class="text-3xl">Welcome to Cryptic Stash</CardTitle>
+			<CardTitle class="text-3xl">
+				<h1>Welcome to Cryptic Stash</h1>
+			</CardTitle>
 			<CardDescription class="text-base">
 				Before you can set up users and stashes, you need to configure some security-related
 				environment variables.
