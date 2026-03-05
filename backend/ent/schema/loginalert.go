@@ -12,21 +12,20 @@ type LoginAlert struct {
 	ent.Schema
 }
 
-// Fields of the SuccessfulLoginAlerts.
+// Fields of the LoginAlert.
 func (LoginAlert) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("sentAt"),
-		field.String("versionedMessengerType").MinLen(1).MaxLen(128),
 		field.Bool("confirmed"),
-		field.UUID("sessionID", uuid.Nil),
+		field.UUID("downloadSessionID", uuid.Nil),
 	}
 }
 
-// Edges of the SuccessfulLoginAlerts.
+// Edges of the LoginAlert.
 func (LoginAlert) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("session", Session.Type).Ref("loginAlerts").
-			Field("sessionID").Unique().Required(),
+		edge.From("downloadSession", DownloadSession.Type).Ref("loginAlerts").
+			Field("downloadSessionID").Unique().Required(),
 	}
 }

@@ -15,32 +15,29 @@ const (
 	FieldID = "id"
 	// FieldSentAt holds the string denoting the sentat field in the database.
 	FieldSentAt = "sent_at"
-	// FieldVersionedMessengerType holds the string denoting the versionedmessengertype field in the database.
-	FieldVersionedMessengerType = "versioned_messenger_type"
 	// FieldConfirmed holds the string denoting the confirmed field in the database.
 	FieldConfirmed = "confirmed"
-	// FieldSessionID holds the string denoting the sessionid field in the database.
-	FieldSessionID = "session_id"
-	// EdgeSession holds the string denoting the session edge name in mutations.
-	EdgeSession = "session"
+	// FieldDownloadSessionID holds the string denoting the downloadsessionid field in the database.
+	FieldDownloadSessionID = "download_session_id"
+	// EdgeDownloadSession holds the string denoting the downloadsession edge name in mutations.
+	EdgeDownloadSession = "downloadSession"
 	// Table holds the table name of the loginalert in the database.
 	Table = "login_alerts"
-	// SessionTable is the table that holds the session relation/edge.
-	SessionTable = "login_alerts"
-	// SessionInverseTable is the table name for the Session entity.
-	// It exists in this package in order to avoid circular dependency with the "session" package.
-	SessionInverseTable = "sessions"
-	// SessionColumn is the table column denoting the session relation/edge.
-	SessionColumn = "session_id"
+	// DownloadSessionTable is the table that holds the downloadSession relation/edge.
+	DownloadSessionTable = "login_alerts"
+	// DownloadSessionInverseTable is the table name for the DownloadSession entity.
+	// It exists in this package in order to avoid circular dependency with the "downloadsession" package.
+	DownloadSessionInverseTable = "download_sessions"
+	// DownloadSessionColumn is the table column denoting the downloadSession relation/edge.
+	DownloadSessionColumn = "download_session_id"
 )
 
 // Columns holds all SQL columns for loginalert fields.
 var Columns = []string{
 	FieldID,
 	FieldSentAt,
-	FieldVersionedMessengerType,
 	FieldConfirmed,
-	FieldSessionID,
+	FieldDownloadSessionID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -54,8 +51,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// VersionedMessengerTypeValidator is a validator for the "versionedMessengerType" field. It is called by the builders before save.
-	VersionedMessengerTypeValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -73,31 +68,26 @@ func BySentAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSentAt, opts...).ToFunc()
 }
 
-// ByVersionedMessengerType orders the results by the versionedMessengerType field.
-func ByVersionedMessengerType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldVersionedMessengerType, opts...).ToFunc()
-}
-
 // ByConfirmed orders the results by the confirmed field.
 func ByConfirmed(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldConfirmed, opts...).ToFunc()
 }
 
-// BySessionID orders the results by the sessionID field.
-func BySessionID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSessionID, opts...).ToFunc()
+// ByDownloadSessionID orders the results by the downloadSessionID field.
+func ByDownloadSessionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDownloadSessionID, opts...).ToFunc()
 }
 
-// BySessionField orders the results by session field.
-func BySessionField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByDownloadSessionField orders the results by downloadSession field.
+func ByDownloadSessionField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSessionStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newDownloadSessionStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newSessionStep() *sqlgraph.Step {
+func newDownloadSessionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SessionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, SessionTable, SessionColumn),
+		sqlgraph.To(DownloadSessionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, DownloadSessionTable, DownloadSessionColumn),
 	)
 }

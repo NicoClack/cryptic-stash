@@ -9,13 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
-// Session holds the schema definition for the Session entity.
-type Session struct {
+// DownloadSession holds the schema definition for the DownloadSession entity.
+type DownloadSession struct {
 	ent.Schema
 }
 
-// Fields of the Session.
-func (Session) Fields() []ent.Field {
+// Fields of the DownloadSession.
+func (DownloadSession) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
@@ -30,17 +30,17 @@ func (Session) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Session.
-func (Session) Edges() []ent.Edge {
+// Edges of the DownloadSession.
+func (DownloadSession) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("sessions").
+		edge.From("user", User.Type).Ref("downloadSessions").
 			Field("userID").Unique().Required(),
 		edge.To("loginAlerts", LoginAlert.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 
-func (Session) Indexes() []ent.Index {
+func (DownloadSession) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("code", "userID"),
 	}

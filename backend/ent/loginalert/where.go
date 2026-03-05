@@ -61,19 +61,14 @@ func SentAt(v time.Time) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldEQ(FieldSentAt, v))
 }
 
-// VersionedMessengerType applies equality check predicate on the "versionedMessengerType" field. It's identical to VersionedMessengerTypeEQ.
-func VersionedMessengerType(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldEQ(FieldVersionedMessengerType, v))
-}
-
 // Confirmed applies equality check predicate on the "confirmed" field. It's identical to ConfirmedEQ.
 func Confirmed(v bool) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldEQ(FieldConfirmed, v))
 }
 
-// SessionID applies equality check predicate on the "sessionID" field. It's identical to SessionIDEQ.
-func SessionID(v uuid.UUID) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldEQ(FieldSessionID, v))
+// DownloadSessionID applies equality check predicate on the "downloadSessionID" field. It's identical to DownloadSessionIDEQ.
+func DownloadSessionID(v uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldEQ(FieldDownloadSessionID, v))
 }
 
 // SentAtEQ applies the EQ predicate on the "sentAt" field.
@@ -116,71 +111,6 @@ func SentAtLTE(v time.Time) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldLTE(FieldSentAt, v))
 }
 
-// VersionedMessengerTypeEQ applies the EQ predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeEQ(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldEQ(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeNEQ applies the NEQ predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeNEQ(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldNEQ(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeIn applies the In predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeIn(vs ...string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldIn(FieldVersionedMessengerType, vs...))
-}
-
-// VersionedMessengerTypeNotIn applies the NotIn predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeNotIn(vs ...string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldNotIn(FieldVersionedMessengerType, vs...))
-}
-
-// VersionedMessengerTypeGT applies the GT predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeGT(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldGT(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeGTE applies the GTE predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeGTE(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldGTE(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeLT applies the LT predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeLT(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldLT(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeLTE applies the LTE predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeLTE(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldLTE(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeContains applies the Contains predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeContains(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldContains(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeHasPrefix applies the HasPrefix predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeHasPrefix(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldHasPrefix(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeHasSuffix applies the HasSuffix predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeHasSuffix(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldHasSuffix(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeEqualFold applies the EqualFold predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeEqualFold(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldEqualFold(FieldVersionedMessengerType, v))
-}
-
-// VersionedMessengerTypeContainsFold applies the ContainsFold predicate on the "versionedMessengerType" field.
-func VersionedMessengerTypeContainsFold(v string) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldContainsFold(FieldVersionedMessengerType, v))
-}
-
 // ConfirmedEQ applies the EQ predicate on the "confirmed" field.
 func ConfirmedEQ(v bool) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldEQ(FieldConfirmed, v))
@@ -191,41 +121,41 @@ func ConfirmedNEQ(v bool) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldNEQ(FieldConfirmed, v))
 }
 
-// SessionIDEQ applies the EQ predicate on the "sessionID" field.
-func SessionIDEQ(v uuid.UUID) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldEQ(FieldSessionID, v))
+// DownloadSessionIDEQ applies the EQ predicate on the "downloadSessionID" field.
+func DownloadSessionIDEQ(v uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldEQ(FieldDownloadSessionID, v))
 }
 
-// SessionIDNEQ applies the NEQ predicate on the "sessionID" field.
-func SessionIDNEQ(v uuid.UUID) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldNEQ(FieldSessionID, v))
+// DownloadSessionIDNEQ applies the NEQ predicate on the "downloadSessionID" field.
+func DownloadSessionIDNEQ(v uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldNEQ(FieldDownloadSessionID, v))
 }
 
-// SessionIDIn applies the In predicate on the "sessionID" field.
-func SessionIDIn(vs ...uuid.UUID) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldIn(FieldSessionID, vs...))
+// DownloadSessionIDIn applies the In predicate on the "downloadSessionID" field.
+func DownloadSessionIDIn(vs ...uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldIn(FieldDownloadSessionID, vs...))
 }
 
-// SessionIDNotIn applies the NotIn predicate on the "sessionID" field.
-func SessionIDNotIn(vs ...uuid.UUID) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldNotIn(FieldSessionID, vs...))
+// DownloadSessionIDNotIn applies the NotIn predicate on the "downloadSessionID" field.
+func DownloadSessionIDNotIn(vs ...uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldNotIn(FieldDownloadSessionID, vs...))
 }
 
-// HasSession applies the HasEdge predicate on the "session" edge.
-func HasSession() predicate.LoginAlert {
+// HasDownloadSession applies the HasEdge predicate on the "downloadSession" edge.
+func HasDownloadSession() predicate.LoginAlert {
 	return predicate.LoginAlert(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, SessionTable, SessionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, DownloadSessionTable, DownloadSessionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSessionWith applies the HasEdge predicate on the "session" edge with a given conditions (other predicates).
-func HasSessionWith(preds ...predicate.Session) predicate.LoginAlert {
+// HasDownloadSessionWith applies the HasEdge predicate on the "downloadSession" edge with a given conditions (other predicates).
+func HasDownloadSessionWith(preds ...predicate.DownloadSession) predicate.LoginAlert {
 	return predicate.LoginAlert(func(s *sql.Selector) {
-		step := newSessionStep()
+		step := newDownloadSessionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -71,9 +71,9 @@ func LockedUntil(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldLockedUntil, v))
 }
 
-// SessionsValidFrom applies equality check predicate on the "sessionsValidFrom" field. It's identical to SessionsValidFromEQ.
-func SessionsValidFrom(v time.Time) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSessionsValidFrom, v))
+// DownloadSessionsValidFrom applies equality check predicate on the "downloadSessionsValidFrom" field. It's identical to DownloadSessionsValidFromEQ.
+func DownloadSessionsValidFrom(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDownloadSessionsValidFrom, v))
 }
 
 // UsernameEQ applies the EQ predicate on the "username" field.
@@ -201,44 +201,44 @@ func LockedUntilNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldLockedUntil))
 }
 
-// SessionsValidFromEQ applies the EQ predicate on the "sessionsValidFrom" field.
-func SessionsValidFromEQ(v time.Time) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSessionsValidFrom, v))
+// DownloadSessionsValidFromEQ applies the EQ predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDownloadSessionsValidFrom, v))
 }
 
-// SessionsValidFromNEQ applies the NEQ predicate on the "sessionsValidFrom" field.
-func SessionsValidFromNEQ(v time.Time) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldSessionsValidFrom, v))
+// DownloadSessionsValidFromNEQ applies the NEQ predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromNEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldDownloadSessionsValidFrom, v))
 }
 
-// SessionsValidFromIn applies the In predicate on the "sessionsValidFrom" field.
-func SessionsValidFromIn(vs ...time.Time) predicate.User {
-	return predicate.User(sql.FieldIn(FieldSessionsValidFrom, vs...))
+// DownloadSessionsValidFromIn applies the In predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldIn(FieldDownloadSessionsValidFrom, vs...))
 }
 
-// SessionsValidFromNotIn applies the NotIn predicate on the "sessionsValidFrom" field.
-func SessionsValidFromNotIn(vs ...time.Time) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldSessionsValidFrom, vs...))
+// DownloadSessionsValidFromNotIn applies the NotIn predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromNotIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldDownloadSessionsValidFrom, vs...))
 }
 
-// SessionsValidFromGT applies the GT predicate on the "sessionsValidFrom" field.
-func SessionsValidFromGT(v time.Time) predicate.User {
-	return predicate.User(sql.FieldGT(FieldSessionsValidFrom, v))
+// DownloadSessionsValidFromGT applies the GT predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromGT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGT(FieldDownloadSessionsValidFrom, v))
 }
 
-// SessionsValidFromGTE applies the GTE predicate on the "sessionsValidFrom" field.
-func SessionsValidFromGTE(v time.Time) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldSessionsValidFrom, v))
+// DownloadSessionsValidFromGTE applies the GTE predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromGTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldDownloadSessionsValidFrom, v))
 }
 
-// SessionsValidFromLT applies the LT predicate on the "sessionsValidFrom" field.
-func SessionsValidFromLT(v time.Time) predicate.User {
-	return predicate.User(sql.FieldLT(FieldSessionsValidFrom, v))
+// DownloadSessionsValidFromLT applies the LT predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromLT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLT(FieldDownloadSessionsValidFrom, v))
 }
 
-// SessionsValidFromLTE applies the LTE predicate on the "sessionsValidFrom" field.
-func SessionsValidFromLTE(v time.Time) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldSessionsValidFrom, v))
+// DownloadSessionsValidFromLTE applies the LTE predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromLTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldDownloadSessionsValidFrom, v))
 }
 
 // HasStash applies the HasEdge predicate on the "stash" edge.
@@ -287,21 +287,21 @@ func HasMessengersWith(preds ...predicate.UserMessenger) predicate.User {
 	})
 }
 
-// HasSessions applies the HasEdge predicate on the "sessions" edge.
-func HasSessions() predicate.User {
+// HasDownloadSessions applies the HasEdge predicate on the "downloadSessions" edge.
+func HasDownloadSessions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, DownloadSessionsTable, DownloadSessionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
-func HasSessionsWith(preds ...predicate.Session) predicate.User {
+// HasDownloadSessionsWith applies the HasEdge predicate on the "downloadSessions" edge with a given conditions (other predicates).
+func HasDownloadSessionsWith(preds ...predicate.DownloadSession) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newSessionsStep()
+		step := newDownloadSessionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

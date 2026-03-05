@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/google/uuid"
 )
 
@@ -31,21 +31,15 @@ func (_c *LoginAlertCreate) SetSentAt(v time.Time) *LoginAlertCreate {
 	return _c
 }
 
-// SetVersionedMessengerType sets the "versionedMessengerType" field.
-func (_c *LoginAlertCreate) SetVersionedMessengerType(v string) *LoginAlertCreate {
-	_c.mutation.SetVersionedMessengerType(v)
-	return _c
-}
-
 // SetConfirmed sets the "confirmed" field.
 func (_c *LoginAlertCreate) SetConfirmed(v bool) *LoginAlertCreate {
 	_c.mutation.SetConfirmed(v)
 	return _c
 }
 
-// SetSessionID sets the "sessionID" field.
-func (_c *LoginAlertCreate) SetSessionID(v uuid.UUID) *LoginAlertCreate {
-	_c.mutation.SetSessionID(v)
+// SetDownloadSessionID sets the "downloadSessionID" field.
+func (_c *LoginAlertCreate) SetDownloadSessionID(v uuid.UUID) *LoginAlertCreate {
+	_c.mutation.SetDownloadSessionID(v)
 	return _c
 }
 
@@ -63,9 +57,9 @@ func (_c *LoginAlertCreate) SetNillableID(v *uuid.UUID) *LoginAlertCreate {
 	return _c
 }
 
-// SetSession sets the "session" edge to the Session entity.
-func (_c *LoginAlertCreate) SetSession(v *Session) *LoginAlertCreate {
-	return _c.SetSessionID(v.ID)
+// SetDownloadSession sets the "downloadSession" edge to the DownloadSession entity.
+func (_c *LoginAlertCreate) SetDownloadSession(v *DownloadSession) *LoginAlertCreate {
+	return _c.SetDownloadSessionID(v.ID)
 }
 
 // Mutation returns the LoginAlertMutation object of the builder.
@@ -114,22 +108,14 @@ func (_c *LoginAlertCreate) check() error {
 	if _, ok := _c.mutation.SentAt(); !ok {
 		return &ValidationError{Name: "sentAt", err: errors.New(`ent: missing required field "LoginAlert.sentAt"`)}
 	}
-	if _, ok := _c.mutation.VersionedMessengerType(); !ok {
-		return &ValidationError{Name: "versionedMessengerType", err: errors.New(`ent: missing required field "LoginAlert.versionedMessengerType"`)}
-	}
-	if v, ok := _c.mutation.VersionedMessengerType(); ok {
-		if err := loginalert.VersionedMessengerTypeValidator(v); err != nil {
-			return &ValidationError{Name: "versionedMessengerType", err: fmt.Errorf(`ent: validator failed for field "LoginAlert.versionedMessengerType": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Confirmed(); !ok {
 		return &ValidationError{Name: "confirmed", err: errors.New(`ent: missing required field "LoginAlert.confirmed"`)}
 	}
-	if _, ok := _c.mutation.SessionID(); !ok {
-		return &ValidationError{Name: "sessionID", err: errors.New(`ent: missing required field "LoginAlert.sessionID"`)}
+	if _, ok := _c.mutation.DownloadSessionID(); !ok {
+		return &ValidationError{Name: "downloadSessionID", err: errors.New(`ent: missing required field "LoginAlert.downloadSessionID"`)}
 	}
-	if len(_c.mutation.SessionIDs()) == 0 {
-		return &ValidationError{Name: "session", err: errors.New(`ent: missing required edge "LoginAlert.session"`)}
+	if len(_c.mutation.DownloadSessionIDs()) == 0 {
+		return &ValidationError{Name: "downloadSession", err: errors.New(`ent: missing required edge "LoginAlert.downloadSession"`)}
 	}
 	return nil
 }
@@ -171,29 +157,25 @@ func (_c *LoginAlertCreate) createSpec() (*LoginAlert, *sqlgraph.CreateSpec) {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
 		_node.SentAt = value
 	}
-	if value, ok := _c.mutation.VersionedMessengerType(); ok {
-		_spec.SetField(loginalert.FieldVersionedMessengerType, field.TypeString, value)
-		_node.VersionedMessengerType = value
-	}
 	if value, ok := _c.mutation.Confirmed(); ok {
 		_spec.SetField(loginalert.FieldConfirmed, field.TypeBool, value)
 		_node.Confirmed = value
 	}
-	if nodes := _c.mutation.SessionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DownloadSessionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   loginalert.SessionTable,
-			Columns: []string{loginalert.SessionColumn},
+			Table:   loginalert.DownloadSessionTable,
+			Columns: []string{loginalert.DownloadSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.SessionID = nodes[0]
+		_node.DownloadSessionID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -260,18 +242,6 @@ func (u *LoginAlertUpsert) UpdateSentAt() *LoginAlertUpsert {
 	return u
 }
 
-// SetVersionedMessengerType sets the "versionedMessengerType" field.
-func (u *LoginAlertUpsert) SetVersionedMessengerType(v string) *LoginAlertUpsert {
-	u.Set(loginalert.FieldVersionedMessengerType, v)
-	return u
-}
-
-// UpdateVersionedMessengerType sets the "versionedMessengerType" field to the value that was provided on create.
-func (u *LoginAlertUpsert) UpdateVersionedMessengerType() *LoginAlertUpsert {
-	u.SetExcluded(loginalert.FieldVersionedMessengerType)
-	return u
-}
-
 // SetConfirmed sets the "confirmed" field.
 func (u *LoginAlertUpsert) SetConfirmed(v bool) *LoginAlertUpsert {
 	u.Set(loginalert.FieldConfirmed, v)
@@ -284,15 +254,15 @@ func (u *LoginAlertUpsert) UpdateConfirmed() *LoginAlertUpsert {
 	return u
 }
 
-// SetSessionID sets the "sessionID" field.
-func (u *LoginAlertUpsert) SetSessionID(v uuid.UUID) *LoginAlertUpsert {
-	u.Set(loginalert.FieldSessionID, v)
+// SetDownloadSessionID sets the "downloadSessionID" field.
+func (u *LoginAlertUpsert) SetDownloadSessionID(v uuid.UUID) *LoginAlertUpsert {
+	u.Set(loginalert.FieldDownloadSessionID, v)
 	return u
 }
 
-// UpdateSessionID sets the "sessionID" field to the value that was provided on create.
-func (u *LoginAlertUpsert) UpdateSessionID() *LoginAlertUpsert {
-	u.SetExcluded(loginalert.FieldSessionID)
+// UpdateDownloadSessionID sets the "downloadSessionID" field to the value that was provided on create.
+func (u *LoginAlertUpsert) UpdateDownloadSessionID() *LoginAlertUpsert {
+	u.SetExcluded(loginalert.FieldDownloadSessionID)
 	return u
 }
 
@@ -358,20 +328,6 @@ func (u *LoginAlertUpsertOne) UpdateSentAt() *LoginAlertUpsertOne {
 	})
 }
 
-// SetVersionedMessengerType sets the "versionedMessengerType" field.
-func (u *LoginAlertUpsertOne) SetVersionedMessengerType(v string) *LoginAlertUpsertOne {
-	return u.Update(func(s *LoginAlertUpsert) {
-		s.SetVersionedMessengerType(v)
-	})
-}
-
-// UpdateVersionedMessengerType sets the "versionedMessengerType" field to the value that was provided on create.
-func (u *LoginAlertUpsertOne) UpdateVersionedMessengerType() *LoginAlertUpsertOne {
-	return u.Update(func(s *LoginAlertUpsert) {
-		s.UpdateVersionedMessengerType()
-	})
-}
-
 // SetConfirmed sets the "confirmed" field.
 func (u *LoginAlertUpsertOne) SetConfirmed(v bool) *LoginAlertUpsertOne {
 	return u.Update(func(s *LoginAlertUpsert) {
@@ -386,17 +342,17 @@ func (u *LoginAlertUpsertOne) UpdateConfirmed() *LoginAlertUpsertOne {
 	})
 }
 
-// SetSessionID sets the "sessionID" field.
-func (u *LoginAlertUpsertOne) SetSessionID(v uuid.UUID) *LoginAlertUpsertOne {
+// SetDownloadSessionID sets the "downloadSessionID" field.
+func (u *LoginAlertUpsertOne) SetDownloadSessionID(v uuid.UUID) *LoginAlertUpsertOne {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.SetSessionID(v)
+		s.SetDownloadSessionID(v)
 	})
 }
 
-// UpdateSessionID sets the "sessionID" field to the value that was provided on create.
-func (u *LoginAlertUpsertOne) UpdateSessionID() *LoginAlertUpsertOne {
+// UpdateDownloadSessionID sets the "downloadSessionID" field to the value that was provided on create.
+func (u *LoginAlertUpsertOne) UpdateDownloadSessionID() *LoginAlertUpsertOne {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.UpdateSessionID()
+		s.UpdateDownloadSessionID()
 	})
 }
 
@@ -629,20 +585,6 @@ func (u *LoginAlertUpsertBulk) UpdateSentAt() *LoginAlertUpsertBulk {
 	})
 }
 
-// SetVersionedMessengerType sets the "versionedMessengerType" field.
-func (u *LoginAlertUpsertBulk) SetVersionedMessengerType(v string) *LoginAlertUpsertBulk {
-	return u.Update(func(s *LoginAlertUpsert) {
-		s.SetVersionedMessengerType(v)
-	})
-}
-
-// UpdateVersionedMessengerType sets the "versionedMessengerType" field to the value that was provided on create.
-func (u *LoginAlertUpsertBulk) UpdateVersionedMessengerType() *LoginAlertUpsertBulk {
-	return u.Update(func(s *LoginAlertUpsert) {
-		s.UpdateVersionedMessengerType()
-	})
-}
-
 // SetConfirmed sets the "confirmed" field.
 func (u *LoginAlertUpsertBulk) SetConfirmed(v bool) *LoginAlertUpsertBulk {
 	return u.Update(func(s *LoginAlertUpsert) {
@@ -657,17 +599,17 @@ func (u *LoginAlertUpsertBulk) UpdateConfirmed() *LoginAlertUpsertBulk {
 	})
 }
 
-// SetSessionID sets the "sessionID" field.
-func (u *LoginAlertUpsertBulk) SetSessionID(v uuid.UUID) *LoginAlertUpsertBulk {
+// SetDownloadSessionID sets the "downloadSessionID" field.
+func (u *LoginAlertUpsertBulk) SetDownloadSessionID(v uuid.UUID) *LoginAlertUpsertBulk {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.SetSessionID(v)
+		s.SetDownloadSessionID(v)
 	})
 }
 
-// UpdateSessionID sets the "sessionID" field to the value that was provided on create.
-func (u *LoginAlertUpsertBulk) UpdateSessionID() *LoginAlertUpsertBulk {
+// UpdateDownloadSessionID sets the "downloadSessionID" field to the value that was provided on create.
+func (u *LoginAlertUpsertBulk) UpdateDownloadSessionID() *LoginAlertUpsertBulk {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.UpdateSessionID()
+		s.UpdateDownloadSessionID()
 	})
 }
 

@@ -8,6 +8,38 @@ import (
 )
 
 var (
+	// DownloadSessionsColumns holds the columns for the "download_sessions" table.
+	DownloadSessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "code", Type: field.TypeBytes, Unique: true},
+		{Name: "valid_from", Type: field.TypeTime},
+		{Name: "valid_until", Type: field.TypeTime},
+		{Name: "user_agent", Type: field.TypeString},
+		{Name: "ip", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// DownloadSessionsTable holds the schema information for the "download_sessions" table.
+	DownloadSessionsTable = &schema.Table{
+		Name:       "download_sessions",
+		Columns:    DownloadSessionsColumns,
+		PrimaryKey: []*schema.Column{DownloadSessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "download_sessions_users_downloadSessions",
+				Columns:    []*schema.Column{DownloadSessionsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "downloadsession_code_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{DownloadSessionsColumns[2], DownloadSessionsColumns[7]},
+			},
+		},
+	}
 	// JobsColumns holds the columns for the "jobs" table.
 	JobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -101,9 +133,8 @@ var (
 	LoginAlertsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "sent_at", Type: field.TypeTime},
-		{Name: "versioned_messenger_type", Type: field.TypeString, Size: 128},
 		{Name: "confirmed", Type: field.TypeBool},
-		{Name: "session_id", Type: field.TypeUUID},
+		{Name: "download_session_id", Type: field.TypeUUID},
 	}
 	// LoginAlertsTable holds the schema information for the "login_alerts" table.
 	LoginAlertsTable = &schema.Table{
@@ -112,9 +143,9 @@ var (
 		PrimaryKey: []*schema.Column{LoginAlertsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "login_alerts_sessions_loginAlerts",
-				Columns:    []*schema.Column{LoginAlertsColumns[4]},
-				RefColumns: []*schema.Column{SessionsColumns[0]},
+				Symbol:     "login_alerts_download_sessions_loginAlerts",
+				Columns:    []*schema.Column{LoginAlertsColumns[3]},
+				RefColumns: []*schema.Column{DownloadSessionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -135,38 +166,6 @@ var (
 				Name:    "periodictask_name",
 				Unique:  true,
 				Columns: []*schema.Column{PeriodicTasksColumns[1]},
-			},
-		},
-	}
-	// SessionsColumns holds the columns for the "sessions" table.
-	SessionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "code", Type: field.TypeBytes, Unique: true},
-		{Name: "valid_from", Type: field.TypeTime},
-		{Name: "valid_until", Type: field.TypeTime},
-		{Name: "user_agent", Type: field.TypeString},
-		{Name: "ip", Type: field.TypeString},
-		{Name: "user_id", Type: field.TypeUUID},
-	}
-	// SessionsTable holds the schema information for the "sessions" table.
-	SessionsTable = &schema.Table{
-		Name:       "sessions",
-		Columns:    SessionsColumns,
-		PrimaryKey: []*schema.Column{SessionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "sessions_users_sessions",
-				Columns:    []*schema.Column{SessionsColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "session_code_user_id",
-				Unique:  false,
-				Columns: []*schema.Column{SessionsColumns[2], SessionsColumns[7]},
 			},
 		},
 	}
@@ -225,7 +224,7 @@ var (
 		{Name: "username", Type: field.TypeString, Unique: true},
 		{Name: "locked", Type: field.TypeBool, Default: false},
 		{Name: "locked_until", Type: field.TypeTime, Nullable: true},
-		{Name: "sessions_valid_from", Type: field.TypeTime},
+		{Name: "download_sessions_valid_from", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -265,12 +264,12 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		DownloadSessionsTable,
 		JobsTable,
 		KeyValuesTable,
 		LogEntriesTable,
 		LoginAlertsTable,
 		PeriodicTasksTable,
-		SessionsTable,
 		StashesTable,
 		TwoFactorActionsTable,
 		UsersTable,
@@ -279,9 +278,9 @@ var (
 )
 
 func init() {
+	DownloadSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	LogEntriesTable.ForeignKeys[0].RefTable = UsersTable
-	LoginAlertsTable.ForeignKeys[0].RefTable = SessionsTable
-	SessionsTable.ForeignKeys[0].RefTable = UsersTable
+	LoginAlertsTable.ForeignKeys[0].RefTable = DownloadSessionsTable
 	StashesTable.ForeignKeys[0].RefTable = UsersTable
 	UserMessengersTable.ForeignKeys[0].RefTable = UsersTable
 }

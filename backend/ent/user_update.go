@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -81,16 +81,16 @@ func (_u *UserUpdate) ClearLockedUntil() *UserUpdate {
 	return _u
 }
 
-// SetSessionsValidFrom sets the "sessionsValidFrom" field.
-func (_u *UserUpdate) SetSessionsValidFrom(v time.Time) *UserUpdate {
-	_u.mutation.SetSessionsValidFrom(v)
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (_u *UserUpdate) SetDownloadSessionsValidFrom(v time.Time) *UserUpdate {
+	_u.mutation.SetDownloadSessionsValidFrom(v)
 	return _u
 }
 
-// SetNillableSessionsValidFrom sets the "sessionsValidFrom" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableSessionsValidFrom(v *time.Time) *UserUpdate {
+// SetNillableDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableDownloadSessionsValidFrom(v *time.Time) *UserUpdate {
 	if v != nil {
-		_u.SetSessionsValidFrom(*v)
+		_u.SetDownloadSessionsValidFrom(*v)
 	}
 	return _u
 }
@@ -129,19 +129,19 @@ func (_u *UserUpdate) AddMessengers(v ...*UserMessenger) *UserUpdate {
 	return _u.AddMessengerIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_u *UserUpdate) AddSessionIDs(ids ...uuid.UUID) *UserUpdate {
-	_u.mutation.AddSessionIDs(ids...)
+// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by IDs.
+func (_u *UserUpdate) AddDownloadSessionIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddDownloadSessionIDs(ids...)
 	return _u
 }
 
-// AddSessions adds the "sessions" edges to the Session entity.
-func (_u *UserUpdate) AddSessions(v ...*Session) *UserUpdate {
+// AddDownloadSessions adds the "downloadSessions" edges to the DownloadSession entity.
+func (_u *UserUpdate) AddDownloadSessions(v ...*DownloadSession) *UserUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddSessionIDs(ids...)
+	return _u.AddDownloadSessionIDs(ids...)
 }
 
 // AddLogIDs adds the "logs" edge to the LogEntry entity by IDs.
@@ -191,25 +191,25 @@ func (_u *UserUpdate) RemoveMessengers(v ...*UserMessenger) *UserUpdate {
 	return _u.RemoveMessengerIDs(ids...)
 }
 
-// ClearSessions clears all "sessions" edges to the Session entity.
-func (_u *UserUpdate) ClearSessions() *UserUpdate {
-	_u.mutation.ClearSessions()
+// ClearDownloadSessions clears all "downloadSessions" edges to the DownloadSession entity.
+func (_u *UserUpdate) ClearDownloadSessions() *UserUpdate {
+	_u.mutation.ClearDownloadSessions()
 	return _u
 }
 
-// RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (_u *UserUpdate) RemoveSessionIDs(ids ...uuid.UUID) *UserUpdate {
-	_u.mutation.RemoveSessionIDs(ids...)
+// RemoveDownloadSessionIDs removes the "downloadSessions" edge to DownloadSession entities by IDs.
+func (_u *UserUpdate) RemoveDownloadSessionIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveDownloadSessionIDs(ids...)
 	return _u
 }
 
-// RemoveSessions removes "sessions" edges to Session entities.
-func (_u *UserUpdate) RemoveSessions(v ...*Session) *UserUpdate {
+// RemoveDownloadSessions removes "downloadSessions" edges to DownloadSession entities.
+func (_u *UserUpdate) RemoveDownloadSessions(v ...*DownloadSession) *UserUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveSessionIDs(ids...)
+	return _u.RemoveDownloadSessionIDs(ids...)
 }
 
 // ClearLogs clears all "logs" edges to the LogEntry entity.
@@ -294,8 +294,8 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.LockedUntilCleared() {
 		_spec.ClearField(user.FieldLockedUntil, field.TypeTime)
 	}
-	if value, ok := _u.mutation.SessionsValidFrom(); ok {
-		_spec.SetField(user.FieldSessionsValidFrom, field.TypeTime, value)
+	if value, ok := _u.mutation.DownloadSessionsValidFrom(); ok {
+		_spec.SetField(user.FieldDownloadSessionsValidFrom, field.TypeTime, value)
 	}
 	if _u.mutation.StashCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -371,28 +371,28 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SessionsCleared() {
+	if _u.mutation.DownloadSessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.DownloadSessionsTable,
+			Columns: []string{user.DownloadSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedDownloadSessionsIDs(); len(nodes) > 0 && !_u.mutation.DownloadSessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.DownloadSessionsTable,
+			Columns: []string{user.DownloadSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -400,15 +400,15 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DownloadSessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.DownloadSessionsTable,
+			Columns: []string{user.DownloadSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -529,16 +529,16 @@ func (_u *UserUpdateOne) ClearLockedUntil() *UserUpdateOne {
 	return _u
 }
 
-// SetSessionsValidFrom sets the "sessionsValidFrom" field.
-func (_u *UserUpdateOne) SetSessionsValidFrom(v time.Time) *UserUpdateOne {
-	_u.mutation.SetSessionsValidFrom(v)
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (_u *UserUpdateOne) SetDownloadSessionsValidFrom(v time.Time) *UserUpdateOne {
+	_u.mutation.SetDownloadSessionsValidFrom(v)
 	return _u
 }
 
-// SetNillableSessionsValidFrom sets the "sessionsValidFrom" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableSessionsValidFrom(v *time.Time) *UserUpdateOne {
+// SetNillableDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableDownloadSessionsValidFrom(v *time.Time) *UserUpdateOne {
 	if v != nil {
-		_u.SetSessionsValidFrom(*v)
+		_u.SetDownloadSessionsValidFrom(*v)
 	}
 	return _u
 }
@@ -577,19 +577,19 @@ func (_u *UserUpdateOne) AddMessengers(v ...*UserMessenger) *UserUpdateOne {
 	return _u.AddMessengerIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_u *UserUpdateOne) AddSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
-	_u.mutation.AddSessionIDs(ids...)
+// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by IDs.
+func (_u *UserUpdateOne) AddDownloadSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddDownloadSessionIDs(ids...)
 	return _u
 }
 
-// AddSessions adds the "sessions" edges to the Session entity.
-func (_u *UserUpdateOne) AddSessions(v ...*Session) *UserUpdateOne {
+// AddDownloadSessions adds the "downloadSessions" edges to the DownloadSession entity.
+func (_u *UserUpdateOne) AddDownloadSessions(v ...*DownloadSession) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddSessionIDs(ids...)
+	return _u.AddDownloadSessionIDs(ids...)
 }
 
 // AddLogIDs adds the "logs" edge to the LogEntry entity by IDs.
@@ -639,25 +639,25 @@ func (_u *UserUpdateOne) RemoveMessengers(v ...*UserMessenger) *UserUpdateOne {
 	return _u.RemoveMessengerIDs(ids...)
 }
 
-// ClearSessions clears all "sessions" edges to the Session entity.
-func (_u *UserUpdateOne) ClearSessions() *UserUpdateOne {
-	_u.mutation.ClearSessions()
+// ClearDownloadSessions clears all "downloadSessions" edges to the DownloadSession entity.
+func (_u *UserUpdateOne) ClearDownloadSessions() *UserUpdateOne {
+	_u.mutation.ClearDownloadSessions()
 	return _u
 }
 
-// RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (_u *UserUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
-	_u.mutation.RemoveSessionIDs(ids...)
+// RemoveDownloadSessionIDs removes the "downloadSessions" edge to DownloadSession entities by IDs.
+func (_u *UserUpdateOne) RemoveDownloadSessionIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveDownloadSessionIDs(ids...)
 	return _u
 }
 
-// RemoveSessions removes "sessions" edges to Session entities.
-func (_u *UserUpdateOne) RemoveSessions(v ...*Session) *UserUpdateOne {
+// RemoveDownloadSessions removes "downloadSessions" edges to DownloadSession entities.
+func (_u *UserUpdateOne) RemoveDownloadSessions(v ...*DownloadSession) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveSessionIDs(ids...)
+	return _u.RemoveDownloadSessionIDs(ids...)
 }
 
 // ClearLogs clears all "logs" edges to the LogEntry entity.
@@ -772,8 +772,8 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if _u.mutation.LockedUntilCleared() {
 		_spec.ClearField(user.FieldLockedUntil, field.TypeTime)
 	}
-	if value, ok := _u.mutation.SessionsValidFrom(); ok {
-		_spec.SetField(user.FieldSessionsValidFrom, field.TypeTime, value)
+	if value, ok := _u.mutation.DownloadSessionsValidFrom(); ok {
+		_spec.SetField(user.FieldDownloadSessionsValidFrom, field.TypeTime, value)
 	}
 	if _u.mutation.StashCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -849,28 +849,28 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SessionsCleared() {
+	if _u.mutation.DownloadSessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.DownloadSessionsTable,
+			Columns: []string{user.DownloadSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedDownloadSessionsIDs(); len(nodes) > 0 && !_u.mutation.DownloadSessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.DownloadSessionsTable,
+			Columns: []string{user.DownloadSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -878,15 +878,15 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DownloadSessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.DownloadSessionsTable,
+			Columns: []string{user.DownloadSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

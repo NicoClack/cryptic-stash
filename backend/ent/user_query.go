@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -24,14 +24,14 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx            *QueryContext
-	order          []user.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.User
-	withStash      *StashQuery
-	withMessengers *UserMessengerQuery
-	withSessions   *SessionQuery
-	withLogs       *LogEntryQuery
+	ctx                  *QueryContext
+	order                []user.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.User
+	withStash            *StashQuery
+	withMessengers       *UserMessengerQuery
+	withDownloadSessions *DownloadSessionQuery
+	withLogs             *LogEntryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -112,9 +112,9 @@ func (_q *UserQuery) QueryMessengers() *UserMessengerQuery {
 	return query
 }
 
-// QuerySessions chains the current query on the "sessions" edge.
-func (_q *UserQuery) QuerySessions() *SessionQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+// QueryDownloadSessions chains the current query on the "downloadSessions" edge.
+func (_q *UserQuery) QueryDownloadSessions() *DownloadSessionQuery {
+	query := (&DownloadSessionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -125,8 +125,8 @@ func (_q *UserQuery) QuerySessions() *SessionQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DownloadSessionsTable, user.DownloadSessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -343,15 +343,15 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:         _q.config,
-		ctx:            _q.ctx.Clone(),
-		order:          append([]user.OrderOption{}, _q.order...),
-		inters:         append([]Interceptor{}, _q.inters...),
-		predicates:     append([]predicate.User{}, _q.predicates...),
-		withStash:      _q.withStash.Clone(),
-		withMessengers: _q.withMessengers.Clone(),
-		withSessions:   _q.withSessions.Clone(),
-		withLogs:       _q.withLogs.Clone(),
+		config:               _q.config,
+		ctx:                  _q.ctx.Clone(),
+		order:                append([]user.OrderOption{}, _q.order...),
+		inters:               append([]Interceptor{}, _q.inters...),
+		predicates:           append([]predicate.User{}, _q.predicates...),
+		withStash:            _q.withStash.Clone(),
+		withMessengers:       _q.withMessengers.Clone(),
+		withDownloadSessions: _q.withDownloadSessions.Clone(),
+		withLogs:             _q.withLogs.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -380,14 +380,14 @@ func (_q *UserQuery) WithMessengers(opts ...func(*UserMessengerQuery)) *UserQuer
 	return _q
 }
 
-// WithSessions tells the query-builder to eager-load the nodes that are connected to
-// the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+// WithDownloadSessions tells the query-builder to eager-load the nodes that are connected to
+// the "downloadSessions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithDownloadSessions(opts ...func(*DownloadSessionQuery)) *UserQuery {
+	query := (&DownloadSessionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withSessions = query
+	_q.withDownloadSessions = query
 	return _q
 }
 
@@ -483,7 +483,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		loadedTypes = [4]bool{
 			_q.withStash != nil,
 			_q.withMessengers != nil,
-			_q.withSessions != nil,
+			_q.withDownloadSessions != nil,
 			_q.withLogs != nil,
 		}
 	)
@@ -518,10 +518,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := _q.withSessions; query != nil {
-		if err := _q.loadSessions(ctx, query, nodes,
-			func(n *User) { n.Edges.Sessions = []*Session{} },
-			func(n *User, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
+	if query := _q.withDownloadSessions; query != nil {
+		if err := _q.loadDownloadSessions(ctx, query, nodes,
+			func(n *User) { n.Edges.DownloadSessions = []*DownloadSession{} },
+			func(n *User, e *DownloadSession) { n.Edges.DownloadSessions = append(n.Edges.DownloadSessions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -592,7 +592,7 @@ func (_q *UserQuery) loadMessengers(ctx context.Context, query *UserMessengerQue
 	}
 	return nil
 }
-func (_q *UserQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*User, init func(*User), assign func(*User, *Session)) error {
+func (_q *UserQuery) loadDownloadSessions(ctx context.Context, query *DownloadSessionQuery, nodes []*User, init func(*User), assign func(*User, *DownloadSession)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -603,10 +603,10 @@ func (_q *UserQuery) loadSessions(ctx context.Context, query *SessionQuery, node
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(session.FieldUserID)
+		query.ctx.AppendFieldOnce(downloadsession.FieldUserID)
 	}
-	query.Where(predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.SessionsColumn), fks...))
+	query.Where(predicate.DownloadSession(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.DownloadSessionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -3,13 +3,13 @@
 package ent
 
 import (
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
 	"github.com/NicoClack/cryptic-stash/backend/ent/keyvalue"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/periodictask"
 	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -21,6 +21,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	downloadsessionFields := schema.DownloadSession{}.Fields()
+	_ = downloadsessionFields
+	// downloadsessionDescCode is the schema descriptor for code field.
+	downloadsessionDescCode := downloadsessionFields[2].Descriptor()
+	// downloadsession.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	downloadsession.CodeValidator = downloadsessionDescCode.Validators[0].(func([]byte) error)
+	// downloadsessionDescID is the schema descriptor for id field.
+	downloadsessionDescID := downloadsessionFields[0].Descriptor()
+	// downloadsession.DefaultID holds the default value on creation for the id field.
+	downloadsession.DefaultID = downloadsessionDescID.Default.(func() uuid.UUID)
 	jobFields := schema.Job{}.Fields()
 	_ = jobFields
 	// jobDescType is the schema descriptor for type field.
@@ -89,24 +99,6 @@ func init() {
 	logentry.DefaultID = logentryDescID.Default.(func() uuid.UUID)
 	loginalertFields := schema.LoginAlert{}.Fields()
 	_ = loginalertFields
-	// loginalertDescVersionedMessengerType is the schema descriptor for versionedMessengerType field.
-	loginalertDescVersionedMessengerType := loginalertFields[2].Descriptor()
-	// loginalert.VersionedMessengerTypeValidator is a validator for the "versionedMessengerType" field. It is called by the builders before save.
-	loginalert.VersionedMessengerTypeValidator = func() func(string) error {
-		validators := loginalertDescVersionedMessengerType.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(versionedMessengerType string) error {
-			for _, fn := range fns {
-				if err := fn(versionedMessengerType); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
 	// loginalertDescID is the schema descriptor for id field.
 	loginalertDescID := loginalertFields[0].Descriptor()
 	// loginalert.DefaultID holds the default value on creation for the id field.
@@ -135,16 +127,6 @@ func init() {
 	periodictaskDescID := periodictaskFields[0].Descriptor()
 	// periodictask.DefaultID holds the default value on creation for the id field.
 	periodictask.DefaultID = periodictaskDescID.Default.(func() uuid.UUID)
-	sessionFields := schema.Session{}.Fields()
-	_ = sessionFields
-	// sessionDescCode is the schema descriptor for code field.
-	sessionDescCode := sessionFields[2].Descriptor()
-	// session.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	session.CodeValidator = sessionDescCode.Validators[0].(func([]byte) error)
-	// sessionDescID is the schema descriptor for id field.
-	sessionDescID := sessionFields[0].Descriptor()
-	// session.DefaultID holds the default value on creation for the id field.
-	session.DefaultID = sessionDescID.Default.(func() uuid.UUID)
 	stashFields := schema.Stash{}.Fields()
 	_ = stashFields
 	// stashDescContent is the schema descriptor for content field.

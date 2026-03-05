@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 )
 
-// SessionDelete is the builder for deleting a Session entity.
-type SessionDelete struct {
+// DownloadSessionDelete is the builder for deleting a DownloadSession entity.
+type DownloadSessionDelete struct {
 	config
 	hooks    []Hook
-	mutation *SessionMutation
+	mutation *DownloadSessionMutation
 }
 
-// Where appends a list predicates to the SessionDelete builder.
-func (_d *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
+// Where appends a list predicates to the DownloadSessionDelete builder.
+func (_d *DownloadSessionDelete) Where(ps ...predicate.DownloadSession) *DownloadSessionDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *SessionDelete) Exec(ctx context.Context) (int, error) {
+func (_d *DownloadSessionDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SessionDelete) ExecX(ctx context.Context) int {
+func (_d *DownloadSessionDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *SessionDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *SessionDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
+func (_d *DownloadSessionDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(downloadsession.Table, sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *SessionDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// SessionDeleteOne is the builder for deleting a single Session entity.
-type SessionDeleteOne struct {
-	_d *SessionDelete
+// DownloadSessionDeleteOne is the builder for deleting a single DownloadSession entity.
+type DownloadSessionDeleteOne struct {
+	_d *DownloadSessionDelete
 }
 
-// Where appends a list predicates to the SessionDelete builder.
-func (_d *SessionDeleteOne) Where(ps ...predicate.Session) *SessionDeleteOne {
+// Where appends a list predicates to the DownloadSessionDelete builder.
+func (_d *DownloadSessionDeleteOne) Where(ps ...predicate.DownloadSession) *DownloadSessionDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *SessionDeleteOne) Exec(ctx context.Context) error {
+func (_d *DownloadSessionDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{session.Label}
+		return &NotFoundError{downloadsession.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SessionDeleteOne) ExecX(ctx context.Context) {
+func (_d *DownloadSessionDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

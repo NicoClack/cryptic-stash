@@ -21,7 +21,7 @@ func (User) Fields() []ent.Field {
 		// Admins might be able to be locked in the future
 		field.Bool("locked").Default(false),
 		field.Time("lockedUntil").Nillable().Optional(),
-		field.Time("sessionsValidFrom"),
+		field.Time("downloadSessionsValidFrom"),
 	}
 }
 
@@ -32,7 +32,7 @@ func (User) Edges() []ent.Edge {
 			Annotations(entsql.OnDelete(entsql.Cascade)).Unique(),
 		edge.To("messengers", UserMessenger.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To("sessions", Session.Type).
+		edge.To("downloadSessions", DownloadSession.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("logs", LogEntry.Type).
 			Annotations(entsql.OnDelete(entsql.SetNull)),

@@ -12,12 +12,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
 	"github.com/NicoClack/cryptic-stash/backend/ent/keyvalue"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/periodictask"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -82,12 +82,12 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			downloadsession.Table: downloadsession.ValidColumn,
 			job.Table:             job.ValidColumn,
 			keyvalue.Table:        keyvalue.ValidColumn,
 			logentry.Table:        logentry.ValidColumn,
 			loginalert.Table:      loginalert.ValidColumn,
 			periodictask.Table:    periodictask.ValidColumn,
-			session.Table:         session.ValidColumn,
 			stash.Table:           stash.ValidColumn,
 			twofactoraction.Table: twofactoraction.ValidColumn,
 			user.Table:            user.ValidColumn,

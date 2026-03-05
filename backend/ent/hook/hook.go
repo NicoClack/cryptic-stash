@@ -9,6 +9,18 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 )
 
+// The DownloadSessionFunc type is an adapter to allow the use of ordinary
+// function as DownloadSession mutator.
+type DownloadSessionFunc func(context.Context, *ent.DownloadSessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DownloadSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DownloadSessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DownloadSessionMutation", m)
+}
+
 // The JobFunc type is an adapter to allow the use of ordinary
 // function as Job mutator.
 type JobFunc func(context.Context, *ent.JobMutation) (ent.Value, error)
@@ -67,18 +79,6 @@ func (f PeriodicTaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PeriodicTaskMutation", m)
-}
-
-// The SessionFunc type is an adapter to allow the use of ordinary
-// function as Session mutator.
-type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.SessionMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
 }
 
 // The StashFunc type is an adapter to allow the use of ordinary

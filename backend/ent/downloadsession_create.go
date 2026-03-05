@@ -12,70 +12,70 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// SessionCreate is the builder for creating a Session entity.
-type SessionCreate struct {
+// DownloadSessionCreate is the builder for creating a DownloadSession entity.
+type DownloadSessionCreate struct {
 	config
-	mutation *SessionMutation
+	mutation *DownloadSessionMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (_c *SessionCreate) SetCreatedAt(v time.Time) *SessionCreate {
+func (_c *DownloadSessionCreate) SetCreatedAt(v time.Time) *DownloadSessionCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetCode sets the "code" field.
-func (_c *SessionCreate) SetCode(v []byte) *SessionCreate {
+func (_c *DownloadSessionCreate) SetCode(v []byte) *DownloadSessionCreate {
 	_c.mutation.SetCode(v)
 	return _c
 }
 
 // SetValidFrom sets the "validFrom" field.
-func (_c *SessionCreate) SetValidFrom(v time.Time) *SessionCreate {
+func (_c *DownloadSessionCreate) SetValidFrom(v time.Time) *DownloadSessionCreate {
 	_c.mutation.SetValidFrom(v)
 	return _c
 }
 
 // SetValidUntil sets the "validUntil" field.
-func (_c *SessionCreate) SetValidUntil(v time.Time) *SessionCreate {
+func (_c *DownloadSessionCreate) SetValidUntil(v time.Time) *DownloadSessionCreate {
 	_c.mutation.SetValidUntil(v)
 	return _c
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *SessionCreate) SetUserAgent(v string) *SessionCreate {
+func (_c *DownloadSessionCreate) SetUserAgent(v string) *DownloadSessionCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetIP sets the "ip" field.
-func (_c *SessionCreate) SetIP(v string) *SessionCreate {
+func (_c *DownloadSessionCreate) SetIP(v string) *DownloadSessionCreate {
 	_c.mutation.SetIP(v)
 	return _c
 }
 
 // SetUserID sets the "userID" field.
-func (_c *SessionCreate) SetUserID(v uuid.UUID) *SessionCreate {
+func (_c *DownloadSessionCreate) SetUserID(v uuid.UUID) *DownloadSessionCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *SessionCreate) SetID(v uuid.UUID) *SessionCreate {
+func (_c *DownloadSessionCreate) SetID(v uuid.UUID) *DownloadSessionCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableID(v *uuid.UUID) *SessionCreate {
+func (_c *DownloadSessionCreate) SetNillableID(v *uuid.UUID) *DownloadSessionCreate {
 	if v != nil {
 		_c.SetID(*v)
 	}
@@ -83,18 +83,18 @@ func (_c *SessionCreate) SetNillableID(v *uuid.UUID) *SessionCreate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *SessionCreate) SetUser(v *User) *SessionCreate {
+func (_c *DownloadSessionCreate) SetUser(v *User) *DownloadSessionCreate {
 	return _c.SetUserID(v.ID)
 }
 
 // AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
-func (_c *SessionCreate) AddLoginAlertIDs(ids ...uuid.UUID) *SessionCreate {
+func (_c *DownloadSessionCreate) AddLoginAlertIDs(ids ...uuid.UUID) *DownloadSessionCreate {
 	_c.mutation.AddLoginAlertIDs(ids...)
 	return _c
 }
 
 // AddLoginAlerts adds the "loginAlerts" edges to the LoginAlert entity.
-func (_c *SessionCreate) AddLoginAlerts(v ...*LoginAlert) *SessionCreate {
+func (_c *DownloadSessionCreate) AddLoginAlerts(v ...*LoginAlert) *DownloadSessionCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -102,19 +102,19 @@ func (_c *SessionCreate) AddLoginAlerts(v ...*LoginAlert) *SessionCreate {
 	return _c.AddLoginAlertIDs(ids...)
 }
 
-// Mutation returns the SessionMutation object of the builder.
-func (_c *SessionCreate) Mutation() *SessionMutation {
+// Mutation returns the DownloadSessionMutation object of the builder.
+func (_c *DownloadSessionCreate) Mutation() *DownloadSessionMutation {
 	return _c.mutation
 }
 
-// Save creates the Session in the database.
-func (_c *SessionCreate) Save(ctx context.Context) (*Session, error) {
+// Save creates the DownloadSession in the database.
+func (_c *DownloadSessionCreate) Save(ctx context.Context) (*DownloadSession, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *SessionCreate) SaveX(ctx context.Context) *Session {
+func (_c *DownloadSessionCreate) SaveX(ctx context.Context) *DownloadSession {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -123,61 +123,61 @@ func (_c *SessionCreate) SaveX(ctx context.Context) *Session {
 }
 
 // Exec executes the query.
-func (_c *SessionCreate) Exec(ctx context.Context) error {
+func (_c *DownloadSessionCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SessionCreate) ExecX(ctx context.Context) {
+func (_c *DownloadSessionCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *SessionCreate) defaults() {
+func (_c *DownloadSessionCreate) defaults() {
 	if _, ok := _c.mutation.ID(); !ok {
-		v := session.DefaultID()
+		v := downloadsession.DefaultID()
 		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *SessionCreate) check() error {
+func (_c *DownloadSessionCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Session.createdAt"`)}
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "DownloadSession.createdAt"`)}
 	}
 	if _, ok := _c.mutation.Code(); !ok {
-		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Session.code"`)}
+		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "DownloadSession.code"`)}
 	}
 	if v, ok := _c.mutation.Code(); ok {
-		if err := session.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "Session.code": %w`, err)}
+		if err := downloadsession.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.code": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.ValidFrom(); !ok {
-		return &ValidationError{Name: "validFrom", err: errors.New(`ent: missing required field "Session.validFrom"`)}
+		return &ValidationError{Name: "validFrom", err: errors.New(`ent: missing required field "DownloadSession.validFrom"`)}
 	}
 	if _, ok := _c.mutation.ValidUntil(); !ok {
-		return &ValidationError{Name: "validUntil", err: errors.New(`ent: missing required field "Session.validUntil"`)}
+		return &ValidationError{Name: "validUntil", err: errors.New(`ent: missing required field "DownloadSession.validUntil"`)}
 	}
 	if _, ok := _c.mutation.UserAgent(); !ok {
-		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Session.userAgent"`)}
+		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "DownloadSession.userAgent"`)}
 	}
 	if _, ok := _c.mutation.IP(); !ok {
-		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "Session.ip"`)}
+		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "DownloadSession.ip"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "Session.userID"`)}
+		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "DownloadSession.userID"`)}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Session.user"`)}
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "DownloadSession.user"`)}
 	}
 	return nil
 }
 
-func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
+func (_c *DownloadSessionCreate) sqlSave(ctx context.Context) (*DownloadSession, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -200,10 +200,10 @@ func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 	return _node, nil
 }
 
-func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
+func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Session{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
+		_node = &DownloadSession{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(downloadsession.Table, sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -211,35 +211,35 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(session.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.Code(); ok {
-		_spec.SetField(session.FieldCode, field.TypeBytes, value)
+		_spec.SetField(downloadsession.FieldCode, field.TypeBytes, value)
 		_node.Code = value
 	}
 	if value, ok := _c.mutation.ValidFrom(); ok {
-		_spec.SetField(session.FieldValidFrom, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldValidFrom, field.TypeTime, value)
 		_node.ValidFrom = value
 	}
 	if value, ok := _c.mutation.ValidUntil(); ok {
-		_spec.SetField(session.FieldValidUntil, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldValidUntil, field.TypeTime, value)
 		_node.ValidUntil = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldUserAgent, field.TypeString, value)
 		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
 		_node.IP = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   downloadsession.UserTable,
+			Columns: []string{downloadsession.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -255,8 +255,8 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   session.LoginAlertsTable,
-			Columns: []string{session.LoginAlertsColumn},
+			Table:   downloadsession.LoginAlertsTable,
+			Columns: []string{downloadsession.LoginAlertsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
@@ -273,7 +273,7 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Session.Create().
+//	client.DownloadSession.Create().
 //		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -282,13 +282,13 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.SessionUpsert) {
+//		Update(func(u *ent.DownloadSessionUpsert) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (_c *SessionCreate) OnConflict(opts ...sql.ConflictOption) *SessionUpsertOne {
+func (_c *DownloadSessionCreate) OnConflict(opts ...sql.ConflictOption) *DownloadSessionUpsertOne {
 	_c.conflict = opts
-	return &SessionUpsertOne{
+	return &DownloadSessionUpsertOne{
 		create: _c,
 	}
 }
@@ -296,129 +296,129 @@ func (_c *SessionCreate) OnConflict(opts ...sql.ConflictOption) *SessionUpsertOn
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	client.DownloadSession.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (_c *SessionCreate) OnConflictColumns(columns ...string) *SessionUpsertOne {
+func (_c *DownloadSessionCreate) OnConflictColumns(columns ...string) *DownloadSessionUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &SessionUpsertOne{
+	return &DownloadSessionUpsertOne{
 		create: _c,
 	}
 }
 
 type (
-	// SessionUpsertOne is the builder for "upsert"-ing
-	//  one Session node.
-	SessionUpsertOne struct {
-		create *SessionCreate
+	// DownloadSessionUpsertOne is the builder for "upsert"-ing
+	//  one DownloadSession node.
+	DownloadSessionUpsertOne struct {
+		create *DownloadSessionCreate
 	}
 
-	// SessionUpsert is the "OnConflict" setter.
-	SessionUpsert struct {
+	// DownloadSessionUpsert is the "OnConflict" setter.
+	DownloadSessionUpsert struct {
 		*sql.UpdateSet
 	}
 )
 
 // SetCreatedAt sets the "createdAt" field.
-func (u *SessionUpsert) SetCreatedAt(v time.Time) *SessionUpsert {
-	u.Set(session.FieldCreatedAt, v)
+func (u *DownloadSessionUpsert) SetCreatedAt(v time.Time) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldCreatedAt, v)
 	return u
 }
 
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateCreatedAt() *SessionUpsert {
-	u.SetExcluded(session.FieldCreatedAt)
+func (u *DownloadSessionUpsert) UpdateCreatedAt() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldCreatedAt)
 	return u
 }
 
 // SetCode sets the "code" field.
-func (u *SessionUpsert) SetCode(v []byte) *SessionUpsert {
-	u.Set(session.FieldCode, v)
+func (u *DownloadSessionUpsert) SetCode(v []byte) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldCode, v)
 	return u
 }
 
 // UpdateCode sets the "code" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateCode() *SessionUpsert {
-	u.SetExcluded(session.FieldCode)
+func (u *DownloadSessionUpsert) UpdateCode() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldCode)
 	return u
 }
 
 // SetValidFrom sets the "validFrom" field.
-func (u *SessionUpsert) SetValidFrom(v time.Time) *SessionUpsert {
-	u.Set(session.FieldValidFrom, v)
+func (u *DownloadSessionUpsert) SetValidFrom(v time.Time) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldValidFrom, v)
 	return u
 }
 
 // UpdateValidFrom sets the "validFrom" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateValidFrom() *SessionUpsert {
-	u.SetExcluded(session.FieldValidFrom)
+func (u *DownloadSessionUpsert) UpdateValidFrom() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldValidFrom)
 	return u
 }
 
 // SetValidUntil sets the "validUntil" field.
-func (u *SessionUpsert) SetValidUntil(v time.Time) *SessionUpsert {
-	u.Set(session.FieldValidUntil, v)
+func (u *DownloadSessionUpsert) SetValidUntil(v time.Time) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldValidUntil, v)
 	return u
 }
 
 // UpdateValidUntil sets the "validUntil" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateValidUntil() *SessionUpsert {
-	u.SetExcluded(session.FieldValidUntil)
+func (u *DownloadSessionUpsert) UpdateValidUntil() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldValidUntil)
 	return u
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsert) SetUserAgent(v string) *SessionUpsert {
-	u.Set(session.FieldUserAgent, v)
+func (u *DownloadSessionUpsert) SetUserAgent(v string) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldUserAgent, v)
 	return u
 }
 
 // UpdateUserAgent sets the "userAgent" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateUserAgent() *SessionUpsert {
-	u.SetExcluded(session.FieldUserAgent)
+func (u *DownloadSessionUpsert) UpdateUserAgent() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldUserAgent)
 	return u
 }
 
 // SetIP sets the "ip" field.
-func (u *SessionUpsert) SetIP(v string) *SessionUpsert {
-	u.Set(session.FieldIP, v)
+func (u *DownloadSessionUpsert) SetIP(v string) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldIP, v)
 	return u
 }
 
 // UpdateIP sets the "ip" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateIP() *SessionUpsert {
-	u.SetExcluded(session.FieldIP)
+func (u *DownloadSessionUpsert) UpdateIP() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldIP)
 	return u
 }
 
 // SetUserID sets the "userID" field.
-func (u *SessionUpsert) SetUserID(v uuid.UUID) *SessionUpsert {
-	u.Set(session.FieldUserID, v)
+func (u *DownloadSessionUpsert) SetUserID(v uuid.UUID) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldUserID, v)
 	return u
 }
 
 // UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateUserID() *SessionUpsert {
-	u.SetExcluded(session.FieldUserID)
+func (u *DownloadSessionUpsert) UpdateUserID() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldUserID)
 	return u
 }
 
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	client.DownloadSession.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(session.FieldID)
+//				u.SetIgnore(downloadsession.FieldID)
 //			}),
 //		).
 //		Exec(ctx)
-func (u *SessionUpsertOne) UpdateNewValues() *SessionUpsertOne {
+func (u *DownloadSessionUpsertOne) UpdateNewValues() *DownloadSessionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(session.FieldID)
+			s.SetIgnore(downloadsession.FieldID)
 		}
 	}))
 	return u
@@ -427,149 +427,149 @@ func (u *SessionUpsertOne) UpdateNewValues() *SessionUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	client.DownloadSession.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
-func (u *SessionUpsertOne) Ignore() *SessionUpsertOne {
+func (u *DownloadSessionUpsertOne) Ignore() *DownloadSessionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *SessionUpsertOne) DoNothing() *SessionUpsertOne {
+func (u *DownloadSessionUpsertOne) DoNothing() *DownloadSessionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the SessionCreate.OnConflict
+// Update allows overriding fields `UPDATE` values. See the DownloadSessionCreate.OnConflict
 // documentation for more info.
-func (u *SessionUpsertOne) Update(set func(*SessionUpsert)) *SessionUpsertOne {
+func (u *DownloadSessionUpsertOne) Update(set func(*DownloadSessionUpsert)) *DownloadSessionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&SessionUpsert{UpdateSet: update})
+		set(&DownloadSessionUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (u *SessionUpsertOne) SetCreatedAt(v time.Time) *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) SetCreatedAt(v time.Time) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetCreatedAt(v)
 	})
 }
 
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateCreatedAt() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) UpdateCreatedAt() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateCreatedAt()
 	})
 }
 
 // SetCode sets the "code" field.
-func (u *SessionUpsertOne) SetCode(v []byte) *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) SetCode(v []byte) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetCode(v)
 	})
 }
 
 // UpdateCode sets the "code" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateCode() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) UpdateCode() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateCode()
 	})
 }
 
 // SetValidFrom sets the "validFrom" field.
-func (u *SessionUpsertOne) SetValidFrom(v time.Time) *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) SetValidFrom(v time.Time) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetValidFrom(v)
 	})
 }
 
 // UpdateValidFrom sets the "validFrom" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateValidFrom() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) UpdateValidFrom() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateValidFrom()
 	})
 }
 
 // SetValidUntil sets the "validUntil" field.
-func (u *SessionUpsertOne) SetValidUntil(v time.Time) *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) SetValidUntil(v time.Time) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetValidUntil(v)
 	})
 }
 
 // UpdateValidUntil sets the "validUntil" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateValidUntil() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) UpdateValidUntil() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateValidUntil()
 	})
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsertOne) SetUserAgent(v string) *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) SetUserAgent(v string) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserAgent(v)
 	})
 }
 
 // UpdateUserAgent sets the "userAgent" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateUserAgent() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) UpdateUserAgent() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateUserAgent()
 	})
 }
 
 // SetIP sets the "ip" field.
-func (u *SessionUpsertOne) SetIP(v string) *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) SetIP(v string) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetIP(v)
 	})
 }
 
 // UpdateIP sets the "ip" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateIP() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) UpdateIP() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateIP()
 	})
 }
 
 // SetUserID sets the "userID" field.
-func (u *SessionUpsertOne) SetUserID(v uuid.UUID) *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) SetUserID(v uuid.UUID) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateUserID() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertOne) UpdateUserID() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateUserID()
 	})
 }
 
 // Exec executes the query.
-func (u *SessionUpsertOne) Exec(ctx context.Context) error {
+func (u *DownloadSessionUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for SessionCreate.OnConflict")
+		return errors.New("ent: missing options for DownloadSessionCreate.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *SessionUpsertOne) ExecX(ctx context.Context) {
+func (u *DownloadSessionUpsertOne) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SessionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+func (u *DownloadSessionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 	if u.create.driver.Dialect() == dialect.MySQL {
 		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
 		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: SessionUpsertOne.ID is not supported by MySQL driver. Use SessionUpsertOne.Exec instead")
+		return id, errors.New("ent: DownloadSessionUpsertOne.ID is not supported by MySQL driver. Use DownloadSessionUpsertOne.Exec instead")
 	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
@@ -579,7 +579,7 @@ func (u *SessionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SessionUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *DownloadSessionUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -587,28 +587,28 @@ func (u *SessionUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// SessionCreateBulk is the builder for creating many Session entities in bulk.
-type SessionCreateBulk struct {
+// DownloadSessionCreateBulk is the builder for creating many DownloadSession entities in bulk.
+type DownloadSessionCreateBulk struct {
 	config
 	err      error
-	builders []*SessionCreate
+	builders []*DownloadSessionCreate
 	conflict []sql.ConflictOption
 }
 
-// Save creates the Session entities in the database.
-func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
+// Save creates the DownloadSession entities in the database.
+func (_c *DownloadSessionCreateBulk) Save(ctx context.Context) ([]*DownloadSession, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*Session, len(_c.builders))
+	nodes := make([]*DownloadSession, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*SessionMutation)
+				mutation, ok := m.(*DownloadSessionMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -652,7 +652,7 @@ func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *SessionCreateBulk) SaveX(ctx context.Context) []*Session {
+func (_c *DownloadSessionCreateBulk) SaveX(ctx context.Context) []*DownloadSession {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -661,13 +661,13 @@ func (_c *SessionCreateBulk) SaveX(ctx context.Context) []*Session {
 }
 
 // Exec executes the query.
-func (_c *SessionCreateBulk) Exec(ctx context.Context) error {
+func (_c *DownloadSessionCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SessionCreateBulk) ExecX(ctx context.Context) {
+func (_c *DownloadSessionCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
@@ -676,7 +676,7 @@ func (_c *SessionCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Session.CreateBulk(builders...).
+//	client.DownloadSession.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -684,13 +684,13 @@ func (_c *SessionCreateBulk) ExecX(ctx context.Context) {
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.SessionUpsert) {
+//		Update(func(u *ent.DownloadSessionUpsert) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (_c *SessionCreateBulk) OnConflict(opts ...sql.ConflictOption) *SessionUpsertBulk {
+func (_c *DownloadSessionCreateBulk) OnConflict(opts ...sql.ConflictOption) *DownloadSessionUpsertBulk {
 	_c.conflict = opts
-	return &SessionUpsertBulk{
+	return &DownloadSessionUpsertBulk{
 		create: _c,
 	}
 }
@@ -698,39 +698,39 @@ func (_c *SessionCreateBulk) OnConflict(opts ...sql.ConflictOption) *SessionUpse
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	client.DownloadSession.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (_c *SessionCreateBulk) OnConflictColumns(columns ...string) *SessionUpsertBulk {
+func (_c *DownloadSessionCreateBulk) OnConflictColumns(columns ...string) *DownloadSessionUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &SessionUpsertBulk{
+	return &DownloadSessionUpsertBulk{
 		create: _c,
 	}
 }
 
-// SessionUpsertBulk is the builder for "upsert"-ing
-// a bulk of Session nodes.
-type SessionUpsertBulk struct {
-	create *SessionCreateBulk
+// DownloadSessionUpsertBulk is the builder for "upsert"-ing
+// a bulk of DownloadSession nodes.
+type DownloadSessionUpsertBulk struct {
+	create *DownloadSessionCreateBulk
 }
 
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	client.DownloadSession.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(session.FieldID)
+//				u.SetIgnore(downloadsession.FieldID)
 //			}),
 //		).
 //		Exec(ctx)
-func (u *SessionUpsertBulk) UpdateNewValues() *SessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) UpdateNewValues() *DownloadSessionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(session.FieldID)
+				s.SetIgnore(downloadsession.FieldID)
 			}
 		}
 	}))
@@ -740,146 +740,146 @@ func (u *SessionUpsertBulk) UpdateNewValues() *SessionUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	client.DownloadSession.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-func (u *SessionUpsertBulk) Ignore() *SessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) Ignore() *DownloadSessionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *SessionUpsertBulk) DoNothing() *SessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) DoNothing() *DownloadSessionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the SessionCreateBulk.OnConflict
+// Update allows overriding fields `UPDATE` values. See the DownloadSessionCreateBulk.OnConflict
 // documentation for more info.
-func (u *SessionUpsertBulk) Update(set func(*SessionUpsert)) *SessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) Update(set func(*DownloadSessionUpsert)) *DownloadSessionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&SessionUpsert{UpdateSet: update})
+		set(&DownloadSessionUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (u *SessionUpsertBulk) SetCreatedAt(v time.Time) *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) SetCreatedAt(v time.Time) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetCreatedAt(v)
 	})
 }
 
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateCreatedAt() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) UpdateCreatedAt() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateCreatedAt()
 	})
 }
 
 // SetCode sets the "code" field.
-func (u *SessionUpsertBulk) SetCode(v []byte) *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) SetCode(v []byte) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetCode(v)
 	})
 }
 
 // UpdateCode sets the "code" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateCode() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) UpdateCode() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateCode()
 	})
 }
 
 // SetValidFrom sets the "validFrom" field.
-func (u *SessionUpsertBulk) SetValidFrom(v time.Time) *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) SetValidFrom(v time.Time) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetValidFrom(v)
 	})
 }
 
 // UpdateValidFrom sets the "validFrom" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateValidFrom() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) UpdateValidFrom() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateValidFrom()
 	})
 }
 
 // SetValidUntil sets the "validUntil" field.
-func (u *SessionUpsertBulk) SetValidUntil(v time.Time) *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) SetValidUntil(v time.Time) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetValidUntil(v)
 	})
 }
 
 // UpdateValidUntil sets the "validUntil" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateValidUntil() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) UpdateValidUntil() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateValidUntil()
 	})
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsertBulk) SetUserAgent(v string) *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) SetUserAgent(v string) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserAgent(v)
 	})
 }
 
 // UpdateUserAgent sets the "userAgent" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateUserAgent() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) UpdateUserAgent() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateUserAgent()
 	})
 }
 
 // SetIP sets the "ip" field.
-func (u *SessionUpsertBulk) SetIP(v string) *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) SetIP(v string) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetIP(v)
 	})
 }
 
 // UpdateIP sets the "ip" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateIP() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) UpdateIP() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateIP()
 	})
 }
 
 // SetUserID sets the "userID" field.
-func (u *SessionUpsertBulk) SetUserID(v uuid.UUID) *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) SetUserID(v uuid.UUID) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateUserID() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
+func (u *DownloadSessionUpsertBulk) UpdateUserID() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateUserID()
 	})
 }
 
 // Exec executes the query.
-func (u *SessionUpsertBulk) Exec(ctx context.Context) error {
+func (u *DownloadSessionUpsertBulk) Exec(ctx context.Context) error {
 	if u.create.err != nil {
 		return u.create.err
 	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SessionCreateBulk instead", i)
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the DownloadSessionCreateBulk instead", i)
 		}
 	}
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for SessionCreateBulk.OnConflict")
+		return errors.New("ent: missing options for DownloadSessionCreateBulk.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *SessionUpsertBulk) ExecX(ctx context.Context) {
+func (u *DownloadSessionUpsertBulk) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}

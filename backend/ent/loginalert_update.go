@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/google/uuid"
 )
 
@@ -44,20 +44,6 @@ func (_u *LoginAlertUpdate) SetNillableSentAt(v *time.Time) *LoginAlertUpdate {
 	return _u
 }
 
-// SetVersionedMessengerType sets the "versionedMessengerType" field.
-func (_u *LoginAlertUpdate) SetVersionedMessengerType(v string) *LoginAlertUpdate {
-	_u.mutation.SetVersionedMessengerType(v)
-	return _u
-}
-
-// SetNillableVersionedMessengerType sets the "versionedMessengerType" field if the given value is not nil.
-func (_u *LoginAlertUpdate) SetNillableVersionedMessengerType(v *string) *LoginAlertUpdate {
-	if v != nil {
-		_u.SetVersionedMessengerType(*v)
-	}
-	return _u
-}
-
 // SetConfirmed sets the "confirmed" field.
 func (_u *LoginAlertUpdate) SetConfirmed(v bool) *LoginAlertUpdate {
 	_u.mutation.SetConfirmed(v)
@@ -72,23 +58,23 @@ func (_u *LoginAlertUpdate) SetNillableConfirmed(v *bool) *LoginAlertUpdate {
 	return _u
 }
 
-// SetSessionID sets the "sessionID" field.
-func (_u *LoginAlertUpdate) SetSessionID(v uuid.UUID) *LoginAlertUpdate {
-	_u.mutation.SetSessionID(v)
+// SetDownloadSessionID sets the "downloadSessionID" field.
+func (_u *LoginAlertUpdate) SetDownloadSessionID(v uuid.UUID) *LoginAlertUpdate {
+	_u.mutation.SetDownloadSessionID(v)
 	return _u
 }
 
-// SetNillableSessionID sets the "sessionID" field if the given value is not nil.
-func (_u *LoginAlertUpdate) SetNillableSessionID(v *uuid.UUID) *LoginAlertUpdate {
+// SetNillableDownloadSessionID sets the "downloadSessionID" field if the given value is not nil.
+func (_u *LoginAlertUpdate) SetNillableDownloadSessionID(v *uuid.UUID) *LoginAlertUpdate {
 	if v != nil {
-		_u.SetSessionID(*v)
+		_u.SetDownloadSessionID(*v)
 	}
 	return _u
 }
 
-// SetSession sets the "session" edge to the Session entity.
-func (_u *LoginAlertUpdate) SetSession(v *Session) *LoginAlertUpdate {
-	return _u.SetSessionID(v.ID)
+// SetDownloadSession sets the "downloadSession" edge to the DownloadSession entity.
+func (_u *LoginAlertUpdate) SetDownloadSession(v *DownloadSession) *LoginAlertUpdate {
+	return _u.SetDownloadSessionID(v.ID)
 }
 
 // Mutation returns the LoginAlertMutation object of the builder.
@@ -96,9 +82,9 @@ func (_u *LoginAlertUpdate) Mutation() *LoginAlertMutation {
 	return _u.mutation
 }
 
-// ClearSession clears the "session" edge to the Session entity.
-func (_u *LoginAlertUpdate) ClearSession() *LoginAlertUpdate {
-	_u.mutation.ClearSession()
+// ClearDownloadSession clears the "downloadSession" edge to the DownloadSession entity.
+func (_u *LoginAlertUpdate) ClearDownloadSession() *LoginAlertUpdate {
+	_u.mutation.ClearDownloadSession()
 	return _u
 }
 
@@ -131,13 +117,8 @@ func (_u *LoginAlertUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *LoginAlertUpdate) check() error {
-	if v, ok := _u.mutation.VersionedMessengerType(); ok {
-		if err := loginalert.VersionedMessengerTypeValidator(v); err != nil {
-			return &ValidationError{Name: "versionedMessengerType", err: fmt.Errorf(`ent: validator failed for field "LoginAlert.versionedMessengerType": %w`, err)}
-		}
-	}
-	if _u.mutation.SessionCleared() && len(_u.mutation.SessionIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "LoginAlert.session"`)
+	if _u.mutation.DownloadSessionCleared() && len(_u.mutation.DownloadSessionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "LoginAlert.downloadSession"`)
 	}
 	return nil
 }
@@ -157,34 +138,31 @@ func (_u *LoginAlertUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.SentAt(); ok {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.VersionedMessengerType(); ok {
-		_spec.SetField(loginalert.FieldVersionedMessengerType, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.Confirmed(); ok {
 		_spec.SetField(loginalert.FieldConfirmed, field.TypeBool, value)
 	}
-	if _u.mutation.SessionCleared() {
+	if _u.mutation.DownloadSessionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   loginalert.SessionTable,
-			Columns: []string{loginalert.SessionColumn},
+			Table:   loginalert.DownloadSessionTable,
+			Columns: []string{loginalert.DownloadSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DownloadSessionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   loginalert.SessionTable,
-			Columns: []string{loginalert.SessionColumn},
+			Table:   loginalert.DownloadSessionTable,
+			Columns: []string{loginalert.DownloadSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -226,20 +204,6 @@ func (_u *LoginAlertUpdateOne) SetNillableSentAt(v *time.Time) *LoginAlertUpdate
 	return _u
 }
 
-// SetVersionedMessengerType sets the "versionedMessengerType" field.
-func (_u *LoginAlertUpdateOne) SetVersionedMessengerType(v string) *LoginAlertUpdateOne {
-	_u.mutation.SetVersionedMessengerType(v)
-	return _u
-}
-
-// SetNillableVersionedMessengerType sets the "versionedMessengerType" field if the given value is not nil.
-func (_u *LoginAlertUpdateOne) SetNillableVersionedMessengerType(v *string) *LoginAlertUpdateOne {
-	if v != nil {
-		_u.SetVersionedMessengerType(*v)
-	}
-	return _u
-}
-
 // SetConfirmed sets the "confirmed" field.
 func (_u *LoginAlertUpdateOne) SetConfirmed(v bool) *LoginAlertUpdateOne {
 	_u.mutation.SetConfirmed(v)
@@ -254,23 +218,23 @@ func (_u *LoginAlertUpdateOne) SetNillableConfirmed(v *bool) *LoginAlertUpdateOn
 	return _u
 }
 
-// SetSessionID sets the "sessionID" field.
-func (_u *LoginAlertUpdateOne) SetSessionID(v uuid.UUID) *LoginAlertUpdateOne {
-	_u.mutation.SetSessionID(v)
+// SetDownloadSessionID sets the "downloadSessionID" field.
+func (_u *LoginAlertUpdateOne) SetDownloadSessionID(v uuid.UUID) *LoginAlertUpdateOne {
+	_u.mutation.SetDownloadSessionID(v)
 	return _u
 }
 
-// SetNillableSessionID sets the "sessionID" field if the given value is not nil.
-func (_u *LoginAlertUpdateOne) SetNillableSessionID(v *uuid.UUID) *LoginAlertUpdateOne {
+// SetNillableDownloadSessionID sets the "downloadSessionID" field if the given value is not nil.
+func (_u *LoginAlertUpdateOne) SetNillableDownloadSessionID(v *uuid.UUID) *LoginAlertUpdateOne {
 	if v != nil {
-		_u.SetSessionID(*v)
+		_u.SetDownloadSessionID(*v)
 	}
 	return _u
 }
 
-// SetSession sets the "session" edge to the Session entity.
-func (_u *LoginAlertUpdateOne) SetSession(v *Session) *LoginAlertUpdateOne {
-	return _u.SetSessionID(v.ID)
+// SetDownloadSession sets the "downloadSession" edge to the DownloadSession entity.
+func (_u *LoginAlertUpdateOne) SetDownloadSession(v *DownloadSession) *LoginAlertUpdateOne {
+	return _u.SetDownloadSessionID(v.ID)
 }
 
 // Mutation returns the LoginAlertMutation object of the builder.
@@ -278,9 +242,9 @@ func (_u *LoginAlertUpdateOne) Mutation() *LoginAlertMutation {
 	return _u.mutation
 }
 
-// ClearSession clears the "session" edge to the Session entity.
-func (_u *LoginAlertUpdateOne) ClearSession() *LoginAlertUpdateOne {
-	_u.mutation.ClearSession()
+// ClearDownloadSession clears the "downloadSession" edge to the DownloadSession entity.
+func (_u *LoginAlertUpdateOne) ClearDownloadSession() *LoginAlertUpdateOne {
+	_u.mutation.ClearDownloadSession()
 	return _u
 }
 
@@ -326,13 +290,8 @@ func (_u *LoginAlertUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *LoginAlertUpdateOne) check() error {
-	if v, ok := _u.mutation.VersionedMessengerType(); ok {
-		if err := loginalert.VersionedMessengerTypeValidator(v); err != nil {
-			return &ValidationError{Name: "versionedMessengerType", err: fmt.Errorf(`ent: validator failed for field "LoginAlert.versionedMessengerType": %w`, err)}
-		}
-	}
-	if _u.mutation.SessionCleared() && len(_u.mutation.SessionIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "LoginAlert.session"`)
+	if _u.mutation.DownloadSessionCleared() && len(_u.mutation.DownloadSessionIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "LoginAlert.downloadSession"`)
 	}
 	return nil
 }
@@ -369,34 +328,31 @@ func (_u *LoginAlertUpdateOne) sqlSave(ctx context.Context) (_node *LoginAlert, 
 	if value, ok := _u.mutation.SentAt(); ok {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.VersionedMessengerType(); ok {
-		_spec.SetField(loginalert.FieldVersionedMessengerType, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.Confirmed(); ok {
 		_spec.SetField(loginalert.FieldConfirmed, field.TypeBool, value)
 	}
-	if _u.mutation.SessionCleared() {
+	if _u.mutation.DownloadSessionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   loginalert.SessionTable,
-			Columns: []string{loginalert.SessionColumn},
+			Table:   loginalert.DownloadSessionTable,
+			Columns: []string{loginalert.DownloadSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DownloadSessionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   loginalert.SessionTable,
-			Columns: []string{loginalert.SessionColumn},
+			Table:   loginalert.DownloadSessionTable,
+			Columns: []string{loginalert.DownloadSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

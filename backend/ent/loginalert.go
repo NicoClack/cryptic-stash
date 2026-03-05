@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/google/uuid"
 )
 
@@ -21,12 +21,10 @@ type LoginAlert struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// SentAt holds the value of the "sentAt" field.
 	SentAt time.Time `json:"sentAt,omitempty"`
-	// VersionedMessengerType holds the value of the "versionedMessengerType" field.
-	VersionedMessengerType string `json:"versionedMessengerType,omitempty"`
 	// Confirmed holds the value of the "confirmed" field.
 	Confirmed bool `json:"confirmed,omitempty"`
-	// SessionID holds the value of the "sessionID" field.
-	SessionID uuid.UUID `json:"sessionID,omitempty"`
+	// DownloadSessionID holds the value of the "downloadSessionID" field.
+	DownloadSessionID uuid.UUID `json:"downloadSessionID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LoginAlertQuery when eager-loading is set.
 	Edges        LoginAlertEdges `json:"edges"`
@@ -35,22 +33,22 @@ type LoginAlert struct {
 
 // LoginAlertEdges holds the relations/edges for other nodes in the graph.
 type LoginAlertEdges struct {
-	// Session holds the value of the session edge.
-	Session *Session `json:"session,omitempty"`
+	// DownloadSession holds the value of the downloadSession edge.
+	DownloadSession *DownloadSession `json:"downloadSession,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// SessionOrErr returns the Session value or an error if the edge
+// DownloadSessionOrErr returns the DownloadSession value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e LoginAlertEdges) SessionOrErr() (*Session, error) {
-	if e.Session != nil {
-		return e.Session, nil
+func (e LoginAlertEdges) DownloadSessionOrErr() (*DownloadSession, error) {
+	if e.DownloadSession != nil {
+		return e.DownloadSession, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: session.Label}
+		return nil, &NotFoundError{label: downloadsession.Label}
 	}
-	return nil, &NotLoadedError{edge: "session"}
+	return nil, &NotLoadedError{edge: "downloadSession"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -60,11 +58,9 @@ func (*LoginAlert) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case loginalert.FieldConfirmed:
 			values[i] = new(sql.NullBool)
-		case loginalert.FieldVersionedMessengerType:
-			values[i] = new(sql.NullString)
 		case loginalert.FieldSentAt:
 			values[i] = new(sql.NullTime)
-		case loginalert.FieldID, loginalert.FieldSessionID:
+		case loginalert.FieldID, loginalert.FieldDownloadSessionID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -93,23 +89,17 @@ func (_m *LoginAlert) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.SentAt = value.Time
 			}
-		case loginalert.FieldVersionedMessengerType:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field versionedMessengerType", values[i])
-			} else if value.Valid {
-				_m.VersionedMessengerType = value.String
-			}
 		case loginalert.FieldConfirmed:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field confirmed", values[i])
 			} else if value.Valid {
 				_m.Confirmed = value.Bool
 			}
-		case loginalert.FieldSessionID:
+		case loginalert.FieldDownloadSessionID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field sessionID", values[i])
+				return fmt.Errorf("unexpected type %T for field downloadSessionID", values[i])
 			} else if value != nil {
-				_m.SessionID = *value
+				_m.DownloadSessionID = *value
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -124,9 +114,9 @@ func (_m *LoginAlert) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QuerySession queries the "session" edge of the LoginAlert entity.
-func (_m *LoginAlert) QuerySession() *SessionQuery {
-	return NewLoginAlertClient(_m.config).QuerySession(_m)
+// QueryDownloadSession queries the "downloadSession" edge of the LoginAlert entity.
+func (_m *LoginAlert) QueryDownloadSession() *DownloadSessionQuery {
+	return NewLoginAlertClient(_m.config).QueryDownloadSession(_m)
 }
 
 // Update returns a builder for updating this LoginAlert.
@@ -155,14 +145,11 @@ func (_m *LoginAlert) String() string {
 	builder.WriteString("sentAt=")
 	builder.WriteString(_m.SentAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("versionedMessengerType=")
-	builder.WriteString(_m.VersionedMessengerType)
-	builder.WriteString(", ")
 	builder.WriteString("confirmed=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Confirmed))
 	builder.WriteString(", ")
-	builder.WriteString("sessionID=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SessionID))
+	builder.WriteString("downloadSessionID=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DownloadSessionID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -19,14 +19,14 @@ const (
 	FieldLocked = "locked"
 	// FieldLockedUntil holds the string denoting the lockeduntil field in the database.
 	FieldLockedUntil = "locked_until"
-	// FieldSessionsValidFrom holds the string denoting the sessionsvalidfrom field in the database.
-	FieldSessionsValidFrom = "sessions_valid_from"
+	// FieldDownloadSessionsValidFrom holds the string denoting the downloadsessionsvalidfrom field in the database.
+	FieldDownloadSessionsValidFrom = "download_sessions_valid_from"
 	// EdgeStash holds the string denoting the stash edge name in mutations.
 	EdgeStash = "stash"
 	// EdgeMessengers holds the string denoting the messengers edge name in mutations.
 	EdgeMessengers = "messengers"
-	// EdgeSessions holds the string denoting the sessions edge name in mutations.
-	EdgeSessions = "sessions"
+	// EdgeDownloadSessions holds the string denoting the downloadsessions edge name in mutations.
+	EdgeDownloadSessions = "downloadSessions"
 	// EdgeLogs holds the string denoting the logs edge name in mutations.
 	EdgeLogs = "logs"
 	// Table holds the table name of the user in the database.
@@ -45,13 +45,13 @@ const (
 	MessengersInverseTable = "user_messengers"
 	// MessengersColumn is the table column denoting the messengers relation/edge.
 	MessengersColumn = "user_id"
-	// SessionsTable is the table that holds the sessions relation/edge.
-	SessionsTable = "sessions"
-	// SessionsInverseTable is the table name for the Session entity.
-	// It exists in this package in order to avoid circular dependency with the "session" package.
-	SessionsInverseTable = "sessions"
-	// SessionsColumn is the table column denoting the sessions relation/edge.
-	SessionsColumn = "user_id"
+	// DownloadSessionsTable is the table that holds the downloadSessions relation/edge.
+	DownloadSessionsTable = "download_sessions"
+	// DownloadSessionsInverseTable is the table name for the DownloadSession entity.
+	// It exists in this package in order to avoid circular dependency with the "downloadsession" package.
+	DownloadSessionsInverseTable = "download_sessions"
+	// DownloadSessionsColumn is the table column denoting the downloadSessions relation/edge.
+	DownloadSessionsColumn = "user_id"
 	// LogsTable is the table that holds the logs relation/edge.
 	LogsTable = "log_entries"
 	// LogsInverseTable is the table name for the LogEntry entity.
@@ -67,7 +67,7 @@ var Columns = []string{
 	FieldUsername,
 	FieldLocked,
 	FieldLockedUntil,
-	FieldSessionsValidFrom,
+	FieldDownloadSessionsValidFrom,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -112,9 +112,9 @@ func ByLockedUntil(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLockedUntil, opts...).ToFunc()
 }
 
-// BySessionsValidFrom orders the results by the sessionsValidFrom field.
-func BySessionsValidFrom(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSessionsValidFrom, opts...).ToFunc()
+// ByDownloadSessionsValidFrom orders the results by the downloadSessionsValidFrom field.
+func ByDownloadSessionsValidFrom(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDownloadSessionsValidFrom, opts...).ToFunc()
 }
 
 // ByStashField orders the results by stash field.
@@ -138,17 +138,17 @@ func ByMessengers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// BySessionsCount orders the results by sessions count.
-func BySessionsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByDownloadSessionsCount orders the results by downloadSessions count.
+func ByDownloadSessionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newSessionsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newDownloadSessionsStep(), opts...)
 	}
 }
 
-// BySessions orders the results by sessions terms.
-func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByDownloadSessions orders the results by downloadSessions terms.
+func ByDownloadSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newDownloadSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -179,11 +179,11 @@ func newMessengersStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, MessengersTable, MessengersColumn),
 	)
 }
-func newSessionsStep() *sqlgraph.Step {
+func newDownloadSessionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SessionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+		sqlgraph.To(DownloadSessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DownloadSessionsTable, DownloadSessionsColumn),
 	)
 }
 func newLogsStep() *sqlgraph.Step {

@@ -11,20 +11,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/google/uuid"
 )
 
 // LoginAlertQuery is the builder for querying LoginAlert entities.
 type LoginAlertQuery struct {
 	config
-	ctx         *QueryContext
-	order       []loginalert.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.LoginAlert
-	withSession *SessionQuery
+	ctx                 *QueryContext
+	order               []loginalert.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.LoginAlert
+	withDownloadSession *DownloadSessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,9 +61,9 @@ func (_q *LoginAlertQuery) Order(o ...loginalert.OrderOption) *LoginAlertQuery {
 	return _q
 }
 
-// QuerySession chains the current query on the "session" edge.
-func (_q *LoginAlertQuery) QuerySession() *SessionQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+// QueryDownloadSession chains the current query on the "downloadSession" edge.
+func (_q *LoginAlertQuery) QueryDownloadSession() *DownloadSessionQuery {
+	query := (&DownloadSessionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,8 +74,8 @@ func (_q *LoginAlertQuery) QuerySession() *SessionQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(loginalert.Table, loginalert.FieldID, selector),
-			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, loginalert.SessionTable, loginalert.SessionColumn),
+			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, loginalert.DownloadSessionTable, loginalert.DownloadSessionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -270,26 +270,26 @@ func (_q *LoginAlertQuery) Clone() *LoginAlertQuery {
 		return nil
 	}
 	return &LoginAlertQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]loginalert.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.LoginAlert{}, _q.predicates...),
-		withSession: _q.withSession.Clone(),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]loginalert.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.LoginAlert{}, _q.predicates...),
+		withDownloadSession: _q.withDownloadSession.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithSession tells the query-builder to eager-load the nodes that are connected to
-// the "session" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *LoginAlertQuery) WithSession(opts ...func(*SessionQuery)) *LoginAlertQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+// WithDownloadSession tells the query-builder to eager-load the nodes that are connected to
+// the "downloadSession" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *LoginAlertQuery) WithDownloadSession(opts ...func(*DownloadSessionQuery)) *LoginAlertQuery {
+	query := (&DownloadSessionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withSession = query
+	_q.withDownloadSession = query
 	return _q
 }
 
@@ -372,7 +372,7 @@ func (_q *LoginAlertQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*L
 		nodes       = []*LoginAlert{}
 		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			_q.withSession != nil,
+			_q.withDownloadSession != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -393,20 +393,20 @@ func (_q *LoginAlertQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*L
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withSession; query != nil {
-		if err := _q.loadSession(ctx, query, nodes, nil,
-			func(n *LoginAlert, e *Session) { n.Edges.Session = e }); err != nil {
+	if query := _q.withDownloadSession; query != nil {
+		if err := _q.loadDownloadSession(ctx, query, nodes, nil,
+			func(n *LoginAlert, e *DownloadSession) { n.Edges.DownloadSession = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *LoginAlertQuery) loadSession(ctx context.Context, query *SessionQuery, nodes []*LoginAlert, init func(*LoginAlert), assign func(*LoginAlert, *Session)) error {
+func (_q *LoginAlertQuery) loadDownloadSession(ctx context.Context, query *DownloadSessionQuery, nodes []*LoginAlert, init func(*LoginAlert), assign func(*LoginAlert, *DownloadSession)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*LoginAlert)
 	for i := range nodes {
-		fk := nodes[i].SessionID
+		fk := nodes[i].DownloadSessionID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -415,7 +415,7 @@ func (_q *LoginAlertQuery) loadSession(ctx context.Context, query *SessionQuery,
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(session.IDIn(ids...))
+	query.Where(downloadsession.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -423,7 +423,7 @@ func (_q *LoginAlertQuery) loadSession(ctx context.Context, query *SessionQuery,
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "sessionID" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "downloadSessionID" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -457,8 +457,8 @@ func (_q *LoginAlertQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withSession != nil {
-			_spec.Node.AddColumnOnce(loginalert.FieldSessionID)
+		if _q.withDownloadSession != nil {
+			_spec.Node.AddColumnOnce(loginalert.FieldDownloadSessionID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

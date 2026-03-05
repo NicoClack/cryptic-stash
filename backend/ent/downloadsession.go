@@ -9,13 +9,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// Session is the model entity for the Session schema.
-type Session struct {
+// DownloadSession is the model entity for the DownloadSession schema.
+type DownloadSession struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
@@ -34,13 +34,13 @@ type Session struct {
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the SessionQuery when eager-loading is set.
-	Edges        SessionEdges `json:"edges"`
+	// The values are being populated by the DownloadSessionQuery when eager-loading is set.
+	Edges        DownloadSessionEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// SessionEdges holds the relations/edges for other nodes in the graph.
-type SessionEdges struct {
+// DownloadSessionEdges holds the relations/edges for other nodes in the graph.
+type DownloadSessionEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// LoginAlerts holds the value of the loginAlerts edge.
@@ -52,7 +52,7 @@ type SessionEdges struct {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SessionEdges) UserOrErr() (*User, error) {
+func (e DownloadSessionEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
 	} else if e.loadedTypes[0] {
@@ -63,7 +63,7 @@ func (e SessionEdges) UserOrErr() (*User, error) {
 
 // LoginAlertsOrErr returns the LoginAlerts value or an error if the edge
 // was not loaded in eager-loading.
-func (e SessionEdges) LoginAlertsOrErr() ([]*LoginAlert, error) {
+func (e DownloadSessionEdges) LoginAlertsOrErr() ([]*LoginAlert, error) {
 	if e.loadedTypes[1] {
 		return e.LoginAlerts, nil
 	}
@@ -71,17 +71,17 @@ func (e SessionEdges) LoginAlertsOrErr() ([]*LoginAlert, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Session) scanValues(columns []string) ([]any, error) {
+func (*DownloadSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case session.FieldCode:
+		case downloadsession.FieldCode:
 			values[i] = new([]byte)
-		case session.FieldUserAgent, session.FieldIP:
+		case downloadsession.FieldUserAgent, downloadsession.FieldIP:
 			values[i] = new(sql.NullString)
-		case session.FieldCreatedAt, session.FieldValidFrom, session.FieldValidUntil:
+		case downloadsession.FieldCreatedAt, downloadsession.FieldValidFrom, downloadsession.FieldValidUntil:
 			values[i] = new(sql.NullTime)
-		case session.FieldID, session.FieldUserID:
+		case downloadsession.FieldID, downloadsession.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -91,56 +91,56 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Session fields.
-func (_m *Session) assignValues(columns []string, values []any) error {
+// to the DownloadSession fields.
+func (_m *DownloadSession) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case session.FieldID:
+		case downloadsession.FieldID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
 			}
-		case session.FieldCreatedAt:
+		case downloadsession.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case session.FieldCode:
+		case downloadsession.FieldCode:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value != nil {
 				_m.Code = *value
 			}
-		case session.FieldValidFrom:
+		case downloadsession.FieldValidFrom:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field validFrom", values[i])
 			} else if value.Valid {
 				_m.ValidFrom = value.Time
 			}
-		case session.FieldValidUntil:
+		case downloadsession.FieldValidUntil:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field validUntil", values[i])
 			} else if value.Valid {
 				_m.ValidUntil = value.Time
 			}
-		case session.FieldUserAgent:
+		case downloadsession.FieldUserAgent:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value.Valid {
 				_m.UserAgent = value.String
 			}
-		case session.FieldIP:
+		case downloadsession.FieldIP:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value.Valid {
 				_m.IP = value.String
 			}
-		case session.FieldUserID:
+		case downloadsession.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field userID", values[i])
 			} else if value != nil {
@@ -153,44 +153,44 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Session.
+// Value returns the ent.Value that was dynamically selected and assigned to the DownloadSession.
 // This includes values selected through modifiers, order, etc.
-func (_m *Session) Value(name string) (ent.Value, error) {
+func (_m *DownloadSession) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the Session entity.
-func (_m *Session) QueryUser() *UserQuery {
-	return NewSessionClient(_m.config).QueryUser(_m)
+// QueryUser queries the "user" edge of the DownloadSession entity.
+func (_m *DownloadSession) QueryUser() *UserQuery {
+	return NewDownloadSessionClient(_m.config).QueryUser(_m)
 }
 
-// QueryLoginAlerts queries the "loginAlerts" edge of the Session entity.
-func (_m *Session) QueryLoginAlerts() *LoginAlertQuery {
-	return NewSessionClient(_m.config).QueryLoginAlerts(_m)
+// QueryLoginAlerts queries the "loginAlerts" edge of the DownloadSession entity.
+func (_m *DownloadSession) QueryLoginAlerts() *LoginAlertQuery {
+	return NewDownloadSessionClient(_m.config).QueryLoginAlerts(_m)
 }
 
-// Update returns a builder for updating this Session.
-// Note that you need to call Session.Unwrap() before calling this method if this Session
+// Update returns a builder for updating this DownloadSession.
+// Note that you need to call DownloadSession.Unwrap() before calling this method if this DownloadSession
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Session) Update() *SessionUpdateOne {
-	return NewSessionClient(_m.config).UpdateOne(_m)
+func (_m *DownloadSession) Update() *DownloadSessionUpdateOne {
+	return NewDownloadSessionClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the Session entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the DownloadSession entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *Session) Unwrap() *Session {
+func (_m *DownloadSession) Unwrap() *DownloadSession {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Session is not a transactional entity")
+		panic("ent: DownloadSession is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *Session) String() string {
+func (_m *DownloadSession) String() string {
 	var builder strings.Builder
-	builder.WriteString("Session(")
+	builder.WriteString("DownloadSession(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("createdAt=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -216,5 +216,5 @@ func (_m *Session) String() string {
 	return builder.String()
 }
 
-// Sessions is a parsable slice of Session.
-type Sessions []*Session
+// DownloadSessions is a parsable slice of DownloadSession.
+type DownloadSessions []*DownloadSession

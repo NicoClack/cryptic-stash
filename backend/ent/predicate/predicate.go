@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// DownloadSession is the predicate function for downloadsession builders.
+type DownloadSession func(*sql.Selector)
+
 // Job is the predicate function for job builders.
 type Job func(*sql.Selector)
 
@@ -20,9 +23,6 @@ type LoginAlert func(*sql.Selector)
 
 // PeriodicTask is the predicate function for periodictask builders.
 type PeriodicTask func(*sql.Selector)
-
-// Session is the predicate function for session builders.
-type Session func(*sql.Selector)
 
 // Stash is the predicate function for stash builders.
 type Stash func(*sql.Selector)

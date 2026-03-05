@@ -11,34 +11,34 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// SessionUpdate is the builder for updating Session entities.
-type SessionUpdate struct {
+// DownloadSessionUpdate is the builder for updating DownloadSession entities.
+type DownloadSessionUpdate struct {
 	config
 	hooks    []Hook
-	mutation *SessionMutation
+	mutation *DownloadSessionMutation
 }
 
-// Where appends a list predicates to the SessionUpdate builder.
-func (_u *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
+// Where appends a list predicates to the DownloadSessionUpdate builder.
+func (_u *DownloadSessionUpdate) Where(ps ...predicate.DownloadSession) *DownloadSessionUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (_u *SessionUpdate) SetCreatedAt(v time.Time) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetCreatedAt(v time.Time) *DownloadSessionUpdate {
 	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableCreatedAt(v *time.Time) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableCreatedAt(v *time.Time) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
@@ -46,19 +46,19 @@ func (_u *SessionUpdate) SetNillableCreatedAt(v *time.Time) *SessionUpdate {
 }
 
 // SetCode sets the "code" field.
-func (_u *SessionUpdate) SetCode(v []byte) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetCode(v []byte) *DownloadSessionUpdate {
 	_u.mutation.SetCode(v)
 	return _u
 }
 
 // SetValidFrom sets the "validFrom" field.
-func (_u *SessionUpdate) SetValidFrom(v time.Time) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetValidFrom(v time.Time) *DownloadSessionUpdate {
 	_u.mutation.SetValidFrom(v)
 	return _u
 }
 
 // SetNillableValidFrom sets the "validFrom" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableValidFrom(v *time.Time) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableValidFrom(v *time.Time) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetValidFrom(*v)
 	}
@@ -66,13 +66,13 @@ func (_u *SessionUpdate) SetNillableValidFrom(v *time.Time) *SessionUpdate {
 }
 
 // SetValidUntil sets the "validUntil" field.
-func (_u *SessionUpdate) SetValidUntil(v time.Time) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetValidUntil(v time.Time) *DownloadSessionUpdate {
 	_u.mutation.SetValidUntil(v)
 	return _u
 }
 
 // SetNillableValidUntil sets the "validUntil" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableValidUntil(v *time.Time) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableValidUntil(v *time.Time) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetValidUntil(*v)
 	}
@@ -80,13 +80,13 @@ func (_u *SessionUpdate) SetNillableValidUntil(v *time.Time) *SessionUpdate {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SessionUpdate) SetUserAgent(v string) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetUserAgent(v string) *DownloadSessionUpdate {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableUserAgent(v *string) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableUserAgent(v *string) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -94,13 +94,13 @@ func (_u *SessionUpdate) SetNillableUserAgent(v *string) *SessionUpdate {
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdate) SetIP(v string) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetIP(v string) *DownloadSessionUpdate {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableIP(v *string) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableIP(v *string) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -108,13 +108,13 @@ func (_u *SessionUpdate) SetNillableIP(v *string) *SessionUpdate {
 }
 
 // SetUserID sets the "userID" field.
-func (_u *SessionUpdate) SetUserID(v uuid.UUID) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetUserID(v uuid.UUID) *DownloadSessionUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "userID" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableUserID(v *uuid.UUID) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableUserID(v *uuid.UUID) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -122,18 +122,18 @@ func (_u *SessionUpdate) SetNillableUserID(v *uuid.UUID) *SessionUpdate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *SessionUpdate) SetUser(v *User) *SessionUpdate {
+func (_u *DownloadSessionUpdate) SetUser(v *User) *DownloadSessionUpdate {
 	return _u.SetUserID(v.ID)
 }
 
 // AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
-func (_u *SessionUpdate) AddLoginAlertIDs(ids ...uuid.UUID) *SessionUpdate {
+func (_u *DownloadSessionUpdate) AddLoginAlertIDs(ids ...uuid.UUID) *DownloadSessionUpdate {
 	_u.mutation.AddLoginAlertIDs(ids...)
 	return _u
 }
 
 // AddLoginAlerts adds the "loginAlerts" edges to the LoginAlert entity.
-func (_u *SessionUpdate) AddLoginAlerts(v ...*LoginAlert) *SessionUpdate {
+func (_u *DownloadSessionUpdate) AddLoginAlerts(v ...*LoginAlert) *DownloadSessionUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -141,31 +141,31 @@ func (_u *SessionUpdate) AddLoginAlerts(v ...*LoginAlert) *SessionUpdate {
 	return _u.AddLoginAlertIDs(ids...)
 }
 
-// Mutation returns the SessionMutation object of the builder.
-func (_u *SessionUpdate) Mutation() *SessionMutation {
+// Mutation returns the DownloadSessionMutation object of the builder.
+func (_u *DownloadSessionUpdate) Mutation() *DownloadSessionMutation {
 	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (_u *SessionUpdate) ClearUser() *SessionUpdate {
+func (_u *DownloadSessionUpdate) ClearUser() *DownloadSessionUpdate {
 	_u.mutation.ClearUser()
 	return _u
 }
 
 // ClearLoginAlerts clears all "loginAlerts" edges to the LoginAlert entity.
-func (_u *SessionUpdate) ClearLoginAlerts() *SessionUpdate {
+func (_u *DownloadSessionUpdate) ClearLoginAlerts() *DownloadSessionUpdate {
 	_u.mutation.ClearLoginAlerts()
 	return _u
 }
 
 // RemoveLoginAlertIDs removes the "loginAlerts" edge to LoginAlert entities by IDs.
-func (_u *SessionUpdate) RemoveLoginAlertIDs(ids ...uuid.UUID) *SessionUpdate {
+func (_u *DownloadSessionUpdate) RemoveLoginAlertIDs(ids ...uuid.UUID) *DownloadSessionUpdate {
 	_u.mutation.RemoveLoginAlertIDs(ids...)
 	return _u
 }
 
 // RemoveLoginAlerts removes "loginAlerts" edges to LoginAlert entities.
-func (_u *SessionUpdate) RemoveLoginAlerts(v ...*LoginAlert) *SessionUpdate {
+func (_u *DownloadSessionUpdate) RemoveLoginAlerts(v ...*LoginAlert) *DownloadSessionUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -174,12 +174,12 @@ func (_u *SessionUpdate) RemoveLoginAlerts(v ...*LoginAlert) *SessionUpdate {
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *SessionUpdate) Save(ctx context.Context) (int, error) {
+func (_u *DownloadSessionUpdate) Save(ctx context.Context) (int, error) {
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SessionUpdate) SaveX(ctx context.Context) int {
+func (_u *DownloadSessionUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -188,36 +188,36 @@ func (_u *SessionUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *SessionUpdate) Exec(ctx context.Context) error {
+func (_u *DownloadSessionUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SessionUpdate) ExecX(ctx context.Context) {
+func (_u *DownloadSessionUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SessionUpdate) check() error {
+func (_u *DownloadSessionUpdate) check() error {
 	if v, ok := _u.mutation.Code(); ok {
-		if err := session.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "Session.code": %w`, err)}
+		if err := downloadsession.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.code": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+		return errors.New(`ent: clearing a required unique edge "DownloadSession.user"`)
 	}
 	return nil
 }
 
-func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *DownloadSessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(downloadsession.Table, downloadsession.Columns, sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -226,29 +226,29 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(session.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(session.FieldCode, field.TypeBytes, value)
+		_spec.SetField(downloadsession.FieldCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ValidFrom(); ok {
-		_spec.SetField(session.FieldValidFrom, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldValidFrom, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.ValidUntil(); ok {
-		_spec.SetField(session.FieldValidUntil, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldValidUntil, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldUserAgent, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   downloadsession.UserTable,
+			Columns: []string{downloadsession.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -260,8 +260,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   downloadsession.UserTable,
+			Columns: []string{downloadsession.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -276,8 +276,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   session.LoginAlertsTable,
-			Columns: []string{session.LoginAlertsColumn},
+			Table:   downloadsession.LoginAlertsTable,
+			Columns: []string{downloadsession.LoginAlertsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
@@ -289,8 +289,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   session.LoginAlertsTable,
-			Columns: []string{session.LoginAlertsColumn},
+			Table:   downloadsession.LoginAlertsTable,
+			Columns: []string{downloadsession.LoginAlertsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
@@ -305,8 +305,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   session.LoginAlertsTable,
-			Columns: []string{session.LoginAlertsColumn},
+			Table:   downloadsession.LoginAlertsTable,
+			Columns: []string{downloadsession.LoginAlertsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
@@ -319,7 +319,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{session.Label}
+			err = &NotFoundError{downloadsession.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -329,22 +329,22 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	return _node, nil
 }
 
-// SessionUpdateOne is the builder for updating a single Session entity.
-type SessionUpdateOne struct {
+// DownloadSessionUpdateOne is the builder for updating a single DownloadSession entity.
+type DownloadSessionUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *SessionMutation
+	mutation *DownloadSessionMutation
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (_u *SessionUpdateOne) SetCreatedAt(v time.Time) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetCreatedAt(v time.Time) *DownloadSessionUpdateOne {
 	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableCreatedAt(v *time.Time) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableCreatedAt(v *time.Time) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
@@ -352,19 +352,19 @@ func (_u *SessionUpdateOne) SetNillableCreatedAt(v *time.Time) *SessionUpdateOne
 }
 
 // SetCode sets the "code" field.
-func (_u *SessionUpdateOne) SetCode(v []byte) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetCode(v []byte) *DownloadSessionUpdateOne {
 	_u.mutation.SetCode(v)
 	return _u
 }
 
 // SetValidFrom sets the "validFrom" field.
-func (_u *SessionUpdateOne) SetValidFrom(v time.Time) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetValidFrom(v time.Time) *DownloadSessionUpdateOne {
 	_u.mutation.SetValidFrom(v)
 	return _u
 }
 
 // SetNillableValidFrom sets the "validFrom" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableValidFrom(v *time.Time) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableValidFrom(v *time.Time) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetValidFrom(*v)
 	}
@@ -372,13 +372,13 @@ func (_u *SessionUpdateOne) SetNillableValidFrom(v *time.Time) *SessionUpdateOne
 }
 
 // SetValidUntil sets the "validUntil" field.
-func (_u *SessionUpdateOne) SetValidUntil(v time.Time) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetValidUntil(v time.Time) *DownloadSessionUpdateOne {
 	_u.mutation.SetValidUntil(v)
 	return _u
 }
 
 // SetNillableValidUntil sets the "validUntil" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableValidUntil(v *time.Time) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableValidUntil(v *time.Time) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetValidUntil(*v)
 	}
@@ -386,13 +386,13 @@ func (_u *SessionUpdateOne) SetNillableValidUntil(v *time.Time) *SessionUpdateOn
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SessionUpdateOne) SetUserAgent(v string) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetUserAgent(v string) *DownloadSessionUpdateOne {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableUserAgent(v *string) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableUserAgent(v *string) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -400,13 +400,13 @@ func (_u *SessionUpdateOne) SetNillableUserAgent(v *string) *SessionUpdateOne {
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdateOne) SetIP(v string) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetIP(v string) *DownloadSessionUpdateOne {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableIP(v *string) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableIP(v *string) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -414,13 +414,13 @@ func (_u *SessionUpdateOne) SetNillableIP(v *string) *SessionUpdateOne {
 }
 
 // SetUserID sets the "userID" field.
-func (_u *SessionUpdateOne) SetUserID(v uuid.UUID) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetUserID(v uuid.UUID) *DownloadSessionUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "userID" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableUserID(v *uuid.UUID) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableUserID(v *uuid.UUID) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -428,18 +428,18 @@ func (_u *SessionUpdateOne) SetNillableUserID(v *uuid.UUID) *SessionUpdateOne {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *SessionUpdateOne) SetUser(v *User) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetUser(v *User) *DownloadSessionUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
 // AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
-func (_u *SessionUpdateOne) AddLoginAlertIDs(ids ...uuid.UUID) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) AddLoginAlertIDs(ids ...uuid.UUID) *DownloadSessionUpdateOne {
 	_u.mutation.AddLoginAlertIDs(ids...)
 	return _u
 }
 
 // AddLoginAlerts adds the "loginAlerts" edges to the LoginAlert entity.
-func (_u *SessionUpdateOne) AddLoginAlerts(v ...*LoginAlert) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) AddLoginAlerts(v ...*LoginAlert) *DownloadSessionUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -447,31 +447,31 @@ func (_u *SessionUpdateOne) AddLoginAlerts(v ...*LoginAlert) *SessionUpdateOne {
 	return _u.AddLoginAlertIDs(ids...)
 }
 
-// Mutation returns the SessionMutation object of the builder.
-func (_u *SessionUpdateOne) Mutation() *SessionMutation {
+// Mutation returns the DownloadSessionMutation object of the builder.
+func (_u *DownloadSessionUpdateOne) Mutation() *DownloadSessionMutation {
 	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (_u *SessionUpdateOne) ClearUser() *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) ClearUser() *DownloadSessionUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
 }
 
 // ClearLoginAlerts clears all "loginAlerts" edges to the LoginAlert entity.
-func (_u *SessionUpdateOne) ClearLoginAlerts() *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) ClearLoginAlerts() *DownloadSessionUpdateOne {
 	_u.mutation.ClearLoginAlerts()
 	return _u
 }
 
 // RemoveLoginAlertIDs removes the "loginAlerts" edge to LoginAlert entities by IDs.
-func (_u *SessionUpdateOne) RemoveLoginAlertIDs(ids ...uuid.UUID) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) RemoveLoginAlertIDs(ids ...uuid.UUID) *DownloadSessionUpdateOne {
 	_u.mutation.RemoveLoginAlertIDs(ids...)
 	return _u
 }
 
 // RemoveLoginAlerts removes "loginAlerts" edges to LoginAlert entities.
-func (_u *SessionUpdateOne) RemoveLoginAlerts(v ...*LoginAlert) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) RemoveLoginAlerts(v ...*LoginAlert) *DownloadSessionUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -479,26 +479,26 @@ func (_u *SessionUpdateOne) RemoveLoginAlerts(v ...*LoginAlert) *SessionUpdateOn
 	return _u.RemoveLoginAlertIDs(ids...)
 }
 
-// Where appends a list predicates to the SessionUpdate builder.
-func (_u *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
+// Where appends a list predicates to the DownloadSessionUpdate builder.
+func (_u *DownloadSessionUpdateOne) Where(ps ...predicate.DownloadSession) *DownloadSessionUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) Select(field string, fields ...string) *DownloadSessionUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated Session entity.
-func (_u *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
+// Save executes the query and returns the updated DownloadSession entity.
+func (_u *DownloadSessionUpdateOne) Save(ctx context.Context) (*DownloadSession, error) {
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SessionUpdateOne) SaveX(ctx context.Context) *Session {
+func (_u *DownloadSessionUpdateOne) SaveX(ctx context.Context) *DownloadSession {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -507,49 +507,49 @@ func (_u *SessionUpdateOne) SaveX(ctx context.Context) *Session {
 }
 
 // Exec executes the query on the entity.
-func (_u *SessionUpdateOne) Exec(ctx context.Context) error {
+func (_u *DownloadSessionUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SessionUpdateOne) ExecX(ctx context.Context) {
+func (_u *DownloadSessionUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SessionUpdateOne) check() error {
+func (_u *DownloadSessionUpdateOne) check() error {
 	if v, ok := _u.mutation.Code(); ok {
-		if err := session.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "Session.code": %w`, err)}
+		if err := downloadsession.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.code": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+		return errors.New(`ent: clearing a required unique edge "DownloadSession.user"`)
 	}
 	return nil
 }
 
-func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err error) {
+func (_u *DownloadSessionUpdateOne) sqlSave(ctx context.Context) (_node *DownloadSession, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(downloadsession.Table, downloadsession.Columns, sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Session.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "DownloadSession.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, downloadsession.FieldID)
 		for _, f := range fields {
-			if !session.ValidColumn(f) {
+			if !downloadsession.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != session.FieldID {
+			if f != downloadsession.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -562,29 +562,29 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		}
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(session.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(session.FieldCode, field.TypeBytes, value)
+		_spec.SetField(downloadsession.FieldCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ValidFrom(); ok {
-		_spec.SetField(session.FieldValidFrom, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldValidFrom, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.ValidUntil(); ok {
-		_spec.SetField(session.FieldValidUntil, field.TypeTime, value)
+		_spec.SetField(downloadsession.FieldValidUntil, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldUserAgent, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   downloadsession.UserTable,
+			Columns: []string{downloadsession.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -596,8 +596,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   downloadsession.UserTable,
+			Columns: []string{downloadsession.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -612,8 +612,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   session.LoginAlertsTable,
-			Columns: []string{session.LoginAlertsColumn},
+			Table:   downloadsession.LoginAlertsTable,
+			Columns: []string{downloadsession.LoginAlertsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
@@ -625,8 +625,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   session.LoginAlertsTable,
-			Columns: []string{session.LoginAlertsColumn},
+			Table:   downloadsession.LoginAlertsTable,
+			Columns: []string{downloadsession.LoginAlertsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
@@ -641,8 +641,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   session.LoginAlertsTable,
-			Columns: []string{session.LoginAlertsColumn},
+			Table:   downloadsession.LoginAlertsTable,
+			Columns: []string{downloadsession.LoginAlertsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
@@ -653,12 +653,12 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Session{config: _u.config}
+	_node = &DownloadSession{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{session.Label}
+			err = &NotFoundError{downloadsession.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

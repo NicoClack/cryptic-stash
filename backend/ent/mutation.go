@@ -12,13 +12,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
 	"github.com/NicoClack/cryptic-stash/backend/ent/keyvalue"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/periodictask"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -35,17 +35,812 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeDownloadSession = "DownloadSession"
 	TypeJob             = "Job"
 	TypeKeyValue        = "KeyValue"
 	TypeLogEntry        = "LogEntry"
 	TypeLoginAlert      = "LoginAlert"
 	TypePeriodicTask    = "PeriodicTask"
-	TypeSession         = "Session"
 	TypeStash           = "Stash"
 	TypeTwoFactorAction = "TwoFactorAction"
 	TypeUser            = "User"
 	TypeUserMessenger   = "UserMessenger"
 )
+
+// DownloadSessionMutation represents an operation that mutates the DownloadSession nodes in the graph.
+type DownloadSessionMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	createdAt          *time.Time
+	code               *[]byte
+	validFrom          *time.Time
+	validUntil         *time.Time
+	userAgent          *string
+	ip                 *string
+	clearedFields      map[string]struct{}
+	user               *uuid.UUID
+	cleareduser        bool
+	loginAlerts        map[uuid.UUID]struct{}
+	removedloginAlerts map[uuid.UUID]struct{}
+	clearedloginAlerts bool
+	done               bool
+	oldValue           func(context.Context) (*DownloadSession, error)
+	predicates         []predicate.DownloadSession
+}
+
+var _ ent.Mutation = (*DownloadSessionMutation)(nil)
+
+// downloadsessionOption allows management of the mutation configuration using functional options.
+type downloadsessionOption func(*DownloadSessionMutation)
+
+// newDownloadSessionMutation creates new mutation for the DownloadSession entity.
+func newDownloadSessionMutation(c config, op Op, opts ...downloadsessionOption) *DownloadSessionMutation {
+	m := &DownloadSessionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDownloadSession,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDownloadSessionID sets the ID field of the mutation.
+func withDownloadSessionID(id uuid.UUID) downloadsessionOption {
+	return func(m *DownloadSessionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DownloadSession
+		)
+		m.oldValue = func(ctx context.Context) (*DownloadSession, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DownloadSession.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDownloadSession sets the old DownloadSession of the mutation.
+func withDownloadSession(node *DownloadSession) downloadsessionOption {
+	return func(m *DownloadSessionMutation) {
+		m.oldValue = func(context.Context) (*DownloadSession, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DownloadSessionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DownloadSessionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DownloadSession entities.
+func (m *DownloadSessionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DownloadSessionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DownloadSessionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DownloadSession.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (m *DownloadSessionMutation) SetCreatedAt(t time.Time) {
+	m.createdAt = &t
+}
+
+// CreatedAt returns the value of the "createdAt" field in the mutation.
+func (m *DownloadSessionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.createdAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "createdAt" field's value of the DownloadSession entity.
+// If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadSessionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "createdAt" field.
+func (m *DownloadSessionMutation) ResetCreatedAt() {
+	m.createdAt = nil
+}
+
+// SetCode sets the "code" field.
+func (m *DownloadSessionMutation) SetCode(b []byte) {
+	m.code = &b
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *DownloadSessionMutation) Code() (r []byte, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the DownloadSession entity.
+// If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadSessionMutation) OldCode(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *DownloadSessionMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetValidFrom sets the "validFrom" field.
+func (m *DownloadSessionMutation) SetValidFrom(t time.Time) {
+	m.validFrom = &t
+}
+
+// ValidFrom returns the value of the "validFrom" field in the mutation.
+func (m *DownloadSessionMutation) ValidFrom() (r time.Time, exists bool) {
+	v := m.validFrom
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValidFrom returns the old "validFrom" field's value of the DownloadSession entity.
+// If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadSessionMutation) OldValidFrom(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValidFrom is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValidFrom requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValidFrom: %w", err)
+	}
+	return oldValue.ValidFrom, nil
+}
+
+// ResetValidFrom resets all changes to the "validFrom" field.
+func (m *DownloadSessionMutation) ResetValidFrom() {
+	m.validFrom = nil
+}
+
+// SetValidUntil sets the "validUntil" field.
+func (m *DownloadSessionMutation) SetValidUntil(t time.Time) {
+	m.validUntil = &t
+}
+
+// ValidUntil returns the value of the "validUntil" field in the mutation.
+func (m *DownloadSessionMutation) ValidUntil() (r time.Time, exists bool) {
+	v := m.validUntil
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValidUntil returns the old "validUntil" field's value of the DownloadSession entity.
+// If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadSessionMutation) OldValidUntil(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValidUntil is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValidUntil requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValidUntil: %w", err)
+	}
+	return oldValue.ValidUntil, nil
+}
+
+// ResetValidUntil resets all changes to the "validUntil" field.
+func (m *DownloadSessionMutation) ResetValidUntil() {
+	m.validUntil = nil
+}
+
+// SetUserAgent sets the "userAgent" field.
+func (m *DownloadSessionMutation) SetUserAgent(s string) {
+	m.userAgent = &s
+}
+
+// UserAgent returns the value of the "userAgent" field in the mutation.
+func (m *DownloadSessionMutation) UserAgent() (r string, exists bool) {
+	v := m.userAgent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserAgent returns the old "userAgent" field's value of the DownloadSession entity.
+// If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadSessionMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserAgent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
+	}
+	return oldValue.UserAgent, nil
+}
+
+// ResetUserAgent resets all changes to the "userAgent" field.
+func (m *DownloadSessionMutation) ResetUserAgent() {
+	m.userAgent = nil
+}
+
+// SetIP sets the "ip" field.
+func (m *DownloadSessionMutation) SetIP(s string) {
+	m.ip = &s
+}
+
+// IP returns the value of the "ip" field in the mutation.
+func (m *DownloadSessionMutation) IP() (r string, exists bool) {
+	v := m.ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIP returns the old "ip" field's value of the DownloadSession entity.
+// If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadSessionMutation) OldIP(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIP: %w", err)
+	}
+	return oldValue.IP, nil
+}
+
+// ResetIP resets all changes to the "ip" field.
+func (m *DownloadSessionMutation) ResetIP() {
+	m.ip = nil
+}
+
+// SetUserID sets the "userID" field.
+func (m *DownloadSessionMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "userID" field in the mutation.
+func (m *DownloadSessionMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "userID" field's value of the DownloadSession entity.
+// If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DownloadSessionMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "userID" field.
+func (m *DownloadSessionMutation) ResetUserID() {
+	m.user = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *DownloadSessionMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[downloadsession.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *DownloadSessionMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *DownloadSessionMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *DownloadSessionMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by ids.
+func (m *DownloadSessionMutation) AddLoginAlertIDs(ids ...uuid.UUID) {
+	if m.loginAlerts == nil {
+		m.loginAlerts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.loginAlerts[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLoginAlerts clears the "loginAlerts" edge to the LoginAlert entity.
+func (m *DownloadSessionMutation) ClearLoginAlerts() {
+	m.clearedloginAlerts = true
+}
+
+// LoginAlertsCleared reports if the "loginAlerts" edge to the LoginAlert entity was cleared.
+func (m *DownloadSessionMutation) LoginAlertsCleared() bool {
+	return m.clearedloginAlerts
+}
+
+// RemoveLoginAlertIDs removes the "loginAlerts" edge to the LoginAlert entity by IDs.
+func (m *DownloadSessionMutation) RemoveLoginAlertIDs(ids ...uuid.UUID) {
+	if m.removedloginAlerts == nil {
+		m.removedloginAlerts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.loginAlerts, ids[i])
+		m.removedloginAlerts[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLoginAlerts returns the removed IDs of the "loginAlerts" edge to the LoginAlert entity.
+func (m *DownloadSessionMutation) RemovedLoginAlertsIDs() (ids []uuid.UUID) {
+	for id := range m.removedloginAlerts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LoginAlertsIDs returns the "loginAlerts" edge IDs in the mutation.
+func (m *DownloadSessionMutation) LoginAlertsIDs() (ids []uuid.UUID) {
+	for id := range m.loginAlerts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLoginAlerts resets all changes to the "loginAlerts" edge.
+func (m *DownloadSessionMutation) ResetLoginAlerts() {
+	m.loginAlerts = nil
+	m.clearedloginAlerts = false
+	m.removedloginAlerts = nil
+}
+
+// Where appends a list predicates to the DownloadSessionMutation builder.
+func (m *DownloadSessionMutation) Where(ps ...predicate.DownloadSession) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DownloadSessionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DownloadSessionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DownloadSession, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DownloadSessionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DownloadSessionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DownloadSession).
+func (m *DownloadSessionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DownloadSessionMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.createdAt != nil {
+		fields = append(fields, downloadsession.FieldCreatedAt)
+	}
+	if m.code != nil {
+		fields = append(fields, downloadsession.FieldCode)
+	}
+	if m.validFrom != nil {
+		fields = append(fields, downloadsession.FieldValidFrom)
+	}
+	if m.validUntil != nil {
+		fields = append(fields, downloadsession.FieldValidUntil)
+	}
+	if m.userAgent != nil {
+		fields = append(fields, downloadsession.FieldUserAgent)
+	}
+	if m.ip != nil {
+		fields = append(fields, downloadsession.FieldIP)
+	}
+	if m.user != nil {
+		fields = append(fields, downloadsession.FieldUserID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DownloadSessionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case downloadsession.FieldCreatedAt:
+		return m.CreatedAt()
+	case downloadsession.FieldCode:
+		return m.Code()
+	case downloadsession.FieldValidFrom:
+		return m.ValidFrom()
+	case downloadsession.FieldValidUntil:
+		return m.ValidUntil()
+	case downloadsession.FieldUserAgent:
+		return m.UserAgent()
+	case downloadsession.FieldIP:
+		return m.IP()
+	case downloadsession.FieldUserID:
+		return m.UserID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DownloadSessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case downloadsession.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case downloadsession.FieldCode:
+		return m.OldCode(ctx)
+	case downloadsession.FieldValidFrom:
+		return m.OldValidFrom(ctx)
+	case downloadsession.FieldValidUntil:
+		return m.OldValidUntil(ctx)
+	case downloadsession.FieldUserAgent:
+		return m.OldUserAgent(ctx)
+	case downloadsession.FieldIP:
+		return m.OldIP(ctx)
+	case downloadsession.FieldUserID:
+		return m.OldUserID(ctx)
+	}
+	return nil, fmt.Errorf("unknown DownloadSession field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DownloadSessionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case downloadsession.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case downloadsession.FieldCode:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case downloadsession.FieldValidFrom:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValidFrom(v)
+		return nil
+	case downloadsession.FieldValidUntil:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValidUntil(v)
+		return nil
+	case downloadsession.FieldUserAgent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserAgent(v)
+		return nil
+	case downloadsession.FieldIP:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIP(v)
+		return nil
+	case downloadsession.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DownloadSession field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DownloadSessionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DownloadSessionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DownloadSessionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DownloadSession numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DownloadSessionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DownloadSessionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DownloadSessionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DownloadSession nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DownloadSessionMutation) ResetField(name string) error {
+	switch name {
+	case downloadsession.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case downloadsession.FieldCode:
+		m.ResetCode()
+		return nil
+	case downloadsession.FieldValidFrom:
+		m.ResetValidFrom()
+		return nil
+	case downloadsession.FieldValidUntil:
+		m.ResetValidUntil()
+		return nil
+	case downloadsession.FieldUserAgent:
+		m.ResetUserAgent()
+		return nil
+	case downloadsession.FieldIP:
+		m.ResetIP()
+		return nil
+	case downloadsession.FieldUserID:
+		m.ResetUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown DownloadSession field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DownloadSessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.user != nil {
+		edges = append(edges, downloadsession.EdgeUser)
+	}
+	if m.loginAlerts != nil {
+		edges = append(edges, downloadsession.EdgeLoginAlerts)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DownloadSessionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case downloadsession.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case downloadsession.EdgeLoginAlerts:
+		ids := make([]ent.Value, 0, len(m.loginAlerts))
+		for id := range m.loginAlerts {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DownloadSessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedloginAlerts != nil {
+		edges = append(edges, downloadsession.EdgeLoginAlerts)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DownloadSessionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case downloadsession.EdgeLoginAlerts:
+		ids := make([]ent.Value, 0, len(m.removedloginAlerts))
+		for id := range m.removedloginAlerts {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DownloadSessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleareduser {
+		edges = append(edges, downloadsession.EdgeUser)
+	}
+	if m.clearedloginAlerts {
+		edges = append(edges, downloadsession.EdgeLoginAlerts)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DownloadSessionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case downloadsession.EdgeUser:
+		return m.cleareduser
+	case downloadsession.EdgeLoginAlerts:
+		return m.clearedloginAlerts
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DownloadSessionMutation) ClearEdge(name string) error {
+	switch name {
+	case downloadsession.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown DownloadSession unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DownloadSessionMutation) ResetEdge(name string) error {
+	switch name {
+	case downloadsession.EdgeUser:
+		m.ResetUser()
+		return nil
+	case downloadsession.EdgeLoginAlerts:
+		m.ResetLoginAlerts()
+		return nil
+	}
+	return fmt.Errorf("unknown DownloadSession edge %s", name)
+}
 
 // JobMutation represents an operation that mutates the Job nodes in the graph.
 type JobMutation struct {
@@ -2605,11 +3400,10 @@ type LoginAlertMutation struct {
 	typ                    string
 	id                     *uuid.UUID
 	sentAt                 *time.Time
-	versionedMessengerType *string
 	confirmed              *bool
 	clearedFields          map[string]struct{}
-	session                *uuid.UUID
-	clearedsession         bool
+	downloadSession        *uuid.UUID
+	cleareddownloadSession bool
 	done                   bool
 	oldValue               func(context.Context) (*LoginAlert, error)
 	predicates             []predicate.LoginAlert
@@ -2755,42 +3549,6 @@ func (m *LoginAlertMutation) ResetSentAt() {
 	m.sentAt = nil
 }
 
-// SetVersionedMessengerType sets the "versionedMessengerType" field.
-func (m *LoginAlertMutation) SetVersionedMessengerType(s string) {
-	m.versionedMessengerType = &s
-}
-
-// VersionedMessengerType returns the value of the "versionedMessengerType" field in the mutation.
-func (m *LoginAlertMutation) VersionedMessengerType() (r string, exists bool) {
-	v := m.versionedMessengerType
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldVersionedMessengerType returns the old "versionedMessengerType" field's value of the LoginAlert entity.
-// If the LoginAlert object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LoginAlertMutation) OldVersionedMessengerType(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVersionedMessengerType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVersionedMessengerType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVersionedMessengerType: %w", err)
-	}
-	return oldValue.VersionedMessengerType, nil
-}
-
-// ResetVersionedMessengerType resets all changes to the "versionedMessengerType" field.
-func (m *LoginAlertMutation) ResetVersionedMessengerType() {
-	m.versionedMessengerType = nil
-}
-
 // SetConfirmed sets the "confirmed" field.
 func (m *LoginAlertMutation) SetConfirmed(b bool) {
 	m.confirmed = &b
@@ -2827,67 +3585,67 @@ func (m *LoginAlertMutation) ResetConfirmed() {
 	m.confirmed = nil
 }
 
-// SetSessionID sets the "sessionID" field.
-func (m *LoginAlertMutation) SetSessionID(u uuid.UUID) {
-	m.session = &u
+// SetDownloadSessionID sets the "downloadSessionID" field.
+func (m *LoginAlertMutation) SetDownloadSessionID(u uuid.UUID) {
+	m.downloadSession = &u
 }
 
-// SessionID returns the value of the "sessionID" field in the mutation.
-func (m *LoginAlertMutation) SessionID() (r uuid.UUID, exists bool) {
-	v := m.session
+// DownloadSessionID returns the value of the "downloadSessionID" field in the mutation.
+func (m *LoginAlertMutation) DownloadSessionID() (r uuid.UUID, exists bool) {
+	v := m.downloadSession
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSessionID returns the old "sessionID" field's value of the LoginAlert entity.
+// OldDownloadSessionID returns the old "downloadSessionID" field's value of the LoginAlert entity.
 // If the LoginAlert object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LoginAlertMutation) OldSessionID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *LoginAlertMutation) OldDownloadSessionID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSessionID is only allowed on UpdateOne operations")
+		return v, errors.New("OldDownloadSessionID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSessionID requires an ID field in the mutation")
+		return v, errors.New("OldDownloadSessionID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSessionID: %w", err)
+		return v, fmt.Errorf("querying old value for OldDownloadSessionID: %w", err)
 	}
-	return oldValue.SessionID, nil
+	return oldValue.DownloadSessionID, nil
 }
 
-// ResetSessionID resets all changes to the "sessionID" field.
-func (m *LoginAlertMutation) ResetSessionID() {
-	m.session = nil
+// ResetDownloadSessionID resets all changes to the "downloadSessionID" field.
+func (m *LoginAlertMutation) ResetDownloadSessionID() {
+	m.downloadSession = nil
 }
 
-// ClearSession clears the "session" edge to the Session entity.
-func (m *LoginAlertMutation) ClearSession() {
-	m.clearedsession = true
-	m.clearedFields[loginalert.FieldSessionID] = struct{}{}
+// ClearDownloadSession clears the "downloadSession" edge to the DownloadSession entity.
+func (m *LoginAlertMutation) ClearDownloadSession() {
+	m.cleareddownloadSession = true
+	m.clearedFields[loginalert.FieldDownloadSessionID] = struct{}{}
 }
 
-// SessionCleared reports if the "session" edge to the Session entity was cleared.
-func (m *LoginAlertMutation) SessionCleared() bool {
-	return m.clearedsession
+// DownloadSessionCleared reports if the "downloadSession" edge to the DownloadSession entity was cleared.
+func (m *LoginAlertMutation) DownloadSessionCleared() bool {
+	return m.cleareddownloadSession
 }
 
-// SessionIDs returns the "session" edge IDs in the mutation.
+// DownloadSessionIDs returns the "downloadSession" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// SessionID instead. It exists only for internal usage by the builders.
-func (m *LoginAlertMutation) SessionIDs() (ids []uuid.UUID) {
-	if id := m.session; id != nil {
+// DownloadSessionID instead. It exists only for internal usage by the builders.
+func (m *LoginAlertMutation) DownloadSessionIDs() (ids []uuid.UUID) {
+	if id := m.downloadSession; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetSession resets all changes to the "session" edge.
-func (m *LoginAlertMutation) ResetSession() {
-	m.session = nil
-	m.clearedsession = false
+// ResetDownloadSession resets all changes to the "downloadSession" edge.
+func (m *LoginAlertMutation) ResetDownloadSession() {
+	m.downloadSession = nil
+	m.cleareddownloadSession = false
 }
 
 // Where appends a list predicates to the LoginAlertMutation builder.
@@ -2924,18 +3682,15 @@ func (m *LoginAlertMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LoginAlertMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 3)
 	if m.sentAt != nil {
 		fields = append(fields, loginalert.FieldSentAt)
-	}
-	if m.versionedMessengerType != nil {
-		fields = append(fields, loginalert.FieldVersionedMessengerType)
 	}
 	if m.confirmed != nil {
 		fields = append(fields, loginalert.FieldConfirmed)
 	}
-	if m.session != nil {
-		fields = append(fields, loginalert.FieldSessionID)
+	if m.downloadSession != nil {
+		fields = append(fields, loginalert.FieldDownloadSessionID)
 	}
 	return fields
 }
@@ -2947,12 +3702,10 @@ func (m *LoginAlertMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case loginalert.FieldSentAt:
 		return m.SentAt()
-	case loginalert.FieldVersionedMessengerType:
-		return m.VersionedMessengerType()
 	case loginalert.FieldConfirmed:
 		return m.Confirmed()
-	case loginalert.FieldSessionID:
-		return m.SessionID()
+	case loginalert.FieldDownloadSessionID:
+		return m.DownloadSessionID()
 	}
 	return nil, false
 }
@@ -2964,12 +3717,10 @@ func (m *LoginAlertMutation) OldField(ctx context.Context, name string) (ent.Val
 	switch name {
 	case loginalert.FieldSentAt:
 		return m.OldSentAt(ctx)
-	case loginalert.FieldVersionedMessengerType:
-		return m.OldVersionedMessengerType(ctx)
 	case loginalert.FieldConfirmed:
 		return m.OldConfirmed(ctx)
-	case loginalert.FieldSessionID:
-		return m.OldSessionID(ctx)
+	case loginalert.FieldDownloadSessionID:
+		return m.OldDownloadSessionID(ctx)
 	}
 	return nil, fmt.Errorf("unknown LoginAlert field %s", name)
 }
@@ -2986,13 +3737,6 @@ func (m *LoginAlertMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSentAt(v)
 		return nil
-	case loginalert.FieldVersionedMessengerType:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetVersionedMessengerType(v)
-		return nil
 	case loginalert.FieldConfirmed:
 		v, ok := value.(bool)
 		if !ok {
@@ -3000,12 +3744,12 @@ func (m *LoginAlertMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetConfirmed(v)
 		return nil
-	case loginalert.FieldSessionID:
+	case loginalert.FieldDownloadSessionID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSessionID(v)
+		m.SetDownloadSessionID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert field %s", name)
@@ -3059,14 +3803,11 @@ func (m *LoginAlertMutation) ResetField(name string) error {
 	case loginalert.FieldSentAt:
 		m.ResetSentAt()
 		return nil
-	case loginalert.FieldVersionedMessengerType:
-		m.ResetVersionedMessengerType()
-		return nil
 	case loginalert.FieldConfirmed:
 		m.ResetConfirmed()
 		return nil
-	case loginalert.FieldSessionID:
-		m.ResetSessionID()
+	case loginalert.FieldDownloadSessionID:
+		m.ResetDownloadSessionID()
 		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert field %s", name)
@@ -3075,8 +3816,8 @@ func (m *LoginAlertMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *LoginAlertMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.session != nil {
-		edges = append(edges, loginalert.EdgeSession)
+	if m.downloadSession != nil {
+		edges = append(edges, loginalert.EdgeDownloadSession)
 	}
 	return edges
 }
@@ -3085,8 +3826,8 @@ func (m *LoginAlertMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *LoginAlertMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case loginalert.EdgeSession:
-		if id := m.session; id != nil {
+	case loginalert.EdgeDownloadSession:
+		if id := m.downloadSession; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -3108,8 +3849,8 @@ func (m *LoginAlertMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *LoginAlertMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedsession {
-		edges = append(edges, loginalert.EdgeSession)
+	if m.cleareddownloadSession {
+		edges = append(edges, loginalert.EdgeDownloadSession)
 	}
 	return edges
 }
@@ -3118,8 +3859,8 @@ func (m *LoginAlertMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *LoginAlertMutation) EdgeCleared(name string) bool {
 	switch name {
-	case loginalert.EdgeSession:
-		return m.clearedsession
+	case loginalert.EdgeDownloadSession:
+		return m.cleareddownloadSession
 	}
 	return false
 }
@@ -3128,8 +3869,8 @@ func (m *LoginAlertMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *LoginAlertMutation) ClearEdge(name string) error {
 	switch name {
-	case loginalert.EdgeSession:
-		m.ClearSession()
+	case loginalert.EdgeDownloadSession:
+		m.ClearDownloadSession()
 		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert unique edge %s", name)
@@ -3139,8 +3880,8 @@ func (m *LoginAlertMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *LoginAlertMutation) ResetEdge(name string) error {
 	switch name {
-	case loginalert.EdgeSession:
-		m.ResetSession()
+	case loginalert.EdgeDownloadSession:
+		m.ResetDownloadSession()
 		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert edge %s", name)
@@ -3552,801 +4293,6 @@ func (m *PeriodicTaskMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PeriodicTaskMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown PeriodicTask edge %s", name)
-}
-
-// SessionMutation represents an operation that mutates the Session nodes in the graph.
-type SessionMutation struct {
-	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	createdAt          *time.Time
-	code               *[]byte
-	validFrom          *time.Time
-	validUntil         *time.Time
-	userAgent          *string
-	ip                 *string
-	clearedFields      map[string]struct{}
-	user               *uuid.UUID
-	cleareduser        bool
-	loginAlerts        map[uuid.UUID]struct{}
-	removedloginAlerts map[uuid.UUID]struct{}
-	clearedloginAlerts bool
-	done               bool
-	oldValue           func(context.Context) (*Session, error)
-	predicates         []predicate.Session
-}
-
-var _ ent.Mutation = (*SessionMutation)(nil)
-
-// sessionOption allows management of the mutation configuration using functional options.
-type sessionOption func(*SessionMutation)
-
-// newSessionMutation creates new mutation for the Session entity.
-func newSessionMutation(c config, op Op, opts ...sessionOption) *SessionMutation {
-	m := &SessionMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeSession,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withSessionID sets the ID field of the mutation.
-func withSessionID(id uuid.UUID) sessionOption {
-	return func(m *SessionMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Session
-		)
-		m.oldValue = func(ctx context.Context) (*Session, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Session.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withSession sets the old Session of the mutation.
-func withSession(node *Session) sessionOption {
-	return func(m *SessionMutation) {
-		m.oldValue = func(context.Context) (*Session, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m SessionMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m SessionMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Session entities.
-func (m *SessionMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *SessionMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *SessionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uuid.UUID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Session.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "createdAt" field.
-func (m *SessionMutation) SetCreatedAt(t time.Time) {
-	m.createdAt = &t
-}
-
-// CreatedAt returns the value of the "createdAt" field in the mutation.
-func (m *SessionMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.createdAt
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "createdAt" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "createdAt" field.
-func (m *SessionMutation) ResetCreatedAt() {
-	m.createdAt = nil
-}
-
-// SetCode sets the "code" field.
-func (m *SessionMutation) SetCode(b []byte) {
-	m.code = &b
-}
-
-// Code returns the value of the "code" field in the mutation.
-func (m *SessionMutation) Code() (r []byte, exists bool) {
-	v := m.code
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCode returns the old "code" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldCode(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCode is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCode requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCode: %w", err)
-	}
-	return oldValue.Code, nil
-}
-
-// ResetCode resets all changes to the "code" field.
-func (m *SessionMutation) ResetCode() {
-	m.code = nil
-}
-
-// SetValidFrom sets the "validFrom" field.
-func (m *SessionMutation) SetValidFrom(t time.Time) {
-	m.validFrom = &t
-}
-
-// ValidFrom returns the value of the "validFrom" field in the mutation.
-func (m *SessionMutation) ValidFrom() (r time.Time, exists bool) {
-	v := m.validFrom
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldValidFrom returns the old "validFrom" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldValidFrom(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldValidFrom is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldValidFrom requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldValidFrom: %w", err)
-	}
-	return oldValue.ValidFrom, nil
-}
-
-// ResetValidFrom resets all changes to the "validFrom" field.
-func (m *SessionMutation) ResetValidFrom() {
-	m.validFrom = nil
-}
-
-// SetValidUntil sets the "validUntil" field.
-func (m *SessionMutation) SetValidUntil(t time.Time) {
-	m.validUntil = &t
-}
-
-// ValidUntil returns the value of the "validUntil" field in the mutation.
-func (m *SessionMutation) ValidUntil() (r time.Time, exists bool) {
-	v := m.validUntil
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldValidUntil returns the old "validUntil" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldValidUntil(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldValidUntil is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldValidUntil requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldValidUntil: %w", err)
-	}
-	return oldValue.ValidUntil, nil
-}
-
-// ResetValidUntil resets all changes to the "validUntil" field.
-func (m *SessionMutation) ResetValidUntil() {
-	m.validUntil = nil
-}
-
-// SetUserAgent sets the "userAgent" field.
-func (m *SessionMutation) SetUserAgent(s string) {
-	m.userAgent = &s
-}
-
-// UserAgent returns the value of the "userAgent" field in the mutation.
-func (m *SessionMutation) UserAgent() (r string, exists bool) {
-	v := m.userAgent
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserAgent returns the old "userAgent" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldUserAgent(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserAgent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
-	}
-	return oldValue.UserAgent, nil
-}
-
-// ResetUserAgent resets all changes to the "userAgent" field.
-func (m *SessionMutation) ResetUserAgent() {
-	m.userAgent = nil
-}
-
-// SetIP sets the "ip" field.
-func (m *SessionMutation) SetIP(s string) {
-	m.ip = &s
-}
-
-// IP returns the value of the "ip" field in the mutation.
-func (m *SessionMutation) IP() (r string, exists bool) {
-	v := m.ip
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIP returns the old "ip" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldIP(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIP is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIP requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIP: %w", err)
-	}
-	return oldValue.IP, nil
-}
-
-// ResetIP resets all changes to the "ip" field.
-func (m *SessionMutation) ResetIP() {
-	m.ip = nil
-}
-
-// SetUserID sets the "userID" field.
-func (m *SessionMutation) SetUserID(u uuid.UUID) {
-	m.user = &u
-}
-
-// UserID returns the value of the "userID" field in the mutation.
-func (m *SessionMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "userID" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "userID" field.
-func (m *SessionMutation) ResetUserID() {
-	m.user = nil
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *SessionMutation) ClearUser() {
-	m.cleareduser = true
-	m.clearedFields[session.FieldUserID] = struct{}{}
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *SessionMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *SessionMutation) UserIDs() (ids []uuid.UUID) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *SessionMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
-// AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by ids.
-func (m *SessionMutation) AddLoginAlertIDs(ids ...uuid.UUID) {
-	if m.loginAlerts == nil {
-		m.loginAlerts = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.loginAlerts[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLoginAlerts clears the "loginAlerts" edge to the LoginAlert entity.
-func (m *SessionMutation) ClearLoginAlerts() {
-	m.clearedloginAlerts = true
-}
-
-// LoginAlertsCleared reports if the "loginAlerts" edge to the LoginAlert entity was cleared.
-func (m *SessionMutation) LoginAlertsCleared() bool {
-	return m.clearedloginAlerts
-}
-
-// RemoveLoginAlertIDs removes the "loginAlerts" edge to the LoginAlert entity by IDs.
-func (m *SessionMutation) RemoveLoginAlertIDs(ids ...uuid.UUID) {
-	if m.removedloginAlerts == nil {
-		m.removedloginAlerts = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.loginAlerts, ids[i])
-		m.removedloginAlerts[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLoginAlerts returns the removed IDs of the "loginAlerts" edge to the LoginAlert entity.
-func (m *SessionMutation) RemovedLoginAlertsIDs() (ids []uuid.UUID) {
-	for id := range m.removedloginAlerts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LoginAlertsIDs returns the "loginAlerts" edge IDs in the mutation.
-func (m *SessionMutation) LoginAlertsIDs() (ids []uuid.UUID) {
-	for id := range m.loginAlerts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLoginAlerts resets all changes to the "loginAlerts" edge.
-func (m *SessionMutation) ResetLoginAlerts() {
-	m.loginAlerts = nil
-	m.clearedloginAlerts = false
-	m.removedloginAlerts = nil
-}
-
-// Where appends a list predicates to the SessionMutation builder.
-func (m *SessionMutation) Where(ps ...predicate.Session) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the SessionMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *SessionMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Session, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *SessionMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *SessionMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Session).
-func (m *SessionMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.createdAt != nil {
-		fields = append(fields, session.FieldCreatedAt)
-	}
-	if m.code != nil {
-		fields = append(fields, session.FieldCode)
-	}
-	if m.validFrom != nil {
-		fields = append(fields, session.FieldValidFrom)
-	}
-	if m.validUntil != nil {
-		fields = append(fields, session.FieldValidUntil)
-	}
-	if m.userAgent != nil {
-		fields = append(fields, session.FieldUserAgent)
-	}
-	if m.ip != nil {
-		fields = append(fields, session.FieldIP)
-	}
-	if m.user != nil {
-		fields = append(fields, session.FieldUserID)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *SessionMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case session.FieldCreatedAt:
-		return m.CreatedAt()
-	case session.FieldCode:
-		return m.Code()
-	case session.FieldValidFrom:
-		return m.ValidFrom()
-	case session.FieldValidUntil:
-		return m.ValidUntil()
-	case session.FieldUserAgent:
-		return m.UserAgent()
-	case session.FieldIP:
-		return m.IP()
-	case session.FieldUserID:
-		return m.UserID()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case session.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case session.FieldCode:
-		return m.OldCode(ctx)
-	case session.FieldValidFrom:
-		return m.OldValidFrom(ctx)
-	case session.FieldValidUntil:
-		return m.OldValidUntil(ctx)
-	case session.FieldUserAgent:
-		return m.OldUserAgent(ctx)
-	case session.FieldIP:
-		return m.OldIP(ctx)
-	case session.FieldUserID:
-		return m.OldUserID(ctx)
-	}
-	return nil, fmt.Errorf("unknown Session field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *SessionMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case session.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case session.FieldCode:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCode(v)
-		return nil
-	case session.FieldValidFrom:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetValidFrom(v)
-		return nil
-	case session.FieldValidUntil:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetValidUntil(v)
-		return nil
-	case session.FieldUserAgent:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserAgent(v)
-		return nil
-	case session.FieldIP:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIP(v)
-		return nil
-	case session.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Session field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *SessionMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *SessionMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *SessionMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Session numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *SessionMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *SessionMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *SessionMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Session nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *SessionMutation) ResetField(name string) error {
-	switch name {
-	case session.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case session.FieldCode:
-		m.ResetCode()
-		return nil
-	case session.FieldValidFrom:
-		m.ResetValidFrom()
-		return nil
-	case session.FieldValidUntil:
-		m.ResetValidUntil()
-		return nil
-	case session.FieldUserAgent:
-		m.ResetUserAgent()
-		return nil
-	case session.FieldIP:
-		m.ResetIP()
-		return nil
-	case session.FieldUserID:
-		m.ResetUserID()
-		return nil
-	}
-	return fmt.Errorf("unknown Session field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *SessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.user != nil {
-		edges = append(edges, session.EdgeUser)
-	}
-	if m.loginAlerts != nil {
-		edges = append(edges, session.EdgeLoginAlerts)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *SessionMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case session.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
-	case session.EdgeLoginAlerts:
-		ids := make([]ent.Value, 0, len(m.loginAlerts))
-		for id := range m.loginAlerts {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *SessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedloginAlerts != nil {
-		edges = append(edges, session.EdgeLoginAlerts)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *SessionMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case session.EdgeLoginAlerts:
-		ids := make([]ent.Value, 0, len(m.removedloginAlerts))
-		for id := range m.removedloginAlerts {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *SessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.cleareduser {
-		edges = append(edges, session.EdgeUser)
-	}
-	if m.clearedloginAlerts {
-		edges = append(edges, session.EdgeLoginAlerts)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *SessionMutation) EdgeCleared(name string) bool {
-	switch name {
-	case session.EdgeUser:
-		return m.cleareduser
-	case session.EdgeLoginAlerts:
-		return m.clearedloginAlerts
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *SessionMutation) ClearEdge(name string) error {
-	switch name {
-	case session.EdgeUser:
-		m.ClearUser()
-		return nil
-	}
-	return fmt.Errorf("unknown Session unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *SessionMutation) ResetEdge(name string) error {
-	switch name {
-	case session.EdgeUser:
-		m.ResetUser()
-		return nil
-	case session.EdgeLoginAlerts:
-		m.ResetLoginAlerts()
-		return nil
-	}
-	return fmt.Errorf("unknown Session edge %s", name)
 }
 
 // StashMutation represents an operation that mutates the Stash nodes in the graph.
@@ -5872,28 +5818,28 @@ func (m *TwoFactorActionMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *uuid.UUID
-	username          *string
-	locked            *bool
-	lockedUntil       *time.Time
-	sessionsValidFrom *time.Time
-	clearedFields     map[string]struct{}
-	stash             *uuid.UUID
-	clearedstash      bool
-	messengers        map[uuid.UUID]struct{}
-	removedmessengers map[uuid.UUID]struct{}
-	clearedmessengers bool
-	sessions          map[uuid.UUID]struct{}
-	removedsessions   map[uuid.UUID]struct{}
-	clearedsessions   bool
-	logs              map[uuid.UUID]struct{}
-	removedlogs       map[uuid.UUID]struct{}
-	clearedlogs       bool
-	done              bool
-	oldValue          func(context.Context) (*User, error)
-	predicates        []predicate.User
+	op                        Op
+	typ                       string
+	id                        *uuid.UUID
+	username                  *string
+	locked                    *bool
+	lockedUntil               *time.Time
+	downloadSessionsValidFrom *time.Time
+	clearedFields             map[string]struct{}
+	stash                     *uuid.UUID
+	clearedstash              bool
+	messengers                map[uuid.UUID]struct{}
+	removedmessengers         map[uuid.UUID]struct{}
+	clearedmessengers         bool
+	downloadSessions          map[uuid.UUID]struct{}
+	removeddownloadSessions   map[uuid.UUID]struct{}
+	cleareddownloadSessions   bool
+	logs                      map[uuid.UUID]struct{}
+	removedlogs               map[uuid.UUID]struct{}
+	clearedlogs               bool
+	done                      bool
+	oldValue                  func(context.Context) (*User, error)
+	predicates                []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -6121,40 +6067,40 @@ func (m *UserMutation) ResetLockedUntil() {
 	delete(m.clearedFields, user.FieldLockedUntil)
 }
 
-// SetSessionsValidFrom sets the "sessionsValidFrom" field.
-func (m *UserMutation) SetSessionsValidFrom(t time.Time) {
-	m.sessionsValidFrom = &t
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (m *UserMutation) SetDownloadSessionsValidFrom(t time.Time) {
+	m.downloadSessionsValidFrom = &t
 }
 
-// SessionsValidFrom returns the value of the "sessionsValidFrom" field in the mutation.
-func (m *UserMutation) SessionsValidFrom() (r time.Time, exists bool) {
-	v := m.sessionsValidFrom
+// DownloadSessionsValidFrom returns the value of the "downloadSessionsValidFrom" field in the mutation.
+func (m *UserMutation) DownloadSessionsValidFrom() (r time.Time, exists bool) {
+	v := m.downloadSessionsValidFrom
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSessionsValidFrom returns the old "sessionsValidFrom" field's value of the User entity.
+// OldDownloadSessionsValidFrom returns the old "downloadSessionsValidFrom" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldSessionsValidFrom(ctx context.Context) (v time.Time, err error) {
+func (m *UserMutation) OldDownloadSessionsValidFrom(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSessionsValidFrom is only allowed on UpdateOne operations")
+		return v, errors.New("OldDownloadSessionsValidFrom is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSessionsValidFrom requires an ID field in the mutation")
+		return v, errors.New("OldDownloadSessionsValidFrom requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSessionsValidFrom: %w", err)
+		return v, fmt.Errorf("querying old value for OldDownloadSessionsValidFrom: %w", err)
 	}
-	return oldValue.SessionsValidFrom, nil
+	return oldValue.DownloadSessionsValidFrom, nil
 }
 
-// ResetSessionsValidFrom resets all changes to the "sessionsValidFrom" field.
-func (m *UserMutation) ResetSessionsValidFrom() {
-	m.sessionsValidFrom = nil
+// ResetDownloadSessionsValidFrom resets all changes to the "downloadSessionsValidFrom" field.
+func (m *UserMutation) ResetDownloadSessionsValidFrom() {
+	m.downloadSessionsValidFrom = nil
 }
 
 // SetStashID sets the "stash" edge to the Stash entity by id.
@@ -6250,58 +6196,58 @@ func (m *UserMutation) ResetMessengers() {
 	m.removedmessengers = nil
 }
 
-// AddSessionIDs adds the "sessions" edge to the Session entity by ids.
-func (m *UserMutation) AddSessionIDs(ids ...uuid.UUID) {
-	if m.sessions == nil {
-		m.sessions = make(map[uuid.UUID]struct{})
+// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by ids.
+func (m *UserMutation) AddDownloadSessionIDs(ids ...uuid.UUID) {
+	if m.downloadSessions == nil {
+		m.downloadSessions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.sessions[ids[i]] = struct{}{}
+		m.downloadSessions[ids[i]] = struct{}{}
 	}
 }
 
-// ClearSessions clears the "sessions" edge to the Session entity.
-func (m *UserMutation) ClearSessions() {
-	m.clearedsessions = true
+// ClearDownloadSessions clears the "downloadSessions" edge to the DownloadSession entity.
+func (m *UserMutation) ClearDownloadSessions() {
+	m.cleareddownloadSessions = true
 }
 
-// SessionsCleared reports if the "sessions" edge to the Session entity was cleared.
-func (m *UserMutation) SessionsCleared() bool {
-	return m.clearedsessions
+// DownloadSessionsCleared reports if the "downloadSessions" edge to the DownloadSession entity was cleared.
+func (m *UserMutation) DownloadSessionsCleared() bool {
+	return m.cleareddownloadSessions
 }
 
-// RemoveSessionIDs removes the "sessions" edge to the Session entity by IDs.
-func (m *UserMutation) RemoveSessionIDs(ids ...uuid.UUID) {
-	if m.removedsessions == nil {
-		m.removedsessions = make(map[uuid.UUID]struct{})
+// RemoveDownloadSessionIDs removes the "downloadSessions" edge to the DownloadSession entity by IDs.
+func (m *UserMutation) RemoveDownloadSessionIDs(ids ...uuid.UUID) {
+	if m.removeddownloadSessions == nil {
+		m.removeddownloadSessions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.sessions, ids[i])
-		m.removedsessions[ids[i]] = struct{}{}
+		delete(m.downloadSessions, ids[i])
+		m.removeddownloadSessions[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedSessions returns the removed IDs of the "sessions" edge to the Session entity.
-func (m *UserMutation) RemovedSessionsIDs() (ids []uuid.UUID) {
-	for id := range m.removedsessions {
+// RemovedDownloadSessions returns the removed IDs of the "downloadSessions" edge to the DownloadSession entity.
+func (m *UserMutation) RemovedDownloadSessionsIDs() (ids []uuid.UUID) {
+	for id := range m.removeddownloadSessions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// SessionsIDs returns the "sessions" edge IDs in the mutation.
-func (m *UserMutation) SessionsIDs() (ids []uuid.UUID) {
-	for id := range m.sessions {
+// DownloadSessionsIDs returns the "downloadSessions" edge IDs in the mutation.
+func (m *UserMutation) DownloadSessionsIDs() (ids []uuid.UUID) {
+	for id := range m.downloadSessions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetSessions resets all changes to the "sessions" edge.
-func (m *UserMutation) ResetSessions() {
-	m.sessions = nil
-	m.clearedsessions = false
-	m.removedsessions = nil
+// ResetDownloadSessions resets all changes to the "downloadSessions" edge.
+func (m *UserMutation) ResetDownloadSessions() {
+	m.downloadSessions = nil
+	m.cleareddownloadSessions = false
+	m.removeddownloadSessions = nil
 }
 
 // AddLogIDs adds the "logs" edge to the LogEntry entity by ids.
@@ -6402,8 +6348,8 @@ func (m *UserMutation) Fields() []string {
 	if m.lockedUntil != nil {
 		fields = append(fields, user.FieldLockedUntil)
 	}
-	if m.sessionsValidFrom != nil {
-		fields = append(fields, user.FieldSessionsValidFrom)
+	if m.downloadSessionsValidFrom != nil {
+		fields = append(fields, user.FieldDownloadSessionsValidFrom)
 	}
 	return fields
 }
@@ -6419,8 +6365,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Locked()
 	case user.FieldLockedUntil:
 		return m.LockedUntil()
-	case user.FieldSessionsValidFrom:
-		return m.SessionsValidFrom()
+	case user.FieldDownloadSessionsValidFrom:
+		return m.DownloadSessionsValidFrom()
 	}
 	return nil, false
 }
@@ -6436,8 +6382,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldLocked(ctx)
 	case user.FieldLockedUntil:
 		return m.OldLockedUntil(ctx)
-	case user.FieldSessionsValidFrom:
-		return m.OldSessionsValidFrom(ctx)
+	case user.FieldDownloadSessionsValidFrom:
+		return m.OldDownloadSessionsValidFrom(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -6468,12 +6414,12 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLockedUntil(v)
 		return nil
-	case user.FieldSessionsValidFrom:
+	case user.FieldDownloadSessionsValidFrom:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSessionsValidFrom(v)
+		m.SetDownloadSessionsValidFrom(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -6542,8 +6488,8 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldLockedUntil:
 		m.ResetLockedUntil()
 		return nil
-	case user.FieldSessionsValidFrom:
-		m.ResetSessionsValidFrom()
+	case user.FieldDownloadSessionsValidFrom:
+		m.ResetDownloadSessionsValidFrom()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -6558,8 +6504,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.messengers != nil {
 		edges = append(edges, user.EdgeMessengers)
 	}
-	if m.sessions != nil {
-		edges = append(edges, user.EdgeSessions)
+	if m.downloadSessions != nil {
+		edges = append(edges, user.EdgeDownloadSessions)
 	}
 	if m.logs != nil {
 		edges = append(edges, user.EdgeLogs)
@@ -6581,9 +6527,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeSessions:
-		ids := make([]ent.Value, 0, len(m.sessions))
-		for id := range m.sessions {
+	case user.EdgeDownloadSessions:
+		ids := make([]ent.Value, 0, len(m.downloadSessions))
+		for id := range m.downloadSessions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6603,8 +6549,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedmessengers != nil {
 		edges = append(edges, user.EdgeMessengers)
 	}
-	if m.removedsessions != nil {
-		edges = append(edges, user.EdgeSessions)
+	if m.removeddownloadSessions != nil {
+		edges = append(edges, user.EdgeDownloadSessions)
 	}
 	if m.removedlogs != nil {
 		edges = append(edges, user.EdgeLogs)
@@ -6622,9 +6568,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeSessions:
-		ids := make([]ent.Value, 0, len(m.removedsessions))
-		for id := range m.removedsessions {
+	case user.EdgeDownloadSessions:
+		ids := make([]ent.Value, 0, len(m.removeddownloadSessions))
+		for id := range m.removeddownloadSessions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6647,8 +6593,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedmessengers {
 		edges = append(edges, user.EdgeMessengers)
 	}
-	if m.clearedsessions {
-		edges = append(edges, user.EdgeSessions)
+	if m.cleareddownloadSessions {
+		edges = append(edges, user.EdgeDownloadSessions)
 	}
 	if m.clearedlogs {
 		edges = append(edges, user.EdgeLogs)
@@ -6664,8 +6610,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedstash
 	case user.EdgeMessengers:
 		return m.clearedmessengers
-	case user.EdgeSessions:
-		return m.clearedsessions
+	case user.EdgeDownloadSessions:
+		return m.cleareddownloadSessions
 	case user.EdgeLogs:
 		return m.clearedlogs
 	}
@@ -6693,8 +6639,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeMessengers:
 		m.ResetMessengers()
 		return nil
-	case user.EdgeSessions:
-		m.ResetSessions()
+	case user.EdgeDownloadSessions:
+		m.ResetDownloadSessions()
 		return nil
 	case user.EdgeLogs:
 		m.ResetLogs()

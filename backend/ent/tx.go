@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// DownloadSession is the client for interacting with the DownloadSession builders.
+	DownloadSession *DownloadSessionClient
 	// Job is the client for interacting with the Job builders.
 	Job *JobClient
 	// KeyValue is the client for interacting with the KeyValue builders.
@@ -22,8 +24,6 @@ type Tx struct {
 	LoginAlert *LoginAlertClient
 	// PeriodicTask is the client for interacting with the PeriodicTask builders.
 	PeriodicTask *PeriodicTaskClient
-	// Session is the client for interacting with the Session builders.
-	Session *SessionClient
 	// Stash is the client for interacting with the Stash builders.
 	Stash *StashClient
 	// TwoFactorAction is the client for interacting with the TwoFactorAction builders.
@@ -163,12 +163,12 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.DownloadSession = NewDownloadSessionClient(tx.config)
 	tx.Job = NewJobClient(tx.config)
 	tx.KeyValue = NewKeyValueClient(tx.config)
 	tx.LogEntry = NewLogEntryClient(tx.config)
 	tx.LoginAlert = NewLoginAlertClient(tx.config)
 	tx.PeriodicTask = NewPeriodicTaskClient(tx.config)
-	tx.Session = NewSessionClient(tx.config)
 	tx.Stash = NewStashClient(tx.config)
 	tx.TwoFactorAction = NewTwoFactorActionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
@@ -182,7 +182,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Job.QueryXXX(), the query will be executed
+// applies a query, for example: DownloadSession.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

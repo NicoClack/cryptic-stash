@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -62,9 +62,9 @@ func (_c *UserCreate) SetNillableLockedUntil(v *time.Time) *UserCreate {
 	return _c
 }
 
-// SetSessionsValidFrom sets the "sessionsValidFrom" field.
-func (_c *UserCreate) SetSessionsValidFrom(v time.Time) *UserCreate {
-	_c.mutation.SetSessionsValidFrom(v)
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (_c *UserCreate) SetDownloadSessionsValidFrom(v time.Time) *UserCreate {
+	_c.mutation.SetDownloadSessionsValidFrom(v)
 	return _c
 }
 
@@ -116,19 +116,19 @@ func (_c *UserCreate) AddMessengers(v ...*UserMessenger) *UserCreate {
 	return _c.AddMessengerIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_c *UserCreate) AddSessionIDs(ids ...uuid.UUID) *UserCreate {
-	_c.mutation.AddSessionIDs(ids...)
+// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by IDs.
+func (_c *UserCreate) AddDownloadSessionIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddDownloadSessionIDs(ids...)
 	return _c
 }
 
-// AddSessions adds the "sessions" edges to the Session entity.
-func (_c *UserCreate) AddSessions(v ...*Session) *UserCreate {
+// AddDownloadSessions adds the "downloadSessions" edges to the DownloadSession entity.
+func (_c *UserCreate) AddDownloadSessions(v ...*DownloadSession) *UserCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddSessionIDs(ids...)
+	return _c.AddDownloadSessionIDs(ids...)
 }
 
 // AddLogIDs adds the "logs" edge to the LogEntry entity by IDs.
@@ -204,8 +204,8 @@ func (_c *UserCreate) check() error {
 	if _, ok := _c.mutation.Locked(); !ok {
 		return &ValidationError{Name: "locked", err: errors.New(`ent: missing required field "User.locked"`)}
 	}
-	if _, ok := _c.mutation.SessionsValidFrom(); !ok {
-		return &ValidationError{Name: "sessionsValidFrom", err: errors.New(`ent: missing required field "User.sessionsValidFrom"`)}
+	if _, ok := _c.mutation.DownloadSessionsValidFrom(); !ok {
+		return &ValidationError{Name: "downloadSessionsValidFrom", err: errors.New(`ent: missing required field "User.downloadSessionsValidFrom"`)}
 	}
 	return nil
 }
@@ -255,9 +255,9 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldLockedUntil, field.TypeTime, value)
 		_node.LockedUntil = &value
 	}
-	if value, ok := _c.mutation.SessionsValidFrom(); ok {
-		_spec.SetField(user.FieldSessionsValidFrom, field.TypeTime, value)
-		_node.SessionsValidFrom = value
+	if value, ok := _c.mutation.DownloadSessionsValidFrom(); ok {
+		_spec.SetField(user.FieldDownloadSessionsValidFrom, field.TypeTime, value)
+		_node.DownloadSessionsValidFrom = value
 	}
 	if nodes := _c.mutation.StashIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -291,15 +291,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DownloadSessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.DownloadSessionsTable,
+			Columns: []string{user.DownloadSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -417,15 +417,15 @@ func (u *UserUpsert) ClearLockedUntil() *UserUpsert {
 	return u
 }
 
-// SetSessionsValidFrom sets the "sessionsValidFrom" field.
-func (u *UserUpsert) SetSessionsValidFrom(v time.Time) *UserUpsert {
-	u.Set(user.FieldSessionsValidFrom, v)
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (u *UserUpsert) SetDownloadSessionsValidFrom(v time.Time) *UserUpsert {
+	u.Set(user.FieldDownloadSessionsValidFrom, v)
 	return u
 }
 
-// UpdateSessionsValidFrom sets the "sessionsValidFrom" field to the value that was provided on create.
-func (u *UserUpsert) UpdateSessionsValidFrom() *UserUpsert {
-	u.SetExcluded(user.FieldSessionsValidFrom)
+// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
+func (u *UserUpsert) UpdateDownloadSessionsValidFrom() *UserUpsert {
+	u.SetExcluded(user.FieldDownloadSessionsValidFrom)
 	return u
 }
 
@@ -526,17 +526,17 @@ func (u *UserUpsertOne) ClearLockedUntil() *UserUpsertOne {
 	})
 }
 
-// SetSessionsValidFrom sets the "sessionsValidFrom" field.
-func (u *UserUpsertOne) SetSessionsValidFrom(v time.Time) *UserUpsertOne {
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (u *UserUpsertOne) SetDownloadSessionsValidFrom(v time.Time) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.SetSessionsValidFrom(v)
+		s.SetDownloadSessionsValidFrom(v)
 	})
 }
 
-// UpdateSessionsValidFrom sets the "sessionsValidFrom" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateSessionsValidFrom() *UserUpsertOne {
+// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateDownloadSessionsValidFrom() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateSessionsValidFrom()
+		s.UpdateDownloadSessionsValidFrom()
 	})
 }
 
@@ -804,17 +804,17 @@ func (u *UserUpsertBulk) ClearLockedUntil() *UserUpsertBulk {
 	})
 }
 
-// SetSessionsValidFrom sets the "sessionsValidFrom" field.
-func (u *UserUpsertBulk) SetSessionsValidFrom(v time.Time) *UserUpsertBulk {
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (u *UserUpsertBulk) SetDownloadSessionsValidFrom(v time.Time) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.SetSessionsValidFrom(v)
+		s.SetDownloadSessionsValidFrom(v)
 	})
 }
 
-// UpdateSessionsValidFrom sets the "sessionsValidFrom" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateSessionsValidFrom() *UserUpsertBulk {
+// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateDownloadSessionsValidFrom() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateSessionsValidFrom()
+		s.UpdateDownloadSessionsValidFrom()
 	})
 }
 

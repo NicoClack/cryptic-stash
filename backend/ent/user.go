@@ -25,8 +25,8 @@ type User struct {
 	Locked bool `json:"locked,omitempty"`
 	// LockedUntil holds the value of the "lockedUntil" field.
 	LockedUntil *time.Time `json:"lockedUntil,omitempty"`
-	// SessionsValidFrom holds the value of the "sessionsValidFrom" field.
-	SessionsValidFrom time.Time `json:"sessionsValidFrom,omitempty"`
+	// DownloadSessionsValidFrom holds the value of the "downloadSessionsValidFrom" field.
+	DownloadSessionsValidFrom time.Time `json:"downloadSessionsValidFrom,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -39,8 +39,8 @@ type UserEdges struct {
 	Stash *Stash `json:"stash,omitempty"`
 	// Messengers holds the value of the messengers edge.
 	Messengers []*UserMessenger `json:"messengers,omitempty"`
-	// Sessions holds the value of the sessions edge.
-	Sessions []*Session `json:"sessions,omitempty"`
+	// DownloadSessions holds the value of the downloadSessions edge.
+	DownloadSessions []*DownloadSession `json:"downloadSessions,omitempty"`
 	// Logs holds the value of the logs edge.
 	Logs []*LogEntry `json:"logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -68,13 +68,13 @@ func (e UserEdges) MessengersOrErr() ([]*UserMessenger, error) {
 	return nil, &NotLoadedError{edge: "messengers"}
 }
 
-// SessionsOrErr returns the Sessions value or an error if the edge
+// DownloadSessionsOrErr returns the DownloadSessions value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+func (e UserEdges) DownloadSessionsOrErr() ([]*DownloadSession, error) {
 	if e.loadedTypes[2] {
-		return e.Sessions, nil
+		return e.DownloadSessions, nil
 	}
-	return nil, &NotLoadedError{edge: "sessions"}
+	return nil, &NotLoadedError{edge: "downloadSessions"}
 }
 
 // LogsOrErr returns the Logs value or an error if the edge
@@ -95,7 +95,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldUsername:
 			values[i] = new(sql.NullString)
-		case user.FieldLockedUntil, user.FieldSessionsValidFrom:
+		case user.FieldLockedUntil, user.FieldDownloadSessionsValidFrom:
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
@@ -139,11 +139,11 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				_m.LockedUntil = new(time.Time)
 				*_m.LockedUntil = value.Time
 			}
-		case user.FieldSessionsValidFrom:
+		case user.FieldDownloadSessionsValidFrom:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field sessionsValidFrom", values[i])
+				return fmt.Errorf("unexpected type %T for field downloadSessionsValidFrom", values[i])
 			} else if value.Valid {
-				_m.SessionsValidFrom = value.Time
+				_m.DownloadSessionsValidFrom = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -168,9 +168,9 @@ func (_m *User) QueryMessengers() *UserMessengerQuery {
 	return NewUserClient(_m.config).QueryMessengers(_m)
 }
 
-// QuerySessions queries the "sessions" edge of the User entity.
-func (_m *User) QuerySessions() *SessionQuery {
-	return NewUserClient(_m.config).QuerySessions(_m)
+// QueryDownloadSessions queries the "downloadSessions" edge of the User entity.
+func (_m *User) QueryDownloadSessions() *DownloadSessionQuery {
+	return NewUserClient(_m.config).QueryDownloadSessions(_m)
 }
 
 // QueryLogs queries the "logs" edge of the User entity.
@@ -212,8 +212,8 @@ func (_m *User) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("sessionsValidFrom=")
-	builder.WriteString(_m.SessionsValidFrom.Format(time.ANSIC))
+	builder.WriteString("downloadSessionsValidFrom=")
+	builder.WriteString(_m.DownloadSessionsValidFrom.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
