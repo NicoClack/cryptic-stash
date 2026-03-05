@@ -1,4 +1,10 @@
 -- +goose Up
+-- create "download_sessions" table
+CREATE TABLE `download_sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `code` blob NOT NULL, `valid_from` datetime NOT NULL, `valid_until` datetime NOT NULL, `user_agent` text NOT NULL, `ip` text NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `download_sessions_users_downloadSessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+-- create index "download_sessions_code_key" to table: "download_sessions"
+CREATE UNIQUE INDEX `download_sessions_code_key` ON `download_sessions` (`code`);
+-- create index "downloadsession_code_user_id" to table: "download_sessions"
+CREATE INDEX `downloadsession_code_user_id` ON `download_sessions` (`code`, `user_id`);
 -- create "jobs" table
 CREATE TABLE `jobs` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `due_at` datetime NOT NULL, `originally_due_at` datetime NOT NULL, `started_at` datetime NULL, `type` text NOT NULL, `version` integer NOT NULL, `priority` integer NOT NULL, `weight` integer NOT NULL, `body` json NOT NULL, `status` text NOT NULL DEFAULT ('pending'), `retries` integer NOT NULL DEFAULT (0), `retried_fraction` real NOT NULL DEFAULT (0), `logged_stall_warning` bool NOT NULL DEFAULT (false), PRIMARY KEY (`id`));
 -- create index "job_status_priority_due_at" to table: "jobs"
@@ -14,17 +20,11 @@ CREATE TABLE `log_entries` (`id` uuid NOT NULL, `logged_at` datetime NOT NULL, `
 -- create index "logentry_logged_at" to table: "log_entries"
 CREATE INDEX `logentry_logged_at` ON `log_entries` (`logged_at`);
 -- create "login_alerts" table
-CREATE TABLE `login_alerts` (`id` uuid NOT NULL, `sent_at` datetime NOT NULL, `versioned_messenger_type` text NOT NULL, `confirmed` bool NOT NULL, `session_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `login_alerts_sessions_loginAlerts` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE);
+CREATE TABLE `login_alerts` (`id` uuid NOT NULL, `sent_at` datetime NOT NULL, `confirmed` bool NOT NULL, `download_session_id` uuid NOT NULL, `user_messenger_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `login_alerts_download_sessions_loginAlerts` FOREIGN KEY (`download_session_id`) REFERENCES `download_sessions` (`id`) ON DELETE CASCADE, CONSTRAINT `login_alerts_user_messengers_loginAlerts` FOREIGN KEY (`user_messenger_id`) REFERENCES `user_messengers` (`id`) ON DELETE CASCADE);
 -- create "periodic_tasks" table
 CREATE TABLE `periodic_tasks` (`id` uuid NOT NULL, `name` text NOT NULL, `last_ran_at` datetime NULL, PRIMARY KEY (`id`));
 -- create index "periodictask_name" to table: "periodic_tasks"
 CREATE UNIQUE INDEX `periodictask_name` ON `periodic_tasks` (`name`);
--- create "sessions" table
-CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `code` blob NOT NULL, `valid_from` datetime NOT NULL, `valid_until` datetime NOT NULL, `user_agent` text NOT NULL, `ip` text NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
--- create index "sessions_code_key" to table: "sessions"
-CREATE UNIQUE INDEX `sessions_code_key` ON `sessions` (`code`);
--- create index "session_code_user_id" to table: "sessions"
-CREATE INDEX `session_code_user_id` ON `sessions` (`code`, `user_id`);
 -- create "stashes" table
 CREATE TABLE `stashes` (`id` uuid NOT NULL, `content` blob NOT NULL, `file_name` text NOT NULL, `mime` text NOT NULL, `nonce` blob NOT NULL, `key_salt` blob NOT NULL, `hash_time` integer NOT NULL, `hash_memory` integer NOT NULL, `hash_threads` integer NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `stashes_users_stash` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "stashes_user_id_key" to table: "stashes"
@@ -34,7 +34,7 @@ CREATE TABLE `two_factor_actions` (`id` uuid NOT NULL, `type` text NOT NULL, `ve
 -- create index "twofactoraction_code" to table: "two_factor_actions"
 CREATE INDEX `twofactoraction_code` ON `two_factor_actions` (`code`);
 -- create "users" table
-CREATE TABLE `users` (`id` uuid NOT NULL, `username` text NOT NULL, `locked` bool NOT NULL DEFAULT (false), `locked_until` datetime NULL, `sessions_valid_from` datetime NOT NULL, PRIMARY KEY (`id`));
+CREATE TABLE `users` (`id` uuid NOT NULL, `username` text NOT NULL, `locked` bool NOT NULL DEFAULT (false), `locked_until` datetime NULL, `download_sessions_valid_from` datetime NOT NULL, PRIMARY KEY (`id`));
 -- create index "users_username_key" to table: "users"
 CREATE UNIQUE INDEX `users_username_key` ON `users` (`username`);
 -- create "user_messengers" table
@@ -59,12 +59,6 @@ DROP TABLE `two_factor_actions`;
 DROP INDEX `stashes_user_id_key`;
 -- reverse: create "stashes" table
 DROP TABLE `stashes`;
--- reverse: create index "session_code_user_id" to table: "sessions"
-DROP INDEX `session_code_user_id`;
--- reverse: create index "sessions_code_key" to table: "sessions"
-DROP INDEX `sessions_code_key`;
--- reverse: create "sessions" table
-DROP TABLE `sessions`;
 -- reverse: create index "periodictask_name" to table: "periodic_tasks"
 DROP INDEX `periodictask_name`;
 -- reverse: create "periodic_tasks" table
@@ -85,3 +79,9 @@ DROP INDEX `job_due_at`;
 DROP INDEX `job_status_priority_due_at`;
 -- reverse: create "jobs" table
 DROP TABLE `jobs`;
+-- reverse: create index "downloadsession_code_user_id" to table: "download_sessions"
+DROP INDEX `downloadsession_code_user_id`;
+-- reverse: create index "download_sessions_code_key" to table: "download_sessions"
+DROP INDEX `download_sessions_code_key`;
+-- reverse: create "download_sessions" table
+DROP TABLE `download_sessions`;

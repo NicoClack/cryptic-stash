@@ -8,7 +8,7 @@ SELECT
     substr(lower(hex(randomblob(2))), 2) || '-' ||
     lower(hex(randomblob(6))) AS val;
 INSERT INTO
-	users (id, username, sessions_valid_from)
+	users (id, username, download_sessions_valid_from)
 VALUES
 	((SELECT val FROM next_uuid), "admin", DATE("now"));
 
