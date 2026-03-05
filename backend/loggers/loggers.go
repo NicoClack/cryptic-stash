@@ -76,8 +76,8 @@ type entry struct {
 func NewHandler(
 	level slog.Level, saveToDatabase bool, shouldPrint bool,
 	app *common.App,
-) Handler {
-	return Handler{
+) *Handler {
+	return &Handler{
 		App:            app,
 		Level:          level,
 		SaveToDatabase: saveToDatabase,
@@ -508,8 +508,9 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 		}
 
 		if len(errs) > 0 { // SendUsingAll will have logged
-			*loggedAdminNotificationErrorPtr = true
 			selfLogged = true
+			// Don't count this as logging the admin notification error since we want to loop around
+			// and use the fallback crash signal
 		}
 		if queuedCount == 0 {
 			session.Cancel()

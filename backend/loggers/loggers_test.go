@@ -17,6 +17,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/loggers"
 	"github.com/NicoClack/cryptic-stash/backend/services"
+	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/google/uuid"
 	"github.com/jonboulle/clockwork"
 	"github.com/stretchr/testify/require"
@@ -24,14 +25,14 @@ import (
 
 type Logger struct {
 	*slog.Logger
-	Handler loggers.Handler
+	Handler *loggers.Handler
 }
 
 func NewLogger(app *common.App) *Logger {
 	handler := loggers.NewHandler(slog.LevelDebug, true, true, app)
 	return NewLoggerWithHandler(handler, app)
 }
-func NewLoggerWithHandler(handler loggers.Handler, app *common.App) *Logger {
+func NewLoggerWithHandler(handler *loggers.Handler, app *common.App) *Logger {
 	return &Logger{
 		Logger:  slog.New(handler),
 		Handler: handler,
@@ -59,7 +60,7 @@ func (service *Logger) AssertWritten(t *testing.T, expectedEntries []ExpectedEnt
 
 	client := service.Handler.App.Database.Client()
 	entries := client.LogEntry.Query().Order(ent.Asc(logentry.FieldLoggedAt)).AllX(t.Context())
-	require.Len(t, entries, len(expectedEntries))
+	require.Len(t, entries, len(expectedEntries), "number of log entries should match")
 	for i, entry := range entries {
 		expected := expectedEntries[i]
 		prefix := fmt.Sprintf("Logger.AssertWritten: entry %v:", i)
@@ -512,8 +513,9 @@ func TestLogger_RetriesBulkCreateIndividually(t *testing.T) {
 }
 
 // TODO: flaky?
-func TestLogger_NoAdminUser_UsesCrashSignal(t *testing.T) {
+func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 	t.Parallel()
+	const minCrashSignalGap = 24 * time.Hour
 
 	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
@@ -528,21 +530,33 @@ func TestLogger_NoAdminUser_UsesCrashSignal(t *testing.T) {
 			ShutdownService: shutdownService,
 		}
 		app.Env.PANIC_ON_ERROR = false
-		app.Env.MESSAGE_ADMIN_ON_ERROR = true
-		app.Env.MIN_CRASH_SIGNAL_GAP = 24 * time.Hour
+		app.Env.MESSAGE_ADMIN_ON_ERROR = true // The admin user exists but doesn't have any messengers, so we'll fall back
+		app.Env.MIN_CRASH_SIGNAL_GAP = minCrashSignalGap
 		logger := NewLogger(app)
 		app.Logger = logger
 		logger.DeleteWrittenLogs(t) // The database is preserved between program runs, so the logs will be too
 		app.RateLimiter = services.NewRateLimiter(app)
 		app.KeyValue = services.NewKeyValue(app)
 		logger.Start()
+		app.KeyValue.Init()
+		mockMessenger := testhelpers.NewMockMessenger("MOCK_MESSENGER")
+		{
+			messengerService := services.NewMessengers(app, mockMessenger.Register)
+			app.Messengers = messengerService
+			app.Jobs = services.NewJobs(app, messengerService.RegisterJobs)
+		}
 
 		logger.Error("an error occurred!")
+		clock.Advance(time.Millisecond)
 		logger.Shutdown()
 
 		logger.AssertWritten(t, []ExpectedEntry{
 			{
 				Message: "an error occurred!",
+				Level:   int(slog.LevelError),
+			},
+			{
+				Message: "admin user has no contacts so couldn't notify them about an error",
 				Level:   int(slog.LevelError),
 			},
 		})
@@ -563,11 +577,14 @@ func TestLogger_NoAdminUser_UsesCrashSignal(t *testing.T) {
 		require.Equal(t, expectedLastSignal, lastCrashSignal)
 	}
 	startTime := clock.Now().UTC()
-	runProgram(true, startTime)
+	runProgram(true, startTime.Add(time.Millisecond))
 
-	clock.Advance(time.Second)
-	runProgram(false, startTime)
+	clock.Advance(
+		time.Second -
+			time.Millisecond, // 1ms was already advanced to space out the logs
+	)
+	runProgram(false, startTime.Add(time.Millisecond))
 
-	clock.Advance(testcommon.DefaultEnv().MIN_CRASH_SIGNAL_GAP - time.Second)
-	runProgram(true, clock.Now().UTC())
+	clock.Advance(minCrashSignalGap - (time.Second) - time.Millisecond) // The millisecond the next crash signal is allowed
+	runProgram(true, clock.Now().UTC().Add(time.Millisecond))
 }

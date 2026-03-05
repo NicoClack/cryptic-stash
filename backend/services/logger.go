@@ -9,7 +9,7 @@ import (
 
 type Logger struct {
 	*slog.Logger
-	Handler loggers.Handler
+	Handler *loggers.Handler
 }
 
 func NewLogger(app *common.App) *Logger {

@@ -24,6 +24,8 @@ type AppOptions struct {
 	MockMessengers []*MockMessenger
 }
 
+// Mainly intended for integration tests, e.g endpoints and jobs
+// Other tests should only initialise the specific services they need
 func NewApp(t *testing.T, options *AppOptions) *App {
 	t.Helper()
 
