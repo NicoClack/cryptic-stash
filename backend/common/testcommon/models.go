@@ -11,7 +11,7 @@ import (
 func NewDummyUser(counter int, dbClient *ent.Client, ctx context.Context, clock clockwork.Clock) *ent.User {
 	userOb := dbClient.User.Create().
 		SetUsername(fmt.Sprintf("user%v", counter)).
-		SetSessionsValidFrom(clock.Now()).
+		SetDownloadSessionsValidFrom(clock.Now()).
 		SaveX(ctx)
 	dbClient.Stash.Create().
 		SetContent([]byte{1}).

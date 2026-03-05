@@ -58,20 +58,20 @@ func (service *Core) GetAdminCode(password string, totpCode string) (string, boo
 func (service *Core) RandomAuthCode() []byte {
 	return core.RandomAuthCode()
 }
-func (service *Core) SendActiveSessionReminders(ctx context.Context) common.WrappedError {
-	return core.SendActiveSessionReminders(
+func (service *Core) SendActiveDownloadSessionReminders(ctx context.Context) common.WrappedError {
+	return core.SendActiveDownloadSessionReminders(
 		ctx, service.App.Clock, service.App.Messengers,
 	)
 }
-func (service *Core) DeleteExpiredSessions(ctx context.Context) common.WrappedError {
-	return core.DeleteExpiredSessions(ctx, service.App.Clock)
+func (service *Core) DeleteExpiredDownloadSessions(ctx context.Context) common.WrappedError {
+	return core.DeleteExpiredDownloadSessions(ctx, service.App.Clock)
 }
-func (service *Core) InvalidateUserSessions(userID uuid.UUID, ctx context.Context) common.WrappedError {
-	return core.InvalidateUserSessions(userID, ctx, service.App.Clock)
+func (service *Core) InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context) common.WrappedError {
+	return core.InvalidateUserDownloadSessions(userID, ctx, service.App.Clock)
 }
-func (service *Core) IsUserSufficientlyNotified(sessionOb *ent.Session) bool {
+func (service *Core) IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool {
 	return core.IsUserSufficientlyNotified(
-		sessionOb,
+		downloadSessionOb,
 		service.App.Messengers,
 		service.App.Logger,
 		service.App.Clock, service.App.Env,

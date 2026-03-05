@@ -84,7 +84,7 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 				validFrom := clock.Now().Add(app.Env.UNLOCK_TIME)
 				validUntil := clock.Now().Add(app.Env.AUTH_CODE_VALID_FOR)
 
-				sessionOb, stdErr := tx.Session.Create().
+				downloadSessionOb, stdErr := tx.DownloadSession.Create().
 					SetCreatedAt(clock.Now()).
 					SetUser(userOb).
 					SetCode(authCode).
@@ -99,10 +99,10 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				_, _, wrappedErr := app.Messengers.SendUsingAll(
 					&common.Message{
-						Type:       common.MessageLogin,
-						User:       userOb,
-						Time:       validFrom,
-						SessionIDs: []uuid.UUID{sessionOb.ID},
+						Type:               common.MessageLogin,
+						User:               userOb,
+						Time:               validFrom,
+						DownloadSessionIDs: []uuid.UUID{downloadSessionOb.ID},
 					},
 					ctx,
 				)

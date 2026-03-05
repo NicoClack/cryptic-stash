@@ -10,7 +10,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/core"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/session"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
@@ -54,36 +54,38 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 				DisableLogging()
 		}
 
-		sessionOb, stdErr := dbcommon.WithReadWriteTx(
+		downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*ent.Session, error) {
-				sessionOb, stdErr := tx.Session.Query().
-					Where(session.And(session.HasUserWith(user.Username(body.Username)), session.Code(givenAuthCodeBytes))).
+			func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
+				downloadSessionOb, stdErr := tx.DownloadSession.Query().
+					Where(downloadsession.And(downloadsession.HasUserWith(user.Username(body.Username)), downloadsession.Code(givenAuthCodeBytes))).
 					WithUser(func(userQuery *ent.UserQuery) {
 						userQuery.WithStash()
 						userQuery.WithMessengers()
 						userQuery.WithStash()
 					}).
-					WithLoginAlerts().
+					WithLoginAlerts(func(laQuery *ent.LoginAlertQuery) {
+						laQuery.WithUserMessenger()
+					}).
 					First(ctx)
 				if stdErr != nil {
 					return nil, servercommon.SendUnauthorizedIfNotFound(stdErr)
 				}
-				if clock.Now().After(sessionOb.ValidUntil) ||
-					sessionOb.Edges.User.SessionsValidFrom.After(sessionOb.CreatedAt) {
-					stdErr := tx.Session.DeleteOneID(sessionOb.ID).Exec(ctx)
+				if clock.Now().After(downloadSessionOb.ValidUntil) ||
+					downloadSessionOb.Edges.User.DownloadSessionsValidFrom.After(downloadSessionOb.CreatedAt) {
+					stdErr := tx.DownloadSession.DeleteOneID(downloadSessionOb.ID).Exec(ctx)
 					if stdErr != nil {
 						return nil, stdErr
 					}
 					return nil, servercommon.NewUnauthorizedError()
 				}
-				return sessionOb, nil
+				return downloadSessionOb, nil
 			},
 		)
 		if stdErr != nil {
 			return stdErr
 		}
-		if clock.Now().Before(sessionOb.ValidFrom) {
+		if clock.Now().Before(downloadSessionOb.ValidFrom) {
 			ginCtx.JSON(http.StatusBadRequest, DownloadResponse{
 				Errors: []servercommon.ErrorDetail{
 					{
@@ -91,16 +93,16 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 						Code:    "CODE_NOT_VALID_YET",
 					},
 				},
-				AuthorizationCodeValidFrom:  &sessionOb.ValidFrom,
-				AuthorizationCodeValidUntil: &sessionOb.ValidUntil,
+				AuthorizationCodeValidFrom:  &downloadSessionOb.ValidFrom,
+				AuthorizationCodeValidUntil: &downloadSessionOb.ValidUntil,
 			})
 			return nil
 		}
-		if app.Core.IsUserLocked(sessionOb.Edges.User) {
+		if app.Core.IsUserLocked(downloadSessionOb.Edges.User) {
 			return servercommon.NewUnauthorizedError()
 		}
 
-		userOb := sessionOb.Edges.User
+		userOb := downloadSessionOb.Edges.User
 		stashOb := userOb.Edges.Stash
 		if stashOb == nil {
 			return servercommon.NewUnauthorizedError()
@@ -122,14 +124,14 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 			)
 		}
 
-		if !app.Core.IsUserSufficientlyNotified(sessionOb) {
+		if !app.Core.IsUserSufficientlyNotified(downloadSessionOb) {
 			return servercommon.NewUnauthorizedError()
 		}
 
 		return dbcommon.WithWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
-				stdErr := tx.Session.UpdateOneID(sessionOb.ID).
+				stdErr := tx.DownloadSession.UpdateOneID(downloadSessionOb.ID).
 					SetValidUntil(clock.Now().Add(app.Env.USED_AUTH_CODE_VALID_FOR)).
 					Exec(ctx)
 				if stdErr != nil {

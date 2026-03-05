@@ -16,7 +16,7 @@
 		<CardHeader>
 			<CardTitle>Admin Messenger Setup</CardTitle>
 			<CardDescription>
-				To ensure we can alert you if there's an error, a user session is created or a few other
+				To ensure we can alert you if there's an error, a download session is created or a few other
 				things happen, please set up at least one messenger for your admin user.
 			</CardDescription>
 		</CardHeader>

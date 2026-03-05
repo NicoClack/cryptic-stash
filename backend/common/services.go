@@ -25,7 +25,7 @@ type Env struct {
 	MOUNT_PATH                    string
 	PROXY_ORIGINAL_IP_HEADER_NAME string
 	ALLOWED_ORIGINS               []string
-	// Things like deleting expired login sessions
+	// Things like deleting expired login download sessions
 	CLEAN_UP_INTERVAL time.Duration
 	FULL_GC_INTERVAL  time.Duration
 
@@ -42,10 +42,10 @@ type Env struct {
 	UNLOCK_TIME         time.Duration
 	AUTH_CODE_VALID_FOR time.Duration
 	// Once used, how much longer the auth code remains valid for
-	USED_AUTH_CODE_VALID_FOR         time.Duration
-	ACTIVE_SESSION_REMINDER_INTERVAL time.Duration
-	MIN_SUCCESSFUL_MESSAGE_COUNT     int
-	PASSWORD_HASH_SETTINGS           *PasswordHashSettings
+	USED_AUTH_CODE_VALID_FOR                  time.Duration
+	ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL time.Duration
+	MIN_SUCCESSFUL_MESSAGE_COUNT              int
+	PASSWORD_HASH_SETTINGS                    *PasswordHashSettings
 
 	LOG_STORE_INTERVAL time.Duration
 	// How long the server should wait for messengers to succeed before crashing the server to send the message
@@ -58,7 +58,8 @@ type Env struct {
 	MIN_ADMIN_MESSAGE_GAP time.Duration
 	MIN_CRASH_SIGNAL_GAP  time.Duration
 	// Used for testing, not recommended when running the server
-	PANIC_ON_ERROR bool
+	PANIC_ON_ERROR         bool
+	MESSAGE_ADMIN_ON_ERROR bool
 
 	ENABLE_DEVELOP_MESSENGER bool
 	DISCORD_TOKEN            string
@@ -141,26 +142,26 @@ type MessengerService interface {
 type MessageType string
 
 const (
-	MessageTest                  MessageType = "test"
-	MessageAdminError            MessageType = "adminError"
-	MessageRegular               MessageType = "regular"
-	MessageLogin                 MessageType = "login"
-	MessageActiveSessionReminder MessageType = "activeSessionReminder"
-	MessageDownload              MessageType = "download"
-	MessageUserUpdate            MessageType = "userUpdate"
-	MessageLock                  MessageType = "lock"
-	MessageUnlock                MessageType = "unlock"
-	MessageSelfLock              MessageType = "selfLock"
-	MessageSelfUnlock            MessageType = "selfUnlock" // When the self-lock expires
-	Message2FA                   MessageType = "2FA"
+	MessageTest                          MessageType = "test"
+	MessageAdminError                    MessageType = "adminError"
+	MessageRegular                       MessageType = "regular"
+	MessageLogin                         MessageType = "login"
+	MessageActiveDownloadSessionReminder MessageType = "activeDownloadSessionReminder"
+	MessageDownload                      MessageType = "download"
+	MessageUserUpdate                    MessageType = "userUpdate"
+	MessageLock                          MessageType = "lock"
+	MessageUnlock                        MessageType = "unlock"
+	MessageSelfLock                      MessageType = "selfLock"
+	MessageSelfUnlock                    MessageType = "selfUnlock" // When the self-lock expires
+	Message2FA                           MessageType = "2FA"
 )
 
 type Message struct {
-	Type       MessageType
-	User       *ent.User
-	Code       string
-	Time       time.Time
-	SessionIDs []uuid.UUID
+	Type               MessageType
+	User               *ent.User
+	Code               string
+	Time               time.Time
+	DownloadSessionIDs []uuid.UUID
 }
 
 // The public version of *messengers.Definition
@@ -236,10 +237,10 @@ type CoreService interface {
 	GetAdminCode(password string, totpCode string) (string, bool)
 	RandomAuthCode() []byte
 
-	SendActiveSessionReminders(ctx context.Context) WrappedError
-	DeleteExpiredSessions(ctx context.Context) WrappedError
-	InvalidateUserSessions(userID uuid.UUID, ctx context.Context) WrappedError
-	IsUserSufficientlyNotified(sessionOb *ent.Session) bool
+	SendActiveDownloadSessionReminders(ctx context.Context) WrappedError
+	DeleteExpiredDownloadSessions(ctx context.Context) WrappedError
+	InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context) WrappedError
+	IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool
 	IsUserLocked(userOb *ent.User) bool
 
 	Encrypt(data []byte, encryptionKey []byte) ([]byte, []byte, WrappedError)

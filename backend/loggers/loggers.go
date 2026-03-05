@@ -371,7 +371,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 	selfLogged := false
 
 	shouldNotifyAdmin := false
-	useFallback := common.AdminUsername == ""
+	useFallback := !handler.App.Env.MESSAGE_ADMIN_ON_ERROR
 	for _, entry := range entries {
 		if entry.level >= int(slog.LevelError) && !entry.disableAdminNotification {
 			shouldNotifyAdmin = true

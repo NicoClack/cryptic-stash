@@ -26,16 +26,16 @@ func (m *EmptyCoreService) GetAdminCode(password string, totpCode string) (strin
 func (m *EmptyCoreService) RandomAuthCode() []byte {
 	return []byte{}
 }
-func (m *EmptyCoreService) SendActiveSessionReminders(ctx context.Context) common.WrappedError {
+func (m *EmptyCoreService) SendActiveDownloadSessionReminders(ctx context.Context) common.WrappedError {
 	return nil
 }
-func (m *EmptyCoreService) DeleteExpiredSessions(ctx context.Context) common.WrappedError {
+func (m *EmptyCoreService) DeleteExpiredDownloadSessions(ctx context.Context) common.WrappedError {
 	return nil
 }
-func (m *EmptyCoreService) InvalidateUserSessions(userID uuid.UUID, ctx context.Context) common.WrappedError {
+func (m *EmptyCoreService) InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context) common.WrappedError {
 	return nil
 }
-func (m *EmptyCoreService) IsUserSufficientlyNotified(sessionOb *ent.Session) bool {
+func (m *EmptyCoreService) IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool {
 	return false
 }
 func (m *EmptyCoreService) IsUserLocked(userOb *ent.User) bool {

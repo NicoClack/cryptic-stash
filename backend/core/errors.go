@@ -3,11 +3,11 @@ package core
 import "github.com/NicoClack/cryptic-stash/backend/common"
 
 const (
-	ErrTypeSendActiveSessionReminders = "send active session reminders"
-	ErrTypeDeleteExpiredSessions      = "delete expired sessions"
-	ErrTypeInvalidateUserSessions     = "invalidate user sessions"
-	ErrTypeEncrypt                    = "encrypt"
-	ErrTypeDecrypt                    = "decrypt"
+	ErrTypeSendActiveDownloadSessionReminders = "send active download session reminders"
+	ErrTypeDeleteExpiredDownloadSessions      = "delete expired download sessions"
+	ErrTypeInvalidateUserDownloadSessions     = "invalidate user download sessions"
+	ErrTypeEncrypt                            = "encrypt"
+	ErrTypeDecrypt                            = "decrypt"
 	// Lower level
 	ErrTypeInvalidData = "invalid data"
 )
@@ -17,9 +17,9 @@ var ErrWrapperCreateCipher = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeI
 
 var ErrIncorrectPassword = common.NewErrorWithCategories("incorrect password", common.ErrTypeCore)
 
-var ErrWrapperSendActiveSessionReminders = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeSendActiveSessionReminders)
-var ErrWrapperDeleteExpiredSessions = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeDeleteExpiredSessions)
-var ErrWrapperInvalidateUserSessions = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeInvalidateUserSessions)
+var ErrWrapperSendActiveDownloadSessionReminders = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeSendActiveDownloadSessionReminders)
+var ErrWrapperDeleteExpiredDownloadSessions = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeDeleteExpiredDownloadSessions)
+var ErrWrapperInvalidateUserDownloadSessions = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeInvalidateUserDownloadSessions)
 
 // These functions don't categorize their errors
 var ErrWrapperEncrypt = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeEncrypt)

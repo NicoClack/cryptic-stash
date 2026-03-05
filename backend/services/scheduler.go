@@ -19,23 +19,23 @@ func NewScheduler(app *common.App) *Scheduler {
 
 	engine.Register(
 		func(taskContext *schedulers.TaskContext) {
-			app.Logger.Info("sending active session reminders...")
+			app.Logger.Info("sending active download session reminders...")
 			stdErr := dbcommon.WithWriteTx(
 				taskContext.Context, taskContext.App.Database,
 				func(tx *ent.Tx, ctx context.Context) error {
-					return app.Core.SendActiveSessionReminders(ctx)
+					return app.Core.SendActiveDownloadSessionReminders(ctx)
 				},
 			)
 			if stdErr != nil {
 				taskContext.App.Logger.Error(
-					"unable to send active session reminders!",
+					"unable to send active download session reminders!",
 					"error", stdErr,
 				)
 			}
 		},
 		schedulers.PersistentFixedInterval(
 			"SEND_ACTIVE_SESSION_REMINDERS",
-			app.Env.ACTIVE_SESSION_REMINDER_INTERVAL,
+			app.Env.ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL,
 		),
 	)
 	engine.Register(
@@ -44,7 +44,7 @@ func NewScheduler(app *common.App) *Scheduler {
 			stdErr := dbcommon.WithWriteTx(
 				taskContext.Context, taskContext.App.Database,
 				func(tx *ent.Tx, ctx context.Context) error {
-					wrappedErr := app.Core.DeleteExpiredSessions(ctx)
+					wrappedErr := app.Core.DeleteExpiredDownloadSessions(ctx)
 					if wrappedErr != nil {
 						return wrappedErr
 					}

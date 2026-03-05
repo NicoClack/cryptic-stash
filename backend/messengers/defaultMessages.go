@@ -24,7 +24,7 @@ var defaultMessageMap = map[common.MessageType]func(message *common.Message) str
 	common.MessageLogin: func(message *common.Message) string {
 		return "LOGIN ATTEMPT! " + getLoginAttemptMessageBody(message)
 	},
-	common.MessageActiveSessionReminder: func(message *common.Message) string {
+	common.MessageActiveDownloadSessionReminder: func(message *common.Message) string {
 		return "REMINDER: YOU HAVE A PENDING LOGIN ATTEMPT! " + getLoginAttemptMessageBody(message)
 	},
 	common.MessageDownload: func(message *common.Message) string {

@@ -41,27 +41,27 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 	encrypted, nonce, wrappedErr := app.Core.Encrypt(fileContent, encryptionKey)
 	require.NoError(t, wrappedErr)
 
-	sessionOb, stdErr := dbcommon.WithReadWriteTx(
+	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.Session, error) {
+		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
 			now := clock.Now()
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
-				SetSessionsValidFrom(now).
+				SetDownloadSessionsValidFrom(now).
 				SetLockedUntil(now). // Has just expired
 				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
-			stdErr = tx.UserMessenger.
+			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
 				SetEnabled(true).
-				Exec(ctx)
+				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
@@ -83,7 +83,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			authCode := app.Core.RandomAuthCode()
 			validUntil := now.Add(24 * time.Hour)
 
-			sessionOb, stdErr := tx.Session.Create().
+			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
 				SetCode(authCode).
@@ -93,16 +93,16 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return sessionOb, stdErr
+				return downloadSessionOb, stdErr
 			}
 
 			_, stdErr = tx.LoginAlert.Create().
-				SetSession(sessionOb).
+				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
-				SetVersionedMessengerType(app.MockMessenger.VersionedName()).
+				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
 				Save(ctx)
-			return sessionOb, stdErr
+			return downloadSessionOb, stdErr
 		},
 	)
 	require.NoError(t, stdErr)
@@ -113,7 +113,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
-			AuthorizationCode: base64.StdEncoding.EncodeToString(sessionOb.Code),
+			AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
 		},
 	)
 	testcommon.AssertJSONResponse(
@@ -150,28 +150,28 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 	encrypted, nonce, wrappedErr := core.Encrypt(fileContent, encryptionKey)
 	require.NoError(t, wrappedErr)
 
-	sessionOb, stdErr := dbcommon.WithReadWriteTx(
+	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.Session, error) {
+		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
 			now := clock.Now()
 			// Set SessionsValidFrom to be in the future
 			sessionsValidFrom := now.Add(1 * time.Hour)
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
-				SetSessionsValidFrom(sessionsValidFrom).
+				SetDownloadSessionsValidFrom(sessionsValidFrom).
 				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
-			stdErr = tx.UserMessenger.
+			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
 				SetEnabled(true).
-				Exec(ctx)
+				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
@@ -193,7 +193,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			authCode := core.RandomAuthCode()
 			validUntil := now.Add(24 * time.Hour)
 
-			sessionOb, stdErr := tx.Session.Create().
+			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
 				SetCode(authCode).
@@ -203,16 +203,16 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return sessionOb, stdErr
+				return downloadSessionOb, stdErr
 			}
 
 			_, stdErr = tx.LoginAlert.Create().
-				SetSession(sessionOb).
+				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
-				SetVersionedMessengerType(app.MockMessenger.VersionedName()).
+				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
 				Save(ctx)
-			return sessionOb, stdErr
+			return downloadSessionOb, stdErr
 		},
 	)
 	require.NoError(t, stdErr)
@@ -223,7 +223,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
-			AuthorizationCode: base64.StdEncoding.EncodeToString(sessionOb.Code),
+			AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
 		},
 	)
 	testcommon.AssertJSONResponse(
@@ -256,27 +256,27 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 	encrypted, nonce, wrappedErr := app.Core.Encrypt(fileContent, encryptionKey)
 	require.NoError(t, wrappedErr)
 
-	sessionOb, stdErr := dbcommon.WithReadWriteTx(
+	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.Session, error) {
+		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
 			now := clock.Now()
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
-				SetSessionsValidFrom(now).
+				SetDownloadSessionsValidFrom(now).
 				SetLockedUntil(now.Add((24 * time.Hour) + time.Nanosecond)).
 				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
-			stdErr = tx.UserMessenger.
+			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
 				SetEnabled(true).
-				Exec(ctx)
+				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
@@ -298,10 +298,10 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			authCode := app.Core.RandomAuthCode()
 			validUntil := now.Add(2 * 24 * time.Hour) // Lasts until after the user is unlocked
 
-			// This session shouldn't exist, but let's say an attacker managed to somehow create it
+			// This download session shouldn't exist, but let's say an attacker managed to somehow create it
 			// at the exact time the user was locked
 			// Even though both things should happen in the same transaction
-			sessionOb, stdErr := tx.Session.Create().
+			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
 				SetCode(authCode).
@@ -311,32 +311,32 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return sessionOb, stdErr
+				return downloadSessionOb, stdErr
 			}
 
 			_, stdErr = tx.LoginAlert.Create().
-				SetSession(sessionOb).
+				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
-				SetVersionedMessengerType(app.MockMessenger.VersionedName()).
+				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
 				Save(ctx)
 			if stdErr != nil {
-				return sessionOb, stdErr
+				return downloadSessionOb, stdErr
 			}
 
 			// Slightly unrealistic but it's easiest to create both alerts here
 			// This is needed otherwise core.IsUserSufficientlyNotified thinks the jobs are failing and prevents the login
 			_, stdErr = tx.LoginAlert.Create().
-				SetSession(sessionOb).
+				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now.Add(24 * time.Hour)).
-				SetVersionedMessengerType(app.MockMessenger.VersionedName()).
+				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
 				Save(ctx)
 			if stdErr != nil {
-				return sessionOb, stdErr
+				return downloadSessionOb, stdErr
 			}
 
-			return sessionOb, nil
+			return downloadSessionOb, nil
 		},
 	)
 	require.NoError(t, stdErr)
@@ -348,7 +348,7 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			users.DownloadPayload{
 				Username:          username,
 				Password:          password,
-				AuthorizationCode: base64.StdEncoding.EncodeToString(sessionOb.Code),
+				AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
 			},
 		)
 	}
@@ -409,28 +409,28 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 	encrypted, nonce, wrappedErr := app.Core.Encrypt(fileContent, encryptionKey)
 	require.NoError(t, wrappedErr)
 
-	sessionOb, stdErr := dbcommon.WithReadWriteTx(
+	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.Session, error) {
+		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
 			now := clock.Now()
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
-				SetSessionsValidFrom(now).
+				SetDownloadSessionsValidFrom(now).
 				SetLockedUntil(now.Add(-time.Hour)). // Expired a little while ago
 				SetLocked(true).                     // But this takes priority
 				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
-			stdErr = tx.UserMessenger.
+			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
 				SetEnabled(true).
-				Exec(ctx)
+				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
 			}
@@ -452,10 +452,10 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			authCode := app.Core.RandomAuthCode()
 			validUntil := now.Add(24 * time.Hour)
 
-			// This session shouldn't exist, but let's say an attacker managed to somehow create it
+			// This download session shouldn't exist, but let's say an attacker managed to somehow create it
 			// at the exact time the user was locked
 			// Even though both things should happen in the same transaction
-			sessionOb, stdErr := tx.Session.Create().
+			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
 				SetCode(authCode).
@@ -465,16 +465,16 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return sessionOb, stdErr
+				return downloadSessionOb, stdErr
 			}
 
 			_, stdErr = tx.LoginAlert.Create().
-				SetSession(sessionOb).
+				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
-				SetVersionedMessengerType(app.MockMessenger.VersionedName()).
+				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
 				Save(ctx)
-			return sessionOb, stdErr
+			return downloadSessionOb, stdErr
 		},
 	)
 	require.NoError(t, stdErr)
@@ -485,7 +485,7 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
-			AuthorizationCode: base64.StdEncoding.EncodeToString(sessionOb.Code),
+			AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
 		},
 	)
 	testcommon.AssertJSONResponse(

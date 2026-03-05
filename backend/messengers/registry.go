@@ -61,7 +61,7 @@ type JobContext = jobs.Context
 type bodyWrapperType struct {
 	MessageType            common.MessageType
 	VersionedMessengerType string
-	SessionIDs             []uuid.UUID
+	DownloadSessionIDs     []uuid.UUID
 	Inner                  string
 }
 type Context struct {
@@ -141,33 +141,32 @@ func (registry *Registry) Register(definition *Definition) {
 			}
 
 			if body.MessageType == common.MessageLogin ||
-				body.MessageType == common.MessageActiveSessionReminder {
+				body.MessageType == common.MessageActiveDownloadSessionReminder {
 				// This is in a separate transaction, so we could successfully commit the messenger's transaction
 				// but roll back this one. But that's ok since it's best to undercount the successful login alerts sent
 				stdErr := dbcommon.WithWriteTx(
 					jobCtx.Context, registry.App.Database,
 					func(tx *ent.Tx, ctx context.Context) error {
 						return tx.LoginAlert.MapCreateBulk(
-							body.SessionIDs,
+							body.DownloadSessionIDs,
 							func(alertCreate *ent.LoginAlertCreate, i int) {
 								alertCreate.
 									SetSentAt(registry.App.Clock.Now()).
-									SetVersionedMessengerType(body.VersionedMessengerType).
 									SetConfirmed(messengerCtx.confirmedSent).
-									SetSessionID(body.SessionIDs[i])
+									SetDownloadSessionID(body.DownloadSessionIDs[i])
 							},
 						).Exec(ctx)
 					},
 				)
 				if stdErr != nil {
-					// TODO: handle missing session IDs, stop this being atomic
+					// TODO: handle missing download session IDs, stop this being atomic
 					jobCtx.Logger.Error(
 						"failed to create LoginAlert objects for successfully sent message, if not enough objects are created, "+
-							"the user won't be able to download their data once their session becomes valid",
+							"the user won't be able to download their data once their download session becomes valid",
 						"error",
 						stdErr,
-						"sessionIDs",
-						body.SessionIDs,
+						"downloadSessionIDs",
+						body.DownloadSessionIDs,
 					)
 				}
 			}
@@ -267,7 +266,7 @@ func (registry *Registry) Send(
 		&bodyWrapperType{
 			MessageType:            message.Type,
 			VersionedMessengerType: versionedType,
-			SessionIDs:             message.SessionIDs,
+			DownloadSessionIDs:     message.DownloadSessionIDs,
 			Inner:                  string(encoded),
 		},
 		func(jobCreate *ent.JobCreate) {

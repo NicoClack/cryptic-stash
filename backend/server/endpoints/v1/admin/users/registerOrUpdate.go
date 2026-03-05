@@ -59,7 +59,7 @@ func RegisterOrUpdate(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) error {
 				userOb, stdErr := tx.User.Create().
 					SetUsername(body.Username).
-					SetSessionsValidFrom(app.Clock.Now()).
+					SetDownloadSessionsValidFrom(app.Clock.Now()).
 					Save(ctx)
 				if stdErr != nil {
 					return stdErr
@@ -79,7 +79,7 @@ func RegisterOrUpdate(app *servercommon.ServerApp) gin.HandlerFunc {
 					return stdErr
 				}
 
-				wrappedErr := app.Core.InvalidateUserSessions(userOb.ID, ctx)
+				wrappedErr := app.Core.InvalidateUserDownloadSessions(userOb.ID, ctx)
 				if wrappedErr != nil {
 					return wrappedErr
 				}

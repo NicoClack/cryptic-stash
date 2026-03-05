@@ -46,7 +46,7 @@ func AdminLock(app *servercommon.ServerApp) gin.HandlerFunc {
 					return servercommon.Send404IfNotFound(stdErr)
 				}
 
-				wrappedErr := app.Core.InvalidateUserSessions(userOb.ID, ctx)
+				wrappedErr := app.Core.InvalidateUserDownloadSessions(userOb.ID, ctx)
 				if wrappedErr != nil {
 					return wrappedErr
 				}

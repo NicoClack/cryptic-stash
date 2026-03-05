@@ -29,6 +29,9 @@ type Logger struct {
 
 func NewLogger(app *common.App) *Logger {
 	handler := loggers.NewHandler(slog.LevelDebug, true, true, app)
+	return NewLoggerWithHandler(handler, app)
+}
+func NewLoggerWithHandler(handler loggers.Handler, app *common.App) *Logger {
 	return &Logger{
 		Logger:  slog.New(handler),
 		Handler: handler,
@@ -228,7 +231,7 @@ func TestLogger_WithAttrs_and_WithGroup(t *testing.T) {
 	logger.WithGroup("group").Info("created user", "userID", userIDs[1])
 	logger.With(
 		"requestID", "request-2",
-	).WithGroup("user_data").Info("user session started", "username", "alice")
+	).WithGroup("user_data").Info("user download session started", "username", "alice")
 	logger.WithGroup("http").WithGroup("request").Info("incoming request 1", "method", "GET", "path", "/api/v1/users")
 	logger.WithGroup("http").Info("incoming request 2", slog.Group("request", "method", "GET", "path", "/api/v1/users"))
 
@@ -262,7 +265,7 @@ func TestLogger_WithAttrs_and_WithGroup(t *testing.T) {
 			},
 		},
 		{
-			Message: "user session started",
+			Message: "user download session started",
 			Level:   int(slog.LevelInfo),
 			Attributes: map[string]any{
 				"requestID": "request-2",
@@ -358,7 +361,7 @@ func TestLogger_SpecialAttributes(t *testing.T) {
 	app.Logger = logger
 	logger.Start()
 
-	logger.Info("deleted expired sessions", loggers.UserIDKey, userIDs[0])
+	logger.Info("deleted expired download sessions", loggers.UserIDKey, userIDs[0])
 	logger.Info(
 		"public message nobody will be sent",
 		loggers.PublicMessageKey, "public version of \"public message nobody will be sent\"",
@@ -375,7 +378,7 @@ func TestLogger_SpecialAttributes(t *testing.T) {
 	logger.Shutdown()
 	logger.AssertWritten(t, []ExpectedEntry{
 		{
-			Message: "deleted expired sessions",
+			Message: "deleted expired download sessions",
 			Level:   int(slog.LevelInfo),
 			UserID:  userIDs[0],
 			Attributes: map[string]any{
@@ -525,10 +528,13 @@ func TestLogger_NoAdminUser_UsesCrashSignal(t *testing.T) {
 			ShutdownService: shutdownService,
 		}
 		app.Env.PANIC_ON_ERROR = false
-		app.KeyValue = services.NewKeyValue(app)
+		app.Env.MESSAGE_ADMIN_ON_ERROR = true
+		app.Env.MIN_CRASH_SIGNAL_GAP = 24 * time.Hour
 		logger := NewLogger(app)
 		app.Logger = logger
 		logger.DeleteWrittenLogs(t) // The database is preserved between program runs, so the logs will be too
+		app.RateLimiter = services.NewRateLimiter(app)
+		app.KeyValue = services.NewKeyValue(app)
 		logger.Start()
 
 		logger.Error("an error occurred!")
