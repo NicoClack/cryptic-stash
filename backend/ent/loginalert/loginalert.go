@@ -19,8 +19,12 @@ const (
 	FieldConfirmed = "confirmed"
 	// FieldDownloadSessionID holds the string denoting the downloadsessionid field in the database.
 	FieldDownloadSessionID = "download_session_id"
+	// FieldUserMessengerID holds the string denoting the usermessengerid field in the database.
+	FieldUserMessengerID = "user_messenger_id"
 	// EdgeDownloadSession holds the string denoting the downloadsession edge name in mutations.
 	EdgeDownloadSession = "downloadSession"
+	// EdgeUserMessenger holds the string denoting the usermessenger edge name in mutations.
+	EdgeUserMessenger = "userMessenger"
 	// Table holds the table name of the loginalert in the database.
 	Table = "login_alerts"
 	// DownloadSessionTable is the table that holds the downloadSession relation/edge.
@@ -30,6 +34,13 @@ const (
 	DownloadSessionInverseTable = "download_sessions"
 	// DownloadSessionColumn is the table column denoting the downloadSession relation/edge.
 	DownloadSessionColumn = "download_session_id"
+	// UserMessengerTable is the table that holds the userMessenger relation/edge.
+	UserMessengerTable = "login_alerts"
+	// UserMessengerInverseTable is the table name for the UserMessenger entity.
+	// It exists in this package in order to avoid circular dependency with the "usermessenger" package.
+	UserMessengerInverseTable = "user_messengers"
+	// UserMessengerColumn is the table column denoting the userMessenger relation/edge.
+	UserMessengerColumn = "user_messenger_id"
 )
 
 // Columns holds all SQL columns for loginalert fields.
@@ -38,6 +49,7 @@ var Columns = []string{
 	FieldSentAt,
 	FieldConfirmed,
 	FieldDownloadSessionID,
+	FieldUserMessengerID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -78,10 +90,22 @@ func ByDownloadSessionID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDownloadSessionID, opts...).ToFunc()
 }
 
+// ByUserMessengerID orders the results by the userMessengerID field.
+func ByUserMessengerID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserMessengerID, opts...).ToFunc()
+}
+
 // ByDownloadSessionField orders the results by downloadSession field.
 func ByDownloadSessionField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newDownloadSessionStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByUserMessengerField orders the results by userMessenger field.
+func ByUserMessengerField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserMessengerStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newDownloadSessionStep() *sqlgraph.Step {
@@ -89,5 +113,12 @@ func newDownloadSessionStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DownloadSessionInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, DownloadSessionTable, DownloadSessionColumn),
+	)
+}
+func newUserMessengerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserMessengerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserMessengerTable, UserMessengerColumn),
 	)
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
 )
 
@@ -25,6 +26,7 @@ type LoginAlertQuery struct {
 	inters              []Interceptor
 	predicates          []predicate.LoginAlert
 	withDownloadSession *DownloadSessionQuery
+	withUserMessenger   *UserMessengerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +78,28 @@ func (_q *LoginAlertQuery) QueryDownloadSession() *DownloadSessionQuery {
 			sqlgraph.From(loginalert.Table, loginalert.FieldID, selector),
 			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, loginalert.DownloadSessionTable, loginalert.DownloadSessionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUserMessenger chains the current query on the "userMessenger" edge.
+func (_q *LoginAlertQuery) QueryUserMessenger() *UserMessengerQuery {
+	query := (&UserMessengerClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(loginalert.Table, loginalert.FieldID, selector),
+			sqlgraph.To(usermessenger.Table, usermessenger.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, loginalert.UserMessengerTable, loginalert.UserMessengerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -276,6 +300,7 @@ func (_q *LoginAlertQuery) Clone() *LoginAlertQuery {
 		inters:              append([]Interceptor{}, _q.inters...),
 		predicates:          append([]predicate.LoginAlert{}, _q.predicates...),
 		withDownloadSession: _q.withDownloadSession.Clone(),
+		withUserMessenger:   _q.withUserMessenger.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -290,6 +315,17 @@ func (_q *LoginAlertQuery) WithDownloadSession(opts ...func(*DownloadSessionQuer
 		opt(query)
 	}
 	_q.withDownloadSession = query
+	return _q
+}
+
+// WithUserMessenger tells the query-builder to eager-load the nodes that are connected to
+// the "userMessenger" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *LoginAlertQuery) WithUserMessenger(opts ...func(*UserMessengerQuery)) *LoginAlertQuery {
+	query := (&UserMessengerClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withUserMessenger = query
 	return _q
 }
 
@@ -371,8 +407,9 @@ func (_q *LoginAlertQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*L
 	var (
 		nodes       = []*LoginAlert{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withDownloadSession != nil,
+			_q.withUserMessenger != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -396,6 +433,12 @@ func (_q *LoginAlertQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*L
 	if query := _q.withDownloadSession; query != nil {
 		if err := _q.loadDownloadSession(ctx, query, nodes, nil,
 			func(n *LoginAlert, e *DownloadSession) { n.Edges.DownloadSession = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withUserMessenger; query != nil {
+		if err := _q.loadUserMessenger(ctx, query, nodes, nil,
+			func(n *LoginAlert, e *UserMessenger) { n.Edges.UserMessenger = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -431,6 +474,35 @@ func (_q *LoginAlertQuery) loadDownloadSession(ctx context.Context, query *Downl
 	}
 	return nil
 }
+func (_q *LoginAlertQuery) loadUserMessenger(ctx context.Context, query *UserMessengerQuery, nodes []*LoginAlert, init func(*LoginAlert), assign func(*LoginAlert, *UserMessenger)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*LoginAlert)
+	for i := range nodes {
+		fk := nodes[i].UserMessengerID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(usermessenger.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "userMessengerID" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (_q *LoginAlertQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
@@ -459,6 +531,9 @@ func (_q *LoginAlertQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withDownloadSession != nil {
 			_spec.Node.AddColumnOnce(loginalert.FieldDownloadSessionID)
+		}
+		if _q.withUserMessenger != nil {
+			_spec.Node.AddColumnOnce(loginalert.FieldUserMessengerID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

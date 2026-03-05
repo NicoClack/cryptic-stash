@@ -71,6 +71,11 @@ func DownloadSessionID(v uuid.UUID) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldEQ(FieldDownloadSessionID, v))
 }
 
+// UserMessengerID applies equality check predicate on the "userMessengerID" field. It's identical to UserMessengerIDEQ.
+func UserMessengerID(v uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldEQ(FieldUserMessengerID, v))
+}
+
 // SentAtEQ applies the EQ predicate on the "sentAt" field.
 func SentAtEQ(v time.Time) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldEQ(FieldSentAt, v))
@@ -141,6 +146,26 @@ func DownloadSessionIDNotIn(vs ...uuid.UUID) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldNotIn(FieldDownloadSessionID, vs...))
 }
 
+// UserMessengerIDEQ applies the EQ predicate on the "userMessengerID" field.
+func UserMessengerIDEQ(v uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldEQ(FieldUserMessengerID, v))
+}
+
+// UserMessengerIDNEQ applies the NEQ predicate on the "userMessengerID" field.
+func UserMessengerIDNEQ(v uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldNEQ(FieldUserMessengerID, v))
+}
+
+// UserMessengerIDIn applies the In predicate on the "userMessengerID" field.
+func UserMessengerIDIn(vs ...uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldIn(FieldUserMessengerID, vs...))
+}
+
+// UserMessengerIDNotIn applies the NotIn predicate on the "userMessengerID" field.
+func UserMessengerIDNotIn(vs ...uuid.UUID) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldNotIn(FieldUserMessengerID, vs...))
+}
+
 // HasDownloadSession applies the HasEdge predicate on the "downloadSession" edge.
 func HasDownloadSession() predicate.LoginAlert {
 	return predicate.LoginAlert(func(s *sql.Selector) {
@@ -156,6 +181,29 @@ func HasDownloadSession() predicate.LoginAlert {
 func HasDownloadSessionWith(preds ...predicate.DownloadSession) predicate.LoginAlert {
 	return predicate.LoginAlert(func(s *sql.Selector) {
 		step := newDownloadSessionStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUserMessenger applies the HasEdge predicate on the "userMessenger" edge.
+func HasUserMessenger() predicate.LoginAlert {
+	return predicate.LoginAlert(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserMessengerTable, UserMessengerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserMessengerWith applies the HasEdge predicate on the "userMessenger" edge with a given conditions (other predicates).
+func HasUserMessengerWith(preds ...predicate.UserMessenger) predicate.LoginAlert {
+	return predicate.LoginAlert(func(s *sql.Selector) {
+		step := newUserMessengerStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

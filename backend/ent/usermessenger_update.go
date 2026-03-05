@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -111,6 +112,21 @@ func (_u *UserMessengerUpdate) SetUser(v *User) *UserMessengerUpdate {
 	return _u.SetUserID(v.ID)
 }
 
+// AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
+func (_u *UserMessengerUpdate) AddLoginAlertIDs(ids ...uuid.UUID) *UserMessengerUpdate {
+	_u.mutation.AddLoginAlertIDs(ids...)
+	return _u
+}
+
+// AddLoginAlerts adds the "loginAlerts" edges to the LoginAlert entity.
+func (_u *UserMessengerUpdate) AddLoginAlerts(v ...*LoginAlert) *UserMessengerUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLoginAlertIDs(ids...)
+}
+
 // Mutation returns the UserMessengerMutation object of the builder.
 func (_u *UserMessengerUpdate) Mutation() *UserMessengerMutation {
 	return _u.mutation
@@ -120,6 +136,27 @@ func (_u *UserMessengerUpdate) Mutation() *UserMessengerMutation {
 func (_u *UserMessengerUpdate) ClearUser() *UserMessengerUpdate {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearLoginAlerts clears all "loginAlerts" edges to the LoginAlert entity.
+func (_u *UserMessengerUpdate) ClearLoginAlerts() *UserMessengerUpdate {
+	_u.mutation.ClearLoginAlerts()
+	return _u
+}
+
+// RemoveLoginAlertIDs removes the "loginAlerts" edge to LoginAlert entities by IDs.
+func (_u *UserMessengerUpdate) RemoveLoginAlertIDs(ids ...uuid.UUID) *UserMessengerUpdate {
+	_u.mutation.RemoveLoginAlertIDs(ids...)
+	return _u
+}
+
+// RemoveLoginAlerts removes "loginAlerts" edges to LoginAlert entities.
+func (_u *UserMessengerUpdate) RemoveLoginAlerts(v ...*LoginAlert) *UserMessengerUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLoginAlertIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -216,6 +253,51 @@ func (_u *UserMessengerUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LoginAlertsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usermessenger.LoginAlertsTable,
+			Columns: []string{usermessenger.LoginAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLoginAlertsIDs(); len(nodes) > 0 && !_u.mutation.LoginAlertsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usermessenger.LoginAlertsTable,
+			Columns: []string{usermessenger.LoginAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LoginAlertsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usermessenger.LoginAlertsTable,
+			Columns: []string{usermessenger.LoginAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -323,6 +405,21 @@ func (_u *UserMessengerUpdateOne) SetUser(v *User) *UserMessengerUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
+// AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
+func (_u *UserMessengerUpdateOne) AddLoginAlertIDs(ids ...uuid.UUID) *UserMessengerUpdateOne {
+	_u.mutation.AddLoginAlertIDs(ids...)
+	return _u
+}
+
+// AddLoginAlerts adds the "loginAlerts" edges to the LoginAlert entity.
+func (_u *UserMessengerUpdateOne) AddLoginAlerts(v ...*LoginAlert) *UserMessengerUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLoginAlertIDs(ids...)
+}
+
 // Mutation returns the UserMessengerMutation object of the builder.
 func (_u *UserMessengerUpdateOne) Mutation() *UserMessengerMutation {
 	return _u.mutation
@@ -332,6 +429,27 @@ func (_u *UserMessengerUpdateOne) Mutation() *UserMessengerMutation {
 func (_u *UserMessengerUpdateOne) ClearUser() *UserMessengerUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearLoginAlerts clears all "loginAlerts" edges to the LoginAlert entity.
+func (_u *UserMessengerUpdateOne) ClearLoginAlerts() *UserMessengerUpdateOne {
+	_u.mutation.ClearLoginAlerts()
+	return _u
+}
+
+// RemoveLoginAlertIDs removes the "loginAlerts" edge to LoginAlert entities by IDs.
+func (_u *UserMessengerUpdateOne) RemoveLoginAlertIDs(ids ...uuid.UUID) *UserMessengerUpdateOne {
+	_u.mutation.RemoveLoginAlertIDs(ids...)
+	return _u
+}
+
+// RemoveLoginAlerts removes "loginAlerts" edges to LoginAlert entities.
+func (_u *UserMessengerUpdateOne) RemoveLoginAlerts(v ...*LoginAlert) *UserMessengerUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLoginAlertIDs(ids...)
 }
 
 // Where appends a list predicates to the UserMessengerUpdate builder.
@@ -458,6 +576,51 @@ func (_u *UserMessengerUpdateOne) sqlSave(ctx context.Context) (_node *UserMesse
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LoginAlertsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usermessenger.LoginAlertsTable,
+			Columns: []string{usermessenger.LoginAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLoginAlertsIDs(); len(nodes) > 0 && !_u.mutation.LoginAlertsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usermessenger.LoginAlertsTable,
+			Columns: []string{usermessenger.LoginAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LoginAlertsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usermessenger.LoginAlertsTable,
+			Columns: []string{usermessenger.LoginAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -39,9 +39,11 @@ type UserMessenger struct {
 type UserMessengerEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// LoginAlerts holds the value of the loginAlerts edge.
+	LoginAlerts []*LoginAlert `json:"loginAlerts,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -53,6 +55,15 @@ func (e UserMessengerEdges) UserOrErr() (*User, error) {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
+}
+
+// LoginAlertsOrErr returns the LoginAlerts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserMessengerEdges) LoginAlertsOrErr() ([]*LoginAlert, error) {
+	if e.loadedTypes[1] {
+		return e.LoginAlerts, nil
+	}
+	return nil, &NotLoadedError{edge: "loginAlerts"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -139,6 +150,11 @@ func (_m *UserMessenger) Value(name string) (ent.Value, error) {
 // QueryUser queries the "user" edge of the UserMessenger entity.
 func (_m *UserMessenger) QueryUser() *UserQuery {
 	return NewUserMessengerClient(_m.config).QueryUser(_m)
+}
+
+// QueryLoginAlerts queries the "loginAlerts" edge of the UserMessenger entity.
+func (_m *UserMessenger) QueryLoginAlerts() *LoginAlertQuery {
+	return NewUserMessengerClient(_m.config).QueryLoginAlerts(_m)
 }
 
 // Update returns a builder for updating this UserMessenger.

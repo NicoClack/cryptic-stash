@@ -3404,6 +3404,8 @@ type LoginAlertMutation struct {
 	clearedFields          map[string]struct{}
 	downloadSession        *uuid.UUID
 	cleareddownloadSession bool
+	userMessenger          *uuid.UUID
+	cleareduserMessenger   bool
 	done                   bool
 	oldValue               func(context.Context) (*LoginAlert, error)
 	predicates             []predicate.LoginAlert
@@ -3621,6 +3623,42 @@ func (m *LoginAlertMutation) ResetDownloadSessionID() {
 	m.downloadSession = nil
 }
 
+// SetUserMessengerID sets the "userMessengerID" field.
+func (m *LoginAlertMutation) SetUserMessengerID(u uuid.UUID) {
+	m.userMessenger = &u
+}
+
+// UserMessengerID returns the value of the "userMessengerID" field in the mutation.
+func (m *LoginAlertMutation) UserMessengerID() (r uuid.UUID, exists bool) {
+	v := m.userMessenger
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserMessengerID returns the old "userMessengerID" field's value of the LoginAlert entity.
+// If the LoginAlert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LoginAlertMutation) OldUserMessengerID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserMessengerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserMessengerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserMessengerID: %w", err)
+	}
+	return oldValue.UserMessengerID, nil
+}
+
+// ResetUserMessengerID resets all changes to the "userMessengerID" field.
+func (m *LoginAlertMutation) ResetUserMessengerID() {
+	m.userMessenger = nil
+}
+
 // ClearDownloadSession clears the "downloadSession" edge to the DownloadSession entity.
 func (m *LoginAlertMutation) ClearDownloadSession() {
 	m.cleareddownloadSession = true
@@ -3646,6 +3684,33 @@ func (m *LoginAlertMutation) DownloadSessionIDs() (ids []uuid.UUID) {
 func (m *LoginAlertMutation) ResetDownloadSession() {
 	m.downloadSession = nil
 	m.cleareddownloadSession = false
+}
+
+// ClearUserMessenger clears the "userMessenger" edge to the UserMessenger entity.
+func (m *LoginAlertMutation) ClearUserMessenger() {
+	m.cleareduserMessenger = true
+	m.clearedFields[loginalert.FieldUserMessengerID] = struct{}{}
+}
+
+// UserMessengerCleared reports if the "userMessenger" edge to the UserMessenger entity was cleared.
+func (m *LoginAlertMutation) UserMessengerCleared() bool {
+	return m.cleareduserMessenger
+}
+
+// UserMessengerIDs returns the "userMessenger" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserMessengerID instead. It exists only for internal usage by the builders.
+func (m *LoginAlertMutation) UserMessengerIDs() (ids []uuid.UUID) {
+	if id := m.userMessenger; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUserMessenger resets all changes to the "userMessenger" edge.
+func (m *LoginAlertMutation) ResetUserMessenger() {
+	m.userMessenger = nil
+	m.cleareduserMessenger = false
 }
 
 // Where appends a list predicates to the LoginAlertMutation builder.
@@ -3682,7 +3747,7 @@ func (m *LoginAlertMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LoginAlertMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.sentAt != nil {
 		fields = append(fields, loginalert.FieldSentAt)
 	}
@@ -3691,6 +3756,9 @@ func (m *LoginAlertMutation) Fields() []string {
 	}
 	if m.downloadSession != nil {
 		fields = append(fields, loginalert.FieldDownloadSessionID)
+	}
+	if m.userMessenger != nil {
+		fields = append(fields, loginalert.FieldUserMessengerID)
 	}
 	return fields
 }
@@ -3706,6 +3774,8 @@ func (m *LoginAlertMutation) Field(name string) (ent.Value, bool) {
 		return m.Confirmed()
 	case loginalert.FieldDownloadSessionID:
 		return m.DownloadSessionID()
+	case loginalert.FieldUserMessengerID:
+		return m.UserMessengerID()
 	}
 	return nil, false
 }
@@ -3721,6 +3791,8 @@ func (m *LoginAlertMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldConfirmed(ctx)
 	case loginalert.FieldDownloadSessionID:
 		return m.OldDownloadSessionID(ctx)
+	case loginalert.FieldUserMessengerID:
+		return m.OldUserMessengerID(ctx)
 	}
 	return nil, fmt.Errorf("unknown LoginAlert field %s", name)
 }
@@ -3750,6 +3822,13 @@ func (m *LoginAlertMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDownloadSessionID(v)
+		return nil
+	case loginalert.FieldUserMessengerID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserMessengerID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert field %s", name)
@@ -3809,15 +3888,21 @@ func (m *LoginAlertMutation) ResetField(name string) error {
 	case loginalert.FieldDownloadSessionID:
 		m.ResetDownloadSessionID()
 		return nil
+	case loginalert.FieldUserMessengerID:
+		m.ResetUserMessengerID()
+		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *LoginAlertMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.downloadSession != nil {
 		edges = append(edges, loginalert.EdgeDownloadSession)
+	}
+	if m.userMessenger != nil {
+		edges = append(edges, loginalert.EdgeUserMessenger)
 	}
 	return edges
 }
@@ -3830,13 +3915,17 @@ func (m *LoginAlertMutation) AddedIDs(name string) []ent.Value {
 		if id := m.downloadSession; id != nil {
 			return []ent.Value{*id}
 		}
+	case loginalert.EdgeUserMessenger:
+		if id := m.userMessenger; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *LoginAlertMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -3848,9 +3937,12 @@ func (m *LoginAlertMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *LoginAlertMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareddownloadSession {
 		edges = append(edges, loginalert.EdgeDownloadSession)
+	}
+	if m.cleareduserMessenger {
+		edges = append(edges, loginalert.EdgeUserMessenger)
 	}
 	return edges
 }
@@ -3861,6 +3953,8 @@ func (m *LoginAlertMutation) EdgeCleared(name string) bool {
 	switch name {
 	case loginalert.EdgeDownloadSession:
 		return m.cleareddownloadSession
+	case loginalert.EdgeUserMessenger:
+		return m.cleareduserMessenger
 	}
 	return false
 }
@@ -3872,6 +3966,9 @@ func (m *LoginAlertMutation) ClearEdge(name string) error {
 	case loginalert.EdgeDownloadSession:
 		m.ClearDownloadSession()
 		return nil
+	case loginalert.EdgeUserMessenger:
+		m.ClearUserMessenger()
+		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert unique edge %s", name)
 }
@@ -3882,6 +3979,9 @@ func (m *LoginAlertMutation) ResetEdge(name string) error {
 	switch name {
 	case loginalert.EdgeDownloadSession:
 		m.ResetDownloadSession()
+		return nil
+	case loginalert.EdgeUserMessenger:
+		m.ResetUserMessenger()
 		return nil
 	}
 	return fmt.Errorf("unknown LoginAlert edge %s", name)
@@ -6652,21 +6752,24 @@ func (m *UserMutation) ResetEdge(name string) error {
 // UserMessengerMutation represents an operation that mutates the UserMessenger nodes in the graph.
 type UserMessengerMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	_type         *string
-	version       *int
-	addversion    *int
-	enabled       *bool
-	options       *json.RawMessage
-	appendoptions json.RawMessage
-	clearedFields map[string]struct{}
-	user          *uuid.UUID
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*UserMessenger, error)
-	predicates    []predicate.UserMessenger
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	_type              *string
+	version            *int
+	addversion         *int
+	enabled            *bool
+	options            *json.RawMessage
+	appendoptions      json.RawMessage
+	clearedFields      map[string]struct{}
+	user               *uuid.UUID
+	cleareduser        bool
+	loginAlerts        map[uuid.UUID]struct{}
+	removedloginAlerts map[uuid.UUID]struct{}
+	clearedloginAlerts bool
+	done               bool
+	oldValue           func(context.Context) (*UserMessenger, error)
+	predicates         []predicate.UserMessenger
 }
 
 var _ ent.Mutation = (*UserMessengerMutation)(nil)
@@ -7015,6 +7118,60 @@ func (m *UserMessengerMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by ids.
+func (m *UserMessengerMutation) AddLoginAlertIDs(ids ...uuid.UUID) {
+	if m.loginAlerts == nil {
+		m.loginAlerts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.loginAlerts[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLoginAlerts clears the "loginAlerts" edge to the LoginAlert entity.
+func (m *UserMessengerMutation) ClearLoginAlerts() {
+	m.clearedloginAlerts = true
+}
+
+// LoginAlertsCleared reports if the "loginAlerts" edge to the LoginAlert entity was cleared.
+func (m *UserMessengerMutation) LoginAlertsCleared() bool {
+	return m.clearedloginAlerts
+}
+
+// RemoveLoginAlertIDs removes the "loginAlerts" edge to the LoginAlert entity by IDs.
+func (m *UserMessengerMutation) RemoveLoginAlertIDs(ids ...uuid.UUID) {
+	if m.removedloginAlerts == nil {
+		m.removedloginAlerts = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.loginAlerts, ids[i])
+		m.removedloginAlerts[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLoginAlerts returns the removed IDs of the "loginAlerts" edge to the LoginAlert entity.
+func (m *UserMessengerMutation) RemovedLoginAlertsIDs() (ids []uuid.UUID) {
+	for id := range m.removedloginAlerts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LoginAlertsIDs returns the "loginAlerts" edge IDs in the mutation.
+func (m *UserMessengerMutation) LoginAlertsIDs() (ids []uuid.UUID) {
+	for id := range m.loginAlerts {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLoginAlerts resets all changes to the "loginAlerts" edge.
+func (m *UserMessengerMutation) ResetLoginAlerts() {
+	m.loginAlerts = nil
+	m.clearedloginAlerts = false
+	m.removedloginAlerts = nil
+}
+
 // Where appends a list predicates to the UserMessengerMutation builder.
 func (m *UserMessengerMutation) Where(ps ...predicate.UserMessenger) {
 	m.predicates = append(m.predicates, ps...)
@@ -7231,9 +7388,12 @@ func (m *UserMessengerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMessengerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.user != nil {
 		edges = append(edges, usermessenger.EdgeUser)
+	}
+	if m.loginAlerts != nil {
+		edges = append(edges, usermessenger.EdgeLoginAlerts)
 	}
 	return edges
 }
@@ -7246,27 +7406,47 @@ func (m *UserMessengerMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case usermessenger.EdgeLoginAlerts:
+		ids := make([]ent.Value, 0, len(m.loginAlerts))
+		for id := range m.loginAlerts {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMessengerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedloginAlerts != nil {
+		edges = append(edges, usermessenger.EdgeLoginAlerts)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserMessengerMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case usermessenger.EdgeLoginAlerts:
+		ids := make([]ent.Value, 0, len(m.removedloginAlerts))
+		for id := range m.removedloginAlerts {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMessengerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareduser {
 		edges = append(edges, usermessenger.EdgeUser)
+	}
+	if m.clearedloginAlerts {
+		edges = append(edges, usermessenger.EdgeLoginAlerts)
 	}
 	return edges
 }
@@ -7277,6 +7457,8 @@ func (m *UserMessengerMutation) EdgeCleared(name string) bool {
 	switch name {
 	case usermessenger.EdgeUser:
 		return m.cleareduser
+	case usermessenger.EdgeLoginAlerts:
+		return m.clearedloginAlerts
 	}
 	return false
 }
@@ -7298,6 +7480,9 @@ func (m *UserMessengerMutation) ResetEdge(name string) error {
 	switch name {
 	case usermessenger.EdgeUser:
 		m.ResetUser()
+		return nil
+	case usermessenger.EdgeLoginAlerts:
+		m.ResetLoginAlerts()
 		return nil
 	}
 	return fmt.Errorf("unknown UserMessenger edge %s", name)

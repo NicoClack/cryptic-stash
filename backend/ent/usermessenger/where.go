@@ -232,6 +232,29 @@ func HasUserWith(preds ...predicate.User) predicate.UserMessenger {
 	})
 }
 
+// HasLoginAlerts applies the HasEdge predicate on the "loginAlerts" edge.
+func HasLoginAlerts() predicate.UserMessenger {
+	return predicate.UserMessenger(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LoginAlertsTable, LoginAlertsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLoginAlertsWith applies the HasEdge predicate on the "loginAlerts" edge with a given conditions (other predicates).
+func HasLoginAlertsWith(preds ...predicate.LoginAlert) predicate.UserMessenger {
+	return predicate.UserMessenger(func(s *sql.Selector) {
+		step := newLoginAlertsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.UserMessenger) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.AndPredicates(predicates...))

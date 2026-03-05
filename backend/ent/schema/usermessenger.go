@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -32,6 +33,8 @@ func (UserMessenger) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("messengers").
 			Field("userID").Unique().Required(),
+		edge.To("loginAlerts", LoginAlert.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

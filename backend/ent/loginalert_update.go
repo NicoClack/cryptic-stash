@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
 )
 
@@ -72,9 +73,28 @@ func (_u *LoginAlertUpdate) SetNillableDownloadSessionID(v *uuid.UUID) *LoginAle
 	return _u
 }
 
+// SetUserMessengerID sets the "userMessengerID" field.
+func (_u *LoginAlertUpdate) SetUserMessengerID(v uuid.UUID) *LoginAlertUpdate {
+	_u.mutation.SetUserMessengerID(v)
+	return _u
+}
+
+// SetNillableUserMessengerID sets the "userMessengerID" field if the given value is not nil.
+func (_u *LoginAlertUpdate) SetNillableUserMessengerID(v *uuid.UUID) *LoginAlertUpdate {
+	if v != nil {
+		_u.SetUserMessengerID(*v)
+	}
+	return _u
+}
+
 // SetDownloadSession sets the "downloadSession" edge to the DownloadSession entity.
 func (_u *LoginAlertUpdate) SetDownloadSession(v *DownloadSession) *LoginAlertUpdate {
 	return _u.SetDownloadSessionID(v.ID)
+}
+
+// SetUserMessenger sets the "userMessenger" edge to the UserMessenger entity.
+func (_u *LoginAlertUpdate) SetUserMessenger(v *UserMessenger) *LoginAlertUpdate {
+	return _u.SetUserMessengerID(v.ID)
 }
 
 // Mutation returns the LoginAlertMutation object of the builder.
@@ -85,6 +105,12 @@ func (_u *LoginAlertUpdate) Mutation() *LoginAlertMutation {
 // ClearDownloadSession clears the "downloadSession" edge to the DownloadSession entity.
 func (_u *LoginAlertUpdate) ClearDownloadSession() *LoginAlertUpdate {
 	_u.mutation.ClearDownloadSession()
+	return _u
+}
+
+// ClearUserMessenger clears the "userMessenger" edge to the UserMessenger entity.
+func (_u *LoginAlertUpdate) ClearUserMessenger() *LoginAlertUpdate {
+	_u.mutation.ClearUserMessenger()
 	return _u
 }
 
@@ -119,6 +145,9 @@ func (_u *LoginAlertUpdate) ExecX(ctx context.Context) {
 func (_u *LoginAlertUpdate) check() error {
 	if _u.mutation.DownloadSessionCleared() && len(_u.mutation.DownloadSessionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "LoginAlert.downloadSession"`)
+	}
+	if _u.mutation.UserMessengerCleared() && len(_u.mutation.UserMessengerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "LoginAlert.userMessenger"`)
 	}
 	return nil
 }
@@ -163,6 +192,35 @@ func (_u *LoginAlertUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UserMessengerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   loginalert.UserMessengerTable,
+			Columns: []string{loginalert.UserMessengerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usermessenger.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UserMessengerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   loginalert.UserMessengerTable,
+			Columns: []string{loginalert.UserMessengerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usermessenger.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -232,9 +290,28 @@ func (_u *LoginAlertUpdateOne) SetNillableDownloadSessionID(v *uuid.UUID) *Login
 	return _u
 }
 
+// SetUserMessengerID sets the "userMessengerID" field.
+func (_u *LoginAlertUpdateOne) SetUserMessengerID(v uuid.UUID) *LoginAlertUpdateOne {
+	_u.mutation.SetUserMessengerID(v)
+	return _u
+}
+
+// SetNillableUserMessengerID sets the "userMessengerID" field if the given value is not nil.
+func (_u *LoginAlertUpdateOne) SetNillableUserMessengerID(v *uuid.UUID) *LoginAlertUpdateOne {
+	if v != nil {
+		_u.SetUserMessengerID(*v)
+	}
+	return _u
+}
+
 // SetDownloadSession sets the "downloadSession" edge to the DownloadSession entity.
 func (_u *LoginAlertUpdateOne) SetDownloadSession(v *DownloadSession) *LoginAlertUpdateOne {
 	return _u.SetDownloadSessionID(v.ID)
+}
+
+// SetUserMessenger sets the "userMessenger" edge to the UserMessenger entity.
+func (_u *LoginAlertUpdateOne) SetUserMessenger(v *UserMessenger) *LoginAlertUpdateOne {
+	return _u.SetUserMessengerID(v.ID)
 }
 
 // Mutation returns the LoginAlertMutation object of the builder.
@@ -245,6 +322,12 @@ func (_u *LoginAlertUpdateOne) Mutation() *LoginAlertMutation {
 // ClearDownloadSession clears the "downloadSession" edge to the DownloadSession entity.
 func (_u *LoginAlertUpdateOne) ClearDownloadSession() *LoginAlertUpdateOne {
 	_u.mutation.ClearDownloadSession()
+	return _u
+}
+
+// ClearUserMessenger clears the "userMessenger" edge to the UserMessenger entity.
+func (_u *LoginAlertUpdateOne) ClearUserMessenger() *LoginAlertUpdateOne {
+	_u.mutation.ClearUserMessenger()
 	return _u
 }
 
@@ -292,6 +375,9 @@ func (_u *LoginAlertUpdateOne) ExecX(ctx context.Context) {
 func (_u *LoginAlertUpdateOne) check() error {
 	if _u.mutation.DownloadSessionCleared() && len(_u.mutation.DownloadSessionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "LoginAlert.downloadSession"`)
+	}
+	if _u.mutation.UserMessengerCleared() && len(_u.mutation.UserMessengerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "LoginAlert.userMessenger"`)
 	}
 	return nil
 }
@@ -353,6 +439,35 @@ func (_u *LoginAlertUpdateOne) sqlSave(ctx context.Context) (_node *LoginAlert, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.UserMessengerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   loginalert.UserMessengerTable,
+			Columns: []string{loginalert.UserMessengerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usermessenger.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UserMessengerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   loginalert.UserMessengerTable,
+			Columns: []string{loginalert.UserMessengerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usermessenger.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

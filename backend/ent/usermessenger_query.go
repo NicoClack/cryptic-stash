@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -20,11 +22,12 @@ import (
 // UserMessengerQuery is the builder for querying UserMessenger entities.
 type UserMessengerQuery struct {
 	config
-	ctx        *QueryContext
-	order      []usermessenger.OrderOption
-	inters     []Interceptor
-	predicates []predicate.UserMessenger
-	withUser   *UserQuery
+	ctx             *QueryContext
+	order           []usermessenger.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.UserMessenger
+	withUser        *UserQuery
+	withLoginAlerts *LoginAlertQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +79,28 @@ func (_q *UserMessengerQuery) QueryUser() *UserQuery {
 			sqlgraph.From(usermessenger.Table, usermessenger.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, usermessenger.UserTable, usermessenger.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLoginAlerts chains the current query on the "loginAlerts" edge.
+func (_q *UserMessengerQuery) QueryLoginAlerts() *LoginAlertQuery {
+	query := (&LoginAlertClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usermessenger.Table, usermessenger.FieldID, selector),
+			sqlgraph.To(loginalert.Table, loginalert.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, usermessenger.LoginAlertsTable, usermessenger.LoginAlertsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +295,13 @@ func (_q *UserMessengerQuery) Clone() *UserMessengerQuery {
 		return nil
 	}
 	return &UserMessengerQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]usermessenger.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.UserMessenger{}, _q.predicates...),
-		withUser:   _q.withUser.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]usermessenger.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.UserMessenger{}, _q.predicates...),
+		withUser:        _q.withUser.Clone(),
+		withLoginAlerts: _q.withLoginAlerts.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -290,6 +316,17 @@ func (_q *UserMessengerQuery) WithUser(opts ...func(*UserQuery)) *UserMessengerQ
 		opt(query)
 	}
 	_q.withUser = query
+	return _q
+}
+
+// WithLoginAlerts tells the query-builder to eager-load the nodes that are connected to
+// the "loginAlerts" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserMessengerQuery) WithLoginAlerts(opts ...func(*LoginAlertQuery)) *UserMessengerQuery {
+	query := (&LoginAlertClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLoginAlerts = query
 	return _q
 }
 
@@ -371,8 +408,9 @@ func (_q *UserMessengerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	var (
 		nodes       = []*UserMessenger{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withUser != nil,
+			_q.withLoginAlerts != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -396,6 +434,13 @@ func (_q *UserMessengerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if query := _q.withUser; query != nil {
 		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *UserMessenger, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLoginAlerts; query != nil {
+		if err := _q.loadLoginAlerts(ctx, query, nodes,
+			func(n *UserMessenger) { n.Edges.LoginAlerts = []*LoginAlert{} },
+			func(n *UserMessenger, e *LoginAlert) { n.Edges.LoginAlerts = append(n.Edges.LoginAlerts, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -428,6 +473,36 @@ func (_q *UserMessengerQuery) loadUser(ctx context.Context, query *UserQuery, no
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (_q *UserMessengerQuery) loadLoginAlerts(ctx context.Context, query *LoginAlertQuery, nodes []*UserMessenger, init func(*UserMessenger), assign func(*UserMessenger, *LoginAlert)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*UserMessenger)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(loginalert.FieldUserMessengerID)
+	}
+	query.Where(predicate.LoginAlert(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(usermessenger.LoginAlertsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserMessengerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "userMessengerID" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

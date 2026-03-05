@@ -135,6 +135,7 @@ var (
 		{Name: "sent_at", Type: field.TypeTime},
 		{Name: "confirmed", Type: field.TypeBool},
 		{Name: "download_session_id", Type: field.TypeUUID},
+		{Name: "user_messenger_id", Type: field.TypeUUID},
 	}
 	// LoginAlertsTable holds the schema information for the "login_alerts" table.
 	LoginAlertsTable = &schema.Table{
@@ -146,6 +147,12 @@ var (
 				Symbol:     "login_alerts_download_sessions_loginAlerts",
 				Columns:    []*schema.Column{LoginAlertsColumns[3]},
 				RefColumns: []*schema.Column{DownloadSessionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "login_alerts_user_messengers_loginAlerts",
+				Columns:    []*schema.Column{LoginAlertsColumns[4]},
+				RefColumns: []*schema.Column{UserMessengersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -281,6 +288,7 @@ func init() {
 	DownloadSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	LogEntriesTable.ForeignKeys[0].RefTable = UsersTable
 	LoginAlertsTable.ForeignKeys[0].RefTable = DownloadSessionsTable
+	LoginAlertsTable.ForeignKeys[1].RefTable = UserMessengersTable
 	StashesTable.ForeignKeys[0].RefTable = UsersTable
 	UserMessengersTable.ForeignKeys[0].RefTable = UsersTable
 }

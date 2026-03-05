@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
+	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
 )
 
@@ -43,6 +44,12 @@ func (_c *LoginAlertCreate) SetDownloadSessionID(v uuid.UUID) *LoginAlertCreate 
 	return _c
 }
 
+// SetUserMessengerID sets the "userMessengerID" field.
+func (_c *LoginAlertCreate) SetUserMessengerID(v uuid.UUID) *LoginAlertCreate {
+	_c.mutation.SetUserMessengerID(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *LoginAlertCreate) SetID(v uuid.UUID) *LoginAlertCreate {
 	_c.mutation.SetID(v)
@@ -60,6 +67,11 @@ func (_c *LoginAlertCreate) SetNillableID(v *uuid.UUID) *LoginAlertCreate {
 // SetDownloadSession sets the "downloadSession" edge to the DownloadSession entity.
 func (_c *LoginAlertCreate) SetDownloadSession(v *DownloadSession) *LoginAlertCreate {
 	return _c.SetDownloadSessionID(v.ID)
+}
+
+// SetUserMessenger sets the "userMessenger" edge to the UserMessenger entity.
+func (_c *LoginAlertCreate) SetUserMessenger(v *UserMessenger) *LoginAlertCreate {
+	return _c.SetUserMessengerID(v.ID)
 }
 
 // Mutation returns the LoginAlertMutation object of the builder.
@@ -114,8 +126,14 @@ func (_c *LoginAlertCreate) check() error {
 	if _, ok := _c.mutation.DownloadSessionID(); !ok {
 		return &ValidationError{Name: "downloadSessionID", err: errors.New(`ent: missing required field "LoginAlert.downloadSessionID"`)}
 	}
+	if _, ok := _c.mutation.UserMessengerID(); !ok {
+		return &ValidationError{Name: "userMessengerID", err: errors.New(`ent: missing required field "LoginAlert.userMessengerID"`)}
+	}
 	if len(_c.mutation.DownloadSessionIDs()) == 0 {
 		return &ValidationError{Name: "downloadSession", err: errors.New(`ent: missing required edge "LoginAlert.downloadSession"`)}
+	}
+	if len(_c.mutation.UserMessengerIDs()) == 0 {
+		return &ValidationError{Name: "userMessenger", err: errors.New(`ent: missing required edge "LoginAlert.userMessenger"`)}
 	}
 	return nil
 }
@@ -176,6 +194,23 @@ func (_c *LoginAlertCreate) createSpec() (*LoginAlert, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.DownloadSessionID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UserMessengerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   loginalert.UserMessengerTable,
+			Columns: []string{loginalert.UserMessengerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usermessenger.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserMessengerID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -266,6 +301,18 @@ func (u *LoginAlertUpsert) UpdateDownloadSessionID() *LoginAlertUpsert {
 	return u
 }
 
+// SetUserMessengerID sets the "userMessengerID" field.
+func (u *LoginAlertUpsert) SetUserMessengerID(v uuid.UUID) *LoginAlertUpsert {
+	u.Set(loginalert.FieldUserMessengerID, v)
+	return u
+}
+
+// UpdateUserMessengerID sets the "userMessengerID" field to the value that was provided on create.
+func (u *LoginAlertUpsert) UpdateUserMessengerID() *LoginAlertUpsert {
+	u.SetExcluded(loginalert.FieldUserMessengerID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -353,6 +400,20 @@ func (u *LoginAlertUpsertOne) SetDownloadSessionID(v uuid.UUID) *LoginAlertUpser
 func (u *LoginAlertUpsertOne) UpdateDownloadSessionID() *LoginAlertUpsertOne {
 	return u.Update(func(s *LoginAlertUpsert) {
 		s.UpdateDownloadSessionID()
+	})
+}
+
+// SetUserMessengerID sets the "userMessengerID" field.
+func (u *LoginAlertUpsertOne) SetUserMessengerID(v uuid.UUID) *LoginAlertUpsertOne {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.SetUserMessengerID(v)
+	})
+}
+
+// UpdateUserMessengerID sets the "userMessengerID" field to the value that was provided on create.
+func (u *LoginAlertUpsertOne) UpdateUserMessengerID() *LoginAlertUpsertOne {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.UpdateUserMessengerID()
 	})
 }
 
@@ -610,6 +671,20 @@ func (u *LoginAlertUpsertBulk) SetDownloadSessionID(v uuid.UUID) *LoginAlertUpse
 func (u *LoginAlertUpsertBulk) UpdateDownloadSessionID() *LoginAlertUpsertBulk {
 	return u.Update(func(s *LoginAlertUpsert) {
 		s.UpdateDownloadSessionID()
+	})
+}
+
+// SetUserMessengerID sets the "userMessengerID" field.
+func (u *LoginAlertUpsertBulk) SetUserMessengerID(v uuid.UUID) *LoginAlertUpsertBulk {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.SetUserMessengerID(v)
+	})
+}
+
+// UpdateUserMessengerID sets the "userMessengerID" field to the value that was provided on create.
+func (u *LoginAlertUpsertBulk) UpdateUserMessengerID() *LoginAlertUpsertBulk {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.UpdateUserMessengerID()
 	})
 }
 

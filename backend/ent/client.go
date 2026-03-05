@@ -984,6 +984,22 @@ func (c *LoginAlertClient) QueryDownloadSession(_m *LoginAlert) *DownloadSession
 	return query
 }
 
+// QueryUserMessenger queries the userMessenger edge of a LoginAlert.
+func (c *LoginAlertClient) QueryUserMessenger(_m *LoginAlert) *UserMessengerQuery {
+	query := (&UserMessengerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(loginalert.Table, loginalert.FieldID, id),
+			sqlgraph.To(usermessenger.Table, usermessenger.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, loginalert.UserMessengerTable, loginalert.UserMessengerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *LoginAlertClient) Hooks() []Hook {
 	return c.hooks.LoginAlert
@@ -1738,6 +1754,22 @@ func (c *UserMessengerClient) QueryUser(_m *UserMessenger) *UserQuery {
 			sqlgraph.From(usermessenger.Table, usermessenger.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, usermessenger.UserTable, usermessenger.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLoginAlerts queries the loginAlerts edge of a UserMessenger.
+func (c *UserMessengerClient) QueryLoginAlerts(_m *UserMessenger) *LoginAlertQuery {
+	query := (&LoginAlertClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usermessenger.Table, usermessenger.FieldID, id),
+			sqlgraph.To(loginalert.Table, loginalert.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, usermessenger.LoginAlertsTable, usermessenger.LoginAlertsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

@@ -25,6 +25,8 @@ const (
 	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeLoginAlerts holds the string denoting the loginalerts edge name in mutations.
+	EdgeLoginAlerts = "loginAlerts"
 	// Table holds the table name of the usermessenger in the database.
 	Table = "user_messengers"
 	// UserTable is the table that holds the user relation/edge.
@@ -34,6 +36,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
+	// LoginAlertsTable is the table that holds the loginAlerts relation/edge.
+	LoginAlertsTable = "login_alerts"
+	// LoginAlertsInverseTable is the table name for the LoginAlert entity.
+	// It exists in this package in order to avoid circular dependency with the "loginalert" package.
+	LoginAlertsInverseTable = "login_alerts"
+	// LoginAlertsColumn is the table column denoting the loginAlerts relation/edge.
+	LoginAlertsColumn = "user_messenger_id"
 )
 
 // Columns holds all SQL columns for usermessenger fields.
@@ -99,10 +108,31 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByLoginAlertsCount orders the results by loginAlerts count.
+func ByLoginAlertsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLoginAlertsStep(), opts...)
+	}
+}
+
+// ByLoginAlerts orders the results by loginAlerts terms.
+func ByLoginAlerts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLoginAlertsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newLoginAlertsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LoginAlertsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LoginAlertsTable, LoginAlertsColumn),
 	)
 }

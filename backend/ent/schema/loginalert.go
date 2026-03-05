@@ -19,6 +19,7 @@ func (LoginAlert) Fields() []ent.Field {
 		field.Time("sentAt"),
 		field.Bool("confirmed"),
 		field.UUID("downloadSessionID", uuid.Nil),
+		field.UUID("userMessengerID", uuid.Nil),
 	}
 }
 
@@ -27,5 +28,7 @@ func (LoginAlert) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("downloadSession", DownloadSession.Type).Ref("loginAlerts").
 			Field("downloadSessionID").Unique().Required(),
+		edge.From("userMessenger", UserMessenger.Type).Ref("loginAlerts").
+			Field("userMessengerID").Unique().Required(),
 	}
 }

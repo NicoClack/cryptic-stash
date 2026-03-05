@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
@@ -80,6 +81,21 @@ func (_c *UserMessengerCreate) SetNillableID(v *uuid.UUID) *UserMessengerCreate 
 // SetUser sets the "user" edge to the User entity.
 func (_c *UserMessengerCreate) SetUser(v *User) *UserMessengerCreate {
 	return _c.SetUserID(v.ID)
+}
+
+// AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
+func (_c *UserMessengerCreate) AddLoginAlertIDs(ids ...uuid.UUID) *UserMessengerCreate {
+	_c.mutation.AddLoginAlertIDs(ids...)
+	return _c
+}
+
+// AddLoginAlerts adds the "loginAlerts" edges to the LoginAlert entity.
+func (_c *UserMessengerCreate) AddLoginAlerts(v ...*LoginAlert) *UserMessengerCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLoginAlertIDs(ids...)
 }
 
 // Mutation returns the UserMessengerMutation object of the builder.
@@ -219,6 +235,22 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LoginAlertsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   usermessenger.LoginAlertsTable,
+			Columns: []string{usermessenger.LoginAlertsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(loginalert.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
