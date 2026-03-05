@@ -13,7 +13,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/globals"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	enttestpkg "github.com/NicoClack/cryptic-stash/backend/ent/enttest"
 	"github.com/NicoClack/cryptic-stash/backend/ent/migrate"
 	_ "github.com/NicoClack/cryptic-stash/backend/entps"
 	"github.com/pressly/goose/v3"
@@ -46,8 +45,7 @@ func CreateDB(t *testing.T) *TestDatabase {
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxLifetime(time.Hour)
 	driver := ent.Driver(entsql.OpenDB("sqlite3", db))
-
-	client := enttestpkg.NewClient(t, enttestpkg.WithOptions(driver))
+	client := ent.NewClient(driver)
 
 	goose.SetBaseFS(migrate.MigrationsFS)
 	stdErr = goose.SetDialect("sqlite3")
