@@ -14,7 +14,7 @@ func TestLoggerShutdown_HandlesConcurrentCalls(t *testing.T) {
 
 	app := &common.App{
 		Env:      testcommon.DefaultEnv(),
-		Database: testcommon.CreateDB(),
+		Database: testcommon.CreateDB(t),
 	}
 	app.Database.Start()
 	t.Cleanup(app.Database.Shutdown)

@@ -7,11 +7,17 @@ import (
 	"log/slog"
 	"time"
 
+	"testing"
+
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/globals"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	enttestpkg "github.com/NicoClack/cryptic-stash/backend/ent/enttest"
+	"github.com/NicoClack/cryptic-stash/backend/ent/migrate"
 	_ "github.com/NicoClack/cryptic-stash/backend/entps"
+	"github.com/pressly/goose/v3"
+	"github.com/stretchr/testify/require"
 )
 
 type TestDatabase struct {
@@ -24,14 +30,9 @@ var (
 	dbCounter = int64(0)
 )
 
-func CreateDB() *TestDatabase {
-	// TODO: use enttest like in https://entgo.io/blog/2023/02/23/simple-cms-with-ent/
-	// TODO: use goose?
+func CreateDB(t *testing.T) *TestDatabase {
+	t.Helper()
 
-	// TODO: review options
-	// TODO: what does shared cache do any why is it sometimes necessary
-	// in order to stop the database being deleted mid test?
-	// ^ this seems to enable WAL mode? Which isn't what I want
 	globals.MigrateMu.Lock()
 	defer globals.MigrateMu.Unlock()
 	dbCounter++
@@ -39,20 +40,26 @@ func CreateDB() *TestDatabase {
 		"file:temp%v?mode=memory&cache=shared",
 		dbCounter,
 	))
-	if stdErr != nil {
-		panic(fmt.Sprintf("failed to open test database. error: %v", stdErr.Error()))
-	}
+	require.NoError(t, stdErr)
 
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxLifetime(time.Hour)
 	driver := ent.Driver(entsql.OpenDB("sqlite3", db))
-	client := ent.NewClient(driver)
 
-	stdErr = client.Schema.Create(context.Background())
+	client := enttestpkg.NewClient(t, enttestpkg.WithOptions(driver))
+
+	goose.SetBaseFS(migrate.MigrationsFS)
+	stdErr = goose.SetDialect("sqlite3")
 	if stdErr != nil {
 		_ = client.Close()
-		panic(fmt.Sprintf("failed to create test database schema. error: %v", stdErr.Error()))
+		t.Fatalf("couldn't set goose dialect. error: %v", stdErr)
+	}
+
+	stdErr = goose.Up(db, "migrations")
+	if stdErr != nil {
+		_ = client.Close()
+		t.Fatalf("migration failed: %v", stdErr)
 	}
 
 	// TODO: take logger as argument?
@@ -64,6 +71,7 @@ func CreateDB() *TestDatabase {
 		startTxHooks: []func(tx *ent.Tx) error{},
 	}
 }
+
 func (db *TestDatabase) Start() {
 	// TODO: move initialisation logic into here like the real DB service?
 }

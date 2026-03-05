@@ -16,7 +16,7 @@ import (
 
 func TestEngine_runsJob(t *testing.T) {
 	t.Parallel()
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 	app := &common.App{
 		Database: db,
@@ -57,7 +57,7 @@ func TestEngine_runsJob(t *testing.T) {
 
 func TestEngine_retriesJob(t *testing.T) {
 	t.Parallel()
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 	app := &common.App{
 		Clock:    clockwork.NewRealClock(),

@@ -95,7 +95,7 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 	}
 	app.RateLimiter = services.NewRateLimiter(app)
 	app.Core = services.NewCore(app)
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	app.Database = db
 	app.KeyValue = services.NewKeyValue(app)
 	app.Database.Start()

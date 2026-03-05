@@ -97,7 +97,7 @@ func (service *Logger) DeleteWrittenLogs(t *testing.T) {
 
 func TestLogger_SavesToDatabase(t *testing.T) {
 	t.Parallel()
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 	app := &common.App{
 		Database:        db,
@@ -139,7 +139,7 @@ func TestLogger_SavesToDatabase(t *testing.T) {
 
 func TestLogger_UserIDNoMatch_LogsWarning(t *testing.T) {
 	t.Parallel()
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 	app := &common.App{
 		Database: db,
@@ -201,7 +201,7 @@ func TestLogger_UserIDNoMatch_LogsWarning(t *testing.T) {
 
 func TestLogger_WithAttrs_and_WithGroup(t *testing.T) {
 	t.Parallel()
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 	clock := clockwork.NewRealClock()
 
@@ -335,7 +335,7 @@ func TestLogger_WithAttrs_and_WithGroup(t *testing.T) {
 
 func TestLogger_SpecialAttributes(t *testing.T) {
 	t.Parallel()
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 	clock := clockwork.NewRealClock()
 
@@ -405,7 +405,7 @@ func TestLogger_SpecialAttributes(t *testing.T) {
 
 func TestLogger_RetriesBulkCreateIndividually(t *testing.T) {
 	t.Parallel()
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 
 	var successfulCreateCounter atomic.Int64
@@ -515,7 +515,7 @@ func TestLogger_RetriesBulkCreateIndividually(t *testing.T) {
 func TestLogger_NoAdminUser_UsesCrashSignal(t *testing.T) {
 	t.Parallel()
 
-	db := testcommon.CreateDB()
+	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 	clock := clockwork.NewFakeClock()
 

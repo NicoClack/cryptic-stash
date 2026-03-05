@@ -18,7 +18,7 @@ func TestSchedulerShutdown_HandlesConcurrentCalls(t *testing.T) {
 	app := &common.App{
 		Clock:            clockwork.NewRealClock(),
 		Env:              testcommon.DefaultEnv(),
-		Database:         testcommon.CreateDB(),
+		Database:         testcommon.CreateDB(t),
 		Logger:           testcommon.NewTestLogger(),
 		Core:             mocks.NewEmptyCoreService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
@@ -44,7 +44,7 @@ func TestSchedulerShutdown_NoOpWhenNotStarted(t *testing.T) {
 	app := &common.App{
 		Clock:            clockwork.NewRealClock(),
 		Env:              testcommon.DefaultEnv(),
-		Database:         testcommon.CreateDB(),
+		Database:         testcommon.CreateDB(t),
 		Logger:           testcommon.NewTestLogger(),
 		Core:             mocks.NewEmptyCoreService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
@@ -64,7 +64,7 @@ func TestSchedulerStart_SubsequentCallsAreNoOp(t *testing.T) {
 	app := &common.App{
 		Clock:            clockwork.NewRealClock(),
 		Env:              testcommon.DefaultEnv(),
-		Database:         testcommon.CreateDB(),
+		Database:         testcommon.CreateDB(t),
 		Logger:           testcommon.NewTestLogger(),
 		Core:             mocks.NewEmptyCoreService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
