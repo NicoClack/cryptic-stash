@@ -206,7 +206,7 @@ func TestLogger_WithAttrs_and_WithGroup(t *testing.T) {
 	defer db.Shutdown()
 	clock := clockwork.NewRealClock()
 
-	userIDs := []uuid.UUID{}
+	userIDs := make([]uuid.UUID, 0, 2)
 	for i := range 2 {
 		userIDs = append(
 			userIDs,
@@ -340,7 +340,7 @@ func TestLogger_SpecialAttributes(t *testing.T) {
 	defer db.Shutdown()
 	clock := clockwork.NewRealClock()
 
-	userIDs := []uuid.UUID{}
+	userIDs := make([]uuid.UUID, 0, 2)
 	for i := range 2 {
 		userIDs = append(
 			userIDs,
@@ -585,6 +585,8 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 	)
 	runProgram(false, startTime.Add(time.Millisecond))
 
-	clock.Advance(minCrashSignalGap - (time.Second) - time.Millisecond) // The millisecond the next crash signal is allowed
+	clock.Advance(
+		minCrashSignalGap - (time.Second) - time.Millisecond,
+	) // The millisecond the next crash signal is allowed
 	runProgram(true, clock.Now().UTC().Add(time.Millisecond))
 }

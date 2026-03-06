@@ -22,7 +22,7 @@ func ParseBody(pointer any, ginCtx *gin.Context) *Error {
 		for _, validationErr := range validationErrs {
 			// TODO: these errors have incorrect casing:
 			// TotpCode: condition failed: required
-			builder.WriteString(fmt.Sprintf("%v: condition failed: %v", validationErr.Field(), validationErr.Tag()))
+			fmt.Fprintf(&builder, "%v: condition failed: %v", validationErr.Field(), validationErr.Tag())
 		}
 
 		return NewError(ErrWrapperParseBodyJson.Wrap(stdErr)).

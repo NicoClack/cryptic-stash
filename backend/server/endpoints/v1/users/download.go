@@ -58,7 +58,10 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
 				downloadSessionOb, stdErr := tx.DownloadSession.Query().
-					Where(downloadsession.And(downloadsession.HasUserWith(user.Username(body.Username)), downloadsession.Code(givenAuthCodeBytes))).
+					Where(downloadsession.And(
+						downloadsession.HasUserWith(user.Username(body.Username)),
+						downloadsession.Code(givenAuthCodeBytes),
+					)).
 					WithUser(func(userQuery *ent.UserQuery) {
 						userQuery.WithStash()
 						userQuery.WithMessengers()

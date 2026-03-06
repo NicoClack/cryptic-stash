@@ -27,6 +27,7 @@ func NewError() gin.HandlerFunc {
 		ginCtx.Next()
 
 		statusCode := -1
+		//nolint:prealloc // each error has an unknown number of details
 		mergedDetails := []servercommon.ErrorDetail{}
 		for _, ginError := range ginCtx.Errors {
 			serverErr := servercommon.NewError(ginError.Err)

@@ -29,14 +29,14 @@ func main() {
 		0,
 		"the threads parameter for Argon2ID (note: changing this affects the hashes produced)",
 	)
-	benchmarkThreads := flag.Uint(
+	benchmarkThreads := flag.Int64(
 		"benchmark-threads",
 		0,
 		"the number of simultaneous decryptions to run, should be at most ceil(CPU threads / hash-threads). "+
 			"But ensure you have sufficient RAM to avoid slowdown due to swap "+
 			"(note: each benchmark thread often consumes twice of hash-memory)",
 	)
-	spacing := flag.Uint(
+	spacing := flag.Int64(
 		"spacing",
 		0,
 		"the time in ms that each thread should wait before trying the next attempt."+
@@ -49,6 +49,24 @@ func main() {
 	if *hashTime == 0 {
 		log.Fatalf("missing required argument \"hash-time\"")
 	}
+	if *hashTime > math.MaxUint32 {
+		log.Fatalf("hash-time (%d) exceeds uint32 max (%d)", *hashTime, uint32(math.MaxUint32))
+	}
+	if *hashMemory > math.MaxUint32 {
+		log.Fatalf("hash-memory (%d) exceeds uint32 max (%d)", *hashMemory, uint32(math.MaxUint32))
+	}
+	if *hashThreads > math.MaxUint8 {
+		log.Fatalf("hash-threads (%d) exceeds uint8 max (%d)", *hashThreads, uint8(math.MaxUint8))
+	}
+	if *benchmarkThreads < 1 {
+		log.Fatalf("benchmark-threads (%d) must be at least 1", *benchmarkThreads)
+	}
+	if *benchmarkThreads > int64(math.MaxUint32) {
+		log.Fatalf("benchmark-threads (%d) exceeds uint32 max (%d)", *benchmarkThreads, uint32(math.MaxUint32))
+	}
+	if *spacing < 0 {
+		log.Fatalf("spacing (%d) must be non-negative", *spacing)
+	}
 	if *hashMemory == 0 {
 		log.Fatalf("missing required argument \"hash-memory\"")
 	}
@@ -59,9 +77,9 @@ func main() {
 		log.Fatalf("missing required argument \"benchmark-threads\"")
 	}
 	hashSettings := &common.PasswordHashSettings{
-		Time:    uint32(*hashTime),
-		Memory:  uint32(*hashMemory),
-		Threads: uint8(*hashThreads),
+		Time:    uint32(*hashTime),   // #nosec G115 -- checked above for overflow
+		Memory:  uint32(*hashMemory), // #nosec G115 -- checked above for overflow
+		Threads: uint8(*hashThreads), // #nosec G115 -- checked above for overflow
 	}
 
 	fmt.Fprintln(os.Stdout, "benchmarking...")
@@ -76,7 +94,7 @@ func main() {
 	fmt.Fprintf(os.Stdout, "running on %v threads\n\n", *benchmarkThreads)
 
 	startTime := time.Now()
-	nextPasswordChan := make(chan string, *benchmarkThreads)
+	nextPasswordChan := make(chan string, int(*benchmarkThreads))
 	guessChan := make(chan guess)
 
 	for range *benchmarkThreads {
@@ -90,7 +108,7 @@ func main() {
 	alphabet := []rune("abcdefghijklmnopqrstuvwxyz")
 	currentPassword := make([]int32, len(*password))
 
-	completedChecks := int64(-*benchmarkThreads)
+	completedChecks := -*benchmarkThreads
 	go performanceLoop(&completedChecks, currentPassword, *benchmarkThreads)
 
 	var successfulGuess guess
@@ -169,7 +187,7 @@ func workerLoop(
 	}
 }
 
-func performanceLoop(completedChecksPointer *int64, currentPassword []int32, benchmarkThreads uint) {
+func performanceLoop(completedChecksPointer *int64, currentPassword []int32, benchmarkThreads int64) {
 	completedChecksWas := int64(0)
 	for {
 		time.Sleep(time.Minute)

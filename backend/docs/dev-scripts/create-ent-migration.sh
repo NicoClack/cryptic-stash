@@ -1,1 +1,0 @@
-go run -mod=mod ent/migrate/main.go initial

@@ -131,7 +131,12 @@ func IsUserSufficientlyNotified(
 	groupedLoginAlerts := make(map[string][]*ent.LoginAlert)
 	for _, loginAlert := range allLoginAlerts {
 		if loginAlert.Edges.UserMessenger == nil {
-			panic(fmt.Sprintf("IsUserSufficientlyNotified: LoginAlert missing UserMessenger edge (loginAlertID=%s)", loginAlert.ID))
+			panic(
+				fmt.Sprintf(
+					"IsUserSufficientlyNotified: LoginAlert missing UserMessenger edge (loginAlertID=%s)",
+					loginAlert.ID,
+				),
+			)
 		}
 		versionedType := common.GetVersionedType(
 			loginAlert.Edges.UserMessenger.Type,

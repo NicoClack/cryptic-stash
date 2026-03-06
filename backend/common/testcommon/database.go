@@ -5,9 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
-	"time"
-
 	"testing"
+	"time"
 
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/common"

@@ -43,11 +43,13 @@ func LoadEnvironmentVariables() *common.Env {
 		ADMIN_PASSWORD_SALT:          common.OptionalBase64Env("ADMIN_PASSWORD_SALT", []byte{}),
 		ADMIN_TOTP_SECRET:            common.OptionalEnv("ADMIN_TOTP_SECRET", ""),
 
-		UNLOCK_TIME:                               common.RequireSecondsEnv("UNLOCK_TIME"),
-		AUTH_CODE_VALID_FOR:                       common.RequireSecondsEnv("AUTH_CODE_VALID_FOR"),
-		USED_AUTH_CODE_VALID_FOR:                  common.RequireSecondsEnv("USED_AUTH_CODE_VALID_FOR"),
-		ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL: common.RequireSecondsEnv("ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL"),
-		MIN_SUCCESSFUL_MESSAGE_COUNT:              common.RequireIntEnv("MIN_SUCCESSFUL_MESSAGE_COUNT"),
+		UNLOCK_TIME:              common.RequireSecondsEnv("UNLOCK_TIME"),
+		AUTH_CODE_VALID_FOR:      common.RequireSecondsEnv("AUTH_CODE_VALID_FOR"),
+		USED_AUTH_CODE_VALID_FOR: common.RequireSecondsEnv("USED_AUTH_CODE_VALID_FOR"),
+		ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL: common.RequireSecondsEnv(
+			"ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL",
+		),
+		MIN_SUCCESSFUL_MESSAGE_COUNT: common.RequireIntEnv("MIN_SUCCESSFUL_MESSAGE_COUNT"),
 		PASSWORD_HASH_SETTINGS: &common.PasswordHashSettings{
 			Time:    common.RequireUint32Env("PASSWORD_HASH_TIME"),
 			Memory:  common.RequireUint32Env("PASSWORD_HASH_MEMORY"),

@@ -7,7 +7,8 @@
 	"go.lintFlags": ["--fix", "--fast-only"],
 	"go.formatTool": "custom",
 	"go.alternateTools": {
-		"customFormatter": "golangci-lint"
+		"customFormatter": "golangci-lint",
+		"golangci-lint-v2": "golangci-lint"
 	},
 	"go.formatFlags": ["run", "--fix"]
 }

@@ -17,9 +17,20 @@ var ErrWrapperCreateCipher = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeI
 
 var ErrIncorrectPassword = common.NewErrorWithCategories("incorrect password", common.ErrTypeCore)
 
-var ErrWrapperSendActiveDownloadSessionReminders = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeSendActiveDownloadSessionReminders)
-var ErrWrapperDeleteExpiredDownloadSessions = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeDeleteExpiredDownloadSessions)
-var ErrWrapperInvalidateUserDownloadSessions = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeInvalidateUserDownloadSessions)
+var ErrWrapperSendActiveDownloadSessionReminders = common.NewErrorWrapper(
+	common.ErrTypeCore,
+	ErrTypeSendActiveDownloadSessionReminders,
+)
+
+var ErrWrapperDeleteExpiredDownloadSessions = common.NewErrorWrapper(
+	common.ErrTypeCore,
+	ErrTypeDeleteExpiredDownloadSessions,
+)
+
+var ErrWrapperInvalidateUserDownloadSessions = common.NewErrorWrapper(
+	common.ErrTypeCore,
+	ErrTypeInvalidateUserDownloadSessions,
+)
 
 // These functions don't categorize their errors
 var ErrWrapperEncrypt = common.NewErrorWrapper(common.ErrTypeCore, ErrTypeEncrypt)

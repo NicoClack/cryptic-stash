@@ -59,6 +59,7 @@ func RequireUint32Env(name string) uint32 {
 	if intValue < 0 || intValue > math.MaxUint32 {
 		log.Fatalf("couldn't parse environment variable \"%v\" into a uint32", name)
 	}
+	// #nosec G115
 	return uint32(intValue)
 }
 func RequireUint8Env(name string) uint8 {
@@ -67,6 +68,7 @@ func RequireUint8Env(name string) uint8 {
 	if intValue < 0 || intValue > math.MaxUint8 {
 		log.Fatalf("couldn't parse environment variable \"%v\" into a uint8", name)
 	}
+	// #nosec G115
 	return uint8(intValue)
 }
 func RequireSecondsEnv(name string) time.Duration {
