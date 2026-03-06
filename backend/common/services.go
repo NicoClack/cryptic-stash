@@ -322,4 +322,6 @@ type AdminAuthEnvVars struct {
 	AdminPasswordSalt string `json:"ADMIN_PASSWORD_SALT"`
 	//nolint:tagliatelle
 	AdminTotpSecret string `json:"ADMIN_TOTP_SECRET"`
+	//nolint:tagliatelle
+	StashEncryptionKey string `json:"STASH_ENCRYPTION_KEY"`
 }

@@ -33,12 +33,15 @@ func GenerateAdminSetupConstants(
 	totpSecret := key.Secret()
 
 	salt := core.GenerateSalt()
-	encryptionKey := core.HashPassword(password, salt, passwordSettings)
+	adminPasswordHash := core.HashPassword(password, salt, passwordSettings)
 
 	return &common.AdminAuthEnvVars{
-			AdminPasswordHash: base64.StdEncoding.EncodeToString(encryptionKey),
+			AdminPasswordHash: base64.StdEncoding.EncodeToString(adminPasswordHash),
 			AdminPasswordSalt: base64.StdEncoding.EncodeToString(salt),
 			AdminTotpSecret:   totpSecret,
+			StashEncryptionKey: base64.StdEncoding.EncodeToString(
+				common.CryptoRandomBytes(32),
+			),
 		},
 		key.URL(),
 		nil
