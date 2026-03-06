@@ -5,13 +5,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-const (
-	EncryptionKeyLength = 32  // Required by AES-256
-	PasswordSaltLength  = 128 // Overkill but there shouldn't really be any downsides
-)
-
 func GenerateSalt() []byte {
-	return common.CryptoRandomBytes(PasswordSaltLength)
+	return common.CryptoRandomBytes(common.PasswordSaltLength)
 }
 
 // Returns an encryption key
@@ -19,6 +14,6 @@ func HashPassword(password string, salt []byte, settings *common.PasswordHashSet
 	return argon2.IDKey(
 		[]byte(password), salt,
 		settings.Time, settings.Memory,
-		settings.Threads, EncryptionKeyLength,
+		settings.Threads, common.EncryptionKeyLength,
 	)
 }

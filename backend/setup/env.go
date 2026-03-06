@@ -40,7 +40,7 @@ func GenerateAdminSetupConstants(
 			AdminPasswordSalt: base64.StdEncoding.EncodeToString(salt),
 			AdminTotpSecret:   totpSecret,
 			StashEncryptionKey: base64.StdEncoding.EncodeToString(
-				common.CryptoRandomBytes(32),
+				common.CryptoRandomBytes(common.EncryptionKeyLength),
 			),
 		},
 		key.URL(),
