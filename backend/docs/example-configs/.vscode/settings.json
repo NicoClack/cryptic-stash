@@ -4,11 +4,11 @@
 		"editor.formatOnSave": true
 	},
 	"go.lintTool": "golangci-lint-v2",
-	"go.lintFlags": ["--fix", "--fast-only"],
+	"go.lintFlags": ["--fix",  "--path-mode=abs", "--fast-only"],
 	"go.formatTool": "custom",
 	"go.alternateTools": {
 		"customFormatter": "golangci-lint",
 		"golangci-lint-v2": "golangci-lint"
 	},
-	"go.formatFlags": ["run", "--fix"]
+	"go.formatFlags": ["fmt", "--stdin"]
 }

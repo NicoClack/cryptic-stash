@@ -9,7 +9,7 @@ import (
 
 type CheckTotpPayload struct {
 	Code   string `binding:"required,len=6,numeric" json:"code"`
-	Secret string `binding:"required,min=1"         json:"secret"`
+	Secret string `binding:"required,min=1"         json:"secret"` // #nosec G117
 }
 
 type CheckTotpResponse struct {

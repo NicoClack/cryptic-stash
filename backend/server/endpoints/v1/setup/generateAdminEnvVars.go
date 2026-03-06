@@ -9,7 +9,7 @@ import (
 )
 
 type GenerateAdminEnvVarsPayload struct {
-	Password string `binding:"required,min=8,max=256" json:"password"`
+	Password string `binding:"required,min=8,max=256" json:"password"` // #nosec G117
 }
 
 type GenerateAdminEnvVarsResponse struct {

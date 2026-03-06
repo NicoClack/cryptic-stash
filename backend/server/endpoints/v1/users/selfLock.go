@@ -19,7 +19,7 @@ const MAX_SELF_LOCK_DURATION = 14 * (24 * time.Hour)
 
 type SelfLockPayload struct {
 	Username string    `binding:"required,min=1,max=32,alphanum,lowercase" json:"username"`
-	Password string    `binding:"required,min=8,max=256"                   json:"password"`
+	Password string    `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
 	Until    time.Time `binding:"required"                                 json:"until"`
 }
 type SelfLockResponse struct {

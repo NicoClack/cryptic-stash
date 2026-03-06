@@ -14,7 +14,7 @@ import (
 )
 
 type LoginPayload struct {
-	Password string `binding:"required,min=1"         json:"password"`
+	Password string `binding:"required,min=1"         json:"password"` // #nosec G117
 	TotpCode string `binding:"required,len=6,numeric" json:"totpCode"`
 }
 
