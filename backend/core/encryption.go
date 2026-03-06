@@ -7,6 +7,10 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 )
 
+const (
+	GCMNonceSize = 12
+)
+
 // Adapted from: https://tutorialedge.net/golang/go-encrypt-decrypt-aes-tutorial/
 func Encrypt(data []byte, encryptionKey []byte) ([]byte, []byte, common.WrappedError) {
 	passwordCipher, err := aes.NewCipher(encryptionKey)
@@ -17,7 +21,7 @@ func Encrypt(data []byte, encryptionKey []byte) ([]byte, []byte, common.WrappedE
 	if err != nil {
 		return nil, nil, ErrWrapperEncrypt.Wrap(err)
 	}
-	nonce := common.CryptoRandomBytes(gcm.NonceSize())
+	nonce := common.CryptoRandomBytes(GCMNonceSize)
 
 	encrypted := gcm.Seal(nil, nonce, data, nil)
 	return encrypted, nonce, nil

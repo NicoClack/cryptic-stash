@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"slices"
 	"sync"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
@@ -82,11 +83,37 @@ func (service *Core) IsUserLocked(userOb *ent.User) bool {
 }
 
 func (service *Core) Encrypt(data []byte, encryptionKey []byte) ([]byte, []byte, common.WrappedError) {
+	if len(service.App.Env.STASH_ENCRYPTION_KEY) > 0 {
+		innerEncrypted, innerNonce, wrappedErr := core.Encrypt(data, service.App.Env.STASH_ENCRYPTION_KEY)
+		if wrappedErr != nil {
+			return nil, nil, wrappedErr
+		}
+		data = slices.Concat(innerNonce, innerEncrypted)
+	}
+
 	return core.Encrypt(data, encryptionKey)
 }
 
 func (service *Core) Decrypt(encrypted []byte, encryptionKey []byte, nonce []byte) ([]byte, common.WrappedError) {
-	return core.Decrypt(encrypted, encryptionKey, nonce)
+	innerEncrypted, wrappedErr := core.Decrypt(encrypted, encryptionKey, nonce)
+	if wrappedErr != nil {
+		return nil, wrappedErr
+	}
+
+	if len(service.App.Env.STASH_ENCRYPTION_KEY) < 1 {
+		return innerEncrypted, nil
+	}
+
+	if len(innerEncrypted) < core.GCMNonceSize {
+		return nil, ErrWrapperDecrypt.Wrap(
+			ErrMissingInnerEncryptionNonce,
+		)
+	}
+	return core.Decrypt(
+		innerEncrypted[core.GCMNonceSize:],
+		service.App.Env.STASH_ENCRYPTION_KEY,
+		innerEncrypted[:core.GCMNonceSize],
+	)
 }
 
 func (service *Core) GenerateSalt() []byte {

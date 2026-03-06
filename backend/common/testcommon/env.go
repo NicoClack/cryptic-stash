@@ -36,6 +36,7 @@ func DefaultEnv() *common.Env {
 		USED_AUTH_CODE_VALID_FOR:                  time.Hour,
 		ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL: time.Hour * 24,
 		MIN_SUCCESSFUL_MESSAGE_COUNT:              1,
+		STASH_ENCRYPTION_KEY:                      []byte{},
 
 		PASSWORD_HASH_SETTINGS: &common.PasswordHashSettings{
 			Time:    1,

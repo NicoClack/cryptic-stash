@@ -46,6 +46,7 @@ type Env struct {
 	ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL time.Duration
 	MIN_SUCCESSFUL_MESSAGE_COUNT              int
 	PASSWORD_HASH_SETTINGS                    *PasswordHashSettings
+	STASH_ENCRYPTION_KEY                      []byte
 
 	LOG_STORE_INTERVAL time.Duration
 	// How long the server should wait for messengers to succeed before crashing the server to send the message

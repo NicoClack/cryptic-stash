@@ -39,6 +39,7 @@ const (
 	ErrTypeRateLimiting    = "rate limiting [package]"
 	ErrTypeDbCommon        = "db common [package]"
 	ErrTypeServerCommon    = "server common [package]"
+	ErrTypeServices        = "services [package]"
 	// Similar idea here if it's unknown
 )
 

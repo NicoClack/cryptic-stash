@@ -55,6 +55,7 @@
 -   Refactor the logger
 -   -   Mostly to improve the self logging
 -   Is the benchmark properly thread-safe? Can guessChan be received in multiple places like that? Maybe should send a done signal down nextPasswordChan to the workers?
+- Add new LAST_STASH_ENCRYPTION_KEY env var to allow STASH_ENCRYPTION_KEY to be rotated
 -   Bump priority of jobs as they get older
 
 # To watch
@@ -66,6 +67,9 @@
 Can I wake up a sleeping railway app by just having a separate cron service send an HTTP request over the internal network?
 
 Maybe have the server save the time periodically and on shutdown? Then when it starts it runs through the cron jobs it missed? It probably shouldn't run the same jobs multiple times though
+
+Reduce the necessary trust in the server by using OPAQUE?
+https://blog.cloudflare.com/opaque-oblivious-passwords/
 
 # Testing
 

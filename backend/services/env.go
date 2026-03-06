@@ -55,6 +55,7 @@ func LoadEnvironmentVariables() *common.Env {
 			Memory:  common.RequireUint32Env("PASSWORD_HASH_MEMORY"),
 			Threads: common.RequireUint8Env("PASSWORD_HASH_THREADS"),
 		},
+		STASH_ENCRYPTION_KEY: common.RequireBase64Env("STASH_ENCRYPTION_KEY"),
 
 		LOG_STORE_INTERVAL:     common.RequireMillisecondsEnv("LOG_STORE_INTERVAL"),
 		ADMIN_MESSAGE_TIMEOUT:  common.RequireSecondsEnv("ADMIN_MESSAGE_TIMEOUT"),
