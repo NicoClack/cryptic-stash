@@ -1,6 +1,8 @@
 # TODO
 
 - Create endpoint for creating a user with a given username. Can then generate a signup link for a user to update their stash and password. That way the user doesn't need to give the admin their password and data, and the admin doesn't need to give their password/download session
+- Client should hash password before sending it to all endpoints. Use a lower memory but higher CPU config of Argon2ID. The server will then hash that a second time with a high memory, lower CPU config. Not a proper DDoS protection because I don't think it's possible to prove the client hasn't just sent a random or precomputed hash (the same request can even be repeated to cause server load). Main advantage is that the user's password is relatively obscured from the server, so less trust is required. It also makes online cracking slightly less viable due to the compute needed. However the server still has the ability to decrypt the stash during signup and downloads.
+- Encrypt stashes using a random key and store that key encrypted with the user's password hash? Instead of encrypting with user's password hash directly? Would that prevent side channel attacks from revealing stash size? Maybe makes it more flexible in the future?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
 -   Improve frontend
 -   Remove userID and publicMessage from logger, it's not worth the complexity and risks
@@ -57,6 +59,7 @@
 -   Is the benchmark properly thread-safe? Can guessChan be received in multiple places like that? Maybe should send a done signal down nextPasswordChan to the workers?
 - Add new LAST_STASH_ENCRYPTION_KEY env var to allow STASH_ENCRYPTION_KEY to be rotated
 -   Bump priority of jobs as they get older
+- Change tests to use the test logger
 
 # To watch
 
