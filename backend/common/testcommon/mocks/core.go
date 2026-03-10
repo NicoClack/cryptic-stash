@@ -41,13 +41,16 @@ func (m *EmptyCoreService) IsUserSufficientlyNotified(downloadSessionOb *ent.Dow
 func (m *EmptyCoreService) IsUserLocked(userOb *ent.User) bool {
 	return false
 }
-func (m *EmptyCoreService) Encrypt(data []byte, encryptionKey []byte) ([]byte, []byte, common.WrappedError) {
-	return []byte{}, []byte{}, nil
+func (m *EmptyCoreService) Encrypt(data []byte, encryptionKey []byte) ([]byte, common.WrappedError) {
+	return []byte{}, nil
 }
-func (m *EmptyCoreService) Decrypt(encrypted []byte, encryptionKey []byte, nonce []byte) ([]byte, common.WrappedError) {
+func (m *EmptyCoreService) Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, common.WrappedError) {
 	return []byte{}, nil
 }
 func (m *EmptyCoreService) GenerateSalt() []byte {
+	return []byte{}
+}
+func (m *EmptyCoreService) GenerateEncryptionKey() []byte {
 	return []byte{}
 }
 func (m *EmptyCoreService) HashPassword(password string, salt []byte, settings *common.PasswordHashSettings) []byte {

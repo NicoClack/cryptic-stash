@@ -43,7 +43,7 @@ func TestSanitizeFilename_GivenSafeFilename_ReturnsOriginal(t *testing.T) {
 func TestSanitizeFilename_GivenReservedCharacters_ReplacesWithUnderscores(t *testing.T) {
 	t.Parallel()
 
-	require.Equal(t, ".._secret_recovery_.txt", common.SanitizeFilename("../secret\\recovery?.txt", ""))
+	require.Equal(t, "_secret_recovery_.txt", common.SanitizeFilename("../secret\\recovery?.txt", ""))
 }
 
 func TestSanitizeFilename_GivenControlCharacters_RemovesThem(t *testing.T) {

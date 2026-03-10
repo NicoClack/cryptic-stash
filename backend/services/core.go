@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"slices"
 	"sync"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
@@ -82,20 +81,20 @@ func (service *Core) IsUserLocked(userOb *ent.User) bool {
 	return core.IsUserLocked(userOb, service.App.Clock)
 }
 
-func (service *Core) Encrypt(data []byte, encryptionKey []byte) ([]byte, []byte, common.WrappedError) {
+func (service *Core) Encrypt(data []byte, encryptionKey []byte) ([]byte, common.WrappedError) {
 	if len(service.App.Env.STASH_ENCRYPTION_KEY) > 0 {
-		innerEncrypted, innerNonce, wrappedErr := core.Encrypt(data, service.App.Env.STASH_ENCRYPTION_KEY)
+		innerEncrypted, wrappedErr := core.Encrypt(data, service.App.Env.STASH_ENCRYPTION_KEY)
 		if wrappedErr != nil {
-			return nil, nil, wrappedErr
+			return nil, wrappedErr
 		}
-		data = slices.Concat(innerNonce, innerEncrypted)
+		data = innerEncrypted
 	}
 
 	return core.Encrypt(data, encryptionKey)
 }
 
-func (service *Core) Decrypt(encrypted []byte, encryptionKey []byte, nonce []byte) ([]byte, common.WrappedError) {
-	innerEncrypted, wrappedErr := core.Decrypt(encrypted, encryptionKey, nonce)
+func (service *Core) Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, common.WrappedError) {
+	innerEncrypted, wrappedErr := core.Decrypt(encrypted, encryptionKey)
 	if wrappedErr != nil {
 		return nil, wrappedErr
 	}
@@ -110,14 +109,16 @@ func (service *Core) Decrypt(encrypted []byte, encryptionKey []byte, nonce []byt
 		)
 	}
 	return core.Decrypt(
-		innerEncrypted[core.GCMNonceSize:],
+		innerEncrypted,
 		service.App.Env.STASH_ENCRYPTION_KEY,
-		innerEncrypted[:core.GCMNonceSize],
 	)
 }
 
 func (service *Core) GenerateSalt() []byte {
 	return core.GenerateSalt()
+}
+func (service *Core) GenerateEncryptionKey() []byte {
+	return core.GenerateEncryptionKey()
 }
 
 func (service *Core) HashPassword(password string, salt []byte, settings *common.PasswordHashSettings) []byte {

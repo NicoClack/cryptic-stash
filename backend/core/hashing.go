@@ -8,6 +8,9 @@ import (
 func GenerateSalt() []byte {
 	return common.CryptoRandomBytes(common.PasswordSaltLength)
 }
+func GenerateEncryptionKey() []byte {
+	return common.CryptoRandomBytes(common.EncryptionKeyLength)
+}
 
 // Returns an encryption key
 func HashPassword(password string, salt []byte, settings *common.PasswordHashSettings) []byte {

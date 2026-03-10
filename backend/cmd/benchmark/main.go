@@ -86,9 +86,9 @@ func main() {
 
 	salt := core.GenerateSalt()
 	encryptionKey := core.HashPassword(*password, salt, hashSettings)
-	encrypted, nonce, err := core.Encrypt([]byte("Hello world"), encryptionKey)
-	if err != nil {
-		log.Fatalf("unable to encrypt test data. error:\n%v", err.Error())
+	encrypted, stdErr := core.Encrypt([]byte("Hello world"), encryptionKey)
+	if stdErr != nil {
+		log.Fatalf("unable to encrypt test data. error:\n%v", stdErr.Error())
 	}
 
 	fmt.Fprintf(os.Stdout, "running on %v threads\n\n", *benchmarkThreads)
@@ -101,7 +101,7 @@ func main() {
 		go workerLoop(
 			nextPasswordChan, guessChan,
 			time.Duration(*spacing)*time.Millisecond,
-			salt, hashSettings, encrypted, nonce,
+			salt, hashSettings, encrypted,
 		)
 	}
 
@@ -164,14 +164,18 @@ func addIntArray(arr []int32, amount int32, maxValue int32) bool {
 }
 
 func workerLoop(
-	nextPasswordChan chan string, guessChan chan guess, spacing time.Duration,
-	salt []byte, passwordHashSettings *common.PasswordHashSettings, encrypted []byte, nonce []byte,
+	nextPasswordChan chan string,
+	guessChan chan guess,
+	spacing time.Duration,
+	salt []byte,
+	passwordHashSettings *common.PasswordHashSettings,
+	encrypted []byte,
 ) {
 	for {
 		select {
 		case password := <-nextPasswordChan:
 			encryptionKey := core.HashPassword(password, salt, passwordHashSettings)
-			decrypted, err := core.Decrypt(encrypted, encryptionKey, nonce)
+			decrypted, err := core.Decrypt(encrypted, encryptionKey)
 			if err == nil {
 				guessChan <- (
 				//exhaustruct:enforce

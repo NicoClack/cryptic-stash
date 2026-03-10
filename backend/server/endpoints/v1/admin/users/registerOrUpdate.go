@@ -17,7 +17,6 @@ type RegisterPayload struct {
 	Password string `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
 	Content  string `binding:"required,min=1,max=100000000"             json:"content"`  // 100 MB but base64 encoded
 	Filename string `binding:"required,min=1,max=256"                   json:"filename"`
-	Mime     string `binding:"required,min=1,max=256"                   json:"mime"`
 }
 type RegisterOrUpdateResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -49,7 +48,12 @@ func RegisterOrUpdate(app *servercommon.ServerApp) gin.HandlerFunc {
 
 		salt := app.Core.GenerateSalt()
 		encryptionKey := app.Core.HashPassword(body.Password, salt, hashSettings)
-		encrypted, nonce, wrappedErr := app.Core.Encrypt(contentBytes, encryptionKey)
+		stashDataKey := app.Core.GenerateSalt()
+		encrypted, wrappedErr := app.Core.Encrypt(contentBytes, stashDataKey)
+		if wrappedErr != nil {
+			return wrappedErr
+		}
+		encryptedDataKey, wrappedErr := app.Core.Encrypt(stashDataKey, encryptionKey)
 		if wrappedErr != nil {
 			return wrappedErr
 		}
@@ -66,10 +70,9 @@ func RegisterOrUpdate(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 				stdErr = tx.Stash.Create().
 					SetContent(encrypted).
-					SetFileName(body.Filename).
-					SetMime(body.Mime).
-					SetNonce(nonce).
-					SetKeySalt(salt).
+					SetFileName([]byte(body.Filename)).
+					SetEncryptionDataKey(encryptedDataKey).
+					SetPasswordSalt(salt).
 					SetHashTime(hashSettings.Time).
 					SetHashMemory(hashSettings.Memory).
 					SetHashThreads(hashSettings.Threads).

@@ -247,6 +247,7 @@ type CoreService interface {
 	Encrypt(data []byte, encryptionKey []byte) ([]byte, WrappedError)
 	Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, WrappedError)
 	GenerateSalt() []byte
+	GenerateEncryptionKey() []byte
 	HashPassword(password string, salt []byte, settings *PasswordHashSettings) []byte
 }
 

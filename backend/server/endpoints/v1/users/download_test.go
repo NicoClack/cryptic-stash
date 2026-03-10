@@ -2,6 +2,7 @@ package users_test
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"net/http"
 	"net/http/httptest"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
-	"github.com/NicoClack/cryptic-stash/backend/core"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
@@ -33,26 +33,35 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 	password := "password123456"
 	fileContent := []byte("file content here")
 	filename := "data.zip"
-	mimeType := "application/zip"
 
-	keySalt := app.Core.GenerateSalt()
-	encryptionKey := app.Core.HashPassword(password, keySalt, app.Env.PASSWORD_HASH_SETTINGS)
+	passwordSalt := app.Core.GenerateSalt()
+	stashKek := app.Core.HashPassword(password, passwordSalt, app.Env.PASSWORD_HASH_SETTINGS)
+	stashDataKey := app.Core.GenerateEncryptionKey()
 
-	encrypted, nonce, wrappedErr := app.Core.Encrypt(fileContent, encryptionKey)
+	encryptedContent, wrappedErr := app.Core.Encrypt(fileContent, stashDataKey)
+	require.NoError(t, wrappedErr)
+	encryptedFileName, wrappedErr := app.Core.Encrypt([]byte(filename), stashDataKey)
 	require.NoError(t, wrappedErr)
 
-	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
+	encryptedDataKey, wrappedErr := app.Core.Encrypt(stashDataKey, stashKek)
+	require.NoError(t, wrappedErr)
+
+	authCode := app.Core.RandomAuthCode()
+
+	stdErr := dbcommon.WithWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
+		func(tx *ent.Tx, ctx context.Context) error {
 			now := clock.Now()
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSessionsValidFrom(now).
 				SetLockedUntil(now). // Has just expired
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
@@ -63,46 +72,46 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			stdErr = tx.Stash.Create().
-				SetContent(encrypted).
-				SetFileName(filename).
-				SetMime(mimeType).
-				SetNonce(nonce).
-				SetKeySalt(keySalt).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetContent(encryptedContent).
+				SetFileName(encryptedFileName).
+				SetEncryptionDataKey(encryptedDataKey).
+				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
 				Exec(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 
-			authCode := app.Core.RandomAuthCode()
+			hashedAuthCode := sha256.Sum256(authCode)
 			validUntil := now.Add(24 * time.Hour)
-
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
-				SetCode(authCode).
+				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
 				SetUserAgent("test-agent").
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return downloadSessionOb, stdErr
+				return stdErr
 			}
 
-			_, stdErr = tx.LoginAlert.Create().
+			stdErr = tx.LoginAlert.Create().
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
-				Save(ctx)
-			return downloadSessionOb, stdErr
+				Exec(ctx)
+			return stdErr
 		},
 	)
 	require.NoError(t, stdErr)
@@ -113,7 +122,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
-			AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
+			AuthorizationCode: base64.StdEncoding.EncodeToString(authCode),
 		},
 	)
 	testcommon.AssertJSONResponse(
@@ -125,7 +134,6 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			AuthorizationCodeValidUntil: nil,
 			Content:                     fileContent,
 			Filename:                    filename,
-			Mime:                        mimeType,
 		},
 	)
 }
@@ -142,27 +150,35 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 	password := "password123456"
 	fileContent := []byte("file content here")
 	filename := "data.zip"
-	mimeType := "application/zip"
 
-	keySalt := core.GenerateSalt()
-	encryptionKey := core.HashPassword(password, keySalt, app.Env.PASSWORD_HASH_SETTINGS)
+	passwordSalt := app.Core.GenerateSalt()
+	stashKek := app.Core.HashPassword(password, passwordSalt, app.Env.PASSWORD_HASH_SETTINGS)
+	stashDataKey := app.Core.GenerateEncryptionKey()
 
-	encrypted, nonce, wrappedErr := core.Encrypt(fileContent, encryptionKey)
+	encryptedContent, wrappedErr := app.Core.Encrypt(fileContent, stashDataKey)
+	require.NoError(t, wrappedErr)
+	encryptedFileName, wrappedErr := app.Core.Encrypt([]byte(filename), stashDataKey)
 	require.NoError(t, wrappedErr)
 
-	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
+	encryptedDataKey, wrappedErr := app.Core.Encrypt(stashDataKey, stashKek)
+	require.NoError(t, wrappedErr)
+
+	authCode := app.Core.RandomAuthCode()
+	stdErr := dbcommon.WithWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
+		func(tx *ent.Tx, ctx context.Context) error {
 			now := clock.Now()
 			// Set SessionsValidFrom to be in the future
 			sessionsValidFrom := now.Add(1 * time.Hour)
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSessionsValidFrom(sessionsValidFrom).
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
@@ -173,46 +189,46 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			stdErr = tx.Stash.Create().
-				SetContent(encrypted).
-				SetFileName(filename).
-				SetMime(mimeType).
-				SetNonce(nonce).
-				SetKeySalt(keySalt).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetContent(encryptedContent).
+				SetFileName(encryptedFileName).
+				SetEncryptionDataKey(encryptedDataKey).
+				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
 				Exec(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 
-			authCode := core.RandomAuthCode()
+			hashedAuthCode := sha256.Sum256(authCode)
 			validUntil := now.Add(24 * time.Hour)
 
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
-				SetCode(authCode).
+				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
 				SetUserAgent("test-agent").
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return downloadSessionOb, stdErr
+				return stdErr
 			}
 
-			_, stdErr = tx.LoginAlert.Create().
+			return tx.LoginAlert.Create().
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
-				Save(ctx)
-			return downloadSessionOb, stdErr
+				Exec(ctx)
 		},
 	)
 	require.NoError(t, stdErr)
@@ -223,7 +239,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
-			AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
+			AuthorizationCode: base64.StdEncoding.EncodeToString(authCode),
 		},
 	)
 	testcommon.AssertJSONResponse(
@@ -248,26 +264,34 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 	password := "password123456"
 	fileContent := []byte("file content here")
 	filename := "data.zip"
-	mimeType := "application/zip"
 
-	keySalt := app.Core.GenerateSalt()
-	encryptionKey := app.Core.HashPassword(password, keySalt, app.Env.PASSWORD_HASH_SETTINGS)
+	passwordSalt := app.Core.GenerateSalt()
+	stashKek := app.Core.HashPassword(password, passwordSalt, app.Env.PASSWORD_HASH_SETTINGS)
+	stashDataKey := app.Core.GenerateEncryptionKey()
 
-	encrypted, nonce, wrappedErr := app.Core.Encrypt(fileContent, encryptionKey)
+	encryptedContent, wrappedErr := app.Core.Encrypt(fileContent, stashDataKey)
+	require.NoError(t, wrappedErr)
+	encryptedFileName, wrappedErr := app.Core.Encrypt([]byte(filename), stashDataKey)
 	require.NoError(t, wrappedErr)
 
-	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
+	encryptedDataKey, wrappedErr := app.Core.Encrypt(stashDataKey, stashKek)
+	require.NoError(t, wrappedErr)
+
+	authCode := app.Core.RandomAuthCode()
+	stdErr := dbcommon.WithWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
+		func(tx *ent.Tx, ctx context.Context) error {
 			now := clock.Now()
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSessionsValidFrom(now).
 				SetLockedUntil(now.Add((24 * time.Hour) + time.Nanosecond)).
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
@@ -278,24 +302,25 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			stdErr = tx.Stash.Create().
-				SetContent(encrypted).
-				SetFileName(filename).
-				SetMime(mimeType).
-				SetNonce(nonce).
-				SetKeySalt(keySalt).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetContent(encryptedContent).
+				SetFileName(encryptedFileName).
+				SetEncryptionDataKey(encryptedDataKey).
+				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
 				Exec(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 
-			authCode := app.Core.RandomAuthCode()
+			hashedAuthCode := sha256.Sum256(authCode)
 			validUntil := now.Add(2 * 24 * time.Hour) // Lasts until after the user is unlocked
 
 			// This download session shouldn't exist, but let's say an attacker managed to somehow create it
@@ -304,39 +329,34 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
-				SetCode(authCode).
+				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
 				SetUserAgent("test-agent").
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return downloadSessionOb, stdErr
+				return stdErr
 			}
 
-			_, stdErr = tx.LoginAlert.Create().
+			stdErr = tx.LoginAlert.Create().
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
-				Save(ctx)
+				Exec(ctx)
 			if stdErr != nil {
-				return downloadSessionOb, stdErr
+				return stdErr
 			}
 
 			// Slightly unrealistic but it's easiest to create both alerts here
 			// This is needed otherwise core.IsUserSufficientlyNotified thinks the jobs are failing and prevents the login
-			_, stdErr = tx.LoginAlert.Create().
+			return tx.LoginAlert.Create().
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now.Add(24 * time.Hour)).
 				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
-				Save(ctx)
-			if stdErr != nil {
-				return downloadSessionOb, stdErr
-			}
-
-			return downloadSessionOb, nil
+				Exec(ctx)
 		},
 	)
 	require.NoError(t, stdErr)
@@ -348,7 +368,7 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			users.DownloadPayload{
 				Username:          username,
 				Password:          password,
-				AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
+				AuthorizationCode: base64.StdEncoding.EncodeToString(authCode),
 			},
 		)
 	}
@@ -384,10 +404,10 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			AuthorizationCodeValidUntil: nil,
 			Content:                     fileContent,
 			Filename:                    filename,
-			Mime:                        mimeType,
 		},
 	)
 }
+
 func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 	t.Parallel()
 	// TODO: assert messenger sent message, maybe improve the setup
@@ -401,27 +421,35 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 	password := "password123456"
 	fileContent := []byte("file content here")
 	filename := "data.zip"
-	mimeType := "application/zip"
 
-	keySalt := app.Core.GenerateSalt()
-	encryptionKey := app.Core.HashPassword(password, keySalt, app.Env.PASSWORD_HASH_SETTINGS)
+	passwordSalt := app.Core.GenerateSalt()
+	stashKek := app.Core.HashPassword(password, passwordSalt, app.Env.PASSWORD_HASH_SETTINGS)
+	stashDataKey := app.Core.GenerateEncryptionKey()
 
-	encrypted, nonce, wrappedErr := app.Core.Encrypt(fileContent, encryptionKey)
+	encryptedContent, wrappedErr := app.Core.Encrypt(fileContent, stashDataKey)
+	require.NoError(t, wrappedErr)
+	encryptedFileName, wrappedErr := app.Core.Encrypt([]byte(filename), stashDataKey)
 	require.NoError(t, wrappedErr)
 
-	downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
+	encryptedDataKey, wrappedErr := app.Core.Encrypt(stashDataKey, stashKek)
+	require.NoError(t, wrappedErr)
+
+	authCode := app.Core.RandomAuthCode()
+	stdErr := dbcommon.WithWriteTx(
 		t.Context(), app.Database,
-		func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
+		func(tx *ent.Tx, ctx context.Context) error {
 			now := clock.Now()
 
 			userOb, stdErr := tx.User.Create().
 				SetUsername(username).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSessionsValidFrom(now).
 				SetLockedUntil(now.Add(-time.Hour)). // Expired a little while ago
 				SetLocked(true).                     // But this takes priority
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
@@ -432,24 +460,25 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 			stdErr = tx.Stash.Create().
-				SetContent(encrypted).
-				SetFileName(filename).
-				SetMime(mimeType).
-				SetNonce(nonce).
-				SetKeySalt(keySalt).
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetContent(encryptedContent).
+				SetFileName(encryptedFileName).
+				SetEncryptionDataKey(encryptedDataKey).
+				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
 				Exec(ctx)
 			if stdErr != nil {
-				return nil, stdErr
+				return stdErr
 			}
 
-			authCode := app.Core.RandomAuthCode()
+			hashedAuthCode := sha256.Sum256(authCode)
 			validUntil := now.Add(24 * time.Hour)
 
 			// This download session shouldn't exist, but let's say an attacker managed to somehow create it
@@ -458,23 +487,22 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetUser(userOb).
 				SetCreatedAt(now).
-				SetCode(authCode).
+				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
 				SetUserAgent("test-agent").
 				SetIP("127.0.0.1").
 				Save(ctx)
 			if stdErr != nil {
-				return downloadSessionOb, stdErr
+				return stdErr
 			}
 
-			_, stdErr = tx.LoginAlert.Create().
+			return tx.LoginAlert.Create().
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
 				SetConfirmed(true).
-				Save(ctx)
-			return downloadSessionOb, stdErr
+				Exec(ctx)
 		},
 	)
 	require.NoError(t, stdErr)
@@ -485,7 +513,7 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 		users.DownloadPayload{
 			Username:          username,
 			Password:          password,
-			AuthorizationCode: base64.StdEncoding.EncodeToString(downloadSessionOb.Code),
+			AuthorizationCode: base64.StdEncoding.EncodeToString(authCode),
 		},
 	)
 	testcommon.AssertJSONResponse(

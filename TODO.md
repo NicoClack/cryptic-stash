@@ -3,6 +3,7 @@
 - Create endpoint for creating a user with a given username. Can then generate a signup link for a user to update their stash and password. That way the user doesn't need to give the admin their password and data, and the admin doesn't need to give their password/download session
 - Encrypt stashes using a random key and store that key encrypted with the user's password hash? Instead of encrypting with user's password hash directly. Would that prevent side channel attacks from revealing stash size? Maybe makes it more flexible in the future?
 - Hash authorisation codes with SHA256 to ensure read access to the database doesn't allow active download sessions to be hijacked
+- Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
 -   Improve frontend
 -   Remove userID and publicMessage from logger, it's not worth the complexity and risks
