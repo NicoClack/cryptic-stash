@@ -49,6 +49,8 @@ func LoadEnvironmentVariables() *common.Env {
 		ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL: common.RequireSecondsEnv(
 			"ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL",
 		),
+		SIGNUP_LINK_DEFAULT_EXPIRY:   common.RequireSecondsEnv("SIGNUP_LINK_DEFAULT_EXPIRY"),
+		SIGNUP_LINK_MAX_EXPIRY:       common.RequireSecondsEnv("SIGNUP_LINK_MAX_EXPIRY"),
 		MIN_SUCCESSFUL_MESSAGE_COUNT: common.RequireIntEnv("MIN_SUCCESSFUL_MESSAGE_COUNT"),
 		PASSWORD_HASH_SETTINGS: &common.PasswordHashSettings{
 			Time:    common.RequireUint32Env("PASSWORD_HASH_TIME"),

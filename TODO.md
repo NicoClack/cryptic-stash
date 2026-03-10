@@ -4,6 +4,8 @@
 - Encrypt stashes using a random key and store that key encrypted with the user's password hash? Instead of encrypting with user's password hash directly. Would that prevent side channel attacks from revealing stash size? Maybe makes it more flexible in the future?
 - Hash authorisation codes with SHA256 to ensure read access to the database doesn't allow active download sessions to be hijacked
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
+- Allow creating signup links to change stash contents/password
+- Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
 -   Improve frontend
 -   Remove userID and publicMessage from logger, it's not worth the complexity and risks
@@ -67,6 +69,8 @@
 -   Timeouts sometimes incorrectly send 500s?
 
 # To research
+
+How password managers work. Maybe a zero trust system is actually possible?
 
 Can I wake up a sleeping railway app by just having a separate cron service send an HTTP request over the internal network?
 

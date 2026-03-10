@@ -39,6 +39,9 @@ type Env struct {
 	ADMIN_PASSWORD_SALT          []byte
 	ADMIN_TOTP_SECRET            string
 
+	SIGNUP_LINK_DEFAULT_EXPIRY time.Duration
+	SIGNUP_LINK_MAX_EXPIRY     time.Duration
+
 	UNLOCK_TIME         time.Duration
 	AUTH_CODE_VALID_FOR time.Duration
 	// Once used, how much longer the auth code remains valid for
