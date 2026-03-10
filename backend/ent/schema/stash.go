@@ -16,11 +16,15 @@ type Stash struct {
 func (Stash) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
-		field.Bytes("content").NotEmpty(),
-		field.String("fileName").NotEmpty(),
-		field.String("mime").NotEmpty(),
-		field.Bytes("nonce").NotEmpty(),
-		field.Bytes("keySalt").NotEmpty(),
+		// Encrypted with encryptionDataKey and prefixed with the nonce
+		field.Bytes("content").NotEmpty().MaxLen(10_000_000), // 10MB
+		field.Bytes("fileName").NotEmpty().MaxLen(256),
+
+		// Encrypted with a key derived from the user's password, then env.STASH_ENCRYPTION_KEY.
+		// GCM and nonce prefixes on both layers so the 32 unencrypted length becomes closer to 128 bytes
+		field.Bytes("encryptionDataKey").MinLen(32).MaxLen(128),
+		field.Bytes("passwordSalt").NotEmpty(),
+
 		field.Uint32("hashTime"),
 		field.Uint32("hashMemory"),
 		field.Uint8("hashThreads"),

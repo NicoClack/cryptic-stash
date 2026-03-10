@@ -31,26 +31,20 @@ func (_c *StashCreate) SetContent(v []byte) *StashCreate {
 }
 
 // SetFileName sets the "fileName" field.
-func (_c *StashCreate) SetFileName(v string) *StashCreate {
+func (_c *StashCreate) SetFileName(v []byte) *StashCreate {
 	_c.mutation.SetFileName(v)
 	return _c
 }
 
-// SetMime sets the "mime" field.
-func (_c *StashCreate) SetMime(v string) *StashCreate {
-	_c.mutation.SetMime(v)
+// SetEncryptionDataKey sets the "encryptionDataKey" field.
+func (_c *StashCreate) SetEncryptionDataKey(v []byte) *StashCreate {
+	_c.mutation.SetEncryptionDataKey(v)
 	return _c
 }
 
-// SetNonce sets the "nonce" field.
-func (_c *StashCreate) SetNonce(v []byte) *StashCreate {
-	_c.mutation.SetNonce(v)
-	return _c
-}
-
-// SetKeySalt sets the "keySalt" field.
-func (_c *StashCreate) SetKeySalt(v []byte) *StashCreate {
-	_c.mutation.SetKeySalt(v)
+// SetPasswordSalt sets the "passwordSalt" field.
+func (_c *StashCreate) SetPasswordSalt(v []byte) *StashCreate {
+	_c.mutation.SetPasswordSalt(v)
 	return _c
 }
 
@@ -156,28 +150,20 @@ func (_c *StashCreate) check() error {
 			return &ValidationError{Name: "fileName", err: fmt.Errorf(`ent: validator failed for field "Stash.fileName": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Mime(); !ok {
-		return &ValidationError{Name: "mime", err: errors.New(`ent: missing required field "Stash.mime"`)}
+	if _, ok := _c.mutation.EncryptionDataKey(); !ok {
+		return &ValidationError{Name: "encryptionDataKey", err: errors.New(`ent: missing required field "Stash.encryptionDataKey"`)}
 	}
-	if v, ok := _c.mutation.Mime(); ok {
-		if err := stash.MimeValidator(v); err != nil {
-			return &ValidationError{Name: "mime", err: fmt.Errorf(`ent: validator failed for field "Stash.mime": %w`, err)}
+	if v, ok := _c.mutation.EncryptionDataKey(); ok {
+		if err := stash.EncryptionDataKeyValidator(v); err != nil {
+			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Nonce(); !ok {
-		return &ValidationError{Name: "nonce", err: errors.New(`ent: missing required field "Stash.nonce"`)}
+	if _, ok := _c.mutation.PasswordSalt(); !ok {
+		return &ValidationError{Name: "passwordSalt", err: errors.New(`ent: missing required field "Stash.passwordSalt"`)}
 	}
-	if v, ok := _c.mutation.Nonce(); ok {
-		if err := stash.NonceValidator(v); err != nil {
-			return &ValidationError{Name: "nonce", err: fmt.Errorf(`ent: validator failed for field "Stash.nonce": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.KeySalt(); !ok {
-		return &ValidationError{Name: "keySalt", err: errors.New(`ent: missing required field "Stash.keySalt"`)}
-	}
-	if v, ok := _c.mutation.KeySalt(); ok {
-		if err := stash.KeySaltValidator(v); err != nil {
-			return &ValidationError{Name: "keySalt", err: fmt.Errorf(`ent: validator failed for field "Stash.keySalt": %w`, err)}
+	if v, ok := _c.mutation.PasswordSalt(); ok {
+		if err := stash.PasswordSaltValidator(v); err != nil {
+			return &ValidationError{Name: "passwordSalt", err: fmt.Errorf(`ent: validator failed for field "Stash.passwordSalt": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.HashTime(); !ok {
@@ -236,20 +222,16 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 		_node.Content = value
 	}
 	if value, ok := _c.mutation.FileName(); ok {
-		_spec.SetField(stash.FieldFileName, field.TypeString, value)
+		_spec.SetField(stash.FieldFileName, field.TypeBytes, value)
 		_node.FileName = value
 	}
-	if value, ok := _c.mutation.Mime(); ok {
-		_spec.SetField(stash.FieldMime, field.TypeString, value)
-		_node.Mime = value
+	if value, ok := _c.mutation.EncryptionDataKey(); ok {
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
+		_node.EncryptionDataKey = value
 	}
-	if value, ok := _c.mutation.Nonce(); ok {
-		_spec.SetField(stash.FieldNonce, field.TypeBytes, value)
-		_node.Nonce = value
-	}
-	if value, ok := _c.mutation.KeySalt(); ok {
-		_spec.SetField(stash.FieldKeySalt, field.TypeBytes, value)
-		_node.KeySalt = value
+	if value, ok := _c.mutation.PasswordSalt(); ok {
+		_spec.SetField(stash.FieldPasswordSalt, field.TypeBytes, value)
+		_node.PasswordSalt = value
 	}
 	if value, ok := _c.mutation.HashTime(); ok {
 		_spec.SetField(stash.FieldHashTime, field.TypeUint32, value)
@@ -345,7 +327,7 @@ func (u *StashUpsert) UpdateContent() *StashUpsert {
 }
 
 // SetFileName sets the "fileName" field.
-func (u *StashUpsert) SetFileName(v string) *StashUpsert {
+func (u *StashUpsert) SetFileName(v []byte) *StashUpsert {
 	u.Set(stash.FieldFileName, v)
 	return u
 }
@@ -356,39 +338,27 @@ func (u *StashUpsert) UpdateFileName() *StashUpsert {
 	return u
 }
 
-// SetMime sets the "mime" field.
-func (u *StashUpsert) SetMime(v string) *StashUpsert {
-	u.Set(stash.FieldMime, v)
+// SetEncryptionDataKey sets the "encryptionDataKey" field.
+func (u *StashUpsert) SetEncryptionDataKey(v []byte) *StashUpsert {
+	u.Set(stash.FieldEncryptionDataKey, v)
 	return u
 }
 
-// UpdateMime sets the "mime" field to the value that was provided on create.
-func (u *StashUpsert) UpdateMime() *StashUpsert {
-	u.SetExcluded(stash.FieldMime)
+// UpdateEncryptionDataKey sets the "encryptionDataKey" field to the value that was provided on create.
+func (u *StashUpsert) UpdateEncryptionDataKey() *StashUpsert {
+	u.SetExcluded(stash.FieldEncryptionDataKey)
 	return u
 }
 
-// SetNonce sets the "nonce" field.
-func (u *StashUpsert) SetNonce(v []byte) *StashUpsert {
-	u.Set(stash.FieldNonce, v)
+// SetPasswordSalt sets the "passwordSalt" field.
+func (u *StashUpsert) SetPasswordSalt(v []byte) *StashUpsert {
+	u.Set(stash.FieldPasswordSalt, v)
 	return u
 }
 
-// UpdateNonce sets the "nonce" field to the value that was provided on create.
-func (u *StashUpsert) UpdateNonce() *StashUpsert {
-	u.SetExcluded(stash.FieldNonce)
-	return u
-}
-
-// SetKeySalt sets the "keySalt" field.
-func (u *StashUpsert) SetKeySalt(v []byte) *StashUpsert {
-	u.Set(stash.FieldKeySalt, v)
-	return u
-}
-
-// UpdateKeySalt sets the "keySalt" field to the value that was provided on create.
-func (u *StashUpsert) UpdateKeySalt() *StashUpsert {
-	u.SetExcluded(stash.FieldKeySalt)
+// UpdatePasswordSalt sets the "passwordSalt" field to the value that was provided on create.
+func (u *StashUpsert) UpdatePasswordSalt() *StashUpsert {
+	u.SetExcluded(stash.FieldPasswordSalt)
 	return u
 }
 
@@ -521,7 +491,7 @@ func (u *StashUpsertOne) UpdateContent() *StashUpsertOne {
 }
 
 // SetFileName sets the "fileName" field.
-func (u *StashUpsertOne) SetFileName(v string) *StashUpsertOne {
+func (u *StashUpsertOne) SetFileName(v []byte) *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
 		s.SetFileName(v)
 	})
@@ -534,45 +504,31 @@ func (u *StashUpsertOne) UpdateFileName() *StashUpsertOne {
 	})
 }
 
-// SetMime sets the "mime" field.
-func (u *StashUpsertOne) SetMime(v string) *StashUpsertOne {
+// SetEncryptionDataKey sets the "encryptionDataKey" field.
+func (u *StashUpsertOne) SetEncryptionDataKey(v []byte) *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.SetMime(v)
+		s.SetEncryptionDataKey(v)
 	})
 }
 
-// UpdateMime sets the "mime" field to the value that was provided on create.
-func (u *StashUpsertOne) UpdateMime() *StashUpsertOne {
+// UpdateEncryptionDataKey sets the "encryptionDataKey" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateEncryptionDataKey() *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateMime()
+		s.UpdateEncryptionDataKey()
 	})
 }
 
-// SetNonce sets the "nonce" field.
-func (u *StashUpsertOne) SetNonce(v []byte) *StashUpsertOne {
+// SetPasswordSalt sets the "passwordSalt" field.
+func (u *StashUpsertOne) SetPasswordSalt(v []byte) *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.SetNonce(v)
+		s.SetPasswordSalt(v)
 	})
 }
 
-// UpdateNonce sets the "nonce" field to the value that was provided on create.
-func (u *StashUpsertOne) UpdateNonce() *StashUpsertOne {
+// UpdatePasswordSalt sets the "passwordSalt" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdatePasswordSalt() *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateNonce()
-	})
-}
-
-// SetKeySalt sets the "keySalt" field.
-func (u *StashUpsertOne) SetKeySalt(v []byte) *StashUpsertOne {
-	return u.Update(func(s *StashUpsert) {
-		s.SetKeySalt(v)
-	})
-}
-
-// UpdateKeySalt sets the "keySalt" field to the value that was provided on create.
-func (u *StashUpsertOne) UpdateKeySalt() *StashUpsertOne {
-	return u.Update(func(s *StashUpsert) {
-		s.UpdateKeySalt()
+		s.UpdatePasswordSalt()
 	})
 }
 
@@ -883,7 +839,7 @@ func (u *StashUpsertBulk) UpdateContent() *StashUpsertBulk {
 }
 
 // SetFileName sets the "fileName" field.
-func (u *StashUpsertBulk) SetFileName(v string) *StashUpsertBulk {
+func (u *StashUpsertBulk) SetFileName(v []byte) *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
 		s.SetFileName(v)
 	})
@@ -896,45 +852,31 @@ func (u *StashUpsertBulk) UpdateFileName() *StashUpsertBulk {
 	})
 }
 
-// SetMime sets the "mime" field.
-func (u *StashUpsertBulk) SetMime(v string) *StashUpsertBulk {
+// SetEncryptionDataKey sets the "encryptionDataKey" field.
+func (u *StashUpsertBulk) SetEncryptionDataKey(v []byte) *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.SetMime(v)
+		s.SetEncryptionDataKey(v)
 	})
 }
 
-// UpdateMime sets the "mime" field to the value that was provided on create.
-func (u *StashUpsertBulk) UpdateMime() *StashUpsertBulk {
+// UpdateEncryptionDataKey sets the "encryptionDataKey" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateEncryptionDataKey() *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateMime()
+		s.UpdateEncryptionDataKey()
 	})
 }
 
-// SetNonce sets the "nonce" field.
-func (u *StashUpsertBulk) SetNonce(v []byte) *StashUpsertBulk {
+// SetPasswordSalt sets the "passwordSalt" field.
+func (u *StashUpsertBulk) SetPasswordSalt(v []byte) *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.SetNonce(v)
+		s.SetPasswordSalt(v)
 	})
 }
 
-// UpdateNonce sets the "nonce" field to the value that was provided on create.
-func (u *StashUpsertBulk) UpdateNonce() *StashUpsertBulk {
+// UpdatePasswordSalt sets the "passwordSalt" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdatePasswordSalt() *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateNonce()
-	})
-}
-
-// SetKeySalt sets the "keySalt" field.
-func (u *StashUpsertBulk) SetKeySalt(v []byte) *StashUpsertBulk {
-	return u.Update(func(s *StashUpsert) {
-		s.SetKeySalt(v)
-	})
-}
-
-// UpdateKeySalt sets the "keySalt" field to the value that was provided on create.
-func (u *StashUpsertBulk) UpdateKeySalt() *StashUpsertBulk {
-	return u.Update(func(s *StashUpsert) {
-		s.UpdateKeySalt()
+		s.UpdatePasswordSalt()
 	})
 }
 

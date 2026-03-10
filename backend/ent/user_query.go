@@ -15,6 +15,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -31,6 +32,7 @@ type UserQuery struct {
 	withStash            *StashQuery
 	withMessengers       *UserMessengerQuery
 	withDownloadSessions *DownloadSessionQuery
+	withSignupLink       *SignupLinkQuery
 	withLogs             *LogEntryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -127,6 +129,28 @@ func (_q *UserQuery) QueryDownloadSessions() *DownloadSessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.DownloadSessionsTable, user.DownloadSessionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySignupLink chains the current query on the "signupLink" edge.
+func (_q *UserQuery) QuerySignupLink() *SignupLinkQuery {
+	query := (&SignupLinkClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(signuplink.Table, signuplink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SignupLinkTable, user.SignupLinkColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -351,6 +375,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withStash:            _q.withStash.Clone(),
 		withMessengers:       _q.withMessengers.Clone(),
 		withDownloadSessions: _q.withDownloadSessions.Clone(),
+		withSignupLink:       _q.withSignupLink.Clone(),
 		withLogs:             _q.withLogs.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -391,6 +416,17 @@ func (_q *UserQuery) WithDownloadSessions(opts ...func(*DownloadSessionQuery)) *
 	return _q
 }
 
+// WithSignupLink tells the query-builder to eager-load the nodes that are connected to
+// the "signupLink" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSignupLink(opts ...func(*SignupLinkQuery)) *UserQuery {
+	query := (&SignupLinkClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSignupLink = query
+	return _q
+}
+
 // WithLogs tells the query-builder to eager-load the nodes that are connected to
 // the "logs" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithLogs(opts ...func(*LogEntryQuery)) *UserQuery {
@@ -408,12 +444,12 @@ func (_q *UserQuery) WithLogs(opts ...func(*LogEntryQuery)) *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldUsername).
+//		GroupBy(user.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -431,11 +467,11 @@ func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Username string `json:"username,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldUsername).
+//		Select(user.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (_q *UserQuery) Select(fields ...string) *UserSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
@@ -480,10 +516,11 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			_q.withStash != nil,
 			_q.withMessengers != nil,
 			_q.withDownloadSessions != nil,
+			_q.withSignupLink != nil,
 			_q.withLogs != nil,
 		}
 	)
@@ -522,6 +559,12 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadDownloadSessions(ctx, query, nodes,
 			func(n *User) { n.Edges.DownloadSessions = []*DownloadSession{} },
 			func(n *User, e *DownloadSession) { n.Edges.DownloadSessions = append(n.Edges.DownloadSessions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSignupLink; query != nil {
+		if err := _q.loadSignupLink(ctx, query, nodes, nil,
+			func(n *User, e *SignupLink) { n.Edges.SignupLink = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -607,6 +650,33 @@ func (_q *UserQuery) loadDownloadSessions(ctx context.Context, query *DownloadSe
 	}
 	query.Where(predicate.DownloadSession(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.DownloadSessionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "userID" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadSignupLink(ctx context.Context, query *SignupLinkQuery, nodes []*User, init func(*User), assign func(*User, *SignupLink)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(signuplink.FieldUserID)
+	}
+	query.Where(predicate.SignupLink(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SignupLinkColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

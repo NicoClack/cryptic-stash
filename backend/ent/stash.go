@@ -21,13 +21,11 @@ type Stash struct {
 	// Content holds the value of the "content" field.
 	Content []byte `json:"content,omitempty"`
 	// FileName holds the value of the "fileName" field.
-	FileName string `json:"fileName,omitempty"`
-	// Mime holds the value of the "mime" field.
-	Mime string `json:"mime,omitempty"`
-	// Nonce holds the value of the "nonce" field.
-	Nonce []byte `json:"nonce,omitempty"`
-	// KeySalt holds the value of the "keySalt" field.
-	KeySalt []byte `json:"keySalt,omitempty"`
+	FileName []byte `json:"fileName,omitempty"`
+	// EncryptionDataKey holds the value of the "encryptionDataKey" field.
+	EncryptionDataKey []byte `json:"encryptionDataKey,omitempty"`
+	// PasswordSalt holds the value of the "passwordSalt" field.
+	PasswordSalt []byte `json:"passwordSalt,omitempty"`
 	// HashTime holds the value of the "hashTime" field.
 	HashTime uint32 `json:"hashTime,omitempty"`
 	// HashMemory holds the value of the "hashMemory" field.
@@ -67,12 +65,10 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case stash.FieldContent, stash.FieldNonce, stash.FieldKeySalt:
+		case stash.FieldContent, stash.FieldFileName, stash.FieldEncryptionDataKey, stash.FieldPasswordSalt:
 			values[i] = new([]byte)
 		case stash.FieldHashTime, stash.FieldHashMemory, stash.FieldHashThreads:
 			values[i] = new(sql.NullInt64)
-		case stash.FieldFileName, stash.FieldMime:
-			values[i] = new(sql.NullString)
 		case stash.FieldID, stash.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -103,28 +99,22 @@ func (_m *Stash) assignValues(columns []string, values []any) error {
 				_m.Content = *value
 			}
 		case stash.FieldFileName:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field fileName", values[i])
-			} else if value.Valid {
-				_m.FileName = value.String
-			}
-		case stash.FieldMime:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field mime", values[i])
-			} else if value.Valid {
-				_m.Mime = value.String
-			}
-		case stash.FieldNonce:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field nonce", values[i])
 			} else if value != nil {
-				_m.Nonce = *value
+				_m.FileName = *value
 			}
-		case stash.FieldKeySalt:
+		case stash.FieldEncryptionDataKey:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field keySalt", values[i])
+				return fmt.Errorf("unexpected type %T for field encryptionDataKey", values[i])
 			} else if value != nil {
-				_m.KeySalt = *value
+				_m.EncryptionDataKey = *value
+			}
+		case stash.FieldPasswordSalt:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field passwordSalt", values[i])
+			} else if value != nil {
+				_m.PasswordSalt = *value
 			}
 		case stash.FieldHashTime:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -195,16 +185,13 @@ func (_m *Stash) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.Content))
 	builder.WriteString(", ")
 	builder.WriteString("fileName=")
-	builder.WriteString(_m.FileName)
+	builder.WriteString(fmt.Sprintf("%v", _m.FileName))
 	builder.WriteString(", ")
-	builder.WriteString("mime=")
-	builder.WriteString(_m.Mime)
+	builder.WriteString("encryptionDataKey=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EncryptionDataKey))
 	builder.WriteString(", ")
-	builder.WriteString("nonce=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Nonce))
-	builder.WriteString(", ")
-	builder.WriteString("keySalt=")
-	builder.WriteString(fmt.Sprintf("%v", _m.KeySalt))
+	builder.WriteString("passwordSalt=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PasswordSalt))
 	builder.WriteString(", ")
 	builder.WriteString("hashTime=")
 	builder.WriteString(fmt.Sprintf("%v", _m.HashTime))

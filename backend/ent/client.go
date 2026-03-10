@@ -22,6 +22,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/periodictask"
+	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -45,6 +46,8 @@ type Client struct {
 	LoginAlert *LoginAlertClient
 	// PeriodicTask is the client for interacting with the PeriodicTask builders.
 	PeriodicTask *PeriodicTaskClient
+	// SignupLink is the client for interacting with the SignupLink builders.
+	SignupLink *SignupLinkClient
 	// Stash is the client for interacting with the Stash builders.
 	Stash *StashClient
 	// TwoFactorAction is the client for interacting with the TwoFactorAction builders.
@@ -70,6 +73,7 @@ func (c *Client) init() {
 	c.LogEntry = NewLogEntryClient(c.config)
 	c.LoginAlert = NewLoginAlertClient(c.config)
 	c.PeriodicTask = NewPeriodicTaskClient(c.config)
+	c.SignupLink = NewSignupLinkClient(c.config)
 	c.Stash = NewStashClient(c.config)
 	c.TwoFactorAction = NewTwoFactorActionClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -172,6 +176,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LogEntry:        NewLogEntryClient(cfg),
 		LoginAlert:      NewLoginAlertClient(cfg),
 		PeriodicTask:    NewPeriodicTaskClient(cfg),
+		SignupLink:      NewSignupLinkClient(cfg),
 		Stash:           NewStashClient(cfg),
 		TwoFactorAction: NewTwoFactorActionClient(cfg),
 		User:            NewUserClient(cfg),
@@ -201,6 +206,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LogEntry:        NewLogEntryClient(cfg),
 		LoginAlert:      NewLoginAlertClient(cfg),
 		PeriodicTask:    NewPeriodicTaskClient(cfg),
+		SignupLink:      NewSignupLinkClient(cfg),
 		Stash:           NewStashClient(cfg),
 		TwoFactorAction: NewTwoFactorActionClient(cfg),
 		User:            NewUserClient(cfg),
@@ -235,7 +241,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.DownloadSession, c.Job, c.KeyValue, c.LogEntry, c.LoginAlert, c.PeriodicTask,
-		c.Stash, c.TwoFactorAction, c.User, c.UserMessenger,
+		c.SignupLink, c.Stash, c.TwoFactorAction, c.User, c.UserMessenger,
 	} {
 		n.Use(hooks...)
 	}
@@ -246,7 +252,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.DownloadSession, c.Job, c.KeyValue, c.LogEntry, c.LoginAlert, c.PeriodicTask,
-		c.Stash, c.TwoFactorAction, c.User, c.UserMessenger,
+		c.SignupLink, c.Stash, c.TwoFactorAction, c.User, c.UserMessenger,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -267,6 +273,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LoginAlert.mutate(ctx, m)
 	case *PeriodicTaskMutation:
 		return c.PeriodicTask.mutate(ctx, m)
+	case *SignupLinkMutation:
+		return c.SignupLink.mutate(ctx, m)
 	case *StashMutation:
 		return c.Stash.mutate(ctx, m)
 	case *TwoFactorActionMutation:
@@ -1158,6 +1166,155 @@ func (c *PeriodicTaskClient) mutate(ctx context.Context, m *PeriodicTaskMutation
 	}
 }
 
+// SignupLinkClient is a client for the SignupLink schema.
+type SignupLinkClient struct {
+	config
+}
+
+// NewSignupLinkClient returns a client for the SignupLink from the given config.
+func NewSignupLinkClient(c config) *SignupLinkClient {
+	return &SignupLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `signuplink.Hooks(f(g(h())))`.
+func (c *SignupLinkClient) Use(hooks ...Hook) {
+	c.hooks.SignupLink = append(c.hooks.SignupLink, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `signuplink.Intercept(f(g(h())))`.
+func (c *SignupLinkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SignupLink = append(c.inters.SignupLink, interceptors...)
+}
+
+// Create returns a builder for creating a SignupLink entity.
+func (c *SignupLinkClient) Create() *SignupLinkCreate {
+	mutation := newSignupLinkMutation(c.config, OpCreate)
+	return &SignupLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SignupLink entities.
+func (c *SignupLinkClient) CreateBulk(builders ...*SignupLinkCreate) *SignupLinkCreateBulk {
+	return &SignupLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SignupLinkClient) MapCreateBulk(slice any, setFunc func(*SignupLinkCreate, int)) *SignupLinkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SignupLinkCreateBulk{err: fmt.Errorf("calling to SignupLinkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SignupLinkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SignupLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SignupLink.
+func (c *SignupLinkClient) Update() *SignupLinkUpdate {
+	mutation := newSignupLinkMutation(c.config, OpUpdate)
+	return &SignupLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SignupLinkClient) UpdateOne(_m *SignupLink) *SignupLinkUpdateOne {
+	mutation := newSignupLinkMutation(c.config, OpUpdateOne, withSignupLink(_m))
+	return &SignupLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SignupLinkClient) UpdateOneID(id uuid.UUID) *SignupLinkUpdateOne {
+	mutation := newSignupLinkMutation(c.config, OpUpdateOne, withSignupLinkID(id))
+	return &SignupLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SignupLink.
+func (c *SignupLinkClient) Delete() *SignupLinkDelete {
+	mutation := newSignupLinkMutation(c.config, OpDelete)
+	return &SignupLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SignupLinkClient) DeleteOne(_m *SignupLink) *SignupLinkDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SignupLinkClient) DeleteOneID(id uuid.UUID) *SignupLinkDeleteOne {
+	builder := c.Delete().Where(signuplink.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SignupLinkDeleteOne{builder}
+}
+
+// Query returns a query builder for SignupLink.
+func (c *SignupLinkClient) Query() *SignupLinkQuery {
+	return &SignupLinkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSignupLink},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SignupLink entity by its id.
+func (c *SignupLinkClient) Get(ctx context.Context, id uuid.UUID) (*SignupLink, error) {
+	return c.Query().Where(signuplink.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SignupLinkClient) GetX(ctx context.Context, id uuid.UUID) *SignupLink {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a SignupLink.
+func (c *SignupLinkClient) QueryUser(_m *SignupLink) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(signuplink.Table, signuplink.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, signuplink.UserTable, signuplink.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SignupLinkClient) Hooks() []Hook {
+	return c.hooks.SignupLink
+}
+
+// Interceptors returns the client interceptors.
+func (c *SignupLinkClient) Interceptors() []Interceptor {
+	return c.inters.SignupLink
+}
+
+func (c *SignupLinkClient) mutate(ctx context.Context, m *SignupLinkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SignupLinkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SignupLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SignupLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SignupLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SignupLink mutation op: %q", m.Op())
+	}
+}
+
 // StashClient is a client for the Stash schema.
 type StashClient struct {
 	config
@@ -1596,6 +1753,22 @@ func (c *UserClient) QueryDownloadSessions(_m *User) *DownloadSessionQuery {
 	return query
 }
 
+// QuerySignupLink queries the signupLink edge of a User.
+func (c *UserClient) QuerySignupLink(_m *User) *SignupLinkQuery {
+	query := (&SignupLinkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(signuplink.Table, signuplink.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SignupLinkTable, user.SignupLinkColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryLogs queries the logs edge of a User.
 func (c *UserClient) QueryLogs(_m *User) *LogEntryQuery {
 	query := (&LogEntryClient{config: c.config}).Query()
@@ -1805,11 +1978,11 @@ func (c *UserMessengerClient) mutate(ctx context.Context, m *UserMessengerMutati
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		DownloadSession, Job, KeyValue, LogEntry, LoginAlert, PeriodicTask, Stash,
-		TwoFactorAction, User, UserMessenger []ent.Hook
+		DownloadSession, Job, KeyValue, LogEntry, LoginAlert, PeriodicTask, SignupLink,
+		Stash, TwoFactorAction, User, UserMessenger []ent.Hook
 	}
 	inters struct {
-		DownloadSession, Job, KeyValue, LogEntry, LoginAlert, PeriodicTask, Stash,
-		TwoFactorAction, User, UserMessenger []ent.Interceptor
+		DownloadSession, Job, KeyValue, LogEntry, LoginAlert, PeriodicTask, SignupLink,
+		Stash, TwoFactorAction, User, UserMessenger []ent.Interceptor
 	}
 )

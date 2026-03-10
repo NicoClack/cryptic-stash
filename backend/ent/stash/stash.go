@@ -17,12 +17,10 @@ const (
 	FieldContent = "content"
 	// FieldFileName holds the string denoting the filename field in the database.
 	FieldFileName = "file_name"
-	// FieldMime holds the string denoting the mime field in the database.
-	FieldMime = "mime"
-	// FieldNonce holds the string denoting the nonce field in the database.
-	FieldNonce = "nonce"
-	// FieldKeySalt holds the string denoting the keysalt field in the database.
-	FieldKeySalt = "key_salt"
+	// FieldEncryptionDataKey holds the string denoting the encryptiondatakey field in the database.
+	FieldEncryptionDataKey = "encryption_data_key"
+	// FieldPasswordSalt holds the string denoting the passwordsalt field in the database.
+	FieldPasswordSalt = "password_salt"
 	// FieldHashTime holds the string denoting the hashtime field in the database.
 	FieldHashTime = "hash_time"
 	// FieldHashMemory holds the string denoting the hashmemory field in the database.
@@ -49,9 +47,8 @@ var Columns = []string{
 	FieldID,
 	FieldContent,
 	FieldFileName,
-	FieldMime,
-	FieldNonce,
-	FieldKeySalt,
+	FieldEncryptionDataKey,
+	FieldPasswordSalt,
 	FieldHashTime,
 	FieldHashMemory,
 	FieldHashThreads,
@@ -72,13 +69,11 @@ var (
 	// ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	ContentValidator func([]byte) error
 	// FileNameValidator is a validator for the "fileName" field. It is called by the builders before save.
-	FileNameValidator func(string) error
-	// MimeValidator is a validator for the "mime" field. It is called by the builders before save.
-	MimeValidator func(string) error
-	// NonceValidator is a validator for the "nonce" field. It is called by the builders before save.
-	NonceValidator func([]byte) error
-	// KeySaltValidator is a validator for the "keySalt" field. It is called by the builders before save.
-	KeySaltValidator func([]byte) error
+	FileNameValidator func([]byte) error
+	// EncryptionDataKeyValidator is a validator for the "encryptionDataKey" field. It is called by the builders before save.
+	EncryptionDataKeyValidator func([]byte) error
+	// PasswordSaltValidator is a validator for the "passwordSalt" field. It is called by the builders before save.
+	PasswordSaltValidator func([]byte) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -89,16 +84,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByFileName orders the results by the fileName field.
-func ByFileName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFileName, opts...).ToFunc()
-}
-
-// ByMime orders the results by the mime field.
-func ByMime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMime, opts...).ToFunc()
 }
 
 // ByHashTime orders the results by the hashTime field.

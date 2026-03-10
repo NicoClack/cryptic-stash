@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -19,6 +20,8 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// Username holds the value of the "username" field.
 	Username string `json:"username,omitempty"`
 	// Locked holds the value of the "locked" field.
@@ -41,11 +44,13 @@ type UserEdges struct {
 	Messengers []*UserMessenger `json:"messengers,omitempty"`
 	// DownloadSessions holds the value of the downloadSessions edge.
 	DownloadSessions []*DownloadSession `json:"downloadSessions,omitempty"`
+	// SignupLink holds the value of the signupLink edge.
+	SignupLink *SignupLink `json:"signupLink,omitempty"`
 	// Logs holds the value of the logs edge.
 	Logs []*LogEntry `json:"logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // StashOrErr returns the Stash value or an error if the edge
@@ -77,10 +82,21 @@ func (e UserEdges) DownloadSessionsOrErr() ([]*DownloadSession, error) {
 	return nil, &NotLoadedError{edge: "downloadSessions"}
 }
 
+// SignupLinkOrErr returns the SignupLink value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) SignupLinkOrErr() (*SignupLink, error) {
+	if e.SignupLink != nil {
+		return e.SignupLink, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: signuplink.Label}
+	}
+	return nil, &NotLoadedError{edge: "signupLink"}
+}
+
 // LogsOrErr returns the Logs value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) LogsOrErr() ([]*LogEntry, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.Logs, nil
 	}
 	return nil, &NotLoadedError{edge: "logs"}
@@ -95,7 +111,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldUsername:
 			values[i] = new(sql.NullString)
-		case user.FieldLockedUntil, user.FieldDownloadSessionsValidFrom:
+		case user.FieldCreatedAt, user.FieldLockedUntil, user.FieldDownloadSessionsValidFrom:
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
@@ -119,6 +135,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
+			}
+		case user.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
 			}
 		case user.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -173,6 +195,11 @@ func (_m *User) QueryDownloadSessions() *DownloadSessionQuery {
 	return NewUserClient(_m.config).QueryDownloadSessions(_m)
 }
 
+// QuerySignupLink queries the "signupLink" edge of the User entity.
+func (_m *User) QuerySignupLink() *SignupLinkQuery {
+	return NewUserClient(_m.config).QuerySignupLink(_m)
+}
+
 // QueryLogs queries the "logs" edge of the User entity.
 func (_m *User) QueryLogs() *LogEntryQuery {
 	return NewUserClient(_m.config).QueryLogs(_m)
@@ -201,6 +228,9 @@ func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("createdAt=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("username=")
 	builder.WriteString(_m.Username)
 	builder.WriteString(", ")

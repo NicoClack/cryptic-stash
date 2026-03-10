@@ -13,6 +13,8 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the createdat field in the database.
+	FieldCreatedAt = "created_at"
 	// FieldUsername holds the string denoting the username field in the database.
 	FieldUsername = "username"
 	// FieldLocked holds the string denoting the locked field in the database.
@@ -27,6 +29,8 @@ const (
 	EdgeMessengers = "messengers"
 	// EdgeDownloadSessions holds the string denoting the downloadsessions edge name in mutations.
 	EdgeDownloadSessions = "downloadSessions"
+	// EdgeSignupLink holds the string denoting the signuplink edge name in mutations.
+	EdgeSignupLink = "signupLink"
 	// EdgeLogs holds the string denoting the logs edge name in mutations.
 	EdgeLogs = "logs"
 	// Table holds the table name of the user in the database.
@@ -52,6 +56,13 @@ const (
 	DownloadSessionsInverseTable = "download_sessions"
 	// DownloadSessionsColumn is the table column denoting the downloadSessions relation/edge.
 	DownloadSessionsColumn = "user_id"
+	// SignupLinkTable is the table that holds the signupLink relation/edge.
+	SignupLinkTable = "signup_links"
+	// SignupLinkInverseTable is the table name for the SignupLink entity.
+	// It exists in this package in order to avoid circular dependency with the "signuplink" package.
+	SignupLinkInverseTable = "signup_links"
+	// SignupLinkColumn is the table column denoting the signupLink relation/edge.
+	SignupLinkColumn = "user_id"
 	// LogsTable is the table that holds the logs relation/edge.
 	LogsTable = "log_entries"
 	// LogsInverseTable is the table name for the LogEntry entity.
@@ -64,6 +75,7 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
 	FieldUsername,
 	FieldLocked,
 	FieldLockedUntil,
@@ -95,6 +107,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the createdAt field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
 // ByUsername orders the results by the username field.
@@ -152,6 +169,13 @@ func ByDownloadSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption 
 	}
 }
 
+// BySignupLinkField orders the results by signupLink field.
+func BySignupLinkField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSignupLinkStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByLogsCount orders the results by logs count.
 func ByLogsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -184,6 +208,13 @@ func newDownloadSessionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DownloadSessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, DownloadSessionsTable, DownloadSessionsColumn),
+	)
+}
+func newSignupLinkStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SignupLinkInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, SignupLinkTable, SignupLinkColumn),
 	)
 }
 func newLogsStep() *sqlgraph.Step {

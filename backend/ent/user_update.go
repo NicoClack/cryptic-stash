@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -30,6 +31,20 @@ type UserUpdate struct {
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *UserUpdate) SetCreatedAt(v time.Time) *UserUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableCreatedAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
 	return _u
 }
 
@@ -144,6 +159,25 @@ func (_u *UserUpdate) AddDownloadSessions(v ...*DownloadSession) *UserUpdate {
 	return _u.AddDownloadSessionIDs(ids...)
 }
 
+// SetSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID.
+func (_u *UserUpdate) SetSignupLinkID(id uuid.UUID) *UserUpdate {
+	_u.mutation.SetSignupLinkID(id)
+	return _u
+}
+
+// SetNillableSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID if the given value is not nil.
+func (_u *UserUpdate) SetNillableSignupLinkID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		_u = _u.SetSignupLinkID(*id)
+	}
+	return _u
+}
+
+// SetSignupLink sets the "signupLink" edge to the SignupLink entity.
+func (_u *UserUpdate) SetSignupLink(v *SignupLink) *UserUpdate {
+	return _u.SetSignupLinkID(v.ID)
+}
+
 // AddLogIDs adds the "logs" edge to the LogEntry entity by IDs.
 func (_u *UserUpdate) AddLogIDs(ids ...uuid.UUID) *UserUpdate {
 	_u.mutation.AddLogIDs(ids...)
@@ -210,6 +244,12 @@ func (_u *UserUpdate) RemoveDownloadSessions(v ...*DownloadSession) *UserUpdate 
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveDownloadSessionIDs(ids...)
+}
+
+// ClearSignupLink clears the "signupLink" edge to the SignupLink entity.
+func (_u *UserUpdate) ClearSignupLink() *UserUpdate {
+	_u.mutation.ClearSignupLink()
+	return _u
 }
 
 // ClearLogs clears all "logs" edges to the LogEntry entity.
@@ -281,6 +321,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
@@ -416,6 +459,35 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.SignupLinkCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SignupLinkTable,
+			Columns: []string{user.SignupLinkColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SignupLinkIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SignupLinkTable,
+			Columns: []string{user.SignupLinkColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.LogsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -479,6 +551,20 @@ type UserUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *UserUpdateOne) SetCreatedAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableCreatedAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
 }
 
 // SetUsername sets the "username" field.
@@ -592,6 +678,25 @@ func (_u *UserUpdateOne) AddDownloadSessions(v ...*DownloadSession) *UserUpdateO
 	return _u.AddDownloadSessionIDs(ids...)
 }
 
+// SetSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID.
+func (_u *UserUpdateOne) SetSignupLinkID(id uuid.UUID) *UserUpdateOne {
+	_u.mutation.SetSignupLinkID(id)
+	return _u
+}
+
+// SetNillableSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableSignupLinkID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		_u = _u.SetSignupLinkID(*id)
+	}
+	return _u
+}
+
+// SetSignupLink sets the "signupLink" edge to the SignupLink entity.
+func (_u *UserUpdateOne) SetSignupLink(v *SignupLink) *UserUpdateOne {
+	return _u.SetSignupLinkID(v.ID)
+}
+
 // AddLogIDs adds the "logs" edge to the LogEntry entity by IDs.
 func (_u *UserUpdateOne) AddLogIDs(ids ...uuid.UUID) *UserUpdateOne {
 	_u.mutation.AddLogIDs(ids...)
@@ -658,6 +763,12 @@ func (_u *UserUpdateOne) RemoveDownloadSessions(v ...*DownloadSession) *UserUpda
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveDownloadSessionIDs(ids...)
+}
+
+// ClearSignupLink clears the "signupLink" edge to the SignupLink entity.
+func (_u *UserUpdateOne) ClearSignupLink() *UserUpdateOne {
+	_u.mutation.ClearSignupLink()
+	return _u
 }
 
 // ClearLogs clears all "logs" edges to the LogEntry entity.
@@ -759,6 +870,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
@@ -887,6 +1001,35 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SignupLinkCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SignupLinkTable,
+			Columns: []string{user.SignupLinkColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SignupLinkIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.SignupLinkTable,
+			Columns: []string{user.SignupLinkColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

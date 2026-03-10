@@ -14,8 +14,8 @@ import (
 	"github.com/jonboulle/clockwork"
 )
 
-// Doubled because the bytes are represented as base64
-const AuthCodeByteLength = 128
+// 44 characters when base64 encoded, 32 bytes when decoded (256 bits)
+const AuthCodeByteLength = 32
 
 func RandomAuthCode() []byte {
 	return common.CryptoRandomBytes(AuthCodeByteLength)

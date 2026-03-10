@@ -36,42 +36,20 @@ func (_u *StashUpdate) SetContent(v []byte) *StashUpdate {
 }
 
 // SetFileName sets the "fileName" field.
-func (_u *StashUpdate) SetFileName(v string) *StashUpdate {
+func (_u *StashUpdate) SetFileName(v []byte) *StashUpdate {
 	_u.mutation.SetFileName(v)
 	return _u
 }
 
-// SetNillableFileName sets the "fileName" field if the given value is not nil.
-func (_u *StashUpdate) SetNillableFileName(v *string) *StashUpdate {
-	if v != nil {
-		_u.SetFileName(*v)
-	}
+// SetEncryptionDataKey sets the "encryptionDataKey" field.
+func (_u *StashUpdate) SetEncryptionDataKey(v []byte) *StashUpdate {
+	_u.mutation.SetEncryptionDataKey(v)
 	return _u
 }
 
-// SetMime sets the "mime" field.
-func (_u *StashUpdate) SetMime(v string) *StashUpdate {
-	_u.mutation.SetMime(v)
-	return _u
-}
-
-// SetNillableMime sets the "mime" field if the given value is not nil.
-func (_u *StashUpdate) SetNillableMime(v *string) *StashUpdate {
-	if v != nil {
-		_u.SetMime(*v)
-	}
-	return _u
-}
-
-// SetNonce sets the "nonce" field.
-func (_u *StashUpdate) SetNonce(v []byte) *StashUpdate {
-	_u.mutation.SetNonce(v)
-	return _u
-}
-
-// SetKeySalt sets the "keySalt" field.
-func (_u *StashUpdate) SetKeySalt(v []byte) *StashUpdate {
-	_u.mutation.SetKeySalt(v)
+// SetPasswordSalt sets the "passwordSalt" field.
+func (_u *StashUpdate) SetPasswordSalt(v []byte) *StashUpdate {
+	_u.mutation.SetPasswordSalt(v)
 	return _u
 }
 
@@ -207,19 +185,14 @@ func (_u *StashUpdate) check() error {
 			return &ValidationError{Name: "fileName", err: fmt.Errorf(`ent: validator failed for field "Stash.fileName": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Mime(); ok {
-		if err := stash.MimeValidator(v); err != nil {
-			return &ValidationError{Name: "mime", err: fmt.Errorf(`ent: validator failed for field "Stash.mime": %w`, err)}
+	if v, ok := _u.mutation.EncryptionDataKey(); ok {
+		if err := stash.EncryptionDataKeyValidator(v); err != nil {
+			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Nonce(); ok {
-		if err := stash.NonceValidator(v); err != nil {
-			return &ValidationError{Name: "nonce", err: fmt.Errorf(`ent: validator failed for field "Stash.nonce": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.KeySalt(); ok {
-		if err := stash.KeySaltValidator(v); err != nil {
-			return &ValidationError{Name: "keySalt", err: fmt.Errorf(`ent: validator failed for field "Stash.keySalt": %w`, err)}
+	if v, ok := _u.mutation.PasswordSalt(); ok {
+		if err := stash.PasswordSaltValidator(v); err != nil {
+			return &ValidationError{Name: "passwordSalt", err: fmt.Errorf(`ent: validator failed for field "Stash.passwordSalt": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -244,16 +217,13 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.FileName(); ok {
-		_spec.SetField(stash.FieldFileName, field.TypeString, value)
+		_spec.SetField(stash.FieldFileName, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.Mime(); ok {
-		_spec.SetField(stash.FieldMime, field.TypeString, value)
+	if value, ok := _u.mutation.EncryptionDataKey(); ok {
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.Nonce(); ok {
-		_spec.SetField(stash.FieldNonce, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.KeySalt(); ok {
-		_spec.SetField(stash.FieldKeySalt, field.TypeBytes, value)
+	if value, ok := _u.mutation.PasswordSalt(); ok {
+		_spec.SetField(stash.FieldPasswordSalt, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.HashTime(); ok {
 		_spec.SetField(stash.FieldHashTime, field.TypeUint32, value)
@@ -329,42 +299,20 @@ func (_u *StashUpdateOne) SetContent(v []byte) *StashUpdateOne {
 }
 
 // SetFileName sets the "fileName" field.
-func (_u *StashUpdateOne) SetFileName(v string) *StashUpdateOne {
+func (_u *StashUpdateOne) SetFileName(v []byte) *StashUpdateOne {
 	_u.mutation.SetFileName(v)
 	return _u
 }
 
-// SetNillableFileName sets the "fileName" field if the given value is not nil.
-func (_u *StashUpdateOne) SetNillableFileName(v *string) *StashUpdateOne {
-	if v != nil {
-		_u.SetFileName(*v)
-	}
+// SetEncryptionDataKey sets the "encryptionDataKey" field.
+func (_u *StashUpdateOne) SetEncryptionDataKey(v []byte) *StashUpdateOne {
+	_u.mutation.SetEncryptionDataKey(v)
 	return _u
 }
 
-// SetMime sets the "mime" field.
-func (_u *StashUpdateOne) SetMime(v string) *StashUpdateOne {
-	_u.mutation.SetMime(v)
-	return _u
-}
-
-// SetNillableMime sets the "mime" field if the given value is not nil.
-func (_u *StashUpdateOne) SetNillableMime(v *string) *StashUpdateOne {
-	if v != nil {
-		_u.SetMime(*v)
-	}
-	return _u
-}
-
-// SetNonce sets the "nonce" field.
-func (_u *StashUpdateOne) SetNonce(v []byte) *StashUpdateOne {
-	_u.mutation.SetNonce(v)
-	return _u
-}
-
-// SetKeySalt sets the "keySalt" field.
-func (_u *StashUpdateOne) SetKeySalt(v []byte) *StashUpdateOne {
-	_u.mutation.SetKeySalt(v)
+// SetPasswordSalt sets the "passwordSalt" field.
+func (_u *StashUpdateOne) SetPasswordSalt(v []byte) *StashUpdateOne {
+	_u.mutation.SetPasswordSalt(v)
 	return _u
 }
 
@@ -513,19 +461,14 @@ func (_u *StashUpdateOne) check() error {
 			return &ValidationError{Name: "fileName", err: fmt.Errorf(`ent: validator failed for field "Stash.fileName": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Mime(); ok {
-		if err := stash.MimeValidator(v); err != nil {
-			return &ValidationError{Name: "mime", err: fmt.Errorf(`ent: validator failed for field "Stash.mime": %w`, err)}
+	if v, ok := _u.mutation.EncryptionDataKey(); ok {
+		if err := stash.EncryptionDataKeyValidator(v); err != nil {
+			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Nonce(); ok {
-		if err := stash.NonceValidator(v); err != nil {
-			return &ValidationError{Name: "nonce", err: fmt.Errorf(`ent: validator failed for field "Stash.nonce": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.KeySalt(); ok {
-		if err := stash.KeySaltValidator(v); err != nil {
-			return &ValidationError{Name: "keySalt", err: fmt.Errorf(`ent: validator failed for field "Stash.keySalt": %w`, err)}
+	if v, ok := _u.mutation.PasswordSalt(); ok {
+		if err := stash.PasswordSaltValidator(v); err != nil {
+			return &ValidationError{Name: "passwordSalt", err: fmt.Errorf(`ent: validator failed for field "Stash.passwordSalt": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -567,16 +510,13 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.FileName(); ok {
-		_spec.SetField(stash.FieldFileName, field.TypeString, value)
+		_spec.SetField(stash.FieldFileName, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.Mime(); ok {
-		_spec.SetField(stash.FieldMime, field.TypeString, value)
+	if value, ok := _u.mutation.EncryptionDataKey(); ok {
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.Nonce(); ok {
-		_spec.SetField(stash.FieldNonce, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.KeySalt(); ok {
-		_spec.SetField(stash.FieldKeySalt, field.TypeBytes, value)
+	if value, ok := _u.mutation.PasswordSalt(); ok {
+		_spec.SetField(stash.FieldPasswordSalt, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.HashTime(); ok {
 		_spec.SetField(stash.FieldHashTime, field.TypeUint32, value)

@@ -29,7 +29,6 @@ type DownloadResponse struct {
 	AuthorizationCodeValidUntil *time.Time                 `                   json:"authorizationCodeValidUntil"`
 	Content                     []byte                     `                   json:"content"`
 	Filename                    string                     `                   json:"filename"`
-	Mime                        string                     `                   json:"mime"`
 }
 
 func Download(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -158,7 +157,6 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 					AuthorizationCodeValidUntil: nil,
 					Content:                     decrypted,
 					Filename:                    stashOb.FileName,
-					Mime:                        stashOb.Mime,
 				})
 				return nil
 			},

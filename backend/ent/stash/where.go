@@ -60,23 +60,18 @@ func Content(v []byte) predicate.Stash {
 }
 
 // FileName applies equality check predicate on the "fileName" field. It's identical to FileNameEQ.
-func FileName(v string) predicate.Stash {
+func FileName(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldFileName, v))
 }
 
-// Mime applies equality check predicate on the "mime" field. It's identical to MimeEQ.
-func Mime(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldMime, v))
+// EncryptionDataKey applies equality check predicate on the "encryptionDataKey" field. It's identical to EncryptionDataKeyEQ.
+func EncryptionDataKey(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldEncryptionDataKey, v))
 }
 
-// Nonce applies equality check predicate on the "nonce" field. It's identical to NonceEQ.
-func Nonce(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldNonce, v))
-}
-
-// KeySalt applies equality check predicate on the "keySalt" field. It's identical to KeySaltEQ.
-func KeySalt(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldKeySalt, v))
+// PasswordSalt applies equality check predicate on the "passwordSalt" field. It's identical to PasswordSaltEQ.
+func PasswordSalt(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldPasswordSalt, v))
 }
 
 // HashTime applies equality check predicate on the "hashTime" field. It's identical to HashTimeEQ.
@@ -140,213 +135,123 @@ func ContentLTE(v []byte) predicate.Stash {
 }
 
 // FileNameEQ applies the EQ predicate on the "fileName" field.
-func FileNameEQ(v string) predicate.Stash {
+func FileNameEQ(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldFileName, v))
 }
 
 // FileNameNEQ applies the NEQ predicate on the "fileName" field.
-func FileNameNEQ(v string) predicate.Stash {
+func FileNameNEQ(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldNEQ(FieldFileName, v))
 }
 
 // FileNameIn applies the In predicate on the "fileName" field.
-func FileNameIn(vs ...string) predicate.Stash {
+func FileNameIn(vs ...[]byte) predicate.Stash {
 	return predicate.Stash(sql.FieldIn(FieldFileName, vs...))
 }
 
 // FileNameNotIn applies the NotIn predicate on the "fileName" field.
-func FileNameNotIn(vs ...string) predicate.Stash {
+func FileNameNotIn(vs ...[]byte) predicate.Stash {
 	return predicate.Stash(sql.FieldNotIn(FieldFileName, vs...))
 }
 
 // FileNameGT applies the GT predicate on the "fileName" field.
-func FileNameGT(v string) predicate.Stash {
+func FileNameGT(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldGT(FieldFileName, v))
 }
 
 // FileNameGTE applies the GTE predicate on the "fileName" field.
-func FileNameGTE(v string) predicate.Stash {
+func FileNameGTE(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldGTE(FieldFileName, v))
 }
 
 // FileNameLT applies the LT predicate on the "fileName" field.
-func FileNameLT(v string) predicate.Stash {
+func FileNameLT(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldLT(FieldFileName, v))
 }
 
 // FileNameLTE applies the LTE predicate on the "fileName" field.
-func FileNameLTE(v string) predicate.Stash {
+func FileNameLTE(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldLTE(FieldFileName, v))
 }
 
-// FileNameContains applies the Contains predicate on the "fileName" field.
-func FileNameContains(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldContains(FieldFileName, v))
+// EncryptionDataKeyEQ applies the EQ predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyEQ(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldEncryptionDataKey, v))
 }
 
-// FileNameHasPrefix applies the HasPrefix predicate on the "fileName" field.
-func FileNameHasPrefix(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldHasPrefix(FieldFileName, v))
+// EncryptionDataKeyNEQ applies the NEQ predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyNEQ(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldEncryptionDataKey, v))
 }
 
-// FileNameHasSuffix applies the HasSuffix predicate on the "fileName" field.
-func FileNameHasSuffix(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldHasSuffix(FieldFileName, v))
+// EncryptionDataKeyIn applies the In predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyIn(vs ...[]byte) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldEncryptionDataKey, vs...))
 }
 
-// FileNameEqualFold applies the EqualFold predicate on the "fileName" field.
-func FileNameEqualFold(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldEqualFold(FieldFileName, v))
+// EncryptionDataKeyNotIn applies the NotIn predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyNotIn(vs ...[]byte) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldEncryptionDataKey, vs...))
 }
 
-// FileNameContainsFold applies the ContainsFold predicate on the "fileName" field.
-func FileNameContainsFold(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldContainsFold(FieldFileName, v))
+// EncryptionDataKeyGT applies the GT predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyGT(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldEncryptionDataKey, v))
 }
 
-// MimeEQ applies the EQ predicate on the "mime" field.
-func MimeEQ(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldMime, v))
+// EncryptionDataKeyGTE applies the GTE predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyGTE(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldEncryptionDataKey, v))
 }
 
-// MimeNEQ applies the NEQ predicate on the "mime" field.
-func MimeNEQ(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldNEQ(FieldMime, v))
+// EncryptionDataKeyLT applies the LT predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyLT(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldEncryptionDataKey, v))
 }
 
-// MimeIn applies the In predicate on the "mime" field.
-func MimeIn(vs ...string) predicate.Stash {
-	return predicate.Stash(sql.FieldIn(FieldMime, vs...))
+// EncryptionDataKeyLTE applies the LTE predicate on the "encryptionDataKey" field.
+func EncryptionDataKeyLTE(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldEncryptionDataKey, v))
 }
 
-// MimeNotIn applies the NotIn predicate on the "mime" field.
-func MimeNotIn(vs ...string) predicate.Stash {
-	return predicate.Stash(sql.FieldNotIn(FieldMime, vs...))
+// PasswordSaltEQ applies the EQ predicate on the "passwordSalt" field.
+func PasswordSaltEQ(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldPasswordSalt, v))
 }
 
-// MimeGT applies the GT predicate on the "mime" field.
-func MimeGT(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldGT(FieldMime, v))
+// PasswordSaltNEQ applies the NEQ predicate on the "passwordSalt" field.
+func PasswordSaltNEQ(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldPasswordSalt, v))
 }
 
-// MimeGTE applies the GTE predicate on the "mime" field.
-func MimeGTE(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldGTE(FieldMime, v))
+// PasswordSaltIn applies the In predicate on the "passwordSalt" field.
+func PasswordSaltIn(vs ...[]byte) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldPasswordSalt, vs...))
 }
 
-// MimeLT applies the LT predicate on the "mime" field.
-func MimeLT(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldLT(FieldMime, v))
+// PasswordSaltNotIn applies the NotIn predicate on the "passwordSalt" field.
+func PasswordSaltNotIn(vs ...[]byte) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldPasswordSalt, vs...))
 }
 
-// MimeLTE applies the LTE predicate on the "mime" field.
-func MimeLTE(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldLTE(FieldMime, v))
+// PasswordSaltGT applies the GT predicate on the "passwordSalt" field.
+func PasswordSaltGT(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldPasswordSalt, v))
 }
 
-// MimeContains applies the Contains predicate on the "mime" field.
-func MimeContains(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldContains(FieldMime, v))
+// PasswordSaltGTE applies the GTE predicate on the "passwordSalt" field.
+func PasswordSaltGTE(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldPasswordSalt, v))
 }
 
-// MimeHasPrefix applies the HasPrefix predicate on the "mime" field.
-func MimeHasPrefix(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldHasPrefix(FieldMime, v))
+// PasswordSaltLT applies the LT predicate on the "passwordSalt" field.
+func PasswordSaltLT(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldPasswordSalt, v))
 }
 
-// MimeHasSuffix applies the HasSuffix predicate on the "mime" field.
-func MimeHasSuffix(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldHasSuffix(FieldMime, v))
-}
-
-// MimeEqualFold applies the EqualFold predicate on the "mime" field.
-func MimeEqualFold(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldEqualFold(FieldMime, v))
-}
-
-// MimeContainsFold applies the ContainsFold predicate on the "mime" field.
-func MimeContainsFold(v string) predicate.Stash {
-	return predicate.Stash(sql.FieldContainsFold(FieldMime, v))
-}
-
-// NonceEQ applies the EQ predicate on the "nonce" field.
-func NonceEQ(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldNonce, v))
-}
-
-// NonceNEQ applies the NEQ predicate on the "nonce" field.
-func NonceNEQ(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldNEQ(FieldNonce, v))
-}
-
-// NonceIn applies the In predicate on the "nonce" field.
-func NonceIn(vs ...[]byte) predicate.Stash {
-	return predicate.Stash(sql.FieldIn(FieldNonce, vs...))
-}
-
-// NonceNotIn applies the NotIn predicate on the "nonce" field.
-func NonceNotIn(vs ...[]byte) predicate.Stash {
-	return predicate.Stash(sql.FieldNotIn(FieldNonce, vs...))
-}
-
-// NonceGT applies the GT predicate on the "nonce" field.
-func NonceGT(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldGT(FieldNonce, v))
-}
-
-// NonceGTE applies the GTE predicate on the "nonce" field.
-func NonceGTE(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldGTE(FieldNonce, v))
-}
-
-// NonceLT applies the LT predicate on the "nonce" field.
-func NonceLT(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldLT(FieldNonce, v))
-}
-
-// NonceLTE applies the LTE predicate on the "nonce" field.
-func NonceLTE(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldLTE(FieldNonce, v))
-}
-
-// KeySaltEQ applies the EQ predicate on the "keySalt" field.
-func KeySaltEQ(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldKeySalt, v))
-}
-
-// KeySaltNEQ applies the NEQ predicate on the "keySalt" field.
-func KeySaltNEQ(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldNEQ(FieldKeySalt, v))
-}
-
-// KeySaltIn applies the In predicate on the "keySalt" field.
-func KeySaltIn(vs ...[]byte) predicate.Stash {
-	return predicate.Stash(sql.FieldIn(FieldKeySalt, vs...))
-}
-
-// KeySaltNotIn applies the NotIn predicate on the "keySalt" field.
-func KeySaltNotIn(vs ...[]byte) predicate.Stash {
-	return predicate.Stash(sql.FieldNotIn(FieldKeySalt, vs...))
-}
-
-// KeySaltGT applies the GT predicate on the "keySalt" field.
-func KeySaltGT(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldGT(FieldKeySalt, v))
-}
-
-// KeySaltGTE applies the GTE predicate on the "keySalt" field.
-func KeySaltGTE(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldGTE(FieldKeySalt, v))
-}
-
-// KeySaltLT applies the LT predicate on the "keySalt" field.
-func KeySaltLT(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldLT(FieldKeySalt, v))
-}
-
-// KeySaltLTE applies the LTE predicate on the "keySalt" field.
-func KeySaltLTE(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldLTE(FieldKeySalt, v))
+// PasswordSaltLTE applies the LTE predicate on the "passwordSalt" field.
+func PasswordSaltLTE(v []byte) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldPasswordSalt, v))
 }
 
 // HashTimeEQ applies the EQ predicate on the "hashTime" field.
