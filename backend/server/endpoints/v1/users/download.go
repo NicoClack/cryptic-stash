@@ -2,13 +2,13 @@ package users
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"net/http"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
-	"github.com/NicoClack/cryptic-stash/backend/core"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -52,6 +52,7 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 				}).
 				DisableLogging()
 		}
+		hashedAuthCode := sha256.Sum256(givenAuthCodeBytes)
 
 		downloadSessionOb, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
@@ -59,7 +60,7 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 				downloadSessionOb, stdErr := tx.DownloadSession.Query().
 					Where(downloadsession.And(
 						downloadsession.HasUserWith(user.Username(body.Username)),
-						downloadsession.Code(givenAuthCodeBytes),
+						downloadsession.HashedAuthCode(hashedAuthCode[:]),
 					)).
 					WithUser(func(userQuery *ent.UserQuery) {
 						userQuery.WithStash()
@@ -109,35 +110,46 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 		if stashOb == nil {
 			return servercommon.NewUnauthorizedError()
 		}
-		encryptionKey := app.Core.HashPassword(
+		stashKek := app.Core.HashPassword(
 			body.Password,
-			stashOb.KeySalt,
+			stashOb.PasswordSalt,
 			&common.PasswordHashSettings{
 				Time:    stashOb.HashTime,
 				Memory:  stashOb.HashMemory,
 				Threads: stashOb.HashThreads,
 			},
 		)
-		decrypted, wrappedErr := app.Core.Decrypt(stashOb.Content, encryptionKey, stashOb.Nonce)
+		stashDataKey, wrappedErr := app.Core.Decrypt(stashOb.EncryptionDataKey, stashKek)
 		if wrappedErr != nil {
-			return servercommon.ExpectError(
-				wrappedErr, core.ErrIncorrectPassword,
-				http.StatusUnauthorized, nil,
-			)
+			return servercommon.NewUnauthorizedError().SetChild(wrappedErr)
 		}
 
 		if !app.Core.IsUserSufficientlyNotified(downloadSessionOb) {
-			return servercommon.NewUnauthorizedError()
+			return servercommon.NewUnauthorizedError().SetChild(wrappedErr)
+		}
+		stashContent, wrappedErr := app.Core.Decrypt(stashOb.Content, stashDataKey)
+		if wrappedErr != nil {
+			return servercommon.NewUnauthorizedError().SetChild(wrappedErr)
+		}
+		stashFileName, wrappedErr := app.Core.Decrypt(stashOb.FileName, stashDataKey)
+		if wrappedErr != nil {
+			return servercommon.NewUnauthorizedError().SetChild(wrappedErr)
 		}
 
-		return dbcommon.WithWriteTx(
+		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) error {
+			func(tx *ent.Tx, ctx context.Context) (*DownloadResponse, error) {
 				stdErr := tx.DownloadSession.UpdateOneID(downloadSessionOb.ID).
 					SetValidUntil(clock.Now().Add(app.Env.USED_AUTH_CODE_VALID_FOR)).
 					Exec(ctx)
 				if stdErr != nil {
-					return stdErr
+					return nil, stdErr
+				}
+				stdErr = tx.Stash.UpdateOneID(stashOb.ID).
+					SetLastDownloadAt(clock.Now()).
+					Exec(ctx)
+				if stdErr != nil {
+					return nil, stdErr
 				}
 				_, _, wrappedErr := app.Messengers.SendUsingAll(
 					&common.Message{
@@ -147,19 +159,23 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 					ctx,
 				)
 				if wrappedErr != nil {
-					return wrappedErr
+					return nil, wrappedErr
 				}
 
-				ginCtx.JSON(http.StatusOK, DownloadResponse{
+				return &DownloadResponse{
 					Errors: []servercommon.ErrorDetail{},
 					// TODO: set these?
 					AuthorizationCodeValidFrom:  nil,
 					AuthorizationCodeValidUntil: nil,
-					Content:                     decrypted,
-					Filename:                    stashOb.FileName,
-				})
-				return nil
+					Content:                     stashContent,
+					Filename:                    string(stashFileName),
+				}, nil
 			},
 		)
+		if stdErr != nil {
+			return stdErr
+		}
+		ginCtx.JSON(http.StatusOK, resp)
+		return nil
 	})
 }

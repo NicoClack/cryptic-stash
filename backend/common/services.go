@@ -244,8 +244,8 @@ type CoreService interface {
 	IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool
 	IsUserLocked(userOb *ent.User) bool
 
-	Encrypt(data []byte, encryptionKey []byte) ([]byte, []byte, WrappedError)
-	Decrypt(encrypted []byte, encryptionKey []byte, nonce []byte) ([]byte, WrappedError)
+	Encrypt(data []byte, encryptionKey []byte) ([]byte, WrappedError)
+	Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, WrappedError)
 	GenerateSalt() []byte
 	HashPassword(password string, salt []byte, settings *PasswordHashSettings) []byte
 }

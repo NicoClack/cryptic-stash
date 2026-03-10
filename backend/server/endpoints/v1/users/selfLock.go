@@ -70,16 +70,16 @@ func SelfLock(app *servercommon.ServerApp) gin.HandlerFunc {
 		if stashOb == nil {
 			return servercommon.NewUnauthorizedError()
 		}
-		encryptionKey := app.Core.HashPassword(
+		stashKek := app.Core.HashPassword(
 			body.Password,
-			stashOb.KeySalt,
+			stashOb.PasswordSalt,
 			&common.PasswordHashSettings{
 				Time:    stashOb.HashTime,
 				Memory:  stashOb.HashMemory,
 				Threads: stashOb.HashThreads,
 			},
 		)
-		_, wrappedErr := app.Core.Decrypt(stashOb.Content, encryptionKey, stashOb.Nonce)
+		_, wrappedErr := app.Core.Decrypt(stashOb.EncryptionDataKey, stashKek)
 		if wrappedErr != nil {
 			return servercommon.NewUnauthorizedError()
 		}

@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"net/http"
 	"time"
@@ -63,38 +64,39 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 		if stashOb == nil {
 			return servercommon.NewUnauthorizedError()
 		}
-		encryptionKey := app.Core.HashPassword(
+		stashKek := app.Core.HashPassword(
 			body.Password,
-			stashOb.KeySalt,
+			stashOb.PasswordSalt,
 			&common.PasswordHashSettings{
 				Time:    stashOb.HashTime,
 				Memory:  stashOb.HashMemory,
 				Threads: stashOb.HashThreads,
 			},
 		)
-		_, wrappedErr := app.Core.Decrypt(stashOb.Content, encryptionKey, stashOb.Nonce)
+		_, wrappedErr := app.Core.Decrypt(stashOb.EncryptionDataKey, stashKek)
 		if wrappedErr != nil {
 			return servercommon.NewUnauthorizedError()
 		}
 
-		return dbcommon.WithWriteTx(
+		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) error {
+			func(tx *ent.Tx, ctx context.Context) (*GetAuthorizationCodeResponse, error) {
 				authCode := app.Core.RandomAuthCode()
 				validFrom := clock.Now().Add(app.Env.UNLOCK_TIME)
 				validUntil := clock.Now().Add(app.Env.AUTH_CODE_VALID_FOR)
+				hashedAuthCode := sha256.Sum256(authCode)
 
 				downloadSessionOb, stdErr := tx.DownloadSession.Create().
 					SetCreatedAt(clock.Now()).
 					SetUser(userOb).
-					SetCode(authCode).
+					SetHashedAuthCode(hashedAuthCode[:]).
 					SetValidFrom(validFrom).
 					SetValidUntil(validUntil).
 					SetUserAgent(ginCtx.Request.UserAgent()).
 					SetIP(ginCtx.ClientIP()).
 					Save(ctx)
 				if stdErr != nil {
-					return stdErr
+					return nil, stdErr
 				}
 
 				_, _, wrappedErr := app.Messengers.SendUsingAll(
@@ -107,17 +109,21 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 					ctx,
 				)
 				if wrappedErr != nil {
-					return wrappedErr
+					return nil, wrappedErr
 				}
 
-				ginCtx.JSON(http.StatusOK, GetAuthorizationCodeResponse{
+				return &GetAuthorizationCodeResponse{
 					Errors:            []servercommon.ErrorDetail{},
 					AuthorizationCode: base64.StdEncoding.EncodeToString(authCode),
 					ValidFrom:         validFrom,
 					ValidUntil:        validUntil,
-				})
-				return nil
+				}, nil
 			},
 		)
+		if stdErr != nil {
+			return stdErr
+		}
+		ginCtx.JSON(http.StatusOK, resp)
+		return nil
 	})
 }
