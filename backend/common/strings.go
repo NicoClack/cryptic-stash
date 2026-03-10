@@ -53,3 +53,38 @@ func JoinPaths(path1, path2 string) string {
 	}
 	return fmt.Sprintf("%s/%s", path1, path2)
 }
+
+func SanitizeFilename(filename string, defaultFilename string) string {
+	trimmedFilename := strings.TrimSpace(filename)
+	if trimmedFilename == "" {
+		return defaultFilename
+	}
+
+	var sanitized strings.Builder
+	sanitized.Grow(len(trimmedFilename))
+
+	lastWasReplacement := false
+	for _, char := range trimmedFilename {
+		if char < 32 || char == 127 {
+			continue
+		}
+
+		if strings.ContainsRune(`<>:"/\\|?*`, char) {
+			if !lastWasReplacement {
+				sanitized.WriteByte('_')
+				lastWasReplacement = true
+			}
+			continue
+		}
+
+		sanitized.WriteRune(char)
+		lastWasReplacement = false
+	}
+
+	sanitizedFilename := strings.Trim(sanitized.String(), ". ")
+	if sanitizedFilename == "" || sanitizedFilename == "." || sanitizedFilename == ".." {
+		return defaultFilename
+	}
+
+	return sanitizedFilename
+}
