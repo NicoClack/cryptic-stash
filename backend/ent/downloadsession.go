@@ -21,8 +21,8 @@ type DownloadSession struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "createdAt" field.
 	CreatedAt time.Time `json:"createdAt,omitempty"`
-	// Code holds the value of the "code" field.
-	Code []byte `json:"code,omitempty"`
+	// HashedAuthCode holds the value of the "hashedAuthCode" field.
+	HashedAuthCode []byte `json:"hashedAuthCode,omitempty"`
 	// ValidFrom holds the value of the "validFrom" field.
 	ValidFrom time.Time `json:"validFrom,omitempty"`
 	// ValidUntil holds the value of the "validUntil" field.
@@ -75,7 +75,7 @@ func (*DownloadSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case downloadsession.FieldCode:
+		case downloadsession.FieldHashedAuthCode:
 			values[i] = new([]byte)
 		case downloadsession.FieldUserAgent, downloadsession.FieldIP:
 			values[i] = new(sql.NullString)
@@ -110,11 +110,11 @@ func (_m *DownloadSession) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case downloadsession.FieldCode:
+		case downloadsession.FieldHashedAuthCode:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field code", values[i])
+				return fmt.Errorf("unexpected type %T for field hashedAuthCode", values[i])
 			} else if value != nil {
-				_m.Code = *value
+				_m.HashedAuthCode = *value
 			}
 		case downloadsession.FieldValidFrom:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -195,8 +195,8 @@ func (_m *DownloadSession) String() string {
 	builder.WriteString("createdAt=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("code=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Code))
+	builder.WriteString("hashedAuthCode=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HashedAuthCode))
 	builder.WriteString(", ")
 	builder.WriteString("validFrom=")
 	builder.WriteString(_m.ValidFrom.Format(time.ANSIC))

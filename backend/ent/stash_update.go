@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -26,6 +27,54 @@ type StashUpdate struct {
 // Where appends a list predicates to the StashUpdate builder.
 func (_u *StashUpdate) Where(ps ...predicate.Stash) *StashUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *StashUpdate) SetCreatedAt(v time.Time) *StashUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableCreatedAt(v *time.Time) *StashUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *StashUpdate) SetUpdatedAt(v time.Time) *StashUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableUpdatedAt(v *time.Time) *StashUpdate {
+	if v != nil {
+		_u.SetUpdatedAt(*v)
+	}
+	return _u
+}
+
+// SetLastDownloadAt sets the "lastDownloadAt" field.
+func (_u *StashUpdate) SetLastDownloadAt(v time.Time) *StashUpdate {
+	_u.mutation.SetLastDownloadAt(v)
+	return _u
+}
+
+// SetNillableLastDownloadAt sets the "lastDownloadAt" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableLastDownloadAt(v *time.Time) *StashUpdate {
+	if v != nil {
+		_u.SetLastDownloadAt(*v)
+	}
+	return _u
+}
+
+// ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
+func (_u *StashUpdate) ClearLastDownloadAt() *StashUpdate {
+	_u.mutation.ClearLastDownloadAt()
 	return _u
 }
 
@@ -213,6 +262,18 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(stash.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(stash.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.LastDownloadAt(); ok {
+		_spec.SetField(stash.FieldLastDownloadAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastDownloadAtCleared() {
+		_spec.ClearField(stash.FieldLastDownloadAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 	}
@@ -290,6 +351,54 @@ type StashUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *StashMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *StashUpdateOne) SetCreatedAt(v time.Time) *StashUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableCreatedAt(v *time.Time) *StashUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *StashUpdateOne) SetUpdatedAt(v time.Time) *StashUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableUpdatedAt(v *time.Time) *StashUpdateOne {
+	if v != nil {
+		_u.SetUpdatedAt(*v)
+	}
+	return _u
+}
+
+// SetLastDownloadAt sets the "lastDownloadAt" field.
+func (_u *StashUpdateOne) SetLastDownloadAt(v time.Time) *StashUpdateOne {
+	_u.mutation.SetLastDownloadAt(v)
+	return _u
+}
+
+// SetNillableLastDownloadAt sets the "lastDownloadAt" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableLastDownloadAt(v *time.Time) *StashUpdateOne {
+	if v != nil {
+		_u.SetLastDownloadAt(*v)
+	}
+	return _u
+}
+
+// ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
+func (_u *StashUpdateOne) ClearLastDownloadAt() *StashUpdateOne {
+	_u.mutation.ClearLastDownloadAt()
+	return _u
 }
 
 // SetContent sets the "content" field.
@@ -505,6 +614,18 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(stash.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(stash.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.LastDownloadAt(); ok {
+		_spec.SetField(stash.FieldLastDownloadAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastDownloadAtCleared() {
+		_spec.ClearField(stash.FieldLastDownloadAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)

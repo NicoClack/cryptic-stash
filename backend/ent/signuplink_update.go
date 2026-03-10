@@ -58,9 +58,9 @@ func (_u *SignupLinkUpdate) SetNillableName(v *string) *SignupLinkUpdate {
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *SignupLinkUpdate) SetCode(v []byte) *SignupLinkUpdate {
-	_u.mutation.SetCode(v)
+// SetHashedCode sets the "hashedCode" field.
+func (_u *SignupLinkUpdate) SetHashedCode(v []byte) *SignupLinkUpdate {
+	_u.mutation.SetHashedCode(v)
 	return _u
 }
 
@@ -176,9 +176,9 @@ func (_u *SignupLinkUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SignupLink.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Code(); ok {
-		if err := signuplink.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "SignupLink.code": %w`, err)}
+	if v, ok := _u.mutation.HashedCode(); ok {
+		if err := signuplink.HashedCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "SignupLink.hashedCode": %w`, err)}
 		}
 	}
 	return nil
@@ -202,8 +202,8 @@ func (_u *SignupLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(signuplink.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(signuplink.FieldCode, field.TypeBytes, value)
+	if value, ok := _u.mutation.HashedCode(); ok {
+		_spec.SetField(signuplink.FieldHashedCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(signuplink.FieldExpiresAt, field.TypeTime, value)
@@ -291,9 +291,9 @@ func (_u *SignupLinkUpdateOne) SetNillableName(v *string) *SignupLinkUpdateOne {
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *SignupLinkUpdateOne) SetCode(v []byte) *SignupLinkUpdateOne {
-	_u.mutation.SetCode(v)
+// SetHashedCode sets the "hashedCode" field.
+func (_u *SignupLinkUpdateOne) SetHashedCode(v []byte) *SignupLinkUpdateOne {
+	_u.mutation.SetHashedCode(v)
 	return _u
 }
 
@@ -422,9 +422,9 @@ func (_u *SignupLinkUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SignupLink.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Code(); ok {
-		if err := signuplink.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "SignupLink.code": %w`, err)}
+	if v, ok := _u.mutation.HashedCode(); ok {
+		if err := signuplink.HashedCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "SignupLink.hashedCode": %w`, err)}
 		}
 	}
 	return nil
@@ -465,8 +465,8 @@ func (_u *SignupLinkUpdateOne) sqlSave(ctx context.Context) (_node *SignupLink, 
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(signuplink.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(signuplink.FieldCode, field.TypeBytes, value)
+	if value, ok := _u.mutation.HashedCode(); ok {
+		_spec.SetField(signuplink.FieldHashedCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(signuplink.FieldExpiresAt, field.TypeTime, value)

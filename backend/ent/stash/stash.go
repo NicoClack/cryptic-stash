@@ -13,6 +13,12 @@ const (
 	Label = "stash"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the createdat field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updatedat field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldLastDownloadAt holds the string denoting the lastdownloadat field in the database.
+	FieldLastDownloadAt = "last_download_at"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
 	// FieldFileName holds the string denoting the filename field in the database.
@@ -45,6 +51,9 @@ const (
 // Columns holds all SQL columns for stash fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldLastDownloadAt,
 	FieldContent,
 	FieldFileName,
 	FieldEncryptionDataKey,
@@ -84,6 +93,21 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the createdAt field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updatedAt field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByLastDownloadAt orders the results by the lastDownloadAt field.
+func ByLastDownloadAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastDownloadAt, opts...).ToFunc()
 }
 
 // ByHashTime orders the results by the hashTime field.

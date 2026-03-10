@@ -3,6 +3,8 @@
 package stash
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
@@ -54,6 +56,21 @@ func IDLTE(id uuid.UUID) predicate.Stash {
 	return predicate.Stash(sql.FieldLTE(FieldID, id))
 }
 
+// CreatedAt applies equality check predicate on the "createdAt" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updatedAt" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// LastDownloadAt applies equality check predicate on the "lastDownloadAt" field. It's identical to LastDownloadAtEQ.
+func LastDownloadAt(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldLastDownloadAt, v))
+}
+
 // Content applies equality check predicate on the "content" field. It's identical to ContentEQ.
 func Content(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldContent, v))
@@ -92,6 +109,136 @@ func HashThreads(v uint8) predicate.Stash {
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldUserID, v))
+}
+
+// CreatedAtEQ applies the EQ predicate on the "createdAt" field.
+func CreatedAtEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "createdAt" field.
+func CreatedAtNEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtIn applies the In predicate on the "createdAt" field.
+func CreatedAtIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "createdAt" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtGT applies the GT predicate on the "createdAt" field.
+func CreatedAtGT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldCreatedAt, v))
+}
+
+// CreatedAtGTE applies the GTE predicate on the "createdAt" field.
+func CreatedAtGTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldCreatedAt, v))
+}
+
+// CreatedAtLT applies the LT predicate on the "createdAt" field.
+func CreatedAtLT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldCreatedAt, v))
+}
+
+// CreatedAtLTE applies the LTE predicate on the "createdAt" field.
+func CreatedAtLTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updatedAt" field.
+func UpdatedAtEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updatedAt" field.
+func UpdatedAtNEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updatedAt" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updatedAt" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updatedAt" field.
+func UpdatedAtGT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updatedAt" field.
+func UpdatedAtGTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updatedAt" field.
+func UpdatedAtLT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updatedAt" field.
+func UpdatedAtLTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// LastDownloadAtEQ applies the EQ predicate on the "lastDownloadAt" field.
+func LastDownloadAtEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldLastDownloadAt, v))
+}
+
+// LastDownloadAtNEQ applies the NEQ predicate on the "lastDownloadAt" field.
+func LastDownloadAtNEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldLastDownloadAt, v))
+}
+
+// LastDownloadAtIn applies the In predicate on the "lastDownloadAt" field.
+func LastDownloadAtIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldLastDownloadAt, vs...))
+}
+
+// LastDownloadAtNotIn applies the NotIn predicate on the "lastDownloadAt" field.
+func LastDownloadAtNotIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldLastDownloadAt, vs...))
+}
+
+// LastDownloadAtGT applies the GT predicate on the "lastDownloadAt" field.
+func LastDownloadAtGT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldLastDownloadAt, v))
+}
+
+// LastDownloadAtGTE applies the GTE predicate on the "lastDownloadAt" field.
+func LastDownloadAtGTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldLastDownloadAt, v))
+}
+
+// LastDownloadAtLT applies the LT predicate on the "lastDownloadAt" field.
+func LastDownloadAtLT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldLastDownloadAt, v))
+}
+
+// LastDownloadAtLTE applies the LTE predicate on the "lastDownloadAt" field.
+func LastDownloadAtLTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldLastDownloadAt, v))
+}
+
+// LastDownloadAtIsNil applies the IsNil predicate on the "lastDownloadAt" field.
+func LastDownloadAtIsNil() predicate.Stash {
+	return predicate.Stash(sql.FieldIsNull(FieldLastDownloadAt))
+}
+
+// LastDownloadAtNotNil applies the NotNil predicate on the "lastDownloadAt" field.
+func LastDownloadAtNotNil() predicate.Stash {
+	return predicate.Stash(sql.FieldNotNull(FieldLastDownloadAt))
 }
 
 // ContentEQ applies the EQ predicate on the "content" field.

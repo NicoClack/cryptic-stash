@@ -12,7 +12,7 @@ var (
 	DownloadSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "code", Type: field.TypeBytes, Unique: true, Size: 32},
+		{Name: "hashed_auth_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "valid_from", Type: field.TypeTime},
 		{Name: "valid_until", Type: field.TypeTime},
 		{Name: "user_agent", Type: field.TypeString},
@@ -34,7 +34,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "downloadsession_code_user_id",
+				Name:    "downloadsession_hashed_auth_code_user_id",
 				Unique:  false,
 				Columns: []*schema.Column{DownloadSessionsColumns[2], DownloadSessionsColumns[7]},
 			},
@@ -181,7 +181,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 32},
-		{Name: "code", Type: field.TypeBytes, Unique: true, Size: 32},
+		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "user_agent", Type: field.TypeString, Default: ""},
 		{Name: "ip", Type: field.TypeString, Default: ""},
@@ -202,7 +202,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "signuplink_code",
+				Name:    "signuplink_hashed_code",
 				Unique:  false,
 				Columns: []*schema.Column{SignupLinksColumns[3]},
 			},
@@ -211,6 +211,9 @@ var (
 	// StashesColumns holds the columns for the "stashes" table.
 	StashesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "last_download_at", Type: field.TypeTime, Nullable: true},
 		{Name: "content", Type: field.TypeBytes, Size: 10000000},
 		{Name: "file_name", Type: field.TypeBytes, Size: 256},
 		{Name: "encryption_data_key", Type: field.TypeBytes, Size: 128},
@@ -228,7 +231,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "stashes_users_stash",
-				Columns:    []*schema.Column{StashesColumns[8]},
+				Columns:    []*schema.Column{StashesColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -260,6 +263,7 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "username", Type: field.TypeString, Unique: true},
 		{Name: "locked", Type: field.TypeBool, Default: false},
 		{Name: "locked_until", Type: field.TypeTime, Nullable: true},

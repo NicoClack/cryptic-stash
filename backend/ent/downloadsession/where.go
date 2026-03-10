@@ -61,9 +61,9 @@ func CreatedAt(v time.Time) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldEQ(FieldCreatedAt, v))
 }
 
-// Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
-func Code(v []byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldEQ(FieldCode, v))
+// HashedAuthCode applies equality check predicate on the "hashedAuthCode" field. It's identical to HashedAuthCodeEQ.
+func HashedAuthCode(v []byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldEQ(FieldHashedAuthCode, v))
 }
 
 // ValidFrom applies equality check predicate on the "validFrom" field. It's identical to ValidFromEQ.
@@ -131,44 +131,44 @@ func CreatedAtLTE(v time.Time) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldLTE(FieldCreatedAt, v))
 }
 
-// CodeEQ applies the EQ predicate on the "code" field.
-func CodeEQ(v []byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldEQ(FieldCode, v))
+// HashedAuthCodeEQ applies the EQ predicate on the "hashedAuthCode" field.
+func HashedAuthCodeEQ(v []byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldEQ(FieldHashedAuthCode, v))
 }
 
-// CodeNEQ applies the NEQ predicate on the "code" field.
-func CodeNEQ(v []byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldNEQ(FieldCode, v))
+// HashedAuthCodeNEQ applies the NEQ predicate on the "hashedAuthCode" field.
+func HashedAuthCodeNEQ(v []byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldNEQ(FieldHashedAuthCode, v))
 }
 
-// CodeIn applies the In predicate on the "code" field.
-func CodeIn(vs ...[]byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldIn(FieldCode, vs...))
+// HashedAuthCodeIn applies the In predicate on the "hashedAuthCode" field.
+func HashedAuthCodeIn(vs ...[]byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldIn(FieldHashedAuthCode, vs...))
 }
 
-// CodeNotIn applies the NotIn predicate on the "code" field.
-func CodeNotIn(vs ...[]byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldNotIn(FieldCode, vs...))
+// HashedAuthCodeNotIn applies the NotIn predicate on the "hashedAuthCode" field.
+func HashedAuthCodeNotIn(vs ...[]byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldNotIn(FieldHashedAuthCode, vs...))
 }
 
-// CodeGT applies the GT predicate on the "code" field.
-func CodeGT(v []byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldGT(FieldCode, v))
+// HashedAuthCodeGT applies the GT predicate on the "hashedAuthCode" field.
+func HashedAuthCodeGT(v []byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldGT(FieldHashedAuthCode, v))
 }
 
-// CodeGTE applies the GTE predicate on the "code" field.
-func CodeGTE(v []byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldGTE(FieldCode, v))
+// HashedAuthCodeGTE applies the GTE predicate on the "hashedAuthCode" field.
+func HashedAuthCodeGTE(v []byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldGTE(FieldHashedAuthCode, v))
 }
 
-// CodeLT applies the LT predicate on the "code" field.
-func CodeLT(v []byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldLT(FieldCode, v))
+// HashedAuthCodeLT applies the LT predicate on the "hashedAuthCode" field.
+func HashedAuthCodeLT(v []byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldLT(FieldHashedAuthCode, v))
 }
 
-// CodeLTE applies the LTE predicate on the "code" field.
-func CodeLTE(v []byte) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldLTE(FieldCode, v))
+// HashedAuthCodeLTE applies the LTE predicate on the "hashedAuthCode" field.
+func HashedAuthCodeLTE(v []byte) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldLTE(FieldHashedAuthCode, v))
 }
 
 // ValidFromEQ applies the EQ predicate on the "validFrom" field.

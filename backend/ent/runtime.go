@@ -24,18 +24,18 @@ import (
 func init() {
 	downloadsessionFields := schema.DownloadSession{}.Fields()
 	_ = downloadsessionFields
-	// downloadsessionDescCode is the schema descriptor for code field.
-	downloadsessionDescCode := downloadsessionFields[2].Descriptor()
-	// downloadsession.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	downloadsession.CodeValidator = func() func([]byte) error {
-		validators := downloadsessionDescCode.Validators
+	// downloadsessionDescHashedAuthCode is the schema descriptor for hashedAuthCode field.
+	downloadsessionDescHashedAuthCode := downloadsessionFields[2].Descriptor()
+	// downloadsession.HashedAuthCodeValidator is a validator for the "hashedAuthCode" field. It is called by the builders before save.
+	downloadsession.HashedAuthCodeValidator = func() func([]byte) error {
+		validators := downloadsessionDescHashedAuthCode.Validators
 		fns := [...]func([]byte) error{
 			validators[0].(func([]byte) error),
 			validators[1].(func([]byte) error),
 		}
-		return func(code []byte) error {
+		return func(hashedAuthCode []byte) error {
 			for _, fn := range fns {
-				if err := fn(code); err != nil {
+				if err := fn(hashedAuthCode); err != nil {
 					return err
 				}
 			}
@@ -148,18 +148,18 @@ func init() {
 	signuplinkDescName := signuplinkFields[2].Descriptor()
 	// signuplink.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	signuplink.NameValidator = signuplinkDescName.Validators[0].(func(string) error)
-	// signuplinkDescCode is the schema descriptor for code field.
-	signuplinkDescCode := signuplinkFields[3].Descriptor()
-	// signuplink.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	signuplink.CodeValidator = func() func([]byte) error {
-		validators := signuplinkDescCode.Validators
+	// signuplinkDescHashedCode is the schema descriptor for hashedCode field.
+	signuplinkDescHashedCode := signuplinkFields[3].Descriptor()
+	// signuplink.HashedCodeValidator is a validator for the "hashedCode" field. It is called by the builders before save.
+	signuplink.HashedCodeValidator = func() func([]byte) error {
+		validators := signuplinkDescHashedCode.Validators
 		fns := [...]func([]byte) error{
 			validators[0].(func([]byte) error),
 			validators[1].(func([]byte) error),
 		}
-		return func(code []byte) error {
+		return func(hashedCode []byte) error {
 			for _, fn := range fns {
-				if err := fn(code); err != nil {
+				if err := fn(hashedCode); err != nil {
 					return err
 				}
 			}
@@ -181,7 +181,7 @@ func init() {
 	stashFields := schema.Stash{}.Fields()
 	_ = stashFields
 	// stashDescContent is the schema descriptor for content field.
-	stashDescContent := stashFields[1].Descriptor()
+	stashDescContent := stashFields[4].Descriptor()
 	// stash.ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	stash.ContentValidator = func() func([]byte) error {
 		validators := stashDescContent.Validators
@@ -199,7 +199,7 @@ func init() {
 		}
 	}()
 	// stashDescFileName is the schema descriptor for fileName field.
-	stashDescFileName := stashFields[2].Descriptor()
+	stashDescFileName := stashFields[5].Descriptor()
 	// stash.FileNameValidator is a validator for the "fileName" field. It is called by the builders before save.
 	stash.FileNameValidator = func() func([]byte) error {
 		validators := stashDescFileName.Validators
@@ -217,7 +217,7 @@ func init() {
 		}
 	}()
 	// stashDescEncryptionDataKey is the schema descriptor for encryptionDataKey field.
-	stashDescEncryptionDataKey := stashFields[3].Descriptor()
+	stashDescEncryptionDataKey := stashFields[6].Descriptor()
 	// stash.EncryptionDataKeyValidator is a validator for the "encryptionDataKey" field. It is called by the builders before save.
 	stash.EncryptionDataKeyValidator = func() func([]byte) error {
 		validators := stashDescEncryptionDataKey.Validators
@@ -235,7 +235,7 @@ func init() {
 		}
 	}()
 	// stashDescPasswordSalt is the schema descriptor for passwordSalt field.
-	stashDescPasswordSalt := stashFields[4].Descriptor()
+	stashDescPasswordSalt := stashFields[7].Descriptor()
 	// stash.PasswordSaltValidator is a validator for the "passwordSalt" field. It is called by the builders before save.
 	stash.PasswordSaltValidator = stashDescPasswordSalt.Validators[0].(func([]byte) error)
 	// stashDescID is the schema descriptor for id field.
@@ -287,11 +287,11 @@ func init() {
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUsername is the schema descriptor for username field.
-	userDescUsername := userFields[2].Descriptor()
+	userDescUsername := userFields[3].Descriptor()
 	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	user.UsernameValidator = userDescUsername.Validators[0].(func(string) error)
 	// userDescLocked is the schema descriptor for locked field.
-	userDescLocked := userFields[3].Descriptor()
+	userDescLocked := userFields[4].Descriptor()
 	// user.DefaultLocked holds the default value on creation for the locked field.
 	user.DefaultLocked = userDescLocked.Default.(bool)
 	// userDescID is the schema descriptor for id field.

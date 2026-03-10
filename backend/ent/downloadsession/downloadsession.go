@@ -15,8 +15,8 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the createdat field in the database.
 	FieldCreatedAt = "created_at"
-	// FieldCode holds the string denoting the code field in the database.
-	FieldCode = "code"
+	// FieldHashedAuthCode holds the string denoting the hashedauthcode field in the database.
+	FieldHashedAuthCode = "hashed_auth_code"
 	// FieldValidFrom holds the string denoting the validfrom field in the database.
 	FieldValidFrom = "valid_from"
 	// FieldValidUntil holds the string denoting the validuntil field in the database.
@@ -53,7 +53,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
-	FieldCode,
+	FieldHashedAuthCode,
 	FieldValidFrom,
 	FieldValidUntil,
 	FieldUserAgent,
@@ -72,8 +72,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	CodeValidator func([]byte) error
+	// HashedAuthCodeValidator is a validator for the "hashedAuthCode" field. It is called by the builders before save.
+	HashedAuthCodeValidator func([]byte) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

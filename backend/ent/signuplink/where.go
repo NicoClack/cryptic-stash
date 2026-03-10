@@ -66,9 +66,9 @@ func Name(v string) predicate.SignupLink {
 	return predicate.SignupLink(sql.FieldEQ(FieldName, v))
 }
 
-// Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
-func Code(v []byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldEQ(FieldCode, v))
+// HashedCode applies equality check predicate on the "hashedCode" field. It's identical to HashedCodeEQ.
+func HashedCode(v []byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldEQ(FieldHashedCode, v))
 }
 
 // ExpiresAt applies equality check predicate on the "expiresAt" field. It's identical to ExpiresAtEQ.
@@ -196,44 +196,44 @@ func NameContainsFold(v string) predicate.SignupLink {
 	return predicate.SignupLink(sql.FieldContainsFold(FieldName, v))
 }
 
-// CodeEQ applies the EQ predicate on the "code" field.
-func CodeEQ(v []byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldEQ(FieldCode, v))
+// HashedCodeEQ applies the EQ predicate on the "hashedCode" field.
+func HashedCodeEQ(v []byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldEQ(FieldHashedCode, v))
 }
 
-// CodeNEQ applies the NEQ predicate on the "code" field.
-func CodeNEQ(v []byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldNEQ(FieldCode, v))
+// HashedCodeNEQ applies the NEQ predicate on the "hashedCode" field.
+func HashedCodeNEQ(v []byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldNEQ(FieldHashedCode, v))
 }
 
-// CodeIn applies the In predicate on the "code" field.
-func CodeIn(vs ...[]byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldIn(FieldCode, vs...))
+// HashedCodeIn applies the In predicate on the "hashedCode" field.
+func HashedCodeIn(vs ...[]byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldIn(FieldHashedCode, vs...))
 }
 
-// CodeNotIn applies the NotIn predicate on the "code" field.
-func CodeNotIn(vs ...[]byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldNotIn(FieldCode, vs...))
+// HashedCodeNotIn applies the NotIn predicate on the "hashedCode" field.
+func HashedCodeNotIn(vs ...[]byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldNotIn(FieldHashedCode, vs...))
 }
 
-// CodeGT applies the GT predicate on the "code" field.
-func CodeGT(v []byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldGT(FieldCode, v))
+// HashedCodeGT applies the GT predicate on the "hashedCode" field.
+func HashedCodeGT(v []byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldGT(FieldHashedCode, v))
 }
 
-// CodeGTE applies the GTE predicate on the "code" field.
-func CodeGTE(v []byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldGTE(FieldCode, v))
+// HashedCodeGTE applies the GTE predicate on the "hashedCode" field.
+func HashedCodeGTE(v []byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldGTE(FieldHashedCode, v))
 }
 
-// CodeLT applies the LT predicate on the "code" field.
-func CodeLT(v []byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldLT(FieldCode, v))
+// HashedCodeLT applies the LT predicate on the "hashedCode" field.
+func HashedCodeLT(v []byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldLT(FieldHashedCode, v))
 }
 
-// CodeLTE applies the LTE predicate on the "code" field.
-func CodeLTE(v []byte) predicate.SignupLink {
-	return predicate.SignupLink(sql.FieldLTE(FieldCode, v))
+// HashedCodeLTE applies the LTE predicate on the "hashedCode" field.
+func HashedCodeLTE(v []byte) predicate.SignupLink {
+	return predicate.SignupLink(sql.FieldLTE(FieldHashedCode, v))
 }
 
 // ExpiresAtEQ applies the EQ predicate on the "expiresAt" field.

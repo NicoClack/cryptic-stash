@@ -20,10 +20,10 @@ func (SignupLink) Fields() []ent.Field {
 		field.Time("createdAt"),
 		// For differentiating between signup links and to provide a suggested username
 		field.String("name").MaxLen(32),
-		field.Bytes("code"). // Hashed with SHA256
-					Unique().
-					MinLen(32).
-					MaxLen(32),
+		field.Bytes("hashedCode"). // Using SHA-256
+						Unique().
+						MinLen(32).
+						MaxLen(32),
 		field.Time("expiresAt"),
 		field.String("userAgent").Default(""),
 		field.String("ip").Default(""),
@@ -41,6 +41,6 @@ func (SignupLink) Edges() []ent.Edge {
 
 func (SignupLink) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("code"),
+		index.Fields("hashedCode"),
 	}
 }

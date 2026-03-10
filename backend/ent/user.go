@@ -22,6 +22,8 @@ type User struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "createdAt" field.
 	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Username holds the value of the "username" field.
 	Username string `json:"username,omitempty"`
 	// Locked holds the value of the "locked" field.
@@ -111,7 +113,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldUsername:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldLockedUntil, user.FieldDownloadSessionsValidFrom:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldLockedUntil, user.FieldDownloadSessionsValidFrom:
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
@@ -141,6 +143,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
+			}
+		case user.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case user.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -230,6 +238,9 @@ func (_m *User) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("createdAt=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("username=")
 	builder.WriteString(_m.Username)

@@ -37,9 +37,9 @@ func (_c *SignupLinkCreate) SetName(v string) *SignupLinkCreate {
 	return _c
 }
 
-// SetCode sets the "code" field.
-func (_c *SignupLinkCreate) SetCode(v []byte) *SignupLinkCreate {
-	_c.mutation.SetCode(v)
+// SetHashedCode sets the "hashedCode" field.
+func (_c *SignupLinkCreate) SetHashedCode(v []byte) *SignupLinkCreate {
+	_c.mutation.SetHashedCode(v)
 	return _c
 }
 
@@ -172,12 +172,12 @@ func (_c *SignupLinkCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SignupLink.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Code(); !ok {
-		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "SignupLink.code"`)}
+	if _, ok := _c.mutation.HashedCode(); !ok {
+		return &ValidationError{Name: "hashedCode", err: errors.New(`ent: missing required field "SignupLink.hashedCode"`)}
 	}
-	if v, ok := _c.mutation.Code(); ok {
-		if err := signuplink.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "SignupLink.code": %w`, err)}
+	if v, ok := _c.mutation.HashedCode(); ok {
+		if err := signuplink.HashedCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "SignupLink.hashedCode": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
@@ -233,9 +233,9 @@ func (_c *SignupLinkCreate) createSpec() (*SignupLink, *sqlgraph.CreateSpec) {
 		_spec.SetField(signuplink.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Code(); ok {
-		_spec.SetField(signuplink.FieldCode, field.TypeBytes, value)
-		_node.Code = value
+	if value, ok := _c.mutation.HashedCode(); ok {
+		_spec.SetField(signuplink.FieldHashedCode, field.TypeBytes, value)
+		_node.HashedCode = value
 	}
 	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(signuplink.FieldExpiresAt, field.TypeTime, value)
@@ -342,15 +342,15 @@ func (u *SignupLinkUpsert) UpdateName() *SignupLinkUpsert {
 	return u
 }
 
-// SetCode sets the "code" field.
-func (u *SignupLinkUpsert) SetCode(v []byte) *SignupLinkUpsert {
-	u.Set(signuplink.FieldCode, v)
+// SetHashedCode sets the "hashedCode" field.
+func (u *SignupLinkUpsert) SetHashedCode(v []byte) *SignupLinkUpsert {
+	u.Set(signuplink.FieldHashedCode, v)
 	return u
 }
 
-// UpdateCode sets the "code" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateCode() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldCode)
+// UpdateHashedCode sets the "hashedCode" field to the value that was provided on create.
+func (u *SignupLinkUpsert) UpdateHashedCode() *SignupLinkUpsert {
+	u.SetExcluded(signuplink.FieldHashedCode)
 	return u
 }
 
@@ -484,17 +484,17 @@ func (u *SignupLinkUpsertOne) UpdateName() *SignupLinkUpsertOne {
 	})
 }
 
-// SetCode sets the "code" field.
-func (u *SignupLinkUpsertOne) SetCode(v []byte) *SignupLinkUpsertOne {
+// SetHashedCode sets the "hashedCode" field.
+func (u *SignupLinkUpsertOne) SetHashedCode(v []byte) *SignupLinkUpsertOne {
 	return u.Update(func(s *SignupLinkUpsert) {
-		s.SetCode(v)
+		s.SetHashedCode(v)
 	})
 }
 
-// UpdateCode sets the "code" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateCode() *SignupLinkUpsertOne {
+// UpdateHashedCode sets the "hashedCode" field to the value that was provided on create.
+func (u *SignupLinkUpsertOne) UpdateHashedCode() *SignupLinkUpsertOne {
 	return u.Update(func(s *SignupLinkUpsert) {
-		s.UpdateCode()
+		s.UpdateHashedCode()
 	})
 }
 
@@ -804,17 +804,17 @@ func (u *SignupLinkUpsertBulk) UpdateName() *SignupLinkUpsertBulk {
 	})
 }
 
-// SetCode sets the "code" field.
-func (u *SignupLinkUpsertBulk) SetCode(v []byte) *SignupLinkUpsertBulk {
+// SetHashedCode sets the "hashedCode" field.
+func (u *SignupLinkUpsertBulk) SetHashedCode(v []byte) *SignupLinkUpsertBulk {
 	return u.Update(func(s *SignupLinkUpsert) {
-		s.SetCode(v)
+		s.SetHashedCode(v)
 	})
 }
 
-// UpdateCode sets the "code" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateCode() *SignupLinkUpsertBulk {
+// UpdateHashedCode sets the "hashedCode" field to the value that was provided on create.
+func (u *SignupLinkUpsertBulk) UpdateHashedCode() *SignupLinkUpsertBulk {
 	return u.Update(func(s *SignupLinkUpsert) {
-		s.UpdateCode()
+		s.UpdateHashedCode()
 	})
 }
 

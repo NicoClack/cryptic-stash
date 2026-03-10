@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,6 +19,12 @@ type Stash struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// LastDownloadAt holds the value of the "lastDownloadAt" field.
+	LastDownloadAt time.Time `json:"lastDownloadAt,omitempty"`
 	// Content holds the value of the "content" field.
 	Content []byte `json:"content,omitempty"`
 	// FileName holds the value of the "fileName" field.
@@ -69,6 +76,8 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case stash.FieldHashTime, stash.FieldHashMemory, stash.FieldHashThreads:
 			values[i] = new(sql.NullInt64)
+		case stash.FieldCreatedAt, stash.FieldUpdatedAt, stash.FieldLastDownloadAt:
+			values[i] = new(sql.NullTime)
 		case stash.FieldID, stash.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -91,6 +100,24 @@ func (_m *Stash) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
+			}
+		case stash.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
+			}
+		case stash.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
+			}
+		case stash.FieldLastDownloadAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastDownloadAt", values[i])
+			} else if value.Valid {
+				_m.LastDownloadAt = value.Time
 			}
 		case stash.FieldContent:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -181,6 +208,15 @@ func (_m *Stash) String() string {
 	var builder strings.Builder
 	builder.WriteString("Stash(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("createdAt=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("lastDownloadAt=")
+	builder.WriteString(_m.LastDownloadAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("content=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Content))
 	builder.WriteString(", ")

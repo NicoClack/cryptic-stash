@@ -48,6 +48,20 @@ func (_u *UserUpdate) SetNillableCreatedAt(v *time.Time) *UserUpdate {
 	return _u
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *UserUpdate) SetUpdatedAt(v time.Time) *UserUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableUpdatedAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetUpdatedAt(*v)
+	}
+	return _u
+}
+
 // SetUsername sets the "username" field.
 func (_u *UserUpdate) SetUsername(v string) *UserUpdate {
 	_u.mutation.SetUsername(v)
@@ -325,6 +339,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
 	}
@@ -563,6 +580,20 @@ func (_u *UserUpdateOne) SetCreatedAt(v time.Time) *UserUpdateOne {
 func (_u *UserUpdateOne) SetNillableCreatedAt(v *time.Time) *UserUpdateOne {
 	if v != nil {
 		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *UserUpdateOne) SetUpdatedAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableUpdatedAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetUpdatedAt(*v)
 	}
 	return _u
 }
@@ -873,6 +904,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)

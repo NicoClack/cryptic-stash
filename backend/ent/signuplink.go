@@ -23,8 +23,8 @@ type SignupLink struct {
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// Code holds the value of the "code" field.
-	Code []byte `json:"code,omitempty"`
+	// HashedCode holds the value of the "hashedCode" field.
+	HashedCode []byte `json:"hashedCode,omitempty"`
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
@@ -64,7 +64,7 @@ func (*SignupLink) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case signuplink.FieldCode:
+		case signuplink.FieldHashedCode:
 			values[i] = new([]byte)
 		case signuplink.FieldName, signuplink.FieldUserAgent, signuplink.FieldIP:
 			values[i] = new(sql.NullString)
@@ -105,11 +105,11 @@ func (_m *SignupLink) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case signuplink.FieldCode:
+		case signuplink.FieldHashedCode:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field code", values[i])
+				return fmt.Errorf("unexpected type %T for field hashedCode", values[i])
 			} else if value != nil {
-				_m.Code = *value
+				_m.HashedCode = *value
 			}
 		case signuplink.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -182,8 +182,8 @@ func (_m *SignupLink) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("code=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Code))
+	builder.WriteString("hashedCode=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HashedCode))
 	builder.WriteString(", ")
 	builder.WriteString("expiresAt=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))

@@ -20,10 +20,10 @@ func (DownloadSession) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		// The randomly generated authorisation code that will become valid after enough time
-		field.Bytes("code"). // Hashed with SHA256
-					Unique().
-					MinLen(32).
-					MaxLen(32),
+		field.Bytes("hashedAuthCode"). // Using SHA-256
+						Unique().
+						MinLen(32).
+						MaxLen(32),
 		field.Time("validFrom"), // After createdAt
 		field.Time("validUntil"),
 		field.String("userAgent"),
@@ -44,6 +44,6 @@ func (DownloadSession) Edges() []ent.Edge {
 
 func (DownloadSession) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("code", "userID"),
+		index.Fields("hashedAuthCode", "userID"),
 	}
 }

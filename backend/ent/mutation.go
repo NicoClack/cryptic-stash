@@ -56,7 +56,7 @@ type DownloadSessionMutation struct {
 	typ                string
 	id                 *uuid.UUID
 	createdAt          *time.Time
-	code               *[]byte
+	hashedAuthCode     *[]byte
 	validFrom          *time.Time
 	validUntil         *time.Time
 	userAgent          *string
@@ -212,40 +212,40 @@ func (m *DownloadSessionMutation) ResetCreatedAt() {
 	m.createdAt = nil
 }
 
-// SetCode sets the "code" field.
-func (m *DownloadSessionMutation) SetCode(b []byte) {
-	m.code = &b
+// SetHashedAuthCode sets the "hashedAuthCode" field.
+func (m *DownloadSessionMutation) SetHashedAuthCode(b []byte) {
+	m.hashedAuthCode = &b
 }
 
-// Code returns the value of the "code" field in the mutation.
-func (m *DownloadSessionMutation) Code() (r []byte, exists bool) {
-	v := m.code
+// HashedAuthCode returns the value of the "hashedAuthCode" field in the mutation.
+func (m *DownloadSessionMutation) HashedAuthCode() (r []byte, exists bool) {
+	v := m.hashedAuthCode
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCode returns the old "code" field's value of the DownloadSession entity.
+// OldHashedAuthCode returns the old "hashedAuthCode" field's value of the DownloadSession entity.
 // If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DownloadSessionMutation) OldCode(ctx context.Context) (v []byte, err error) {
+func (m *DownloadSessionMutation) OldHashedAuthCode(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+		return v, errors.New("OldHashedAuthCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCode requires an ID field in the mutation")
+		return v, errors.New("OldHashedAuthCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+		return v, fmt.Errorf("querying old value for OldHashedAuthCode: %w", err)
 	}
-	return oldValue.Code, nil
+	return oldValue.HashedAuthCode, nil
 }
 
-// ResetCode resets all changes to the "code" field.
-func (m *DownloadSessionMutation) ResetCode() {
-	m.code = nil
+// ResetHashedAuthCode resets all changes to the "hashedAuthCode" field.
+func (m *DownloadSessionMutation) ResetHashedAuthCode() {
+	m.hashedAuthCode = nil
 }
 
 // SetValidFrom sets the "validFrom" field.
@@ -547,8 +547,8 @@ func (m *DownloadSessionMutation) Fields() []string {
 	if m.createdAt != nil {
 		fields = append(fields, downloadsession.FieldCreatedAt)
 	}
-	if m.code != nil {
-		fields = append(fields, downloadsession.FieldCode)
+	if m.hashedAuthCode != nil {
+		fields = append(fields, downloadsession.FieldHashedAuthCode)
 	}
 	if m.validFrom != nil {
 		fields = append(fields, downloadsession.FieldValidFrom)
@@ -575,8 +575,8 @@ func (m *DownloadSessionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case downloadsession.FieldCreatedAt:
 		return m.CreatedAt()
-	case downloadsession.FieldCode:
-		return m.Code()
+	case downloadsession.FieldHashedAuthCode:
+		return m.HashedAuthCode()
 	case downloadsession.FieldValidFrom:
 		return m.ValidFrom()
 	case downloadsession.FieldValidUntil:
@@ -598,8 +598,8 @@ func (m *DownloadSessionMutation) OldField(ctx context.Context, name string) (en
 	switch name {
 	case downloadsession.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case downloadsession.FieldCode:
-		return m.OldCode(ctx)
+	case downloadsession.FieldHashedAuthCode:
+		return m.OldHashedAuthCode(ctx)
 	case downloadsession.FieldValidFrom:
 		return m.OldValidFrom(ctx)
 	case downloadsession.FieldValidUntil:
@@ -626,12 +626,12 @@ func (m *DownloadSessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case downloadsession.FieldCode:
+	case downloadsession.FieldHashedAuthCode:
 		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCode(v)
+		m.SetHashedAuthCode(v)
 		return nil
 	case downloadsession.FieldValidFrom:
 		v, ok := value.(time.Time)
@@ -720,8 +720,8 @@ func (m *DownloadSessionMutation) ResetField(name string) error {
 	case downloadsession.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case downloadsession.FieldCode:
-		m.ResetCode()
+	case downloadsession.FieldHashedAuthCode:
+		m.ResetHashedAuthCode()
 		return nil
 	case downloadsession.FieldValidFrom:
 		m.ResetValidFrom()
@@ -4405,7 +4405,7 @@ type SignupLinkMutation struct {
 	id            *uuid.UUID
 	createdAt     *time.Time
 	name          *string
-	code          *[]byte
+	hashedCode    *[]byte
 	expiresAt     *time.Time
 	userAgent     *string
 	ip            *string
@@ -4593,40 +4593,40 @@ func (m *SignupLinkMutation) ResetName() {
 	m.name = nil
 }
 
-// SetCode sets the "code" field.
-func (m *SignupLinkMutation) SetCode(b []byte) {
-	m.code = &b
+// SetHashedCode sets the "hashedCode" field.
+func (m *SignupLinkMutation) SetHashedCode(b []byte) {
+	m.hashedCode = &b
 }
 
-// Code returns the value of the "code" field in the mutation.
-func (m *SignupLinkMutation) Code() (r []byte, exists bool) {
-	v := m.code
+// HashedCode returns the value of the "hashedCode" field in the mutation.
+func (m *SignupLinkMutation) HashedCode() (r []byte, exists bool) {
+	v := m.hashedCode
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCode returns the old "code" field's value of the SignupLink entity.
+// OldHashedCode returns the old "hashedCode" field's value of the SignupLink entity.
 // If the SignupLink object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SignupLinkMutation) OldCode(ctx context.Context) (v []byte, err error) {
+func (m *SignupLinkMutation) OldHashedCode(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+		return v, errors.New("OldHashedCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCode requires an ID field in the mutation")
+		return v, errors.New("OldHashedCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+		return v, fmt.Errorf("querying old value for OldHashedCode: %w", err)
 	}
-	return oldValue.Code, nil
+	return oldValue.HashedCode, nil
 }
 
-// ResetCode resets all changes to the "code" field.
-func (m *SignupLinkMutation) ResetCode() {
-	m.code = nil
+// ResetHashedCode resets all changes to the "hashedCode" field.
+func (m *SignupLinkMutation) ResetHashedCode() {
+	m.hashedCode = nil
 }
 
 // SetExpiresAt sets the "expiresAt" field.
@@ -4854,8 +4854,8 @@ func (m *SignupLinkMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, signuplink.FieldName)
 	}
-	if m.code != nil {
-		fields = append(fields, signuplink.FieldCode)
+	if m.hashedCode != nil {
+		fields = append(fields, signuplink.FieldHashedCode)
 	}
 	if m.expiresAt != nil {
 		fields = append(fields, signuplink.FieldExpiresAt)
@@ -4881,8 +4881,8 @@ func (m *SignupLinkMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case signuplink.FieldName:
 		return m.Name()
-	case signuplink.FieldCode:
-		return m.Code()
+	case signuplink.FieldHashedCode:
+		return m.HashedCode()
 	case signuplink.FieldExpiresAt:
 		return m.ExpiresAt()
 	case signuplink.FieldUserAgent:
@@ -4904,8 +4904,8 @@ func (m *SignupLinkMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldCreatedAt(ctx)
 	case signuplink.FieldName:
 		return m.OldName(ctx)
-	case signuplink.FieldCode:
-		return m.OldCode(ctx)
+	case signuplink.FieldHashedCode:
+		return m.OldHashedCode(ctx)
 	case signuplink.FieldExpiresAt:
 		return m.OldExpiresAt(ctx)
 	case signuplink.FieldUserAgent:
@@ -4937,12 +4937,12 @@ func (m *SignupLinkMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case signuplink.FieldCode:
+	case signuplink.FieldHashedCode:
 		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCode(v)
+		m.SetHashedCode(v)
 		return nil
 	case signuplink.FieldExpiresAt:
 		v, ok := value.(time.Time)
@@ -5036,8 +5036,8 @@ func (m *SignupLinkMutation) ResetField(name string) error {
 	case signuplink.FieldName:
 		m.ResetName()
 		return nil
-	case signuplink.FieldCode:
-		m.ResetCode()
+	case signuplink.FieldHashedCode:
+		m.ResetHashedCode()
 		return nil
 	case signuplink.FieldExpiresAt:
 		m.ResetExpiresAt()
@@ -5135,6 +5135,9 @@ type StashMutation struct {
 	op                Op
 	typ               string
 	id                *uuid.UUID
+	createdAt         *time.Time
+	updatedAt         *time.Time
+	lastDownloadAt    *time.Time
 	content           *[]byte
 	fileName          *[]byte
 	encryptionDataKey *[]byte
@@ -5255,6 +5258,127 @@ func (m *StashMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (m *StashMutation) SetCreatedAt(t time.Time) {
+	m.createdAt = &t
+}
+
+// CreatedAt returns the value of the "createdAt" field in the mutation.
+func (m *StashMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.createdAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "createdAt" field's value of the Stash entity.
+// If the Stash object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StashMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "createdAt" field.
+func (m *StashMutation) ResetCreatedAt() {
+	m.createdAt = nil
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (m *StashMutation) SetUpdatedAt(t time.Time) {
+	m.updatedAt = &t
+}
+
+// UpdatedAt returns the value of the "updatedAt" field in the mutation.
+func (m *StashMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updatedAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updatedAt" field's value of the Stash entity.
+// If the Stash object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StashMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updatedAt" field.
+func (m *StashMutation) ResetUpdatedAt() {
+	m.updatedAt = nil
+}
+
+// SetLastDownloadAt sets the "lastDownloadAt" field.
+func (m *StashMutation) SetLastDownloadAt(t time.Time) {
+	m.lastDownloadAt = &t
+}
+
+// LastDownloadAt returns the value of the "lastDownloadAt" field in the mutation.
+func (m *StashMutation) LastDownloadAt() (r time.Time, exists bool) {
+	v := m.lastDownloadAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastDownloadAt returns the old "lastDownloadAt" field's value of the Stash entity.
+// If the Stash object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StashMutation) OldLastDownloadAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastDownloadAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastDownloadAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastDownloadAt: %w", err)
+	}
+	return oldValue.LastDownloadAt, nil
+}
+
+// ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
+func (m *StashMutation) ClearLastDownloadAt() {
+	m.lastDownloadAt = nil
+	m.clearedFields[stash.FieldLastDownloadAt] = struct{}{}
+}
+
+// LastDownloadAtCleared returns if the "lastDownloadAt" field was cleared in this mutation.
+func (m *StashMutation) LastDownloadAtCleared() bool {
+	_, ok := m.clearedFields[stash.FieldLastDownloadAt]
+	return ok
+}
+
+// ResetLastDownloadAt resets all changes to the "lastDownloadAt" field.
+func (m *StashMutation) ResetLastDownloadAt() {
+	m.lastDownloadAt = nil
+	delete(m.clearedFields, stash.FieldLastDownloadAt)
 }
 
 // SetContent sets the "content" field.
@@ -5666,7 +5790,16 @@ func (m *StashMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StashMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 11)
+	if m.createdAt != nil {
+		fields = append(fields, stash.FieldCreatedAt)
+	}
+	if m.updatedAt != nil {
+		fields = append(fields, stash.FieldUpdatedAt)
+	}
+	if m.lastDownloadAt != nil {
+		fields = append(fields, stash.FieldLastDownloadAt)
+	}
 	if m.content != nil {
 		fields = append(fields, stash.FieldContent)
 	}
@@ -5699,6 +5832,12 @@ func (m *StashMutation) Fields() []string {
 // schema.
 func (m *StashMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case stash.FieldCreatedAt:
+		return m.CreatedAt()
+	case stash.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case stash.FieldLastDownloadAt:
+		return m.LastDownloadAt()
 	case stash.FieldContent:
 		return m.Content()
 	case stash.FieldFileName:
@@ -5724,6 +5863,12 @@ func (m *StashMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *StashMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case stash.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case stash.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case stash.FieldLastDownloadAt:
+		return m.OldLastDownloadAt(ctx)
 	case stash.FieldContent:
 		return m.OldContent(ctx)
 	case stash.FieldFileName:
@@ -5749,6 +5894,27 @@ func (m *StashMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *StashMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case stash.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case stash.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case stash.FieldLastDownloadAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastDownloadAt(v)
+		return nil
 	case stash.FieldContent:
 		v, ok := value.([]byte)
 		if !ok {
@@ -5873,7 +6039,11 @@ func (m *StashMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *StashMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(stash.FieldLastDownloadAt) {
+		fields = append(fields, stash.FieldLastDownloadAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5886,6 +6056,11 @@ func (m *StashMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *StashMutation) ClearField(name string) error {
+	switch name {
+	case stash.FieldLastDownloadAt:
+		m.ClearLastDownloadAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Stash nullable field %s", name)
 }
 
@@ -5893,6 +6068,15 @@ func (m *StashMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *StashMutation) ResetField(name string) error {
 	switch name {
+	case stash.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case stash.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case stash.FieldLastDownloadAt:
+		m.ResetLastDownloadAt()
+		return nil
 	case stash.FieldContent:
 		m.ResetContent()
 		return nil
@@ -6602,6 +6786,7 @@ type UserMutation struct {
 	typ                       string
 	id                        *uuid.UUID
 	createdAt                 *time.Time
+	updatedAt                 *time.Time
 	username                  *string
 	locked                    *bool
 	lockedUntil               *time.Time
@@ -6763,6 +6948,42 @@ func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error
 // ResetCreatedAt resets all changes to the "createdAt" field.
 func (m *UserMutation) ResetCreatedAt() {
 	m.createdAt = nil
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (m *UserMutation) SetUpdatedAt(t time.Time) {
+	m.updatedAt = &t
+}
+
+// UpdatedAt returns the value of the "updatedAt" field in the mutation.
+func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updatedAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updatedAt" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updatedAt" field.
+func (m *UserMutation) ResetUpdatedAt() {
+	m.updatedAt = nil
 }
 
 // SetUsername sets the "username" field.
@@ -7196,9 +7417,12 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.createdAt != nil {
 		fields = append(fields, user.FieldCreatedAt)
+	}
+	if m.updatedAt != nil {
+		fields = append(fields, user.FieldUpdatedAt)
 	}
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
@@ -7222,6 +7446,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
+	case user.FieldUpdatedAt:
+		return m.UpdatedAt()
 	case user.FieldUsername:
 		return m.Username()
 	case user.FieldLocked:
@@ -7241,6 +7467,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case user.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	case user.FieldUsername:
 		return m.OldUsername(ctx)
 	case user.FieldLocked:
@@ -7264,6 +7492,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case user.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	case user.FieldUsername:
 		v, ok := value.(string)
@@ -7353,6 +7588,9 @@ func (m *UserMutation) ResetField(name string) error {
 	switch name {
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case user.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	case user.FieldUsername:
 		m.ResetUsername()

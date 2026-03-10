@@ -15,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the createdat field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updatedat field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldUsername holds the string denoting the username field in the database.
 	FieldUsername = "username"
 	// FieldLocked holds the string denoting the locked field in the database.
@@ -76,6 +78,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldUsername,
 	FieldLocked,
 	FieldLockedUntil,
@@ -112,6 +115,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the createdAt field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updatedAt field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
 // ByUsername orders the results by the username field.

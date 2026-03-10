@@ -45,9 +45,9 @@ func (_u *DownloadSessionUpdate) SetNillableCreatedAt(v *time.Time) *DownloadSes
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *DownloadSessionUpdate) SetCode(v []byte) *DownloadSessionUpdate {
-	_u.mutation.SetCode(v)
+// SetHashedAuthCode sets the "hashedAuthCode" field.
+func (_u *DownloadSessionUpdate) SetHashedAuthCode(v []byte) *DownloadSessionUpdate {
+	_u.mutation.SetHashedAuthCode(v)
 	return _u
 }
 
@@ -202,9 +202,9 @@ func (_u *DownloadSessionUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *DownloadSessionUpdate) check() error {
-	if v, ok := _u.mutation.Code(); ok {
-		if err := downloadsession.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.code": %w`, err)}
+	if v, ok := _u.mutation.HashedAuthCode(); ok {
+		if err := downloadsession.HashedAuthCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedAuthCode", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.hashedAuthCode": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -228,8 +228,8 @@ func (_u *DownloadSessionUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(downloadsession.FieldCode, field.TypeBytes, value)
+	if value, ok := _u.mutation.HashedAuthCode(); ok {
+		_spec.SetField(downloadsession.FieldHashedAuthCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ValidFrom(); ok {
 		_spec.SetField(downloadsession.FieldValidFrom, field.TypeTime, value)
@@ -351,9 +351,9 @@ func (_u *DownloadSessionUpdateOne) SetNillableCreatedAt(v *time.Time) *Download
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *DownloadSessionUpdateOne) SetCode(v []byte) *DownloadSessionUpdateOne {
-	_u.mutation.SetCode(v)
+// SetHashedAuthCode sets the "hashedAuthCode" field.
+func (_u *DownloadSessionUpdateOne) SetHashedAuthCode(v []byte) *DownloadSessionUpdateOne {
+	_u.mutation.SetHashedAuthCode(v)
 	return _u
 }
 
@@ -521,9 +521,9 @@ func (_u *DownloadSessionUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *DownloadSessionUpdateOne) check() error {
-	if v, ok := _u.mutation.Code(); ok {
-		if err := downloadsession.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.code": %w`, err)}
+	if v, ok := _u.mutation.HashedAuthCode(); ok {
+		if err := downloadsession.HashedAuthCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedAuthCode", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.hashedAuthCode": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
@@ -564,8 +564,8 @@ func (_u *DownloadSessionUpdateOne) sqlSave(ctx context.Context) (_node *Downloa
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(downloadsession.FieldCode, field.TypeBytes, value)
+	if value, ok := _u.mutation.HashedAuthCode(); ok {
+		_spec.SetField(downloadsession.FieldHashedAuthCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ValidFrom(); ok {
 		_spec.SetField(downloadsession.FieldValidFrom, field.TypeTime, value)

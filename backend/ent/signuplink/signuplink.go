@@ -17,8 +17,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldCode holds the string denoting the code field in the database.
-	FieldCode = "code"
+	// FieldHashedCode holds the string denoting the hashedcode field in the database.
+	FieldHashedCode = "hashed_code"
 	// FieldExpiresAt holds the string denoting the expiresat field in the database.
 	FieldExpiresAt = "expires_at"
 	// FieldUserAgent holds the string denoting the useragent field in the database.
@@ -45,7 +45,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldName,
-	FieldCode,
+	FieldHashedCode,
 	FieldExpiresAt,
 	FieldUserAgent,
 	FieldIP,
@@ -65,8 +65,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	CodeValidator func([]byte) error
+	// HashedCodeValidator is a validator for the "hashedCode" field. It is called by the builders before save.
+	HashedCodeValidator func([]byte) error
 	// DefaultUserAgent holds the default value on creation for the "userAgent" field.
 	DefaultUserAgent string
 	// DefaultIP holds the default value on creation for the "ip" field.

@@ -35,6 +35,12 @@ func (_c *UserCreate) SetCreatedAt(v time.Time) *UserCreate {
 	return _c
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *UserCreate) SetUpdatedAt(v time.Time) *UserCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetUsername sets the "username" field.
 func (_c *UserCreate) SetUsername(v string) *UserCreate {
 	_c.mutation.SetUsername(v)
@@ -222,6 +228,9 @@ func (_c *UserCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "User.createdAt"`)}
 	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "User.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.Username(); !ok {
 		return &ValidationError{Name: "username", err: errors.New(`ent: missing required field "User.username"`)}
 	}
@@ -275,6 +284,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
@@ -436,6 +449,18 @@ func (u *UserUpsert) UpdateCreatedAt() *UserUpsert {
 	return u
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *UserUpsert) SetUpdatedAt(v time.Time) *UserUpsert {
+	u.Set(user.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *UserUpsert) UpdateUpdatedAt() *UserUpsert {
+	u.SetExcluded(user.FieldUpdatedAt)
+	return u
+}
+
 // SetUsername sets the "username" field.
 func (u *UserUpsert) SetUsername(v string) *UserUpsert {
 	u.Set(user.FieldUsername, v)
@@ -549,6 +574,20 @@ func (u *UserUpsertOne) SetCreatedAt(v time.Time) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateCreatedAt() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *UserUpsertOne) SetUpdatedAt(v time.Time) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateUpdatedAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 
@@ -841,6 +880,20 @@ func (u *UserUpsertBulk) SetCreatedAt(v time.Time) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateCreatedAt() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *UserUpsertBulk) SetUpdatedAt(v time.Time) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateUpdatedAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 

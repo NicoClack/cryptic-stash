@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +23,32 @@ type StashCreate struct {
 	mutation *StashMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_c *StashCreate) SetCreatedAt(v time.Time) *StashCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *StashCreate) SetUpdatedAt(v time.Time) *StashCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
+// SetLastDownloadAt sets the "lastDownloadAt" field.
+func (_c *StashCreate) SetLastDownloadAt(v time.Time) *StashCreate {
+	_c.mutation.SetLastDownloadAt(v)
+	return _c
+}
+
+// SetNillableLastDownloadAt sets the "lastDownloadAt" field if the given value is not nil.
+func (_c *StashCreate) SetNillableLastDownloadAt(v *time.Time) *StashCreate {
+	if v != nil {
+		_c.SetLastDownloadAt(*v)
+	}
+	return _c
 }
 
 // SetContent sets the "content" field.
@@ -134,6 +161,12 @@ func (_c *StashCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *StashCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Stash.createdAt"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "Stash.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Stash.content"`)}
 	}
@@ -217,6 +250,18 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(stash.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(stash.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.LastDownloadAt(); ok {
+		_spec.SetField(stash.FieldLastDownloadAt, field.TypeTime, value)
+		_node.LastDownloadAt = value
+	}
 	if value, ok := _c.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 		_node.Content = value
@@ -269,7 +314,7 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Stash.Create().
-//		SetContent(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -278,7 +323,7 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.StashUpsert) {
-//			SetContent(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *StashCreate) OnConflict(opts ...sql.ConflictOption) *StashUpsertOne {
@@ -313,6 +358,48 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *StashUpsert) SetCreatedAt(v time.Time) *StashUpsert {
+	u.Set(stash.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *StashUpsert) UpdateCreatedAt() *StashUpsert {
+	u.SetExcluded(stash.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *StashUpsert) SetUpdatedAt(v time.Time) *StashUpsert {
+	u.Set(stash.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *StashUpsert) UpdateUpdatedAt() *StashUpsert {
+	u.SetExcluded(stash.FieldUpdatedAt)
+	return u
+}
+
+// SetLastDownloadAt sets the "lastDownloadAt" field.
+func (u *StashUpsert) SetLastDownloadAt(v time.Time) *StashUpsert {
+	u.Set(stash.FieldLastDownloadAt, v)
+	return u
+}
+
+// UpdateLastDownloadAt sets the "lastDownloadAt" field to the value that was provided on create.
+func (u *StashUpsert) UpdateLastDownloadAt() *StashUpsert {
+	u.SetExcluded(stash.FieldLastDownloadAt)
+	return u
+}
+
+// ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
+func (u *StashUpsert) ClearLastDownloadAt() *StashUpsert {
+	u.SetNull(stash.FieldLastDownloadAt)
+	return u
+}
 
 // SetContent sets the "content" field.
 func (u *StashUpsert) SetContent(v []byte) *StashUpsert {
@@ -474,6 +561,55 @@ func (u *StashUpsertOne) Update(set func(*StashUpsert)) *StashUpsertOne {
 		set(&StashUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *StashUpsertOne) SetCreatedAt(v time.Time) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateCreatedAt() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *StashUpsertOne) SetUpdatedAt(v time.Time) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateUpdatedAt() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetLastDownloadAt sets the "lastDownloadAt" field.
+func (u *StashUpsertOne) SetLastDownloadAt(v time.Time) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetLastDownloadAt(v)
+	})
+}
+
+// UpdateLastDownloadAt sets the "lastDownloadAt" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateLastDownloadAt() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateLastDownloadAt()
+	})
+}
+
+// ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
+func (u *StashUpsertOne) ClearLastDownloadAt() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.ClearLastDownloadAt()
+	})
 }
 
 // SetContent sets the "content" field.
@@ -745,7 +881,7 @@ func (_c *StashCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.StashUpsert) {
-//			SetContent(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *StashCreateBulk) OnConflict(opts ...sql.ConflictOption) *StashUpsertBulk {
@@ -822,6 +958,55 @@ func (u *StashUpsertBulk) Update(set func(*StashUpsert)) *StashUpsertBulk {
 		set(&StashUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *StashUpsertBulk) SetCreatedAt(v time.Time) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateCreatedAt() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *StashUpsertBulk) SetUpdatedAt(v time.Time) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateUpdatedAt() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetLastDownloadAt sets the "lastDownloadAt" field.
+func (u *StashUpsertBulk) SetLastDownloadAt(v time.Time) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetLastDownloadAt(v)
+	})
+}
+
+// UpdateLastDownloadAt sets the "lastDownloadAt" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateLastDownloadAt() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateLastDownloadAt()
+	})
+}
+
+// ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
+func (u *StashUpsertBulk) ClearLastDownloadAt() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.ClearLastDownloadAt()
+	})
 }
 
 // SetContent sets the "content" field.

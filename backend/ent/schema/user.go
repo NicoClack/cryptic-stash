@@ -18,6 +18,7 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
+		field.Time("updatedAt"),
 		field.String("username").Unique().NotEmpty(),
 		// Admins might be able to be locked in the future
 		field.Bool("locked").Default(false),

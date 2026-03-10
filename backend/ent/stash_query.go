@@ -299,12 +299,12 @@ func (_q *StashQuery) WithUser(opts ...func(*UserQuery)) *StashQuery {
 // Example:
 //
 //	var v []struct {
-//		Content []byte `json:"content,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Stash.Query().
-//		GroupBy(stash.FieldContent).
+//		GroupBy(stash.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *StashQuery) GroupBy(field string, fields ...string) *StashGroupBy {
@@ -322,11 +322,11 @@ func (_q *StashQuery) GroupBy(field string, fields ...string) *StashGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Content []byte `json:"content,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
 //	client.Stash.Query().
-//		Select(stash.FieldContent).
+//		Select(stash.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (_q *StashQuery) Select(fields ...string) *StashSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

@@ -32,9 +32,9 @@ func (_c *DownloadSessionCreate) SetCreatedAt(v time.Time) *DownloadSessionCreat
 	return _c
 }
 
-// SetCode sets the "code" field.
-func (_c *DownloadSessionCreate) SetCode(v []byte) *DownloadSessionCreate {
-	_c.mutation.SetCode(v)
+// SetHashedAuthCode sets the "hashedAuthCode" field.
+func (_c *DownloadSessionCreate) SetHashedAuthCode(v []byte) *DownloadSessionCreate {
+	_c.mutation.SetHashedAuthCode(v)
 	return _c
 }
 
@@ -148,12 +148,12 @@ func (_c *DownloadSessionCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "DownloadSession.createdAt"`)}
 	}
-	if _, ok := _c.mutation.Code(); !ok {
-		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "DownloadSession.code"`)}
+	if _, ok := _c.mutation.HashedAuthCode(); !ok {
+		return &ValidationError{Name: "hashedAuthCode", err: errors.New(`ent: missing required field "DownloadSession.hashedAuthCode"`)}
 	}
-	if v, ok := _c.mutation.Code(); ok {
-		if err := downloadsession.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.code": %w`, err)}
+	if v, ok := _c.mutation.HashedAuthCode(); ok {
+		if err := downloadsession.HashedAuthCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedAuthCode", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.hashedAuthCode": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.ValidFrom(); !ok {
@@ -214,9 +214,9 @@ func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.Creat
 		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := _c.mutation.Code(); ok {
-		_spec.SetField(downloadsession.FieldCode, field.TypeBytes, value)
-		_node.Code = value
+	if value, ok := _c.mutation.HashedAuthCode(); ok {
+		_spec.SetField(downloadsession.FieldHashedAuthCode, field.TypeBytes, value)
+		_node.HashedAuthCode = value
 	}
 	if value, ok := _c.mutation.ValidFrom(); ok {
 		_spec.SetField(downloadsession.FieldValidFrom, field.TypeTime, value)
@@ -331,15 +331,15 @@ func (u *DownloadSessionUpsert) UpdateCreatedAt() *DownloadSessionUpsert {
 	return u
 }
 
-// SetCode sets the "code" field.
-func (u *DownloadSessionUpsert) SetCode(v []byte) *DownloadSessionUpsert {
-	u.Set(downloadsession.FieldCode, v)
+// SetHashedAuthCode sets the "hashedAuthCode" field.
+func (u *DownloadSessionUpsert) SetHashedAuthCode(v []byte) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldHashedAuthCode, v)
 	return u
 }
 
-// UpdateCode sets the "code" field to the value that was provided on create.
-func (u *DownloadSessionUpsert) UpdateCode() *DownloadSessionUpsert {
-	u.SetExcluded(downloadsession.FieldCode)
+// UpdateHashedAuthCode sets the "hashedAuthCode" field to the value that was provided on create.
+func (u *DownloadSessionUpsert) UpdateHashedAuthCode() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldHashedAuthCode)
 	return u
 }
 
@@ -465,17 +465,17 @@ func (u *DownloadSessionUpsertOne) UpdateCreatedAt() *DownloadSessionUpsertOne {
 	})
 }
 
-// SetCode sets the "code" field.
-func (u *DownloadSessionUpsertOne) SetCode(v []byte) *DownloadSessionUpsertOne {
+// SetHashedAuthCode sets the "hashedAuthCode" field.
+func (u *DownloadSessionUpsertOne) SetHashedAuthCode(v []byte) *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.SetCode(v)
+		s.SetHashedAuthCode(v)
 	})
 }
 
-// UpdateCode sets the "code" field to the value that was provided on create.
-func (u *DownloadSessionUpsertOne) UpdateCode() *DownloadSessionUpsertOne {
+// UpdateHashedAuthCode sets the "hashedAuthCode" field to the value that was provided on create.
+func (u *DownloadSessionUpsertOne) UpdateHashedAuthCode() *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.UpdateCode()
+		s.UpdateHashedAuthCode()
 	})
 }
 
@@ -778,17 +778,17 @@ func (u *DownloadSessionUpsertBulk) UpdateCreatedAt() *DownloadSessionUpsertBulk
 	})
 }
 
-// SetCode sets the "code" field.
-func (u *DownloadSessionUpsertBulk) SetCode(v []byte) *DownloadSessionUpsertBulk {
+// SetHashedAuthCode sets the "hashedAuthCode" field.
+func (u *DownloadSessionUpsertBulk) SetHashedAuthCode(v []byte) *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.SetCode(v)
+		s.SetHashedAuthCode(v)
 	})
 }
 
-// UpdateCode sets the "code" field to the value that was provided on create.
-func (u *DownloadSessionUpsertBulk) UpdateCode() *DownloadSessionUpsertBulk {
+// UpdateHashedAuthCode sets the "hashedAuthCode" field to the value that was provided on create.
+func (u *DownloadSessionUpsertBulk) UpdateHashedAuthCode() *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.UpdateCode()
+		s.UpdateHashedAuthCode()
 	})
 }
 
