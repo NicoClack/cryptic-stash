@@ -31,6 +31,9 @@ func DefaultEnv() *common.Env {
 		JOB_POLL_INTERVAL:    time.Hour * 999,
 		MAX_TOTAL_JOB_WEIGHT: 100,
 
+		SIGNUP_LINK_DEFAULT_EXPIRY: time.Hour * 24 * 2,
+		SIGNUP_LINK_MAX_EXPIRY:     time.Hour * 24 * 7,
+
 		UNLOCK_TIME:                               time.Hour * 24 * 7,
 		AUTH_CODE_VALID_FOR:                       time.Hour * 24 * 3,
 		USED_AUTH_CODE_VALID_FOR:                  time.Hour,
