@@ -1,5 +1,5 @@
 # Cryptic Stash
-A web app for securely storing 2 factor recovery codes. Users can upload a file, which gets encrypted using a strong key derived from their password using Argon2ID, to create a stash. In the event the user loses access to their devices, they can log in with the password and download the file after a waiting period. If an attacker tries to do the same, the user is notified and can block the attempt before it's allowed.
+An inverse 2FA web app for securely storing 2 factor recovery codes in case you lose your devices or get locked out. You can upload a file, which gets encrypted using a strong key ultimately derived from your password using Argon2ID, to create a stash. In the event you lose access to your devices, you can log in with the password and download the file after a waiting period. If an attacker tries to do the same, you are notified and can block the attempt before it's allowed.
 
 Technical features:
 - Written in Go and uses SQLite for extremely low hosting costs on platforms like Railway
