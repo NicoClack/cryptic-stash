@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
@@ -16,8 +17,10 @@ type ListUsersResponse struct {
 	Users  []*User                    `binding:"required" json:"users"`
 }
 type User struct {
-	ID       string `binding:"required" json:"id"`
-	Username string `binding:"required" json:"username"`
+	ID        string    `binding:"required" json:"id"`
+	Username  string    `binding:"required" json:"username"`
+	CreatedAt time.Time `binding:"required" json:"createdAt"`
+	UpdatedAt time.Time `binding:"required" json:"updatedAt"`
 }
 
 func ListUsers(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -28,7 +31,8 @@ func ListUsers(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) ([]*ent.User, error) {
 				return tx.User.Query().
 					Where(user.UsernameHasPrefix(username)).
-					Select(user.FieldID, user.FieldUsername).
+					Select(user.FieldID, user.FieldUsername, user.FieldCreatedAt, user.FieldUpdatedAt).
+					Order(ent.Desc(user.FieldCreatedAt)).
 					All(ctx)
 			},
 		)
@@ -39,8 +43,10 @@ func ListUsers(app *servercommon.ServerApp) gin.HandlerFunc {
 		responseUsers := make([]*User, 0, len(userObs))
 		for _, userOb := range userObs {
 			responseUsers = append(responseUsers, &User{
-				ID:       userOb.ID.String(),
-				Username: userOb.Username,
+				ID:        userOb.ID.String(),
+				Username:  userOb.Username,
+				CreatedAt: userOb.CreatedAt,
+				UpdatedAt: userOb.UpdatedAt,
 			})
 		}
 

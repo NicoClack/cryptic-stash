@@ -12,9 +12,9 @@
 </script>
 
 {#await messengersPromise then response}
-	{#each Object.entries<any>(response.data.messengers) as [versionedType, messenger] (versionedType)}
+	{#each response.data.messengers as messenger (messenger.versionedType)}
 		<Messenger
-			{versionedType}
+			versionedType={messenger.versionedType}
 			{userID}
 			name={messenger.name}
 			enabled={messenger.enabled}
