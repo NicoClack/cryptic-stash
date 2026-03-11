@@ -23,11 +23,13 @@ func TestWithReadTx_AllowsConcurrentReads(t *testing.T) {
 	db := testcommon.CreateDB(t)
 	t.Cleanup(db.Shutdown)
 
+	now := time.Now()
 	jobOb, stdErr := db.Client().Job.Create().
+		SetCreatedAt(now).
+		SetUpdatedAt(now).
 		SetType("test_job").
-		SetCreatedAt(time.Now()).
-		SetDueAt(time.Now()).
-		SetOriginallyDueAt(time.Now()).
+		SetDueAt(now).
+		SetOriginallyDueAt(now).
 		SetVersion(1).
 		SetPriority(1).
 		SetWeight(1).
@@ -86,11 +88,13 @@ func TestWithWriteTx_Supports50ConcurrentWrites(t *testing.T) {
 		stdErr := dbcommon.WithWriteTx(
 			t.Context(), db,
 			func(tx *ent.Tx, ctx context.Context) error {
+				now := time.Now()
 				return tx.Job.Create().
+					SetCreatedAt(now).
+					SetUpdatedAt(now).
 					SetType("test_job").
-					SetCreatedAt(time.Now()).
-					SetDueAt(time.Now()).
-					SetOriginallyDueAt(time.Now()).
+					SetDueAt(now).
+					SetOriginallyDueAt(now).
 					SetVersion(1).
 					SetPriority(1).
 					SetWeight(1).
@@ -115,11 +119,13 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
 
+	now := time.Now()
 	stdErr := db.Client().Job.Create().
 		SetType("counter").
-		SetCreatedAt(time.Now()).
-		SetDueAt(time.Now()).
-		SetOriginallyDueAt(time.Now()).
+		SetCreatedAt(now).
+		SetUpdatedAt(now).
+		SetDueAt(now).
+		SetOriginallyDueAt(now).
 		SetVersion(1).
 		SetPriority(1).
 		SetWeight(1).
@@ -156,7 +162,10 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 						errCount.Add(1)
 						return stdErr
 					}
-					stdErr = job.Update().SetBody(json.RawMessage(newBody)).Exec(ctx)
+					stdErr = job.Update().
+						SetUpdatedAt(now).
+						SetBody(json.RawMessage(newBody)).
+						Exec(ctx)
 					if stdErr != nil {
 						errCount.Add(1)
 						return common.ErrWrapperDatabase.Wrap(stdErr)

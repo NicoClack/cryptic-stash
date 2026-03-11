@@ -44,7 +44,10 @@ func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
 				return tx.User.Query().
 					Where(user.ID(userID)).
 					WithMessengers(func(messengerQuery *ent.UserMessengerQuery) {
-						messengerQuery.Order(ent.Asc(usermessenger.FieldType), ent.Asc(usermessenger.FieldVersion))
+						messengerQuery.Order(
+							ent.Asc(usermessenger.FieldType),
+							ent.Asc(usermessenger.FieldVersion),
+						)
 					}).
 					Only(ctx)
 			},

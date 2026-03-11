@@ -54,6 +54,9 @@
 - Standardise error handling on the frontend
 - Use load functions on the frontend more consistently
 - Page when signup link doesn't include an ID?
+- Don't delete download sessions?
+- Improved audit logging
+- Reduce some of the duplication in test setup
 
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 -   Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints

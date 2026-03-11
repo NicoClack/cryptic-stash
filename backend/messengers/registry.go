@@ -446,6 +446,7 @@ func (registry *Registry) EnableMessenger(
 	stdErr := tx.UserMessenger.
 		Create().
 		SetCreatedAt(now).
+		SetUpdatedAt(now).
 		SetType(definition.ID).
 		SetVersion(definition.Version).
 		SetUserID(userOb.ID).

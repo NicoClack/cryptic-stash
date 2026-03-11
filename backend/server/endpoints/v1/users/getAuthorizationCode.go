@@ -89,6 +89,7 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				downloadSessionOb, stdErr := tx.DownloadSession.Create().
 					SetCreatedAt(now).
+					SetUpdatedAt(now).
 					SetUser(userOb).
 					SetHashedAuthCode(hashedAuthCode[:]).
 					SetValidFrom(validFrom).

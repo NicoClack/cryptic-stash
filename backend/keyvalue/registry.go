@@ -117,10 +117,15 @@ func (registry *Registry) Set(name string, value any, ctx context.Context) commo
 		return ErrWrapperSetValue.Wrap(ErrWrapperEncode.Wrap(stdErr))
 	}
 
+	now := registry.App.Clock.Now()
 	stdErr = tx.KeyValue.Create().
+		SetCreatedAt(now).
+		SetUpdatedAt(now).
 		SetKey(name).
 		SetValue(encoded).
-		OnConflict().UpdateNewValues().
+		OnConflict().
+		UpdateUpdatedAt().
+		UpdateValue().
 		Exec(ctx)
 	if stdErr != nil {
 		return ErrWrapperSetValue.Wrap(common.ErrWrapperDatabase.Wrap(stdErr))
@@ -161,7 +166,11 @@ func (registry *Registry) InitAll(ctx context.Context) common.WrappedError {
 		if stdErr != nil {
 			return ErrWrapperInitAll.Wrap(ErrWrapperEncode.Wrap(stdErr))
 		}
+
+		now := registry.App.Clock.Now()
 		stdErr = tx.KeyValue.Create().
+			SetCreatedAt(now).
+			SetUpdatedAt(now).
 			SetKey(definition.Name).
 			SetValue(encoded).
 			Exec(ctx)

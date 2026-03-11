@@ -141,6 +141,7 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 				now := clock.Now()
 				authCodeValidUntil := now.Add(app.Env.USED_AUTH_CODE_VALID_FOR)
 				stdErr := tx.DownloadSession.UpdateOneID(downloadSessionOb.ID).
+					SetUpdatedAt(now).
 					SetValidUntil(authCodeValidUntil).
 					Exec(ctx)
 				if stdErr != nil {

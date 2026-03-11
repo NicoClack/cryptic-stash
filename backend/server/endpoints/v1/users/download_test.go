@@ -63,8 +63,11 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			if stdErr != nil {
 				return stdErr
 			}
+
 			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
@@ -93,8 +96,9 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			hashedAuthCode := sha256.Sum256(authCode)
 			validUntil := now.Add(24 * time.Hour)
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
-				SetUser(userOb).
 				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetUser(userOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
@@ -106,6 +110,8 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			}
 
 			stdErr = tx.LoginAlert.Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
@@ -182,6 +188,8 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			}
 			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
@@ -211,8 +219,9 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			validUntil := now.Add(24 * time.Hour)
 
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
-				SetUser(userOb).
 				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetUser(userOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
@@ -224,6 +233,8 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			}
 
 			return tx.LoginAlert.Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
@@ -295,6 +306,8 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			}
 			userMessengerOb, stdErr := tx.UserMessenger.
 				Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
@@ -327,8 +340,9 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			// at the exact time the user was locked
 			// Even though both things should happen in the same transaction
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
-				SetUser(userOb).
 				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetUser(userOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
@@ -340,6 +354,8 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			}
 
 			stdErr = tx.LoginAlert.Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
@@ -352,6 +368,8 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			// Slightly unrealistic but it's easiest to create both alerts here
 			// This is needed otherwise core.IsUserSufficientlyNotified thinks the jobs are failing and prevents the login
 			return tx.LoginAlert.Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now.Add(24 * time.Hour)).
 				SetUserMessenger(userMessengerOb).
@@ -441,9 +459,9 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			now := clock.Now()
 
 			userOb, stdErr := tx.User.Create().
-				SetUsername(username).
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
+				SetUsername(username).
 				SetDownloadSessionsValidFrom(now).
 				SetLockedUntil(now.Add(-time.Hour)). // Expired a little while ago
 				SetLocked(true).                     // But this takes priority
@@ -451,8 +469,9 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			if stdErr != nil {
 				return stdErr
 			}
-			userMessengerOb, stdErr := tx.UserMessenger.
-				Create().
+			userMessengerOb, stdErr := tx.UserMessenger.Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
@@ -485,8 +504,9 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			// at the exact time the user was locked
 			// Even though both things should happen in the same transaction
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
-				SetUser(userOb).
 				SetCreatedAt(now).
+				SetUpdatedAt(now).
+				SetUser(userOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
@@ -498,6 +518,8 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			}
 
 			return tx.LoginAlert.Create().
+				SetCreatedAt(now).
+				SetUpdatedAt(now).
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).

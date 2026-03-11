@@ -213,7 +213,10 @@ func (handler *Handler) bulkWrite(entries []*entry, ctx context.Context) error {
 		func(tx *ent.Tx, ctx context.Context) error {
 			return tx.LogEntry.MapCreateBulk(entries, func(logEntryCreate *ent.LogEntryCreate, i int) {
 				entry := entries[i]
+				now := handler.App.Clock.Now()
 				logEntryCreate.SetLoggedAt(entry.time).SetLoggedAtKnown(entry.timeKnown).
+					SetCreatedAt(now).
+					SetUpdatedAt(now).
 					SetLevel(entry.level).
 					SetMessage(entry.message).
 					SetAttributes(entry.attributes).
@@ -252,7 +255,10 @@ func (handler *Handler) individualWriteFallback(
 		entryID, stdErr := dbcommon.WithReadWriteTx(
 			individualCtx, handler.App.Database,
 			func(tx *ent.Tx, ctx context.Context) (uuid.UUID, error) {
+				now := handler.App.Clock.Now()
 				ob, stdErr := tx.LogEntry.Create().
+					SetCreatedAt(now).
+					SetUpdatedAt(now).
 					SetLoggedAt(entry.time).SetLoggedAtKnown(entry.timeKnown).
 					SetLevel(entry.level).
 					SetMessage(entry.message).
@@ -298,7 +304,10 @@ func (handler *Handler) individualWriteFallback(
 		stdErr = dbcommon.WithWriteTx(
 			individualCtx, handler.App.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
-				return tx.LogEntry.UpdateOneID(entryID).SetUserID(entry.userID).Exec(ctx)
+				return tx.LogEntry.UpdateOneID(entryID).
+					// TODO: should this count as an update?
+					SetUpdatedAt(handler.App.Clock.Now()).
+					SetUserID(entry.userID).Exec(ctx)
 			},
 		)
 		cancel()

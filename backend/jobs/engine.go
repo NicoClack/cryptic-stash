@@ -177,7 +177,9 @@ func (engine *Engine) runJobs(currentWeight int, completedJobChan chan completed
 			func(tx *ent.Tx, ctx context.Context) error {
 				now := engine.App.Clock.Now()
 				return tx.Job.UpdateOneID(currentJob.ID).
-					SetStatus("running").SetStartedAt(now).
+					SetUpdatedAt(now).
+					SetStatus("running").
+					SetStartedAt(now).
 					Exec(ctx)
 			},
 		)
@@ -261,6 +263,7 @@ func (engine *Engine) handleCompletedJob(completedJob completedJob, currentWeigh
 		sendJobSignal := false
 		stdErr := dbcommon.WithWriteTx(context.TODO(), engine.App.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
+				now := engine.App.Clock.Now()
 				if shouldRetry {
 					logger.Error(
 						"job failed",
@@ -269,6 +272,7 @@ func (engine *Engine) handleCompletedJob(completedJob completedJob, currentWeigh
 						"runDuration", engine.App.Clock.Since(completedJob.StartTime),
 					)
 					return tx.Job.UpdateOneID(completedJob.Object.ID).
+						SetUpdatedAt(now).
 						SetStatus("failed").
 						Exec(ctx)
 				} else {
@@ -280,8 +284,9 @@ func (engine *Engine) handleCompletedJob(completedJob completedJob, currentWeigh
 					)
 					sendJobSignal = true
 					return tx.Job.UpdateOneID(completedJob.Object.ID).
+						SetUpdatedAt(now).
 						SetStatus("pending").
-						SetDueAt(engine.App.Clock.Now().Add(backoff)).
+						SetDueAt(now.Add(backoff)).
 						AddRetries(1).
 						SetRetriedFraction(retriedFraction).
 						SetLoggedStallWarning(false).
@@ -412,8 +417,9 @@ func (engine *Engine) EnqueueEncodedWithModifier(
 	}
 	now := engine.App.Clock.Now()
 	jobCreate := tx.Job.Create().
-		SetType(jobType).
 		SetCreatedAt(now).
+		SetUpdatedAt(now).
+		SetType(jobType).
 		SetDueAt(now).
 		SetOriginallyDueAt(now).
 		SetVersion(version).
