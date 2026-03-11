@@ -40,6 +40,7 @@ func SendActiveDownloadSessionReminders(
 				Order(ent.Asc(downloadsession.FieldValidFrom)).
 				Limit(1)
 		}).
+		WithMessengers(). // TODO: only load if there's an active download session?
 		All(ctx)
 	if stdErr != nil {
 		return ErrWrapperSendActiveDownloadSessionReminders.Wrap(
