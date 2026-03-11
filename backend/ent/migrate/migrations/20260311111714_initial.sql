@@ -33,6 +33,8 @@ CREATE UNIQUE INDEX `signup_links_hashed_code_key` ON `signup_links` (`hashed_co
 CREATE UNIQUE INDEX `signup_links_user_id_key` ON `signup_links` (`user_id`);
 -- create index "signuplink_hashed_code" to table: "signup_links"
 CREATE INDEX `signuplink_hashed_code` ON `signup_links` (`hashed_code`);
+-- create index "signuplink_created_at" to table: "signup_links"
+CREATE INDEX `signuplink_created_at` ON `signup_links` (`created_at`);
 -- create "stashes" table
 CREATE TABLE `stashes` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `last_download_at` datetime NULL, `content` blob NOT NULL, `file_name` blob NOT NULL, `encryption_data_key` blob NOT NULL, `password_salt` blob NOT NULL, `hash_time` integer NOT NULL, `hash_memory` integer NOT NULL, `hash_threads` integer NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `stashes_users_stash` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "stashes_user_id_key" to table: "stashes"
@@ -45,6 +47,8 @@ CREATE INDEX `twofactoraction_code` ON `two_factor_actions` (`code`);
 CREATE TABLE `users` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `username` text NOT NULL, `locked` bool NOT NULL DEFAULT (false), `locked_until` datetime NULL, `download_sessions_valid_from` datetime NOT NULL, PRIMARY KEY (`id`));
 -- create index "users_username_key" to table: "users"
 CREATE UNIQUE INDEX `users_username_key` ON `users` (`username`);
+-- create index "user_created_at" to table: "users"
+CREATE INDEX `user_created_at` ON `users` (`created_at`);
 -- create "user_messengers" table
 CREATE TABLE `user_messengers` (`id` uuid NOT NULL, `type` text NOT NULL, `version` integer NOT NULL, `enabled` bool NOT NULL DEFAULT (true), `options` json NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `user_messengers_users_messengers` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "usermessenger_type_version_user_id" to table: "user_messengers"
@@ -55,6 +59,8 @@ CREATE UNIQUE INDEX `usermessenger_type_version_user_id` ON `user_messengers` (`
 DROP INDEX `usermessenger_type_version_user_id`;
 -- reverse: create "user_messengers" table
 DROP TABLE `user_messengers`;
+-- reverse: create index "user_created_at" to table: "users"
+DROP INDEX `user_created_at`;
 -- reverse: create index "users_username_key" to table: "users"
 DROP INDEX `users_username_key`;
 -- reverse: create "users" table
@@ -67,6 +73,8 @@ DROP TABLE `two_factor_actions`;
 DROP INDEX `stashes_user_id_key`;
 -- reverse: create "stashes" table
 DROP TABLE `stashes`;
+-- reverse: create index "signuplink_created_at" to table: "signup_links"
+DROP INDEX `signuplink_created_at`;
 -- reverse: create index "signuplink_hashed_code" to table: "signup_links"
 DROP INDEX `signuplink_hashed_code`;
 -- reverse: create index "signup_links_user_id_key" to table: "signup_links"
