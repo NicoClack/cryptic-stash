@@ -32,8 +32,10 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if serverErr := servercommon.ValidateUsername(body.Name); serverErr != nil {
-			return serverErr
+		if body.Name != "" {
+			if serverErr := servercommon.ValidateUsername(body.Name); serverErr != nil {
+				return serverErr
+			}
 		}
 
 		expiresIn := app.Env.SIGNUP_LINK_DEFAULT_EXPIRY
@@ -52,6 +54,7 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				signupOb, stdErr := tx.SignupLink.Create().
 					SetCreatedAt(now).
+					SetUpdatedAt(now).
 					SetName(body.Name).
 					SetHashedCode(hashed[:]).
 					SetExpiresAt(expiresAt).
