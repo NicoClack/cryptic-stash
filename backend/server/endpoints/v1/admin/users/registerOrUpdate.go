@@ -13,10 +13,10 @@ import (
 )
 
 type RegisterPayload struct {
-	Username string `binding:"required,min=1,max=32,alphanum,lowercase" json:"username"`
-	Password string `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
-	Content  string `binding:"required,min=1,max=100000000"             json:"content"`  // 100 MB but base64 encoded
-	Filename string `binding:"required,min=1,max=256"                   json:"filename"`
+	Username string `binding:"required,min=1,max=32"        json:"username"`
+	Password string `binding:"required,min=8,max=256"       json:"password"` // #nosec G117
+	Content  string `binding:"required,min=1,max=100000000" json:"content"`  // 100 MB but base64 encoded
+	Filename string `binding:"required,min=1,max=256"       json:"filename"`
 }
 type RegisterOrUpdateResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -32,8 +32,8 @@ func RegisterOrUpdate(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if body.Username == common.AdminUsername {
-			return servercommon.NewInvalidUsernameError()
+		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+			return serverErr
 		}
 		contentBytes, stdErr := base64.StdEncoding.DecodeString(body.Content)
 		if stdErr != nil {

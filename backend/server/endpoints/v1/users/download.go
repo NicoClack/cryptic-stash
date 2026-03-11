@@ -17,7 +17,7 @@ import (
 )
 
 type DownloadPayload struct {
-	Username          string `binding:"required,min=1,max=32,alphanum,lowercase" json:"username"`
+	Username          string `binding:"required,min=1,max=32" json:"username"`
 	Password          string `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
 	AuthorizationCode string `binding:"required,len=44"                          json:"authorizationCode"`
 }
@@ -38,8 +38,8 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if body.Username == common.AdminUsername {
-			return servercommon.NewInvalidUsernameError()
+		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+			return serverErr
 		}
 		givenAuthCodeBytes, stdErr := base64.StdEncoding.DecodeString(body.AuthorizationCode)
 		if stdErr != nil {

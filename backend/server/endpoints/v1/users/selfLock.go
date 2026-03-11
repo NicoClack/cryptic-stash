@@ -18,7 +18,7 @@ import (
 const MAX_SELF_LOCK_DURATION = 14 * (24 * time.Hour)
 
 type SelfLockPayload struct {
-	Username string    `binding:"required,min=1,max=32,alphanum,lowercase" json:"username"`
+	Username string    `binding:"required,min=1,max=32" json:"username"`
 	Password string    `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
 	Until    time.Time `binding:"required"                                 json:"until"`
 }
@@ -35,8 +35,8 @@ func SelfLock(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if body.Username == common.AdminUsername {
-			return servercommon.NewInvalidUsernameError()
+		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+			return serverErr
 		}
 		until := clock.Now().Add(
 			min(

@@ -13,7 +13,7 @@ import (
 )
 
 type AdminUnlockPayload struct {
-	Username string `binding:"required,min=1,max=32,alphanum,lowercase" json:"username"`
+	Username string `binding:"required,min=1,max=32" json:"username"`
 }
 type AdminUnlockResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -25,8 +25,8 @@ func AdminUnlock(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if body.Username == common.AdminUsername {
-			return servercommon.NewInvalidUsernameError()
+		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+			return serverErr
 		}
 
 		return dbcommon.WithWriteTx(

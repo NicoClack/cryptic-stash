@@ -17,7 +17,7 @@ import (
 )
 
 type GetAuthorizationCodePayload struct {
-	Username string `binding:"required,min=1,max=32,alphanum,lowercase" json:"username"`
+	Username string `binding:"required,min=1,max=32" json:"username"`
 	Password string `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
 }
 
@@ -36,8 +36,8 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if body.Username == common.AdminUsername {
-			return servercommon.NewInvalidUsernameError()
+		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+			return serverErr
 		}
 
 		userOb, stdErr := dbcommon.WithReadTx(

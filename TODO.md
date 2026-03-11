@@ -32,6 +32,7 @@
 -   Review contexts. Possibly want to give them all a timeout, partly to make shutdowns more predictable
 -   Does log.Fatalf stop the shutdown logic running if the server crashes on startup?
 -   Require both admin and users to click a link every 4 weeks (unless already locked) to confirm their contacts are working. If they don't click it, users will automatically lock and have to be unlocked by an admin. If the admin doesn't, all users will automatically lock
+- Standardise frontend styling and headers
 -   Admin endpoints for troubleshooting:
 -   -   Dump database as sqlite file
 -   -   Cancel failed job
@@ -51,6 +52,7 @@
 -   -   -   How does this safely go down again? Going up isn't particularly safe either
 -   -   Admin endpoints don't need this security, as long as they fail early if unauthorised
 -   When the admin is locked, whether temporarily or permanently, errors should make the server enter some kind of lockdown state? Need to weigh up pros and cons
+- Standardise error handling on the frontend
 
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 -   Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints

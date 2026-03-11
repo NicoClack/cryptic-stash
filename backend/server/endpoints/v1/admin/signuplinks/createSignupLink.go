@@ -14,8 +14,8 @@ import (
 )
 
 type CreatePayload struct {
-	Name      string `binding:"omitempty,min=1,max=32,alphanum,lowercase" json:"name"`
-	ExpiresIn int64  `binding:"omitempty"                                 json:"expiresIn"`
+	Name      string `binding:"omitempty,min=1,max=32" json:"name"`
+	ExpiresIn int64  `binding:"omitempty"              json:"expiresIn"`
 }
 type CreateResponse struct {
 	Errors    []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -31,6 +31,9 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 		body := CreatePayload{}
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
+		}
+		if serverErr := servercommon.ValidateUsername(body.Name); serverErr != nil {
+			return serverErr
 		}
 
 		expiresIn := app.Env.SIGNUP_LINK_DEFAULT_EXPIRY
@@ -51,8 +54,6 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 					SetName(body.Name).
 					SetHashedCode(hashed[:]).
 					SetExpiresAt(expiresAt).
-					SetUserAgent(ginCtx.Request.UserAgent()).
-					SetIP(ginCtx.ClientIP()).
 					Save(ctx)
 				if stdErr != nil {
 					return nil, stdErr
