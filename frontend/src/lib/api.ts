@@ -35,6 +35,13 @@ export class JsonResponse {
 		}
 	}
 }
+export interface InnerResponse {
+	errors?: ApiErrorDetail[];
+}
+export interface ApiErrorDetail {
+	code: string;
+	message: string;
+}
 
 export interface JsonResponseInit extends RequestInit {
 	throwForStatus?: boolean;
