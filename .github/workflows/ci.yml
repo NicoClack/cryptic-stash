@@ -36,8 +36,22 @@ jobs:
           atlas migrate hash --dir "file://backend/ent/migrate/migrations"
           git diff --exit-code -- backend/ent/migrate/migrations/atlas.sum
 
+  backend-check-ent-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: false
+      - name: Generate Ent files
+        working-directory: ./backend
+        run: go generate ./ent
+      - name: Verify generated Ent files are committed
+        run: git diff --exit-code -- backend/ent
+
   backend-test:
-    needs: [backend-lint, backend-migration-lint]
+    needs: [backend-lint, backend-migration-lint, backend-check-ent-codegen]
     runs-on: ubuntu-latest
     container:
       image: golang:1.25-alpine
