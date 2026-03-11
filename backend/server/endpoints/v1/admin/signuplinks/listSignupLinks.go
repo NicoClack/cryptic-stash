@@ -46,7 +46,7 @@ func List(app *servercommon.ServerApp) gin.HandlerFunc {
 					signuplink.FieldIP,
 					signuplink.FieldUserAgent,
 					signuplink.FieldUserID,
-				).All(ctx)
+				).Order(ent.Desc(signuplink.FieldCreatedAt)).All(ctx)
 			},
 		)
 		if stdErr != nil {
