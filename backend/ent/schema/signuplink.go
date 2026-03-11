@@ -42,5 +42,6 @@ func (SignupLink) Edges() []ent.Edge {
 func (SignupLink) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("hashedCode"),
+		index.Fields("createdAt"),
 	}
 }

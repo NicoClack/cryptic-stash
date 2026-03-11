@@ -206,6 +206,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{SignupLinksColumns[3]},
 			},
+			{
+				Name:    "signuplink_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SignupLinksColumns[1]},
+			},
 		},
 	}
 	// StashesColumns holds the columns for the "stashes" table.
@@ -274,6 +279,13 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[1]},
+			},
+		},
 	}
 	// UserMessengersColumns holds the columns for the "user_messengers" table.
 	UserMessengersColumns = []*schema.Column{
