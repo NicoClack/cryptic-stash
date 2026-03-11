@@ -10,7 +10,6 @@
 -   Improve frontend
 -   Remove userID and publicMessage from logger, it's not worth the complexity and risks
 - Encrypt stashes with an extra key to prevent offline attacks if database is leaked
--   00:07:52 ERR schedulers\delayFuncs.go:68 unable to create initial PeriodicTask object error="db common [package] error: WithTx error: start transaction error: database [general] error: other error: ent: starting a transaction: SQL logic error: cannot start a transaction within a transaction (1)" periodicTaskName=SEND_ACTIVE_SESSION_REMINDERS
 -   Can cancelling requests make views non-atomic if a view uses multiple transactions? Are there any security risks with this?
 -   Standardise returning errors and using gin.H vs the endpoint specific download struct. That struct applies defaults which the other 2 approaches don't, so it could leak information
 -   Experiment using Cloudflare to prevent DDoS requests on the hashing endpoint. It's not a great idea to shift the hashing to the client due to WASM and different devices' RAM limitations. Can specifically limit that endpoint
@@ -53,6 +52,7 @@
 -   -   Admin endpoints don't need this security, as long as they fail early if unauthorised
 -   When the admin is locked, whether temporarily or permanently, errors should make the server enter some kind of lockdown state? Need to weigh up pros and cons
 - Standardise error handling on the frontend
+- Use load functions on the frontend more consistently
 
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 -   Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints
@@ -69,6 +69,13 @@
 # To watch
 
 -   Timeouts sometimes incorrectly send 500s?
+
+# Errors to investigate
+
+-   11:42:03 ERR messengers/registry.go:328 failed to enqueue message send messengerType=discord_1 error="messengers [package] error: send error: enqueue job error: jobs [package] error: enqueue error: database [general] error: timeout [general] error: context deadline exceeded"
+11:42:03 ERR loggers/loggers.go:497 failed to message admin about an error error="db common [package] error: WithTx error: commit transaction error: database [general] error: other error: sql: transaction has already been committed or rolled back"
+
+-   00:07:52 ERR schedulers\delayFuncs.go:68 unable to create initial PeriodicTask object error="db common [package] error: WithTx error: start transaction error: database [general] error: other error: ent: starting a transaction: SQL logic error: cannot start a transaction within a transaction (1)" periodicTaskName=SEND_ACTIVE_SESSION_REMINDERS
 
 # To research
 
@@ -89,5 +96,6 @@ https://blog.cloudflare.com/opaque-oblivious-passwords/
 -   Race condition fuzzer that spams a bunch of endpoints
 -   -   Would be run with the -race flag
 -   -   In particular, test that spamming get-authorization-code with the correct password then updating the password invalidates all of the codes generated using the old password
+- Fix tests around messaging admin on error, they were still passing when I forgot to load the UserMessenger edge, which caused the logic to think there were no messengers
 -   Endpoints
 -   -   Do they cancel their work if a request times out? Can encryption/decryption run in the background?

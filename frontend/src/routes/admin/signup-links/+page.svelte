@@ -72,7 +72,7 @@
 
 		// TODO: use URL safe base64?
 		const signupUrl = new URL(
-			`signup/${latestInvite.id}/?code=${encodeURIComponent(latestInvite.code)}`,
+			`/signup/${latestInvite.id}/?code=${encodeURIComponent(latestInvite.code)}`,
 			document.baseURI,
 		).toString();
 		try {
