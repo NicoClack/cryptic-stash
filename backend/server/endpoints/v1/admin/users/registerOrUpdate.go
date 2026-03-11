@@ -61,14 +61,19 @@ func RegisterOrUpdate(app *servercommon.ServerApp) gin.HandlerFunc {
 		return dbcommon.WithWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
+				now := app.Clock.Now()
 				userOb, stdErr := tx.User.Create().
 					SetUsername(body.Username).
-					SetDownloadSessionsValidFrom(app.Clock.Now()).
+					SetCreatedAt(now).
+					SetUpdatedAt(now).
+					SetDownloadSessionsValidFrom(now).
 					Save(ctx)
 				if stdErr != nil {
 					return stdErr
 				}
 				stdErr = tx.Stash.Create().
+					SetCreatedAt(now).
+					SetUpdatedAt(now).
 					SetContent(encrypted).
 					SetFileName([]byte(body.Filename)).
 					SetEncryptionDataKey(encryptedDataKey).

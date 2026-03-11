@@ -17,9 +17,9 @@ import (
 )
 
 type DownloadPayload struct {
-	Username          string `binding:"required,min=1,max=32" json:"username"`
-	Password          string `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
-	AuthorizationCode string `binding:"required,len=44"                          json:"authorizationCode"`
+	Username          string `binding:"required,min=1,max=32"  json:"username"`
+	Password          string `binding:"required,min=8,max=256" json:"password"` // #nosec G117
+	AuthorizationCode string `binding:"required,len=44"        json:"authorizationCode"`
 }
 
 type DownloadResponse struct {
@@ -138,14 +138,18 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*DownloadResponse, error) {
+				now := clock.Now()
+				authCodeValidUntil := now.Add(app.Env.USED_AUTH_CODE_VALID_FOR)
 				stdErr := tx.DownloadSession.UpdateOneID(downloadSessionOb.ID).
-					SetValidUntil(clock.Now().Add(app.Env.USED_AUTH_CODE_VALID_FOR)).
+					SetValidUntil(authCodeValidUntil).
 					Exec(ctx)
 				if stdErr != nil {
 					return nil, stdErr
 				}
+				now = clock.Now()
 				stdErr = tx.Stash.UpdateOneID(stashOb.ID).
-					SetLastDownloadAt(clock.Now()).
+					SetUpdatedAt(now).
+					SetLastDownloadAt(now).
 					Exec(ctx)
 				if stdErr != nil {
 					return nil, stdErr

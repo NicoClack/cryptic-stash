@@ -47,10 +47,11 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) (*CreateResponse, error) {
 				code := app.Core.RandomAuthCode()
 				hashed := sha256.Sum256(code)
-				expiresAt := clock.Now().Add(expiresIn)
+				now := clock.Now()
+				expiresAt := now.Add(expiresIn)
 
 				signupOb, stdErr := tx.SignupLink.Create().
-					SetCreatedAt(clock.Now()).
+					SetCreatedAt(now).
 					SetName(body.Name).
 					SetHashedCode(hashed[:]).
 					SetExpiresAt(expiresAt).

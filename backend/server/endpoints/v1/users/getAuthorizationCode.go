@@ -17,8 +17,8 @@ import (
 )
 
 type GetAuthorizationCodePayload struct {
-	Username string `binding:"required,min=1,max=32" json:"username"`
-	Password string `binding:"required,min=8,max=256"                   json:"password"` // #nosec G117
+	Username string `binding:"required,min=1,max=32"  json:"username"`
+	Password string `binding:"required,min=8,max=256" json:"password"` // #nosec G117
 }
 
 type GetAuthorizationCodeResponse struct {
@@ -81,13 +81,14 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*GetAuthorizationCodeResponse, error) {
+				now := clock.Now()
 				authCode := app.Core.RandomAuthCode()
-				validFrom := clock.Now().Add(app.Env.UNLOCK_TIME)
-				validUntil := clock.Now().Add(app.Env.AUTH_CODE_VALID_FOR)
+				validFrom := now.Add(app.Env.UNLOCK_TIME)
+				validUntil := now.Add(app.Env.AUTH_CODE_VALID_FOR)
 				hashedAuthCode := sha256.Sum256(authCode)
 
 				downloadSessionOb, stdErr := tx.DownloadSession.Create().
-					SetCreatedAt(clock.Now()).
+					SetCreatedAt(now).
 					SetUser(userOb).
 					SetHashedAuthCode(hashedAuthCode[:]).
 					SetValidFrom(validFrom).

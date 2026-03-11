@@ -31,6 +31,7 @@ func TempSelfUnlock1(app *common.App) *jobs.Definition {
 			return dbcommon.WithWriteTx(
 				jobCtx.Context, app.Database,
 				func(tx *ent.Tx, ctx context.Context) error {
+					now := app.Clock.Now()
 					userOb, stdErr := tx.User.Query().
 						Where(user.Username(body.Username)).
 						Only(ctx)
@@ -45,6 +46,7 @@ func TempSelfUnlock1(app *common.App) *jobs.Definition {
 						return nil
 					}
 					userOb, stdErr = userOb.Update().
+						SetUpdatedAt(now).
 						ClearLockedUntil().
 						Save(ctx)
 					if stdErr != nil {

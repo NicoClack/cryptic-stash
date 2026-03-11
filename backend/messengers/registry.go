@@ -442,14 +442,18 @@ func (registry *Registry) EnableMessenger(
 		}
 	}
 
+	now := registry.App.Clock.Now()
 	stdErr := tx.UserMessenger.
 		Create().
+		SetCreatedAt(now).
 		SetType(definition.ID).
 		SetVersion(definition.Version).
 		SetUserID(userOb.ID).
 		SetOptions(options).
 		SetEnabled(true).
+		SetUpdatedAt(now).
 		OnConflictColumns(usermessenger.FieldType, usermessenger.FieldVersion, usermessenger.FieldUserID).
+		UpdateUpdatedAt().
 		UpdateOptions().
 		UpdateEnabled().
 		Exec(ctx)
@@ -481,6 +485,7 @@ func (registry *Registry) DisableMessenger(
 			usermessenger.Version(definition.Version),
 			usermessenger.UserID(userOb.ID),
 		).
+		SetUpdatedAt(registry.App.Clock.Now()).
 		SetEnabled(false).
 		Exec(ctx)
 	if stdErr != nil {

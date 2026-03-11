@@ -32,6 +32,7 @@ func AdminLock(app *servercommon.ServerApp) gin.HandlerFunc {
 		return dbcommon.WithWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
+				now := app.Clock.Now()
 				userOb, stdErr := tx.User.Query().
 					Where(user.Username(body.Username)).
 					Only(ctx)
@@ -39,6 +40,7 @@ func AdminLock(app *servercommon.ServerApp) gin.HandlerFunc {
 					return servercommon.Send404IfNotFound(stdErr)
 				}
 				userOb, stdErr = userOb.Update().
+					SetUpdatedAt(now).
 					SetLocked(true).
 					ClearLockedUntil().
 					Save(ctx)

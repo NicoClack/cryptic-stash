@@ -105,8 +105,10 @@ func InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context, clock
 			ErrWrapperDatabase.Wrap(stdErr),
 		)
 	}
+	now := clock.Now()
 	stdErr = tx.User.UpdateOneID(userID).
-		SetDownloadSessionsValidFrom(clock.Now()).
+		SetUpdatedAt(now).
+		SetDownloadSessionsValidFrom(now).
 		Exec(ctx)
 	if stdErr != nil {
 		return ErrWrapperInvalidateUserDownloadSessions.Wrap(

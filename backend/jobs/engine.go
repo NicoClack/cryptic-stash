@@ -175,8 +175,9 @@ func (engine *Engine) runJobs(currentWeight int, completedJobChan chan completed
 		stdErr = dbcommon.WithWriteTx(
 			context.TODO(), engine.App.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
+				now := engine.App.Clock.Now()
 				return tx.Job.UpdateOneID(currentJob.ID).
-					SetStatus("running").SetStartedAt(time.Now()).
+					SetStatus("running").SetStartedAt(now).
 					Exec(ctx)
 			},
 		)
