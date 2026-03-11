@@ -5,6 +5,7 @@
 - Hash authorisation codes with SHA256 to ensure read access to the database doesn't allow active download sessions to be hijacked
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
 - Crash signals don't seem to show up in Railway
+- Use hash to store code in signup links rather than search param, that way it doesn't show up in logs
 - Allow creating signup links to change stash contents/password
 - Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect

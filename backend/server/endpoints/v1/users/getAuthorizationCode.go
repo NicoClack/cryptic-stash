@@ -45,6 +45,7 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) (*ent.User, error) {
 				userOb, stdErr := tx.User.Query().
 					Where(user.Username(body.Username)).
+					WithMessengers().
 					WithStash().
 					Only(ctx)
 				if stdErr != nil {
