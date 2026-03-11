@@ -26,7 +26,9 @@ type CreateUserResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
 }
 
-// TODO: prevent user enumeration
+// TODO: prevent user enumeration.
+// Maybe just limiting the number of failed attempts per link would be enough?
+// Can cancelling the request be used to bypass that?
 func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 	clock := app.Clock
 	hashSettings := app.Env.PASSWORD_HASH_SETTINGS
@@ -138,6 +140,8 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, stdErr
 				}
 				stdErr = tx.Stash.Create().
+					SetCreatedAt(now).
+					SetUpdatedAt(now).
 					SetContent(encrypted).
 					SetFileName([]byte(body.Filename)).
 					SetEncryptionDataKey(encryptedDataKey).
