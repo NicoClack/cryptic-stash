@@ -5,10 +5,12 @@
 - Hash authorisation codes with SHA256 to ensure read access to the database doesn't allow active download sessions to be hijacked
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
 - Crash signals don't seem to show up in Railway
+- Rate limit hashing, maybe also limit per IP concurrent calls?
 - Use hash to store code in signup links rather than search param, that way it doesn't show up in logs
 - Allow creating signup links to change stash contents/password
 - Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
+- Use HSTS in Production
 -   Improve frontend
 -   Remove userID and publicMessage from logger, it's not worth the complexity and risks
 - Encrypt stashes with an extra key to prevent offline attacks if database is leaked
@@ -82,6 +84,9 @@
 11:42:03 ERR loggers/loggers.go:497 failed to message admin about an error error="db common [package] error: WithTx error: commit transaction error: database [general] error: other error: sql: transaction has already been committed or rolled back"
 
 -   00:07:52 ERR schedulers\delayFuncs.go:68 unable to create initial PeriodicTask object error="db common [package] error: WithTx error: start transaction error: database [general] error: other error: ent: starting a transaction: SQL logic error: cannot start a transaction within a transaction (1)" periodicTaskName=SEND_ACTIVE_SESSION_REMINDERS
+
+- Clients cancelling requests causes internal errors?
+15:44:34 ERR middleware/logging.go:52 an internal server error occurred url=/api/v1/users/get-authorization-code/ method=POST error="db common [package] error: WithTx error: context canceled" statusCode=-1
 
 # To research
 
