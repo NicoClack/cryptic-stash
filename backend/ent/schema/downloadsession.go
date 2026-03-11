@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
@@ -19,6 +21,7 @@ func (DownloadSession) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		// The randomly generated authorisation code that will become valid after enough time
 		field.Bytes("hashedAuthCode"). // Using SHA-256
 						Unique().

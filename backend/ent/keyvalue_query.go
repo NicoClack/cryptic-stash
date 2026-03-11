@@ -263,12 +263,12 @@ func (_q *KeyValueQuery) Clone() *KeyValueQuery {
 // Example:
 //
 //	var v []struct {
-//		Key string `json:"key,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.KeyValue.Query().
-//		GroupBy(keyvalue.FieldKey).
+//		GroupBy(keyvalue.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *KeyValueQuery) GroupBy(field string, fields ...string) *KeyValueGroupBy {
@@ -286,11 +286,11 @@ func (_q *KeyValueQuery) GroupBy(field string, fields ...string) *KeyValueGroupB
 // Example:
 //
 //	var v []struct {
-//		Key string `json:"key,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
 //	client.KeyValue.Query().
-//		Select(keyvalue.FieldKey).
+//		Select(keyvalue.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (_q *KeyValueQuery) Select(fields ...string) *KeyValueSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

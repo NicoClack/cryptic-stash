@@ -50,14 +50,6 @@ func (_u *StashUpdate) SetUpdatedAt(v time.Time) *StashUpdate {
 	return _u
 }
 
-// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
-func (_u *StashUpdate) SetNillableUpdatedAt(v *time.Time) *StashUpdate {
-	if v != nil {
-		_u.SetUpdatedAt(*v)
-	}
-	return _u
-}
-
 // SetLastDownloadAt sets the "lastDownloadAt" field.
 func (_u *StashUpdate) SetLastDownloadAt(v time.Time) *StashUpdate {
 	_u.mutation.SetLastDownloadAt(v)
@@ -197,6 +189,7 @@ func (_u *StashUpdate) ClearUser() *StashUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *StashUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -219,6 +212,14 @@ func (_u *StashUpdate) Exec(ctx context.Context) error {
 func (_u *StashUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *StashUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := stash.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -370,14 +371,6 @@ func (_u *StashUpdateOne) SetNillableCreatedAt(v *time.Time) *StashUpdateOne {
 // SetUpdatedAt sets the "updatedAt" field.
 func (_u *StashUpdateOne) SetUpdatedAt(v time.Time) *StashUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetNillableUpdatedAt sets the "updatedAt" field if the given value is not nil.
-func (_u *StashUpdateOne) SetNillableUpdatedAt(v *time.Time) *StashUpdateOne {
-	if v != nil {
-		_u.SetUpdatedAt(*v)
-	}
 	return _u
 }
 
@@ -533,6 +526,7 @@ func (_u *StashUpdateOne) Select(field string, fields ...string) *StashUpdateOne
 
 // Save executes the query and returns the updated Stash entity.
 func (_u *StashUpdateOne) Save(ctx context.Context) (*Stash, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -555,6 +549,14 @@ func (_u *StashUpdateOne) Exec(ctx context.Context) error {
 func (_u *StashUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *StashUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := stash.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 

@@ -28,6 +28,26 @@ func (_u *PeriodicTaskUpdate) Where(ps ...predicate.PeriodicTask) *PeriodicTaskU
 	return _u
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_u *PeriodicTaskUpdate) SetCreatedAt(v time.Time) *PeriodicTaskUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *PeriodicTaskUpdate) SetNillableCreatedAt(v *time.Time) *PeriodicTaskUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *PeriodicTaskUpdate) SetUpdatedAt(v time.Time) *PeriodicTaskUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *PeriodicTaskUpdate) SetName(v string) *PeriodicTaskUpdate {
 	_u.mutation.SetName(v)
@@ -69,6 +89,7 @@ func (_u *PeriodicTaskUpdate) Mutation() *PeriodicTaskMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PeriodicTaskUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -94,6 +115,14 @@ func (_u *PeriodicTaskUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *PeriodicTaskUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := periodictask.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *PeriodicTaskUpdate) check() error {
 	if v, ok := _u.mutation.Name(); ok {
@@ -115,6 +144,12 @@ func (_u *PeriodicTaskUpdate) sqlSave(ctx context.Context) (_node int, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(periodictask.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(periodictask.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(periodictask.FieldName, field.TypeString, value)
@@ -143,6 +178,26 @@ type PeriodicTaskUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PeriodicTaskMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *PeriodicTaskUpdateOne) SetCreatedAt(v time.Time) *PeriodicTaskUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *PeriodicTaskUpdateOne) SetNillableCreatedAt(v *time.Time) *PeriodicTaskUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *PeriodicTaskUpdateOne) SetUpdatedAt(v time.Time) *PeriodicTaskUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetName sets the "name" field.
@@ -199,6 +254,7 @@ func (_u *PeriodicTaskUpdateOne) Select(field string, fields ...string) *Periodi
 
 // Save executes the query and returns the updated PeriodicTask entity.
 func (_u *PeriodicTaskUpdateOne) Save(ctx context.Context) (*PeriodicTask, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -221,6 +277,14 @@ func (_u *PeriodicTaskUpdateOne) Exec(ctx context.Context) error {
 func (_u *PeriodicTaskUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *PeriodicTaskUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := periodictask.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -262,6 +326,12 @@ func (_u *PeriodicTaskUpdateOne) sqlSave(ctx context.Context) (_node *PeriodicTa
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(periodictask.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(periodictask.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(periodictask.FieldName, field.TypeString, value)

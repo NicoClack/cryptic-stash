@@ -3,6 +3,8 @@
 package downloadsession
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
@@ -15,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the createdat field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updatedat field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldHashedAuthCode holds the string denoting the hashedauthcode field in the database.
 	FieldHashedAuthCode = "hashed_auth_code"
 	// FieldValidFrom holds the string denoting the validfrom field in the database.
@@ -53,6 +57,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldHashedAuthCode,
 	FieldValidFrom,
 	FieldValidUntil,
@@ -72,6 +77,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updatedAt" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// HashedAuthCodeValidator is a validator for the "hashedAuthCode" field. It is called by the builders before save.
 	HashedAuthCodeValidator func([]byte) error
 	// DefaultID holds the default value on creation for the "id" field.
@@ -89,6 +96,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the createdAt field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updatedAt field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
 // ByValidFrom orders the results by the validFrom field.

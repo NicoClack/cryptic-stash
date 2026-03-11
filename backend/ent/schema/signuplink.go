@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -18,6 +20,7 @@ func (SignupLink) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		// For differentiating between signup links and to provide a suggested username
 		field.String("name").MaxLen(32),
 		field.Bytes("hashedCode"). // Using SHA-256

@@ -32,6 +32,12 @@ func (_c *DownloadSessionCreate) SetCreatedAt(v time.Time) *DownloadSessionCreat
 	return _c
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *DownloadSessionCreate) SetUpdatedAt(v time.Time) *DownloadSessionCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetHashedAuthCode sets the "hashedAuthCode" field.
 func (_c *DownloadSessionCreate) SetHashedAuthCode(v []byte) *DownloadSessionCreate {
 	_c.mutation.SetHashedAuthCode(v)
@@ -148,6 +154,9 @@ func (_c *DownloadSessionCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "DownloadSession.createdAt"`)}
 	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "DownloadSession.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.HashedAuthCode(); !ok {
 		return &ValidationError{Name: "hashedAuthCode", err: errors.New(`ent: missing required field "DownloadSession.hashedAuthCode"`)}
 	}
@@ -213,6 +222,10 @@ func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.Creat
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(downloadsession.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.HashedAuthCode(); ok {
 		_spec.SetField(downloadsession.FieldHashedAuthCode, field.TypeBytes, value)
@@ -328,6 +341,18 @@ func (u *DownloadSessionUpsert) SetCreatedAt(v time.Time) *DownloadSessionUpsert
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
 func (u *DownloadSessionUpsert) UpdateCreatedAt() *DownloadSessionUpsert {
 	u.SetExcluded(downloadsession.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *DownloadSessionUpsert) SetUpdatedAt(v time.Time) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *DownloadSessionUpsert) UpdateUpdatedAt() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldUpdatedAt)
 	return u
 }
 
@@ -462,6 +487,20 @@ func (u *DownloadSessionUpsertOne) SetCreatedAt(v time.Time) *DownloadSessionUps
 func (u *DownloadSessionUpsertOne) UpdateCreatedAt() *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *DownloadSessionUpsertOne) SetUpdatedAt(v time.Time) *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *DownloadSessionUpsertOne) UpdateUpdatedAt() *DownloadSessionUpsertOne {
+	return u.Update(func(s *DownloadSessionUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 
@@ -775,6 +814,20 @@ func (u *DownloadSessionUpsertBulk) SetCreatedAt(v time.Time) *DownloadSessionUp
 func (u *DownloadSessionUpsertBulk) UpdateCreatedAt() *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *DownloadSessionUpsertBulk) SetUpdatedAt(v time.Time) *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *DownloadSessionUpsertBulk) UpdateUpdatedAt() *DownloadSessionUpsertBulk {
+	return u.Update(func(s *DownloadSessionUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 

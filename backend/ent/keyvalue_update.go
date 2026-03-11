@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -26,6 +27,26 @@ type KeyValueUpdate struct {
 // Where appends a list predicates to the KeyValueUpdate builder.
 func (_u *KeyValueUpdate) Where(ps ...predicate.KeyValue) *KeyValueUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *KeyValueUpdate) SetCreatedAt(v time.Time) *KeyValueUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *KeyValueUpdate) SetNillableCreatedAt(v *time.Time) *KeyValueUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *KeyValueUpdate) SetUpdatedAt(v time.Time) *KeyValueUpdate {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -62,6 +83,7 @@ func (_u *KeyValueUpdate) Mutation() *KeyValueMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *KeyValueUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -87,6 +109,14 @@ func (_u *KeyValueUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *KeyValueUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := keyvalue.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *KeyValueUpdate) check() error {
 	if v, ok := _u.mutation.Key(); ok {
@@ -108,6 +138,12 @@ func (_u *KeyValueUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(keyvalue.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(keyvalue.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Key(); ok {
 		_spec.SetField(keyvalue.FieldKey, field.TypeString, value)
@@ -138,6 +174,26 @@ type KeyValueUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *KeyValueMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *KeyValueUpdateOne) SetCreatedAt(v time.Time) *KeyValueUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *KeyValueUpdateOne) SetNillableCreatedAt(v *time.Time) *KeyValueUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *KeyValueUpdateOne) SetUpdatedAt(v time.Time) *KeyValueUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetKey sets the "key" field.
@@ -186,6 +242,7 @@ func (_u *KeyValueUpdateOne) Select(field string, fields ...string) *KeyValueUpd
 
 // Save executes the query and returns the updated KeyValue entity.
 func (_u *KeyValueUpdateOne) Save(ctx context.Context) (*KeyValue, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -208,6 +265,14 @@ func (_u *KeyValueUpdateOne) Exec(ctx context.Context) error {
 func (_u *KeyValueUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *KeyValueUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := keyvalue.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -249,6 +314,12 @@ func (_u *KeyValueUpdateOne) sqlSave(ctx context.Context) (_node *KeyValue, err 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(keyvalue.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(keyvalue.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Key(); ok {
 		_spec.SetField(keyvalue.FieldKey, field.TypeString, value)

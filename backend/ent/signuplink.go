@@ -21,6 +21,8 @@ type SignupLink struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "createdAt" field.
 	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// HashedCode holds the value of the "hashedCode" field.
@@ -68,7 +70,7 @@ func (*SignupLink) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case signuplink.FieldName, signuplink.FieldUserAgent, signuplink.FieldIP:
 			values[i] = new(sql.NullString)
-		case signuplink.FieldCreatedAt, signuplink.FieldExpiresAt:
+		case signuplink.FieldCreatedAt, signuplink.FieldUpdatedAt, signuplink.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case signuplink.FieldID, signuplink.FieldUserID:
 			values[i] = new(uuid.UUID)
@@ -98,6 +100,12 @@ func (_m *SignupLink) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
+			}
+		case signuplink.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case signuplink.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -178,6 +186,9 @@ func (_m *SignupLink) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("createdAt=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

@@ -30,6 +30,26 @@ func (_u *TwoFactorActionUpdate) Where(ps ...predicate.TwoFactorAction) *TwoFact
 	return _u
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_u *TwoFactorActionUpdate) SetCreatedAt(v time.Time) *TwoFactorActionUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *TwoFactorActionUpdate) SetNillableCreatedAt(v *time.Time) *TwoFactorActionUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *TwoFactorActionUpdate) SetUpdatedAt(v time.Time) *TwoFactorActionUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // SetType sets the "type" field.
 func (_u *TwoFactorActionUpdate) SetType(v string) *TwoFactorActionUpdate {
 	_u.mutation.SetType(v)
@@ -112,6 +132,7 @@ func (_u *TwoFactorActionUpdate) Mutation() *TwoFactorActionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TwoFactorActionUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -134,6 +155,14 @@ func (_u *TwoFactorActionUpdate) Exec(ctx context.Context) error {
 func (_u *TwoFactorActionUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *TwoFactorActionUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := twofactoraction.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -163,6 +192,12 @@ func (_u *TwoFactorActionUpdate) sqlSave(ctx context.Context) (_node int, err er
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(twofactoraction.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(twofactoraction.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(twofactoraction.FieldType, field.TypeString, value)
@@ -205,6 +240,26 @@ type TwoFactorActionUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *TwoFactorActionMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *TwoFactorActionUpdateOne) SetCreatedAt(v time.Time) *TwoFactorActionUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *TwoFactorActionUpdateOne) SetNillableCreatedAt(v *time.Time) *TwoFactorActionUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *TwoFactorActionUpdateOne) SetUpdatedAt(v time.Time) *TwoFactorActionUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetType sets the "type" field.
@@ -302,6 +357,7 @@ func (_u *TwoFactorActionUpdateOne) Select(field string, fields ...string) *TwoF
 
 // Save executes the query and returns the updated TwoFactorAction entity.
 func (_u *TwoFactorActionUpdateOne) Save(ctx context.Context) (*TwoFactorAction, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -324,6 +380,14 @@ func (_u *TwoFactorActionUpdateOne) Exec(ctx context.Context) error {
 func (_u *TwoFactorActionUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *TwoFactorActionUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := twofactoraction.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -370,6 +434,12 @@ func (_u *TwoFactorActionUpdateOne) sqlSave(ctx context.Context) (_node *TwoFact
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(twofactoraction.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(twofactoraction.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(twofactoraction.FieldType, field.TypeString, value)

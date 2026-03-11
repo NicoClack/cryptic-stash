@@ -20,6 +20,10 @@ type LogEntry struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// LoggedAt holds the value of the "loggedAt" field.
 	LoggedAt time.Time `json:"loggedAt,omitempty"`
 	// LoggedAtKnown holds the value of the "loggedAtKnown" field.
@@ -79,7 +83,7 @@ func (*LogEntry) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case logentry.FieldMessage, logentry.FieldSourceFile, logentry.FieldSourceFunction, logentry.FieldPublicMessage:
 			values[i] = new(sql.NullString)
-		case logentry.FieldLoggedAt:
+		case logentry.FieldCreatedAt, logentry.FieldUpdatedAt, logentry.FieldLoggedAt:
 			values[i] = new(sql.NullTime)
 		case logentry.FieldID, logentry.FieldUserID:
 			values[i] = new(uuid.UUID)
@@ -103,6 +107,18 @@ func (_m *LogEntry) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
+			}
+		case logentry.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
+			}
+		case logentry.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case logentry.FieldLoggedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -207,6 +223,12 @@ func (_m *LogEntry) String() string {
 	var builder strings.Builder
 	builder.WriteString("LogEntry(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("createdAt=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("loggedAt=")
 	builder.WriteString(_m.LoggedAt.Format(time.ANSIC))
 	builder.WriteString(", ")

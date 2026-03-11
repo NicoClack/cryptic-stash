@@ -19,6 +19,10 @@ type TwoFactorAction struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Version holds the value of the "version" field.
@@ -43,7 +47,7 @@ func (*TwoFactorAction) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case twofactoraction.FieldType, twofactoraction.FieldCode:
 			values[i] = new(sql.NullString)
-		case twofactoraction.FieldExpiresAt:
+		case twofactoraction.FieldCreatedAt, twofactoraction.FieldUpdatedAt, twofactoraction.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case twofactoraction.FieldID:
 			values[i] = new(uuid.UUID)
@@ -67,6 +71,18 @@ func (_m *TwoFactorAction) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
+			}
+		case twofactoraction.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
+			}
+		case twofactoraction.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case twofactoraction.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -136,6 +152,12 @@ func (_m *TwoFactorAction) String() string {
 	var builder strings.Builder
 	builder.WriteString("TwoFactorAction(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("createdAt=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(_m.Type)
 	builder.WriteString(", ")

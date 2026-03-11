@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -24,6 +25,18 @@ type UserMessengerCreate struct {
 	mutation *UserMessengerMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_c *UserMessengerCreate) SetCreatedAt(v time.Time) *UserMessengerCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *UserMessengerCreate) SetUpdatedAt(v time.Time) *UserMessengerCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetType sets the "type" field.
@@ -145,6 +158,12 @@ func (_c *UserMessengerCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserMessengerCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "UserMessenger.createdAt"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "UserMessenger.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "UserMessenger.type"`)}
 	}
@@ -204,6 +223,14 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(usermessenger.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(usermessenger.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(usermessenger.FieldType, field.TypeString, value)
 		_node.Type = value
@@ -260,7 +287,7 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 // of the `INSERT` statement. For example:
 //
 //	client.UserMessenger.Create().
-//		SetType(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -269,7 +296,7 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.UserMessengerUpsert) {
-//			SetType(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *UserMessengerCreate) OnConflict(opts ...sql.ConflictOption) *UserMessengerUpsertOne {
@@ -304,6 +331,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *UserMessengerUpsert) SetCreatedAt(v time.Time) *UserMessengerUpsert {
+	u.Set(usermessenger.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *UserMessengerUpsert) UpdateCreatedAt() *UserMessengerUpsert {
+	u.SetExcluded(usermessenger.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *UserMessengerUpsert) SetUpdatedAt(v time.Time) *UserMessengerUpsert {
+	u.Set(usermessenger.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *UserMessengerUpsert) UpdateUpdatedAt() *UserMessengerUpsert {
+	u.SetExcluded(usermessenger.FieldUpdatedAt)
+	return u
+}
 
 // SetType sets the "type" field.
 func (u *UserMessengerUpsert) SetType(v string) *UserMessengerUpsert {
@@ -417,6 +468,34 @@ func (u *UserMessengerUpsertOne) Update(set func(*UserMessengerUpsert)) *UserMes
 		set(&UserMessengerUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *UserMessengerUpsertOne) SetCreatedAt(v time.Time) *UserMessengerUpsertOne {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *UserMessengerUpsertOne) UpdateCreatedAt() *UserMessengerUpsertOne {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *UserMessengerUpsertOne) SetUpdatedAt(v time.Time) *UserMessengerUpsertOne {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *UserMessengerUpsertOne) UpdateUpdatedAt() *UserMessengerUpsertOne {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetType sets the "type" field.
@@ -632,7 +711,7 @@ func (_c *UserMessengerCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.UserMessengerUpsert) {
-//			SetType(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *UserMessengerCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserMessengerUpsertBulk {
@@ -709,6 +788,34 @@ func (u *UserMessengerUpsertBulk) Update(set func(*UserMessengerUpsert)) *UserMe
 		set(&UserMessengerUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *UserMessengerUpsertBulk) SetCreatedAt(v time.Time) *UserMessengerUpsertBulk {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *UserMessengerUpsertBulk) UpdateCreatedAt() *UserMessengerUpsertBulk {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *UserMessengerUpsertBulk) SetUpdatedAt(v time.Time) *UserMessengerUpsertBulk {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *UserMessengerUpsertBulk) UpdateUpdatedAt() *UserMessengerUpsertBulk {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetType sets the "type" field.

@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -16,6 +18,8 @@ type PeriodicTask struct {
 func (PeriodicTask) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
+		field.Time("createdAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.String("name").MinLen(1).MaxLen(128),
 		// Note: there's no version because we should just be able to upgrade to new versions
 		// when the server restarts since there's no request body

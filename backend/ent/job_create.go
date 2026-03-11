@@ -31,6 +31,12 @@ func (_c *JobCreate) SetCreatedAt(v time.Time) *JobCreate {
 	return _c
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *JobCreate) SetUpdatedAt(v time.Time) *JobCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetDueAt sets the "dueAt" field.
 func (_c *JobCreate) SetDueAt(v time.Time) *JobCreate {
 	_c.mutation.SetDueAt(v)
@@ -219,6 +225,9 @@ func (_c *JobCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Job.createdAt"`)}
 	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "Job.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.DueAt(); !ok {
 		return &ValidationError{Name: "dueAt", err: errors.New(`ent: missing required field "Job.dueAt"`)}
 	}
@@ -301,6 +310,10 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(job.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(job.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.DueAt(); ok {
 		_spec.SetField(job.FieldDueAt, field.TypeTime, value)
@@ -411,6 +424,18 @@ func (u *JobUpsert) SetCreatedAt(v time.Time) *JobUpsert {
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
 func (u *JobUpsert) UpdateCreatedAt() *JobUpsert {
 	u.SetExcluded(job.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *JobUpsert) SetUpdatedAt(v time.Time) *JobUpsert {
+	u.Set(job.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *JobUpsert) UpdateUpdatedAt() *JobUpsert {
+	u.SetExcluded(job.FieldUpdatedAt)
 	return u
 }
 
@@ -653,6 +678,20 @@ func (u *JobUpsertOne) SetCreatedAt(v time.Time) *JobUpsertOne {
 func (u *JobUpsertOne) UpdateCreatedAt() *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *JobUpsertOne) SetUpdatedAt(v time.Time) *JobUpsertOne {
+	return u.Update(func(s *JobUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *JobUpsertOne) UpdateUpdatedAt() *JobUpsertOne {
+	return u.Update(func(s *JobUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 
@@ -1092,6 +1131,20 @@ func (u *JobUpsertBulk) SetCreatedAt(v time.Time) *JobUpsertBulk {
 func (u *JobUpsertBulk) UpdateCreatedAt() *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *JobUpsertBulk) SetUpdatedAt(v time.Time) *JobUpsertBulk {
+	return u.Update(func(s *JobUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *JobUpsertBulk) UpdateUpdatedAt() *JobUpsertBulk {
+	return u.Update(func(s *JobUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 

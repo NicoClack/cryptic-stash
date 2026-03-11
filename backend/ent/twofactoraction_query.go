@@ -263,12 +263,12 @@ func (_q *TwoFactorActionQuery) Clone() *TwoFactorActionQuery {
 // Example:
 //
 //	var v []struct {
-//		Type string `json:"type,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TwoFactorAction.Query().
-//		GroupBy(twofactoraction.FieldType).
+//		GroupBy(twofactoraction.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *TwoFactorActionQuery) GroupBy(field string, fields ...string) *TwoFactorActionGroupBy {
@@ -286,11 +286,11 @@ func (_q *TwoFactorActionQuery) GroupBy(field string, fields ...string) *TwoFact
 // Example:
 //
 //	var v []struct {
-//		Type string `json:"type,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
 //	client.TwoFactorAction.Query().
-//		Select(twofactoraction.FieldType).
+//		Select(twofactoraction.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (_q *TwoFactorActionQuery) Select(fields ...string) *TwoFactorActionSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

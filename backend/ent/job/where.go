@@ -60,6 +60,11 @@ func CreatedAt(v time.Time) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// UpdatedAt applies equality check predicate on the "updatedAt" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
 // DueAt applies equality check predicate on the "dueAt" field. It's identical to DueAtEQ.
 func DueAt(v time.Time) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldDueAt, v))
@@ -148,6 +153,46 @@ func CreatedAtLT(v time.Time) predicate.Job {
 // CreatedAtLTE applies the LTE predicate on the "createdAt" field.
 func CreatedAtLTE(v time.Time) predicate.Job {
 	return predicate.Job(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updatedAt" field.
+func UpdatedAtEQ(v time.Time) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updatedAt" field.
+func UpdatedAtNEQ(v time.Time) predicate.Job {
+	return predicate.Job(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updatedAt" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Job {
+	return predicate.Job(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updatedAt" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Job {
+	return predicate.Job(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updatedAt" field.
+func UpdatedAtGT(v time.Time) predicate.Job {
+	return predicate.Job(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updatedAt" field.
+func UpdatedAtGTE(v time.Time) predicate.Job {
+	return predicate.Job(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updatedAt" field.
+func UpdatedAtLT(v time.Time) predicate.Job {
+	return predicate.Job(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updatedAt" field.
+func UpdatedAtLTE(v time.Time) predicate.Job {
+	return predicate.Job(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // DueAtEQ applies the EQ predicate on the "dueAt" field.

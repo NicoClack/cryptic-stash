@@ -18,6 +18,10 @@ type PeriodicTask struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// LastRanAt holds the value of the "lastRanAt" field.
@@ -32,7 +36,7 @@ func (*PeriodicTask) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case periodictask.FieldName:
 			values[i] = new(sql.NullString)
-		case periodictask.FieldLastRanAt:
+		case periodictask.FieldCreatedAt, periodictask.FieldUpdatedAt, periodictask.FieldLastRanAt:
 			values[i] = new(sql.NullTime)
 		case periodictask.FieldID:
 			values[i] = new(uuid.UUID)
@@ -56,6 +60,18 @@ func (_m *PeriodicTask) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
+			}
+		case periodictask.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
+			}
+		case periodictask.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case periodictask.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -105,6 +121,12 @@ func (_m *PeriodicTask) String() string {
 	var builder strings.Builder
 	builder.WriteString("PeriodicTask(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("createdAt=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")

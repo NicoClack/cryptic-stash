@@ -3,6 +3,8 @@
 package stash
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
@@ -75,6 +77,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updatedAt" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	ContentValidator func([]byte) error
 	// FileNameValidator is a validator for the "fileName" field. It is called by the builders before save.

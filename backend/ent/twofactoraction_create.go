@@ -25,6 +25,18 @@ type TwoFactorActionCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_c *TwoFactorActionCreate) SetCreatedAt(v time.Time) *TwoFactorActionCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *TwoFactorActionCreate) SetUpdatedAt(v time.Time) *TwoFactorActionCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetType sets the "type" field.
 func (_c *TwoFactorActionCreate) SetType(v string) *TwoFactorActionCreate {
 	_c.mutation.SetType(v)
@@ -112,6 +124,12 @@ func (_c *TwoFactorActionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TwoFactorActionCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "TwoFactorAction.createdAt"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "TwoFactorAction.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "TwoFactorAction.type"`)}
 	}
@@ -173,6 +191,14 @@ func (_c *TwoFactorActionCreate) createSpec() (*TwoFactorAction, *sqlgraph.Creat
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(twofactoraction.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(twofactoraction.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(twofactoraction.FieldType, field.TypeString, value)
 		_node.Type = value
@@ -200,7 +226,7 @@ func (_c *TwoFactorActionCreate) createSpec() (*TwoFactorAction, *sqlgraph.Creat
 // of the `INSERT` statement. For example:
 //
 //	client.TwoFactorAction.Create().
-//		SetType(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -209,7 +235,7 @@ func (_c *TwoFactorActionCreate) createSpec() (*TwoFactorAction, *sqlgraph.Creat
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TwoFactorActionUpsert) {
-//			SetType(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *TwoFactorActionCreate) OnConflict(opts ...sql.ConflictOption) *TwoFactorActionUpsertOne {
@@ -244,6 +270,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *TwoFactorActionUpsert) SetCreatedAt(v time.Time) *TwoFactorActionUpsert {
+	u.Set(twofactoraction.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *TwoFactorActionUpsert) UpdateCreatedAt() *TwoFactorActionUpsert {
+	u.SetExcluded(twofactoraction.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *TwoFactorActionUpsert) SetUpdatedAt(v time.Time) *TwoFactorActionUpsert {
+	u.Set(twofactoraction.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *TwoFactorActionUpsert) UpdateUpdatedAt() *TwoFactorActionUpsert {
+	u.SetExcluded(twofactoraction.FieldUpdatedAt)
+	return u
+}
 
 // SetType sets the "type" field.
 func (u *TwoFactorActionUpsert) SetType(v string) *TwoFactorActionUpsert {
@@ -357,6 +407,34 @@ func (u *TwoFactorActionUpsertOne) Update(set func(*TwoFactorActionUpsert)) *Two
 		set(&TwoFactorActionUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *TwoFactorActionUpsertOne) SetCreatedAt(v time.Time) *TwoFactorActionUpsertOne {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *TwoFactorActionUpsertOne) UpdateCreatedAt() *TwoFactorActionUpsertOne {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *TwoFactorActionUpsertOne) SetUpdatedAt(v time.Time) *TwoFactorActionUpsertOne {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *TwoFactorActionUpsertOne) UpdateUpdatedAt() *TwoFactorActionUpsertOne {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetType sets the "type" field.
@@ -572,7 +650,7 @@ func (_c *TwoFactorActionCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TwoFactorActionUpsert) {
-//			SetType(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *TwoFactorActionCreateBulk) OnConflict(opts ...sql.ConflictOption) *TwoFactorActionUpsertBulk {
@@ -649,6 +727,34 @@ func (u *TwoFactorActionUpsertBulk) Update(set func(*TwoFactorActionUpsert)) *Tw
 		set(&TwoFactorActionUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *TwoFactorActionUpsertBulk) SetCreatedAt(v time.Time) *TwoFactorActionUpsertBulk {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *TwoFactorActionUpsertBulk) UpdateCreatedAt() *TwoFactorActionUpsertBulk {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *TwoFactorActionUpsertBulk) SetUpdatedAt(v time.Time) *TwoFactorActionUpsertBulk {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *TwoFactorActionUpsertBulk) UpdateUpdatedAt() *TwoFactorActionUpsertBulk {
+	return u.Update(func(s *TwoFactorActionUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetType sets the "type" field.

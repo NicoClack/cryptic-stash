@@ -31,6 +31,26 @@ func (_u *LoginAlertUpdate) Where(ps ...predicate.LoginAlert) *LoginAlertUpdate 
 	return _u
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_u *LoginAlertUpdate) SetCreatedAt(v time.Time) *LoginAlertUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *LoginAlertUpdate) SetNillableCreatedAt(v *time.Time) *LoginAlertUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *LoginAlertUpdate) SetUpdatedAt(v time.Time) *LoginAlertUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // SetSentAt sets the "sentAt" field.
 func (_u *LoginAlertUpdate) SetSentAt(v time.Time) *LoginAlertUpdate {
 	_u.mutation.SetSentAt(v)
@@ -116,6 +136,7 @@ func (_u *LoginAlertUpdate) ClearUserMessenger() *LoginAlertUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LoginAlertUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -141,6 +162,14 @@ func (_u *LoginAlertUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *LoginAlertUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := loginalert.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *LoginAlertUpdate) check() error {
 	if _u.mutation.DownloadSessionCleared() && len(_u.mutation.DownloadSessionIDs()) > 0 {
@@ -163,6 +192,12 @@ func (_u *LoginAlertUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(loginalert.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(loginalert.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.SentAt(); ok {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
@@ -246,6 +281,26 @@ type LoginAlertUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *LoginAlertMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *LoginAlertUpdateOne) SetCreatedAt(v time.Time) *LoginAlertUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *LoginAlertUpdateOne) SetNillableCreatedAt(v *time.Time) *LoginAlertUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *LoginAlertUpdateOne) SetUpdatedAt(v time.Time) *LoginAlertUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetSentAt sets the "sentAt" field.
@@ -346,6 +401,7 @@ func (_u *LoginAlertUpdateOne) Select(field string, fields ...string) *LoginAler
 
 // Save executes the query and returns the updated LoginAlert entity.
 func (_u *LoginAlertUpdateOne) Save(ctx context.Context) (*LoginAlert, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -368,6 +424,14 @@ func (_u *LoginAlertUpdateOne) Exec(ctx context.Context) error {
 func (_u *LoginAlertUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *LoginAlertUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := loginalert.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -410,6 +474,12 @@ func (_u *LoginAlertUpdateOne) sqlSave(ctx context.Context) (_node *LoginAlert, 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(loginalert.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(loginalert.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.SentAt(); ok {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)

@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -16,6 +18,8 @@ type LoginAlert struct {
 func (LoginAlert) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
+		field.Time("createdAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.Time("sentAt"),
 		field.Bool("confirmed"),
 		field.UUID("downloadSessionID", uuid.Nil),

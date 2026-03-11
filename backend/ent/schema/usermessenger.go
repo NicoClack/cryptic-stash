@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -20,6 +21,8 @@ type UserMessenger struct {
 func (UserMessenger) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
+		field.Time("createdAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.String("type").MinLen(1).MaxLen(128),
 		field.Int("version"),
 		field.Bool("enabled").Default(true),
@@ -40,6 +43,6 @@ func (UserMessenger) Edges() []ent.Edge {
 
 func (UserMessenger) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("type", "version", "userID").Unique(),
+		index.Fields("userID", "type", "version").Unique(),
 	}
 }

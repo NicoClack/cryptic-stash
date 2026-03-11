@@ -44,6 +44,12 @@ func (_u *JobUpdate) SetNillableCreatedAt(v *time.Time) *JobUpdate {
 	return _u
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *JobUpdate) SetUpdatedAt(v time.Time) *JobUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // SetDueAt sets the "dueAt" field.
 func (_u *JobUpdate) SetDueAt(v time.Time) *JobUpdate {
 	_u.mutation.SetDueAt(v)
@@ -258,6 +264,7 @@ func (_u *JobUpdate) Mutation() *JobMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *JobUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -280,6 +287,14 @@ func (_u *JobUpdate) Exec(ctx context.Context) error {
 func (_u *JobUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *JobUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := job.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -312,6 +327,9 @@ func (_u *JobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(job.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(job.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.DueAt(); ok {
 		_spec.SetField(job.FieldDueAt, field.TypeTime, value)
@@ -403,6 +421,12 @@ func (_u *JobUpdateOne) SetNillableCreatedAt(v *time.Time) *JobUpdateOne {
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *JobUpdateOne) SetUpdatedAt(v time.Time) *JobUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -633,6 +657,7 @@ func (_u *JobUpdateOne) Select(field string, fields ...string) *JobUpdateOne {
 
 // Save executes the query and returns the updated Job entity.
 func (_u *JobUpdateOne) Save(ctx context.Context) (*Job, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -655,6 +680,14 @@ func (_u *JobUpdateOne) Exec(ctx context.Context) error {
 func (_u *JobUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *JobUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := job.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -704,6 +737,9 @@ func (_u *JobUpdateOne) sqlSave(ctx context.Context) (_node *Job, err error) {
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(job.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(job.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.DueAt(); ok {
 		_spec.SetField(job.FieldDueAt, field.TypeTime, value)

@@ -12,6 +12,7 @@ var (
 	DownloadSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "hashed_auth_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "valid_from", Type: field.TypeTime},
 		{Name: "valid_until", Type: field.TypeTime},
@@ -27,7 +28,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "download_sessions_users_downloadSessions",
-				Columns:    []*schema.Column{DownloadSessionsColumns[7]},
+				Columns:    []*schema.Column{DownloadSessionsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -36,7 +37,7 @@ var (
 			{
 				Name:    "downloadsession_hashed_auth_code_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{DownloadSessionsColumns[2], DownloadSessionsColumns[7]},
+				Columns: []*schema.Column{DownloadSessionsColumns[3], DownloadSessionsColumns[8]},
 			},
 		},
 	}
@@ -44,6 +45,7 @@ var (
 	JobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "due_at", Type: field.TypeTime},
 		{Name: "originally_due_at", Type: field.TypeTime},
 		{Name: "started_at", Type: field.TypeTime, Nullable: true},
@@ -66,18 +68,20 @@ var (
 			{
 				Name:    "job_status_priority_due_at",
 				Unique:  false,
-				Columns: []*schema.Column{JobsColumns[10], JobsColumns[7], JobsColumns[2]},
+				Columns: []*schema.Column{JobsColumns[11], JobsColumns[8], JobsColumns[3]},
 			},
 			{
 				Name:    "job_due_at",
 				Unique:  false,
-				Columns: []*schema.Column{JobsColumns[2]},
+				Columns: []*schema.Column{JobsColumns[3]},
 			},
 		},
 	}
 	// KeyValuesColumns holds the columns for the "key_values" table.
 	KeyValuesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "key", Type: field.TypeString, Size: 128},
 		{Name: "value", Type: field.TypeJSON},
 	}
@@ -90,13 +94,15 @@ var (
 			{
 				Name:    "keyvalue_key",
 				Unique:  true,
-				Columns: []*schema.Column{KeyValuesColumns[1]},
+				Columns: []*schema.Column{KeyValuesColumns[3]},
 			},
 		},
 	}
 	// LogEntriesColumns holds the columns for the "log_entries" table.
 	LogEntriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "logged_at", Type: field.TypeTime},
 		{Name: "logged_at_known", Type: field.TypeBool},
 		{Name: "level", Type: field.TypeInt},
@@ -116,7 +122,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "log_entries_users_logs",
-				Columns:    []*schema.Column{LogEntriesColumns[10]},
+				Columns:    []*schema.Column{LogEntriesColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -125,13 +131,15 @@ var (
 			{
 				Name:    "logentry_logged_at",
 				Unique:  false,
-				Columns: []*schema.Column{LogEntriesColumns[1]},
+				Columns: []*schema.Column{LogEntriesColumns[3]},
 			},
 		},
 	}
 	// LoginAlertsColumns holds the columns for the "login_alerts" table.
 	LoginAlertsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "sent_at", Type: field.TypeTime},
 		{Name: "confirmed", Type: field.TypeBool},
 		{Name: "download_session_id", Type: field.TypeUUID},
@@ -145,13 +153,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "login_alerts_download_sessions_loginAlerts",
-				Columns:    []*schema.Column{LoginAlertsColumns[3]},
+				Columns:    []*schema.Column{LoginAlertsColumns[5]},
 				RefColumns: []*schema.Column{DownloadSessionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "login_alerts_user_messengers_loginAlerts",
-				Columns:    []*schema.Column{LoginAlertsColumns[4]},
+				Columns:    []*schema.Column{LoginAlertsColumns[6]},
 				RefColumns: []*schema.Column{UserMessengersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -160,6 +168,8 @@ var (
 	// PeriodicTasksColumns holds the columns for the "periodic_tasks" table.
 	PeriodicTasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 128},
 		{Name: "last_ran_at", Type: field.TypeTime, Nullable: true},
 	}
@@ -172,7 +182,7 @@ var (
 			{
 				Name:    "periodictask_name",
 				Unique:  true,
-				Columns: []*schema.Column{PeriodicTasksColumns[1]},
+				Columns: []*schema.Column{PeriodicTasksColumns[3]},
 			},
 		},
 	}
@@ -180,6 +190,7 @@ var (
 	SignupLinksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 32},
 		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
@@ -195,7 +206,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "signup_links_users_signupLink",
-				Columns:    []*schema.Column{SignupLinksColumns[7]},
+				Columns:    []*schema.Column{SignupLinksColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -204,7 +215,7 @@ var (
 			{
 				Name:    "signuplink_hashed_code",
 				Unique:  false,
-				Columns: []*schema.Column{SignupLinksColumns[3]},
+				Columns: []*schema.Column{SignupLinksColumns[4]},
 			},
 			{
 				Name:    "signuplink_created_at",
@@ -245,6 +256,8 @@ var (
 	// TwoFactorActionsColumns holds the columns for the "two_factor_actions" table.
 	TwoFactorActionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeString, Size: 128},
 		{Name: "version", Type: field.TypeInt},
 		{Name: "body", Type: field.TypeJSON},
@@ -260,7 +273,7 @@ var (
 			{
 				Name:    "twofactoraction_code",
 				Unique:  false,
-				Columns: []*schema.Column{TwoFactorActionsColumns[5]},
+				Columns: []*schema.Column{TwoFactorActionsColumns[7]},
 			},
 		},
 	}
@@ -290,6 +303,8 @@ var (
 	// UserMessengersColumns holds the columns for the "user_messengers" table.
 	UserMessengersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeString, Size: 128},
 		{Name: "version", Type: field.TypeInt},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
@@ -304,16 +319,16 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "user_messengers_users_messengers",
-				Columns:    []*schema.Column{UserMessengersColumns[5]},
+				Columns:    []*schema.Column{UserMessengersColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "usermessenger_type_version_user_id",
+				Name:    "usermessenger_user_id_type_version",
 				Unique:  true,
-				Columns: []*schema.Column{UserMessengersColumns[1], UserMessengersColumns[2], UserMessengersColumns[5]},
+				Columns: []*schema.Column{UserMessengersColumns[7], UserMessengersColumns[3], UserMessengersColumns[4]},
 			},
 		},
 	}

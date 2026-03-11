@@ -336,12 +336,12 @@ func (_q *UserMessengerQuery) WithLoginAlerts(opts ...func(*LoginAlertQuery)) *U
 // Example:
 //
 //	var v []struct {
-//		Type string `json:"type,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.UserMessenger.Query().
-//		GroupBy(usermessenger.FieldType).
+//		GroupBy(usermessenger.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *UserMessengerQuery) GroupBy(field string, fields ...string) *UserMessengerGroupBy {
@@ -359,11 +359,11 @@ func (_q *UserMessengerQuery) GroupBy(field string, fields ...string) *UserMesse
 // Example:
 //
 //	var v []struct {
-//		Type string `json:"type,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
 //	client.UserMessenger.Query().
-//		Select(usermessenger.FieldType).
+//		Select(usermessenger.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (_q *UserMessengerQuery) Select(fields ...string) *UserMessengerSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

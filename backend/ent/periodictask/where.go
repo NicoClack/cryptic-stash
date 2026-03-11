@@ -55,6 +55,16 @@ func IDLTE(id uuid.UUID) predicate.PeriodicTask {
 	return predicate.PeriodicTask(sql.FieldLTE(FieldID, id))
 }
 
+// CreatedAt applies equality check predicate on the "createdAt" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updatedAt" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.PeriodicTask {
 	return predicate.PeriodicTask(sql.FieldEQ(FieldName, v))
@@ -63,6 +73,86 @@ func Name(v string) predicate.PeriodicTask {
 // LastRanAt applies equality check predicate on the "lastRanAt" field. It's identical to LastRanAtEQ.
 func LastRanAt(v time.Time) predicate.PeriodicTask {
 	return predicate.PeriodicTask(sql.FieldEQ(FieldLastRanAt, v))
+}
+
+// CreatedAtEQ applies the EQ predicate on the "createdAt" field.
+func CreatedAtEQ(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "createdAt" field.
+func CreatedAtNEQ(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldNEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtIn applies the In predicate on the "createdAt" field.
+func CreatedAtIn(vs ...time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "createdAt" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtGT applies the GT predicate on the "createdAt" field.
+func CreatedAtGT(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldGT(FieldCreatedAt, v))
+}
+
+// CreatedAtGTE applies the GTE predicate on the "createdAt" field.
+func CreatedAtGTE(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldGTE(FieldCreatedAt, v))
+}
+
+// CreatedAtLT applies the LT predicate on the "createdAt" field.
+func CreatedAtLT(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldLT(FieldCreatedAt, v))
+}
+
+// CreatedAtLTE applies the LTE predicate on the "createdAt" field.
+func CreatedAtLTE(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updatedAt" field.
+func UpdatedAtEQ(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updatedAt" field.
+func UpdatedAtNEQ(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updatedAt" field.
+func UpdatedAtIn(vs ...time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updatedAt" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updatedAt" field.
+func UpdatedAtGT(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updatedAt" field.
+func UpdatedAtGTE(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updatedAt" field.
+func UpdatedAtLT(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updatedAt" field.
+func UpdatedAtLTE(v time.Time) predicate.PeriodicTask {
+	return predicate.PeriodicTask(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

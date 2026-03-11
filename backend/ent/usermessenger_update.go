@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -29,6 +30,26 @@ type UserMessengerUpdate struct {
 // Where appends a list predicates to the UserMessengerUpdate builder.
 func (_u *UserMessengerUpdate) Where(ps ...predicate.UserMessenger) *UserMessengerUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *UserMessengerUpdate) SetCreatedAt(v time.Time) *UserMessengerUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *UserMessengerUpdate) SetNillableCreatedAt(v *time.Time) *UserMessengerUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *UserMessengerUpdate) SetUpdatedAt(v time.Time) *UserMessengerUpdate {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -161,6 +182,7 @@ func (_u *UserMessengerUpdate) RemoveLoginAlerts(v ...*LoginAlert) *UserMessenge
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserMessengerUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -183,6 +205,14 @@ func (_u *UserMessengerUpdate) Exec(ctx context.Context) error {
 func (_u *UserMessengerUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *UserMessengerUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := usermessenger.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -210,6 +240,12 @@ func (_u *UserMessengerUpdate) sqlSave(ctx context.Context) (_node int, err erro
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(usermessenger.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(usermessenger.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(usermessenger.FieldType, field.TypeString, value)
@@ -323,6 +359,26 @@ type UserMessengerUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UserMessengerMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *UserMessengerUpdateOne) SetCreatedAt(v time.Time) *UserMessengerUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *UserMessengerUpdateOne) SetNillableCreatedAt(v *time.Time) *UserMessengerUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *UserMessengerUpdateOne) SetUpdatedAt(v time.Time) *UserMessengerUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetType sets the "type" field.
@@ -467,6 +523,7 @@ func (_u *UserMessengerUpdateOne) Select(field string, fields ...string) *UserMe
 
 // Save executes the query and returns the updated UserMessenger entity.
 func (_u *UserMessengerUpdateOne) Save(ctx context.Context) (*UserMessenger, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -489,6 +546,14 @@ func (_u *UserMessengerUpdateOne) Exec(ctx context.Context) error {
 func (_u *UserMessengerUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *UserMessengerUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := usermessenger.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -533,6 +598,12 @@ func (_u *UserMessengerUpdateOne) sqlSave(ctx context.Context) (_node *UserMesse
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(usermessenger.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(usermessenger.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(usermessenger.FieldType, field.TypeString, value)

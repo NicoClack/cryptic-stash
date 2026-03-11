@@ -25,6 +25,18 @@ type LogEntryCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_c *LogEntryCreate) SetCreatedAt(v time.Time) *LogEntryCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *LogEntryCreate) SetUpdatedAt(v time.Time) *LogEntryCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetLoggedAt sets the "loggedAt" field.
 func (_c *LogEntryCreate) SetLoggedAt(v time.Time) *LogEntryCreate {
 	_c.mutation.SetLoggedAt(v)
@@ -155,6 +167,12 @@ func (_c *LogEntryCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *LogEntryCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "LogEntry.createdAt"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "LogEntry.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.LoggedAt(); !ok {
 		return &ValidationError{Name: "loggedAt", err: errors.New(`ent: missing required field "LogEntry.loggedAt"`)}
 	}
@@ -218,6 +236,14 @@ func (_c *LogEntryCreate) createSpec() (*LogEntry, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(logentry.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(logentry.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := _c.mutation.LoggedAt(); ok {
 		_spec.SetField(logentry.FieldLoggedAt, field.TypeTime, value)
 		_node.LoggedAt = value
@@ -278,7 +304,7 @@ func (_c *LogEntryCreate) createSpec() (*LogEntry, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.LogEntry.Create().
-//		SetLoggedAt(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -287,7 +313,7 @@ func (_c *LogEntryCreate) createSpec() (*LogEntry, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.LogEntryUpsert) {
-//			SetLoggedAt(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *LogEntryCreate) OnConflict(opts ...sql.ConflictOption) *LogEntryUpsertOne {
@@ -322,6 +348,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *LogEntryUpsert) SetCreatedAt(v time.Time) *LogEntryUpsert {
+	u.Set(logentry.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *LogEntryUpsert) UpdateCreatedAt() *LogEntryUpsert {
+	u.SetExcluded(logentry.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *LogEntryUpsert) SetUpdatedAt(v time.Time) *LogEntryUpsert {
+	u.Set(logentry.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *LogEntryUpsert) UpdateUpdatedAt() *LogEntryUpsert {
+	u.SetExcluded(logentry.FieldUpdatedAt)
+	return u
+}
 
 // SetLoggedAt sets the "loggedAt" field.
 func (u *LogEntryUpsert) SetLoggedAt(v time.Time) *LogEntryUpsert {
@@ -507,6 +557,34 @@ func (u *LogEntryUpsertOne) Update(set func(*LogEntryUpsert)) *LogEntryUpsertOne
 		set(&LogEntryUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *LogEntryUpsertOne) SetCreatedAt(v time.Time) *LogEntryUpsertOne {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *LogEntryUpsertOne) UpdateCreatedAt() *LogEntryUpsertOne {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *LogEntryUpsertOne) SetUpdatedAt(v time.Time) *LogEntryUpsertOne {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *LogEntryUpsertOne) UpdateUpdatedAt() *LogEntryUpsertOne {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetLoggedAt sets the "loggedAt" field.
@@ -806,7 +884,7 @@ func (_c *LogEntryCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.LogEntryUpsert) {
-//			SetLoggedAt(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *LogEntryCreateBulk) OnConflict(opts ...sql.ConflictOption) *LogEntryUpsertBulk {
@@ -883,6 +961,34 @@ func (u *LogEntryUpsertBulk) Update(set func(*LogEntryUpsert)) *LogEntryUpsertBu
 		set(&LogEntryUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *LogEntryUpsertBulk) SetCreatedAt(v time.Time) *LogEntryUpsertBulk {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *LogEntryUpsertBulk) UpdateCreatedAt() *LogEntryUpsertBulk {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *LogEntryUpsertBulk) SetUpdatedAt(v time.Time) *LogEntryUpsertBulk {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *LogEntryUpsertBulk) UpdateUpdatedAt() *LogEntryUpsertBulk {
+	return u.Update(func(s *LogEntryUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetLoggedAt sets the "loggedAt" field.

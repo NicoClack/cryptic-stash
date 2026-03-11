@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
@@ -18,6 +19,8 @@ type KeyValue struct {
 func (KeyValue) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
+		field.Time("createdAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.String("key").MinLen(1).MaxLen(128),
 		field.JSON("value", json.RawMessage{}),
 	}

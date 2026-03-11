@@ -3,6 +3,8 @@
 package usermessenger
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
@@ -54,6 +56,16 @@ func IDLTE(id uuid.UUID) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldLTE(FieldID, id))
 }
 
+// CreatedAt applies equality check predicate on the "createdAt" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updatedAt" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
 // Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
 func Type(v string) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldEQ(FieldType, v))
@@ -72,6 +84,86 @@ func Enabled(v bool) predicate.UserMessenger {
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldEQ(FieldUserID, v))
+}
+
+// CreatedAtEQ applies the EQ predicate on the "createdAt" field.
+func CreatedAtEQ(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "createdAt" field.
+func CreatedAtNEQ(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtIn applies the In predicate on the "createdAt" field.
+func CreatedAtIn(vs ...time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "createdAt" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtGT applies the GT predicate on the "createdAt" field.
+func CreatedAtGT(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldGT(FieldCreatedAt, v))
+}
+
+// CreatedAtGTE applies the GTE predicate on the "createdAt" field.
+func CreatedAtGTE(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldGTE(FieldCreatedAt, v))
+}
+
+// CreatedAtLT applies the LT predicate on the "createdAt" field.
+func CreatedAtLT(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldLT(FieldCreatedAt, v))
+}
+
+// CreatedAtLTE applies the LTE predicate on the "createdAt" field.
+func CreatedAtLTE(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updatedAt" field.
+func UpdatedAtEQ(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updatedAt" field.
+func UpdatedAtNEQ(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updatedAt" field.
+func UpdatedAtIn(vs ...time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updatedAt" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updatedAt" field.
+func UpdatedAtGT(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updatedAt" field.
+func UpdatedAtGTE(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updatedAt" field.
+func UpdatedAtLT(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updatedAt" field.
+func UpdatedAtLTE(v time.Time) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.

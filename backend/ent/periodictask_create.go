@@ -24,6 +24,18 @@ type PeriodicTaskCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_c *PeriodicTaskCreate) SetCreatedAt(v time.Time) *PeriodicTaskCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *PeriodicTaskCreate) SetUpdatedAt(v time.Time) *PeriodicTaskCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *PeriodicTaskCreate) SetName(v string) *PeriodicTaskCreate {
 	_c.mutation.SetName(v)
@@ -101,6 +113,12 @@ func (_c *PeriodicTaskCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *PeriodicTaskCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "PeriodicTask.createdAt"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "PeriodicTask.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "PeriodicTask.name"`)}
 	}
@@ -145,6 +163,14 @@ func (_c *PeriodicTaskCreate) createSpec() (*PeriodicTask, *sqlgraph.CreateSpec)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(periodictask.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(periodictask.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(periodictask.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -160,7 +186,7 @@ func (_c *PeriodicTaskCreate) createSpec() (*PeriodicTask, *sqlgraph.CreateSpec)
 // of the `INSERT` statement. For example:
 //
 //	client.PeriodicTask.Create().
-//		SetName(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -169,7 +195,7 @@ func (_c *PeriodicTaskCreate) createSpec() (*PeriodicTask, *sqlgraph.CreateSpec)
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PeriodicTaskUpsert) {
-//			SetName(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *PeriodicTaskCreate) OnConflict(opts ...sql.ConflictOption) *PeriodicTaskUpsertOne {
@@ -204,6 +230,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *PeriodicTaskUpsert) SetCreatedAt(v time.Time) *PeriodicTaskUpsert {
+	u.Set(periodictask.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *PeriodicTaskUpsert) UpdateCreatedAt() *PeriodicTaskUpsert {
+	u.SetExcluded(periodictask.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *PeriodicTaskUpsert) SetUpdatedAt(v time.Time) *PeriodicTaskUpsert {
+	u.Set(periodictask.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *PeriodicTaskUpsert) UpdateUpdatedAt() *PeriodicTaskUpsert {
+	u.SetExcluded(periodictask.FieldUpdatedAt)
+	return u
+}
 
 // SetName sets the "name" field.
 func (u *PeriodicTaskUpsert) SetName(v string) *PeriodicTaskUpsert {
@@ -281,6 +331,34 @@ func (u *PeriodicTaskUpsertOne) Update(set func(*PeriodicTaskUpsert)) *PeriodicT
 		set(&PeriodicTaskUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *PeriodicTaskUpsertOne) SetCreatedAt(v time.Time) *PeriodicTaskUpsertOne {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *PeriodicTaskUpsertOne) UpdateCreatedAt() *PeriodicTaskUpsertOne {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *PeriodicTaskUpsertOne) SetUpdatedAt(v time.Time) *PeriodicTaskUpsertOne {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *PeriodicTaskUpsertOne) UpdateUpdatedAt() *PeriodicTaskUpsertOne {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetName sets the "name" field.
@@ -454,7 +532,7 @@ func (_c *PeriodicTaskCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PeriodicTaskUpsert) {
-//			SetName(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *PeriodicTaskCreateBulk) OnConflict(opts ...sql.ConflictOption) *PeriodicTaskUpsertBulk {
@@ -531,6 +609,34 @@ func (u *PeriodicTaskUpsertBulk) Update(set func(*PeriodicTaskUpsert)) *Periodic
 		set(&PeriodicTaskUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *PeriodicTaskUpsertBulk) SetCreatedAt(v time.Time) *PeriodicTaskUpsertBulk {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *PeriodicTaskUpsertBulk) UpdateCreatedAt() *PeriodicTaskUpsertBulk {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *PeriodicTaskUpsertBulk) SetUpdatedAt(v time.Time) *PeriodicTaskUpsertBulk {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *PeriodicTaskUpsertBulk) UpdateUpdatedAt() *PeriodicTaskUpsertBulk {
+	return u.Update(func(s *PeriodicTaskUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetName sets the "name" field.

@@ -20,6 +20,10 @@ type LoginAlert struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// SentAt holds the value of the "sentAt" field.
 	SentAt time.Time `json:"sentAt,omitempty"`
 	// Confirmed holds the value of the "confirmed" field.
@@ -74,7 +78,7 @@ func (*LoginAlert) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case loginalert.FieldConfirmed:
 			values[i] = new(sql.NullBool)
-		case loginalert.FieldSentAt:
+		case loginalert.FieldCreatedAt, loginalert.FieldUpdatedAt, loginalert.FieldSentAt:
 			values[i] = new(sql.NullTime)
 		case loginalert.FieldID, loginalert.FieldDownloadSessionID, loginalert.FieldUserMessengerID:
 			values[i] = new(uuid.UUID)
@@ -98,6 +102,18 @@ func (_m *LoginAlert) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
+			}
+		case loginalert.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
+			}
+		case loginalert.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case loginalert.FieldSentAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -169,6 +185,12 @@ func (_m *LoginAlert) String() string {
 	var builder strings.Builder
 	builder.WriteString("LoginAlert(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("createdAt=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("sentAt=")
 	builder.WriteString(_m.SentAt.Format(time.ANSIC))
 	builder.WriteString(", ")

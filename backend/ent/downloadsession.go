@@ -21,6 +21,8 @@ type DownloadSession struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "createdAt" field.
 	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// HashedAuthCode holds the value of the "hashedAuthCode" field.
 	HashedAuthCode []byte `json:"hashedAuthCode,omitempty"`
 	// ValidFrom holds the value of the "validFrom" field.
@@ -79,7 +81,7 @@ func (*DownloadSession) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case downloadsession.FieldUserAgent, downloadsession.FieldIP:
 			values[i] = new(sql.NullString)
-		case downloadsession.FieldCreatedAt, downloadsession.FieldValidFrom, downloadsession.FieldValidUntil:
+		case downloadsession.FieldCreatedAt, downloadsession.FieldUpdatedAt, downloadsession.FieldValidFrom, downloadsession.FieldValidUntil:
 			values[i] = new(sql.NullTime)
 		case downloadsession.FieldID, downloadsession.FieldUserID:
 			values[i] = new(uuid.UUID)
@@ -109,6 +111,12 @@ func (_m *DownloadSession) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
+			}
+		case downloadsession.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case downloadsession.FieldHashedAuthCode:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -194,6 +202,9 @@ func (_m *DownloadSession) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("createdAt=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("hashedAuthCode=")
 	builder.WriteString(fmt.Sprintf("%v", _m.HashedAuthCode))

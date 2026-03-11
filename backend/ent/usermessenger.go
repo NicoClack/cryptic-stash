@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,6 +20,10 @@ type UserMessenger struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Version holds the value of the "version" field.
@@ -79,6 +84,8 @@ func (*UserMessenger) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case usermessenger.FieldType:
 			values[i] = new(sql.NullString)
+		case usermessenger.FieldCreatedAt, usermessenger.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		case usermessenger.FieldID, usermessenger.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -101,6 +108,18 @@ func (_m *UserMessenger) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
+			}
+		case usermessenger.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				_m.CreatedAt = value.Time
+			}
+		case usermessenger.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case usermessenger.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -180,6 +199,12 @@ func (_m *UserMessenger) String() string {
 	var builder strings.Builder
 	builder.WriteString("UserMessenger(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("createdAt=")
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(_m.Type)
 	builder.WriteString(", ")

@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -17,7 +19,7 @@ func (Stash) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
-		field.Time("updatedAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.Time("lastDownloadAt").Optional(),
 		// Encrypted with encryptionDataKey and prefixed with the nonce
 		field.Bytes("content").NotEmpty().MaxLen(10_000_000), // 10MB

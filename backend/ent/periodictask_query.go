@@ -263,12 +263,12 @@ func (_q *PeriodicTaskQuery) Clone() *PeriodicTaskQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.PeriodicTask.Query().
-//		GroupBy(periodictask.FieldName).
+//		GroupBy(periodictask.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *PeriodicTaskQuery) GroupBy(field string, fields ...string) *PeriodicTaskGroupBy {
@@ -286,11 +286,11 @@ func (_q *PeriodicTaskQuery) GroupBy(field string, fields ...string) *PeriodicTa
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
 //	client.PeriodicTask.Query().
-//		Select(periodictask.FieldName).
+//		Select(periodictask.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (_q *PeriodicTaskQuery) Select(fields ...string) *PeriodicTaskSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)

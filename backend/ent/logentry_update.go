@@ -30,6 +30,26 @@ func (_u *LogEntryUpdate) Where(ps ...predicate.LogEntry) *LogEntryUpdate {
 	return _u
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_u *LogEntryUpdate) SetCreatedAt(v time.Time) *LogEntryUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *LogEntryUpdate) SetNillableCreatedAt(v *time.Time) *LogEntryUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *LogEntryUpdate) SetUpdatedAt(v time.Time) *LogEntryUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // SetLoggedAt sets the "loggedAt" field.
 func (_u *LogEntryUpdate) SetLoggedAt(v time.Time) *LogEntryUpdate {
 	_u.mutation.SetLoggedAt(v)
@@ -200,6 +220,7 @@ func (_u *LogEntryUpdate) ClearUser() *LogEntryUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LogEntryUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -225,6 +246,14 @@ func (_u *LogEntryUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *LogEntryUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := logentry.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (_u *LogEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(logentry.Table, logentry.Columns, sqlgraph.NewFieldSpec(logentry.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -233,6 +262,12 @@ func (_u *LogEntryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(logentry.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(logentry.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.LoggedAt(); ok {
 		_spec.SetField(logentry.FieldLoggedAt, field.TypeTime, value)
@@ -314,6 +349,26 @@ type LogEntryUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *LogEntryMutation
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_u *LogEntryUpdateOne) SetCreatedAt(v time.Time) *LogEntryUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
+}
+
+// SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
+func (_u *LogEntryUpdateOne) SetNillableCreatedAt(v *time.Time) *LogEntryUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *LogEntryUpdateOne) SetUpdatedAt(v time.Time) *LogEntryUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetLoggedAt sets the "loggedAt" field.
@@ -499,6 +554,7 @@ func (_u *LogEntryUpdateOne) Select(field string, fields ...string) *LogEntryUpd
 
 // Save executes the query and returns the updated LogEntry entity.
 func (_u *LogEntryUpdateOne) Save(ctx context.Context) (*LogEntry, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -521,6 +577,14 @@ func (_u *LogEntryUpdateOne) Exec(ctx context.Context) error {
 func (_u *LogEntryUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *LogEntryUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := logentry.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -549,6 +613,12 @@ func (_u *LogEntryUpdateOne) sqlSave(ctx context.Context) (_node *LogEntry, err 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.CreatedAt(); ok {
+		_spec.SetField(logentry.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(logentry.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.LoggedAt(); ok {
 		_spec.SetField(logentry.FieldLoggedAt, field.TypeTime, value)

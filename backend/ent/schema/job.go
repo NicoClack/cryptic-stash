@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
@@ -19,6 +20,7 @@ func (Job) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
+		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.Time("dueAt"),
 		field.Time("originallyDueAt"), // Due is updated for retries
 		field.Time("startedAt").Optional(),

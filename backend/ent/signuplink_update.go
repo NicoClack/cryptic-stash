@@ -44,6 +44,12 @@ func (_u *SignupLinkUpdate) SetNillableCreatedAt(v *time.Time) *SignupLinkUpdate
 	return _u
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *SignupLinkUpdate) SetUpdatedAt(v time.Time) *SignupLinkUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *SignupLinkUpdate) SetName(v string) *SignupLinkUpdate {
 	_u.mutation.SetName(v)
@@ -144,6 +150,7 @@ func (_u *SignupLinkUpdate) ClearUser() *SignupLinkUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *SignupLinkUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -166,6 +173,14 @@ func (_u *SignupLinkUpdate) Exec(ctx context.Context) error {
 func (_u *SignupLinkUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *SignupLinkUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := signuplink.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -198,6 +213,9 @@ func (_u *SignupLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(signuplink.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(signuplink.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(signuplink.FieldName, field.TypeString, value)
@@ -274,6 +292,12 @@ func (_u *SignupLinkUpdateOne) SetNillableCreatedAt(v *time.Time) *SignupLinkUpd
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *SignupLinkUpdateOne) SetUpdatedAt(v time.Time) *SignupLinkUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -390,6 +414,7 @@ func (_u *SignupLinkUpdateOne) Select(field string, fields ...string) *SignupLin
 
 // Save executes the query and returns the updated SignupLink entity.
 func (_u *SignupLinkUpdateOne) Save(ctx context.Context) (*SignupLink, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -412,6 +437,14 @@ func (_u *SignupLinkUpdateOne) Exec(ctx context.Context) error {
 func (_u *SignupLinkUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *SignupLinkUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := signuplink.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -461,6 +494,9 @@ func (_u *SignupLinkUpdateOne) sqlSave(ctx context.Context) (_node *SignupLink, 
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(signuplink.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(signuplink.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(signuplink.FieldName, field.TypeString, value)

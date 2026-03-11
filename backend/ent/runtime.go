@@ -3,6 +3,8 @@
 package ent
 
 import (
+	"time"
+
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
 	"github.com/NicoClack/cryptic-stash/backend/ent/keyvalue"
@@ -24,8 +26,12 @@ import (
 func init() {
 	downloadsessionFields := schema.DownloadSession{}.Fields()
 	_ = downloadsessionFields
+	// downloadsessionDescUpdatedAt is the schema descriptor for updatedAt field.
+	downloadsessionDescUpdatedAt := downloadsessionFields[2].Descriptor()
+	// downloadsession.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	downloadsession.UpdateDefaultUpdatedAt = downloadsessionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// downloadsessionDescHashedAuthCode is the schema descriptor for hashedAuthCode field.
-	downloadsessionDescHashedAuthCode := downloadsessionFields[2].Descriptor()
+	downloadsessionDescHashedAuthCode := downloadsessionFields[3].Descriptor()
 	// downloadsession.HashedAuthCodeValidator is a validator for the "hashedAuthCode" field. It is called by the builders before save.
 	downloadsession.HashedAuthCodeValidator = func() func([]byte) error {
 		validators := downloadsessionDescHashedAuthCode.Validators
@@ -48,8 +54,12 @@ func init() {
 	downloadsession.DefaultID = downloadsessionDescID.Default.(func() uuid.UUID)
 	jobFields := schema.Job{}.Fields()
 	_ = jobFields
+	// jobDescUpdatedAt is the schema descriptor for updatedAt field.
+	jobDescUpdatedAt := jobFields[2].Descriptor()
+	// job.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	job.UpdateDefaultUpdatedAt = jobDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// jobDescType is the schema descriptor for type field.
-	jobDescType := jobFields[5].Descriptor()
+	jobDescType := jobFields[6].Descriptor()
 	// job.TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	job.TypeValidator = func() func(string) error {
 		validators := jobDescType.Validators
@@ -67,15 +77,15 @@ func init() {
 		}
 	}()
 	// jobDescRetries is the schema descriptor for retries field.
-	jobDescRetries := jobFields[11].Descriptor()
+	jobDescRetries := jobFields[12].Descriptor()
 	// job.DefaultRetries holds the default value on creation for the retries field.
 	job.DefaultRetries = jobDescRetries.Default.(int)
 	// jobDescRetriedFraction is the schema descriptor for retriedFraction field.
-	jobDescRetriedFraction := jobFields[12].Descriptor()
+	jobDescRetriedFraction := jobFields[13].Descriptor()
 	// job.DefaultRetriedFraction holds the default value on creation for the retriedFraction field.
 	job.DefaultRetriedFraction = jobDescRetriedFraction.Default.(float64)
 	// jobDescLoggedStallWarning is the schema descriptor for loggedStallWarning field.
-	jobDescLoggedStallWarning := jobFields[13].Descriptor()
+	jobDescLoggedStallWarning := jobFields[14].Descriptor()
 	// job.DefaultLoggedStallWarning holds the default value on creation for the loggedStallWarning field.
 	job.DefaultLoggedStallWarning = jobDescLoggedStallWarning.Default.(bool)
 	// jobDescID is the schema descriptor for id field.
@@ -84,8 +94,12 @@ func init() {
 	job.DefaultID = jobDescID.Default.(func() uuid.UUID)
 	keyvalueFields := schema.KeyValue{}.Fields()
 	_ = keyvalueFields
+	// keyvalueDescUpdatedAt is the schema descriptor for updatedAt field.
+	keyvalueDescUpdatedAt := keyvalueFields[2].Descriptor()
+	// keyvalue.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	keyvalue.UpdateDefaultUpdatedAt = keyvalueDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// keyvalueDescKey is the schema descriptor for key field.
-	keyvalueDescKey := keyvalueFields[1].Descriptor()
+	keyvalueDescKey := keyvalueFields[3].Descriptor()
 	// keyvalue.KeyValidator is a validator for the "key" field. It is called by the builders before save.
 	keyvalue.KeyValidator = func() func(string) error {
 		validators := keyvalueDescKey.Validators
@@ -108,20 +122,32 @@ func init() {
 	keyvalue.DefaultID = keyvalueDescID.Default.(func() uuid.UUID)
 	logentryFields := schema.LogEntry{}.Fields()
 	_ = logentryFields
+	// logentryDescUpdatedAt is the schema descriptor for updatedAt field.
+	logentryDescUpdatedAt := logentryFields[2].Descriptor()
+	// logentry.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	logentry.UpdateDefaultUpdatedAt = logentryDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// logentryDescID is the schema descriptor for id field.
 	logentryDescID := logentryFields[0].Descriptor()
 	// logentry.DefaultID holds the default value on creation for the id field.
 	logentry.DefaultID = logentryDescID.Default.(func() uuid.UUID)
 	loginalertFields := schema.LoginAlert{}.Fields()
 	_ = loginalertFields
+	// loginalertDescUpdatedAt is the schema descriptor for updatedAt field.
+	loginalertDescUpdatedAt := loginalertFields[2].Descriptor()
+	// loginalert.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	loginalert.UpdateDefaultUpdatedAt = loginalertDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// loginalertDescID is the schema descriptor for id field.
 	loginalertDescID := loginalertFields[0].Descriptor()
 	// loginalert.DefaultID holds the default value on creation for the id field.
 	loginalert.DefaultID = loginalertDescID.Default.(func() uuid.UUID)
 	periodictaskFields := schema.PeriodicTask{}.Fields()
 	_ = periodictaskFields
+	// periodictaskDescUpdatedAt is the schema descriptor for updatedAt field.
+	periodictaskDescUpdatedAt := periodictaskFields[2].Descriptor()
+	// periodictask.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	periodictask.UpdateDefaultUpdatedAt = periodictaskDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// periodictaskDescName is the schema descriptor for name field.
-	periodictaskDescName := periodictaskFields[1].Descriptor()
+	periodictaskDescName := periodictaskFields[3].Descriptor()
 	// periodictask.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	periodictask.NameValidator = func() func(string) error {
 		validators := periodictaskDescName.Validators
@@ -144,12 +170,16 @@ func init() {
 	periodictask.DefaultID = periodictaskDescID.Default.(func() uuid.UUID)
 	signuplinkFields := schema.SignupLink{}.Fields()
 	_ = signuplinkFields
+	// signuplinkDescUpdatedAt is the schema descriptor for updatedAt field.
+	signuplinkDescUpdatedAt := signuplinkFields[2].Descriptor()
+	// signuplink.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	signuplink.UpdateDefaultUpdatedAt = signuplinkDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// signuplinkDescName is the schema descriptor for name field.
-	signuplinkDescName := signuplinkFields[2].Descriptor()
+	signuplinkDescName := signuplinkFields[3].Descriptor()
 	// signuplink.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	signuplink.NameValidator = signuplinkDescName.Validators[0].(func(string) error)
 	// signuplinkDescHashedCode is the schema descriptor for hashedCode field.
-	signuplinkDescHashedCode := signuplinkFields[3].Descriptor()
+	signuplinkDescHashedCode := signuplinkFields[4].Descriptor()
 	// signuplink.HashedCodeValidator is a validator for the "hashedCode" field. It is called by the builders before save.
 	signuplink.HashedCodeValidator = func() func([]byte) error {
 		validators := signuplinkDescHashedCode.Validators
@@ -167,11 +197,11 @@ func init() {
 		}
 	}()
 	// signuplinkDescUserAgent is the schema descriptor for userAgent field.
-	signuplinkDescUserAgent := signuplinkFields[5].Descriptor()
+	signuplinkDescUserAgent := signuplinkFields[6].Descriptor()
 	// signuplink.DefaultUserAgent holds the default value on creation for the userAgent field.
 	signuplink.DefaultUserAgent = signuplinkDescUserAgent.Default.(string)
 	// signuplinkDescIP is the schema descriptor for ip field.
-	signuplinkDescIP := signuplinkFields[6].Descriptor()
+	signuplinkDescIP := signuplinkFields[7].Descriptor()
 	// signuplink.DefaultIP holds the default value on creation for the ip field.
 	signuplink.DefaultIP = signuplinkDescIP.Default.(string)
 	// signuplinkDescID is the schema descriptor for id field.
@@ -180,6 +210,10 @@ func init() {
 	signuplink.DefaultID = signuplinkDescID.Default.(func() uuid.UUID)
 	stashFields := schema.Stash{}.Fields()
 	_ = stashFields
+	// stashDescUpdatedAt is the schema descriptor for updatedAt field.
+	stashDescUpdatedAt := stashFields[2].Descriptor()
+	// stash.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	stash.UpdateDefaultUpdatedAt = stashDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// stashDescContent is the schema descriptor for content field.
 	stashDescContent := stashFields[4].Descriptor()
 	// stash.ContentValidator is a validator for the "content" field. It is called by the builders before save.
@@ -244,8 +278,12 @@ func init() {
 	stash.DefaultID = stashDescID.Default.(func() uuid.UUID)
 	twofactoractionFields := schema.TwoFactorAction{}.Fields()
 	_ = twofactoractionFields
+	// twofactoractionDescUpdatedAt is the schema descriptor for updatedAt field.
+	twofactoractionDescUpdatedAt := twofactoractionFields[2].Descriptor()
+	// twofactoraction.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	twofactoraction.UpdateDefaultUpdatedAt = twofactoractionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// twofactoractionDescType is the schema descriptor for type field.
-	twofactoractionDescType := twofactoractionFields[1].Descriptor()
+	twofactoractionDescType := twofactoractionFields[3].Descriptor()
 	// twofactoraction.TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	twofactoraction.TypeValidator = func() func(string) error {
 		validators := twofactoractionDescType.Validators
@@ -263,7 +301,7 @@ func init() {
 		}
 	}()
 	// twofactoractionDescCode is the schema descriptor for code field.
-	twofactoractionDescCode := twofactoractionFields[5].Descriptor()
+	twofactoractionDescCode := twofactoractionFields[7].Descriptor()
 	// twofactoraction.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	twofactoraction.CodeValidator = func() func(string) error {
 		validators := twofactoractionDescCode.Validators
@@ -286,6 +324,10 @@ func init() {
 	twofactoraction.DefaultID = twofactoractionDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescUpdatedAt is the schema descriptor for updatedAt field.
+	userDescUpdatedAt := userFields[2].Descriptor()
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescUsername is the schema descriptor for username field.
 	userDescUsername := userFields[3].Descriptor()
 	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
@@ -300,8 +342,12 @@ func init() {
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 	usermessengerFields := schema.UserMessenger{}.Fields()
 	_ = usermessengerFields
+	// usermessengerDescUpdatedAt is the schema descriptor for updatedAt field.
+	usermessengerDescUpdatedAt := usermessengerFields[2].Descriptor()
+	// usermessenger.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
+	usermessenger.UpdateDefaultUpdatedAt = usermessengerDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// usermessengerDescType is the schema descriptor for type field.
-	usermessengerDescType := usermessengerFields[1].Descriptor()
+	usermessengerDescType := usermessengerFields[3].Descriptor()
 	// usermessenger.TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	usermessenger.TypeValidator = func() func(string) error {
 		validators := usermessengerDescType.Validators
@@ -319,7 +365,7 @@ func init() {
 		}
 	}()
 	// usermessengerDescEnabled is the schema descriptor for enabled field.
-	usermessengerDescEnabled := usermessengerFields[3].Descriptor()
+	usermessengerDescEnabled := usermessengerFields[5].Descriptor()
 	// usermessenger.DefaultEnabled holds the default value on creation for the enabled field.
 	usermessenger.DefaultEnabled = usermessengerDescEnabled.Default.(bool)
 	// usermessengerDescID is the schema descriptor for id field.

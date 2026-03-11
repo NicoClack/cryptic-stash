@@ -45,6 +45,12 @@ func (_u *DownloadSessionUpdate) SetNillableCreatedAt(v *time.Time) *DownloadSes
 	return _u
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *DownloadSessionUpdate) SetUpdatedAt(v time.Time) *DownloadSessionUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // SetHashedAuthCode sets the "hashedAuthCode" field.
 func (_u *DownloadSessionUpdate) SetHashedAuthCode(v []byte) *DownloadSessionUpdate {
 	_u.mutation.SetHashedAuthCode(v)
@@ -175,6 +181,7 @@ func (_u *DownloadSessionUpdate) RemoveLoginAlerts(v ...*LoginAlert) *DownloadSe
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *DownloadSessionUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -197,6 +204,14 @@ func (_u *DownloadSessionUpdate) Exec(ctx context.Context) error {
 func (_u *DownloadSessionUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *DownloadSessionUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := downloadsession.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -227,6 +242,9 @@ func (_u *DownloadSessionUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(downloadsession.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.HashedAuthCode(); ok {
 		_spec.SetField(downloadsession.FieldHashedAuthCode, field.TypeBytes, value)
@@ -348,6 +366,12 @@ func (_u *DownloadSessionUpdateOne) SetNillableCreatedAt(v *time.Time) *Download
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_u *DownloadSessionUpdateOne) SetUpdatedAt(v time.Time) *DownloadSessionUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -494,6 +518,7 @@ func (_u *DownloadSessionUpdateOne) Select(field string, fields ...string) *Down
 
 // Save executes the query and returns the updated DownloadSession entity.
 func (_u *DownloadSessionUpdateOne) Save(ctx context.Context) (*DownloadSession, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -516,6 +541,14 @@ func (_u *DownloadSessionUpdateOne) Exec(ctx context.Context) error {
 func (_u *DownloadSessionUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *DownloadSessionUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := downloadsession.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -563,6 +596,9 @@ func (_u *DownloadSessionUpdateOne) sqlSave(ctx context.Context) (_node *Downloa
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(downloadsession.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(downloadsession.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.HashedAuthCode(); ok {
 		_spec.SetField(downloadsession.FieldHashedAuthCode, field.TypeBytes, value)

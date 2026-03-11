@@ -26,6 +26,18 @@ type LoginAlertCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "createdAt" field.
+func (_c *LoginAlertCreate) SetCreatedAt(v time.Time) *LoginAlertCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *LoginAlertCreate) SetUpdatedAt(v time.Time) *LoginAlertCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetSentAt sets the "sentAt" field.
 func (_c *LoginAlertCreate) SetSentAt(v time.Time) *LoginAlertCreate {
 	_c.mutation.SetSentAt(v)
@@ -117,6 +129,12 @@ func (_c *LoginAlertCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *LoginAlertCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "LoginAlert.createdAt"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "LoginAlert.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.SentAt(); !ok {
 		return &ValidationError{Name: "sentAt", err: errors.New(`ent: missing required field "LoginAlert.sentAt"`)}
 	}
@@ -171,6 +189,14 @@ func (_c *LoginAlertCreate) createSpec() (*LoginAlert, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(loginalert.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(loginalert.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := _c.mutation.SentAt(); ok {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
 		_node.SentAt = value
@@ -220,7 +246,7 @@ func (_c *LoginAlertCreate) createSpec() (*LoginAlert, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.LoginAlert.Create().
-//		SetSentAt(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -229,7 +255,7 @@ func (_c *LoginAlertCreate) createSpec() (*LoginAlert, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.LoginAlertUpsert) {
-//			SetSentAt(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *LoginAlertCreate) OnConflict(opts ...sql.ConflictOption) *LoginAlertUpsertOne {
@@ -264,6 +290,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *LoginAlertUpsert) SetCreatedAt(v time.Time) *LoginAlertUpsert {
+	u.Set(loginalert.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *LoginAlertUpsert) UpdateCreatedAt() *LoginAlertUpsert {
+	u.SetExcluded(loginalert.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *LoginAlertUpsert) SetUpdatedAt(v time.Time) *LoginAlertUpsert {
+	u.Set(loginalert.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *LoginAlertUpsert) UpdateUpdatedAt() *LoginAlertUpsert {
+	u.SetExcluded(loginalert.FieldUpdatedAt)
+	return u
+}
 
 // SetSentAt sets the "sentAt" field.
 func (u *LoginAlertUpsert) SetSentAt(v time.Time) *LoginAlertUpsert {
@@ -359,6 +409,34 @@ func (u *LoginAlertUpsertOne) Update(set func(*LoginAlertUpsert)) *LoginAlertUps
 		set(&LoginAlertUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *LoginAlertUpsertOne) SetCreatedAt(v time.Time) *LoginAlertUpsertOne {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *LoginAlertUpsertOne) UpdateCreatedAt() *LoginAlertUpsertOne {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *LoginAlertUpsertOne) SetUpdatedAt(v time.Time) *LoginAlertUpsertOne {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *LoginAlertUpsertOne) UpdateUpdatedAt() *LoginAlertUpsertOne {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetSentAt sets the "sentAt" field.
@@ -553,7 +631,7 @@ func (_c *LoginAlertCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.LoginAlertUpsert) {
-//			SetSentAt(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *LoginAlertCreateBulk) OnConflict(opts ...sql.ConflictOption) *LoginAlertUpsertBulk {
@@ -630,6 +708,34 @@ func (u *LoginAlertUpsertBulk) Update(set func(*LoginAlertUpsert)) *LoginAlertUp
 		set(&LoginAlertUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *LoginAlertUpsertBulk) SetCreatedAt(v time.Time) *LoginAlertUpsertBulk {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *LoginAlertUpsertBulk) UpdateCreatedAt() *LoginAlertUpsertBulk {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *LoginAlertUpsertBulk) SetUpdatedAt(v time.Time) *LoginAlertUpsertBulk {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *LoginAlertUpsertBulk) UpdateUpdatedAt() *LoginAlertUpsertBulk {
+	return u.Update(func(s *LoginAlertUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetSentAt sets the "sentAt" field.

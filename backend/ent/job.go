@@ -21,6 +21,8 @@ type Job struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "createdAt" field.
 	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// DueAt holds the value of the "dueAt" field.
 	DueAt time.Time `json:"dueAt,omitempty"`
 	// OriginallyDueAt holds the value of the "originallyDueAt" field.
@@ -63,7 +65,7 @@ func (*Job) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case job.FieldType, job.FieldStatus:
 			values[i] = new(sql.NullString)
-		case job.FieldCreatedAt, job.FieldDueAt, job.FieldOriginallyDueAt, job.FieldStartedAt:
+		case job.FieldCreatedAt, job.FieldUpdatedAt, job.FieldDueAt, job.FieldOriginallyDueAt, job.FieldStartedAt:
 			values[i] = new(sql.NullTime)
 		case job.FieldID:
 			values[i] = new(uuid.UUID)
@@ -93,6 +95,12 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
+			}
+		case job.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		case job.FieldDueAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -206,6 +214,9 @@ func (_m *Job) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("createdAt=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updatedAt=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("dueAt=")
 	builder.WriteString(_m.DueAt.Format(time.ANSIC))

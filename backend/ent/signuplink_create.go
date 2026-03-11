@@ -31,6 +31,12 @@ func (_c *SignupLinkCreate) SetCreatedAt(v time.Time) *SignupLinkCreate {
 	return _c
 }
 
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *SignupLinkCreate) SetUpdatedAt(v time.Time) *SignupLinkCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *SignupLinkCreate) SetName(v string) *SignupLinkCreate {
 	_c.mutation.SetName(v)
@@ -164,6 +170,9 @@ func (_c *SignupLinkCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "SignupLink.createdAt"`)}
 	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "SignupLink.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "SignupLink.name"`)}
 	}
@@ -228,6 +237,10 @@ func (_c *SignupLinkCreate) createSpec() (*SignupLink, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(signuplink.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(signuplink.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(signuplink.FieldName, field.TypeString, value)
@@ -327,6 +340,18 @@ func (u *SignupLinkUpsert) SetCreatedAt(v time.Time) *SignupLinkUpsert {
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
 func (u *SignupLinkUpsert) UpdateCreatedAt() *SignupLinkUpsert {
 	u.SetExcluded(signuplink.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *SignupLinkUpsert) SetUpdatedAt(v time.Time) *SignupLinkUpsert {
+	u.Set(signuplink.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *SignupLinkUpsert) UpdateUpdatedAt() *SignupLinkUpsert {
+	u.SetExcluded(signuplink.FieldUpdatedAt)
 	return u
 }
 
@@ -467,6 +492,20 @@ func (u *SignupLinkUpsertOne) SetCreatedAt(v time.Time) *SignupLinkUpsertOne {
 func (u *SignupLinkUpsertOne) UpdateCreatedAt() *SignupLinkUpsertOne {
 	return u.Update(func(s *SignupLinkUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *SignupLinkUpsertOne) SetUpdatedAt(v time.Time) *SignupLinkUpsertOne {
+	return u.Update(func(s *SignupLinkUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *SignupLinkUpsertOne) UpdateUpdatedAt() *SignupLinkUpsertOne {
+	return u.Update(func(s *SignupLinkUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 
@@ -787,6 +826,20 @@ func (u *SignupLinkUpsertBulk) SetCreatedAt(v time.Time) *SignupLinkUpsertBulk {
 func (u *SignupLinkUpsertBulk) UpdateCreatedAt() *SignupLinkUpsertBulk {
 	return u.Update(func(s *SignupLinkUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *SignupLinkUpsertBulk) SetUpdatedAt(v time.Time) *SignupLinkUpsertBulk {
+	return u.Update(func(s *SignupLinkUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *SignupLinkUpsertBulk) UpdateUpdatedAt() *SignupLinkUpsertBulk {
+	return u.Update(func(s *SignupLinkUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 

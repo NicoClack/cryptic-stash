@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +23,18 @@ type KeyValueCreate struct {
 	mutation *KeyValueMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (_c *KeyValueCreate) SetCreatedAt(v time.Time) *KeyValueCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (_c *KeyValueCreate) SetUpdatedAt(v time.Time) *KeyValueCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetKey sets the "key" field.
@@ -93,6 +106,12 @@ func (_c *KeyValueCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *KeyValueCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "KeyValue.createdAt"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "KeyValue.updatedAt"`)}
+	}
 	if _, ok := _c.mutation.Key(); !ok {
 		return &ValidationError{Name: "key", err: errors.New(`ent: missing required field "KeyValue.key"`)}
 	}
@@ -140,6 +159,14 @@ func (_c *KeyValueCreate) createSpec() (*KeyValue, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(keyvalue.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(keyvalue.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := _c.mutation.Key(); ok {
 		_spec.SetField(keyvalue.FieldKey, field.TypeString, value)
 		_node.Key = value
@@ -155,7 +182,7 @@ func (_c *KeyValueCreate) createSpec() (*KeyValue, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.KeyValue.Create().
-//		SetKey(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -164,7 +191,7 @@ func (_c *KeyValueCreate) createSpec() (*KeyValue, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.KeyValueUpsert) {
-//			SetKey(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *KeyValueCreate) OnConflict(opts ...sql.ConflictOption) *KeyValueUpsertOne {
@@ -199,6 +226,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *KeyValueUpsert) SetCreatedAt(v time.Time) *KeyValueUpsert {
+	u.Set(keyvalue.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *KeyValueUpsert) UpdateCreatedAt() *KeyValueUpsert {
+	u.SetExcluded(keyvalue.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *KeyValueUpsert) SetUpdatedAt(v time.Time) *KeyValueUpsert {
+	u.Set(keyvalue.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *KeyValueUpsert) UpdateUpdatedAt() *KeyValueUpsert {
+	u.SetExcluded(keyvalue.FieldUpdatedAt)
+	return u
+}
 
 // SetKey sets the "key" field.
 func (u *KeyValueUpsert) SetKey(v string) *KeyValueUpsert {
@@ -270,6 +321,34 @@ func (u *KeyValueUpsertOne) Update(set func(*KeyValueUpsert)) *KeyValueUpsertOne
 		set(&KeyValueUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *KeyValueUpsertOne) SetCreatedAt(v time.Time) *KeyValueUpsertOne {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *KeyValueUpsertOne) UpdateCreatedAt() *KeyValueUpsertOne {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *KeyValueUpsertOne) SetUpdatedAt(v time.Time) *KeyValueUpsertOne {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *KeyValueUpsertOne) UpdateUpdatedAt() *KeyValueUpsertOne {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetKey sets the "key" field.
@@ -436,7 +515,7 @@ func (_c *KeyValueCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.KeyValueUpsert) {
-//			SetKey(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (_c *KeyValueCreateBulk) OnConflict(opts ...sql.ConflictOption) *KeyValueUpsertBulk {
@@ -513,6 +592,34 @@ func (u *KeyValueUpsertBulk) Update(set func(*KeyValueUpsert)) *KeyValueUpsertBu
 		set(&KeyValueUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetCreatedAt sets the "createdAt" field.
+func (u *KeyValueUpsertBulk) SetCreatedAt(v time.Time) *KeyValueUpsertBulk {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
+func (u *KeyValueUpsertBulk) UpdateCreatedAt() *KeyValueUpsertBulk {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updatedAt" field.
+func (u *KeyValueUpsertBulk) SetUpdatedAt(v time.Time) *KeyValueUpsertBulk {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
+func (u *KeyValueUpsertBulk) UpdateUpdatedAt() *KeyValueUpsertBulk {
+	return u.Update(func(s *KeyValueUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetKey sets the "key" field.
