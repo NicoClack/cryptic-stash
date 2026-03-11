@@ -228,6 +228,9 @@ func (registry *Registry) Send(
 	sendTime time.Time,
 	ctx context.Context,
 ) common.WrappedError {
+	if message.User.Edges.Messengers == nil {
+		panic("Send: user messengers edge must be loaded")
+	}
 	messengerDef, ok := registry.messengers[versionedType]
 	if !ok {
 		return ErrWrapperSend.Wrap(ErrUnknownMessengerType)
@@ -352,8 +355,8 @@ func (registry *Registry) SendBulk(
 	return nil
 }
 
-func (registry *Registry) GetConfiguredMessengerTypes(user *ent.User) []string {
-	if user.Edges.Messengers == nil {
+func (registry *Registry) GetConfiguredMessengerTypes(userOb *ent.User) []string {
+	if userOb.Edges.Messengers == nil {
 		panic("GetConfiguredMessengerTypes: user messengers edge must be loaded")
 	}
 
@@ -363,7 +366,7 @@ func (registry *Registry) GetConfiguredMessengerTypes(user *ent.User) []string {
 			versionedType,
 			&common.Message{
 				Type: common.MessageTest,
-				User: user,
+				User: userOb,
 			},
 		)
 		if wrappedErr != nil {
