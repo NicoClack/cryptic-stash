@@ -13,8 +13,8 @@ class AdminAuthState {
 
 	constructor() {
 		if (browser) {
-			const sessionToken = localStorage.getItem(ADMIN_SESSION_TOKEN_STORAGE_KEY);
-			const userID = localStorage.getItem(ADMIN_USER_ID_STORAGE_KEY);
+			const sessionToken = sessionStorage.getItem(ADMIN_SESSION_TOKEN_STORAGE_KEY);
+			const userID = sessionStorage.getItem(ADMIN_USER_ID_STORAGE_KEY);
 			if (sessionToken && userID) {
 				this.#sessionToken = sessionToken;
 				this.#userID = userID;
@@ -46,8 +46,8 @@ class AdminAuthState {
 	login(sessionToken: string, userID: string) {
 		this.#sessionToken = sessionToken;
 		this.#userID = userID;
-		localStorage.setItem(ADMIN_SESSION_TOKEN_STORAGE_KEY, sessionToken);
-		localStorage.setItem(ADMIN_USER_ID_STORAGE_KEY, userID);
+		sessionStorage.setItem(ADMIN_SESSION_TOKEN_STORAGE_KEY, sessionToken);
+		sessionStorage.setItem(ADMIN_USER_ID_STORAGE_KEY, userID);
 
 		const redirectTo = page.url.searchParams.get("redirectTo");
 		if (redirectTo) {

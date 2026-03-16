@@ -4,20 +4,21 @@
 - Encrypt stashes using a random key and store that key encrypted with the user's password hash? Instead of encrypting with user's password hash directly. Would that prevent side channel attacks from revealing stash size? Maybe makes it more flexible in the future?
 - Hash authorisation codes with SHA256 to ensure read access to the database doesn't allow active download sessions to be hijacked
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
-- Crash signals don't seem to show up in Railway
+- Crash signals don't seem to show up in Railway. Is it because of the restart policy? Is the email only sent if the max is exceeded?
 - Rate limit hashing, maybe also limit per IP concurrent calls?
+-   Limit number of concurrent hash requests to avoid using too much RAM
 - Use hash to store code in signup links rather than search param, that way it doesn't show up in logs
 - Allow creating signup links to change stash contents/password
 - Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
 - Use HSTS in Production
+- Improve frontend security: CSP/HSTS/X-Frame-Options/X-Content-Type-Options/Referrer-Policy
 -   Improve frontend
 -   Remove userID and publicMessage from logger, it's not worth the complexity and risks
 - Encrypt stashes with an extra key to prevent offline attacks if database is leaked
 -   Can cancelling requests make views non-atomic if a view uses multiple transactions? Are there any security risks with this?
 -   Standardise returning errors and using gin.H vs the endpoint specific download struct. That struct applies defaults which the other 2 approaches don't, so it could leak information
 -   Experiment using Cloudflare to prevent DDoS requests on the hashing endpoint. It's not a great idea to shift the hashing to the client due to WASM and different devices' RAM limitations. Can specifically limit that endpoint
--   Limit number of concurrent hash requests to avoid using too much RAM
 -   Avoid sending successful responses inside a transaction because it could fail while committing?
 -   Add limits on self-locking so a hacker can't lock you out forever
 -   -   Attempting to get an authorisation code when locked should send the unlock date
@@ -62,6 +63,7 @@
 - Improved audit logging
 - Reduce some of the duplication in test setup
 
+- Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 -   Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints
 -   Create servicescommon so things can be split up better?
@@ -92,12 +94,19 @@
 
 How password managers work. Maybe a zero trust system is actually possible?
 
+Is it safe to hash an Argon2ID hash with Argon2ID?
+https://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
+
+Can long passwords be used to DoS?
+
+Can I zero sensitive memory on the frontend and backend?
+
+
 Can I wake up a sleeping railway app by just having a separate cron service send an HTTP request over the internal network?
 
 Maybe have the server save the time periodically and on shutdown? Then when it starts it runs through the cron jobs it missed? It probably shouldn't run the same jobs multiple times though
 
-Reduce the necessary trust in the server by using OPAQUE?
-https://blog.cloudflare.com/opaque-oblivious-passwords/
+Prevent replay attacks on download endpoint with challenge-response system? Not really a concern because if the attacker is able to view the requests, chances are they have access to the responses too, which include the encrypted stashes. Probably means they've compromised the client, server or somehow the network. 
 
 # Testing
 
