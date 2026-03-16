@@ -109,10 +109,15 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		salt := app.Core.GenerateSalt()
 		encryptionKey := app.Core.HashPassword(body.Password, salt, hashSettings)
 		stashDataKey := app.Core.GenerateSalt()
-		encrypted, wrappedErr := app.Core.Encrypt(contentBytes, stashDataKey)
+		encryptedContent, wrappedErr := app.Core.Encrypt(contentBytes, stashDataKey)
 		if wrappedErr != nil {
 			return wrappedErr
 		}
+		encryptedFileName, wrappedErr := app.Core.Encrypt([]byte(body.Filename), stashDataKey)
+		if wrappedErr != nil {
+			return wrappedErr
+		}
+
 		encryptedDataKey, wrappedErr := app.Core.Encrypt(stashDataKey, encryptionKey)
 		if wrappedErr != nil {
 			return wrappedErr
@@ -142,8 +147,8 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				stdErr = tx.Stash.Create().
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
-					SetContent(encrypted).
-					SetFileName([]byte(body.Filename)).
+					SetContent(encryptedContent).
+					SetFileName(encryptedFileName).
 					SetEncryptionDataKey(encryptedDataKey).
 					SetPasswordSalt(salt).
 					SetHashTime(hashSettings.Time).
