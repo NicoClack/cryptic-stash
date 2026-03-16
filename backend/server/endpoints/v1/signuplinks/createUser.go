@@ -108,7 +108,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 
 		salt := app.Core.GenerateSalt()
 		encryptionKey := app.Core.HashPassword(body.Password, salt, hashSettings)
-		stashDataKey := app.Core.GenerateSalt()
+		stashDataKey := app.Core.GenerateEncryptionKey()
 		encryptedContent, wrappedErr := app.Core.Encrypt(contentBytes, stashDataKey)
 		if wrappedErr != nil {
 			return wrappedErr
