@@ -82,6 +82,7 @@
 - Delete accounts if they're locked for too long (GDPR)
 - - Lock accounts if the user doesn't respond to the regular messenger check.
 - - The email messenger probably shouldn't ever be disabled automatically? Should it be manually disableable?
+- Delete old logs and other sources of PII periodically
 
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging

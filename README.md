@@ -24,6 +24,7 @@ Technical features:
 - Improved rate limiting limits to concurrent hashing
 - More messengers
 - Further reduced dependencies
+- I'm currently trying to decide on a licence, although it will most likely be GPL3 or AGPL3
 - Other plans and thoughts in the [TODO.md](./TODO.md)
 
 # Note
