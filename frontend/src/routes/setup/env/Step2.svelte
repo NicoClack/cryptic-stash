@@ -45,6 +45,10 @@
 		Please scan this QR code in your authenticator app (e.g., Google Authenticator, Authy) and enter
 		the 2FA code you see.
 	</p>
+	<p class="text-sm text-muted-foreground md:text-base">
+		Note: backup codes aren't provided because you can reset the admin auth by changing the server's
+		environment variables.
+	</p>
 	<div class="h-25 w-25 overflow-hidden rounded-md border border-border bg-card p-2">
 		{#await qrcodeUrlPromise then qrcodeUrl}
 			<img class="h-full w-full" alt="TOTP QR Code" src={qrcodeUrl} width="100" height="100" />
