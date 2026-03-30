@@ -1,13 +1,24 @@
 # TODO
 
-- Create endpoint for creating a user with a given username. Can then generate a signup link for a user to update their stash and password. That way the user doesn't need to give the admin their password and data, and the admin doesn't need to give their password/download session
-- Encrypt stashes using a random key and store that key encrypted with the user's password hash? Instead of encrypting with user's password hash directly. Would that prevent side channel attacks from revealing stash size? Maybe makes it more flexible in the future?
-- Hash authorisation codes with SHA256 to ensure read access to the database doesn't allow active download sessions to be hijacked
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
-- Crash signals don't seem to show up in Railway. Is it because of the restart policy? Is the email only sent if the max is exceeded?
-- Rate limit hashing, maybe also limit per IP concurrent calls?
--   Limit number of concurrent hash requests to avoid using too much RAM
+- Rate limit hashing
+- - Limit number of concurrent hash requests to avoid using too much RAM
+- - Block IPs who get passwords wrong too often. Use exponential backoff
 - Use hash to store code in signup links rather than search param, that way it doesn't show up in logs
+- Prevent username enumeration? Does user ID enumeration matter if the login endpoint only accepts usernames?
+- - n8n just seems to mitigate with jitter, probably enough: https://github.com/n8n-io/n8n/pull/24553/changes
+- - Reset emails should always succeed unless triggered by an admin (maybe only implement the latter for now)
+- - Invites should specify the email and not allow it to be changed, like n8n
+- - If using usernames on signup page, could mitigate by limiting failed uses of a signup link and requiring a unique credit card for public signups (if I ever implement that)
+- - Can fake salts by hashing something deterministic like the email with a static pepper. If the pepper is leaked, I can just rotate it. If the database is leaked, the attacker has the stash records anyway. This approach means I don't need to store the random data I'm sending to ensure consistent results 
+- - Encrypt user emails with static env?
+- Add password strength requirements, maybe using https://github.com/dropbox/zxcvbn or https://github.com/zxcvbn-ts/zxcvbn ? Use matcher-pwned
+- Add /.well-known/change-password redirect
+- Add /.well-known/security.txt redirect to GitHub
+- Test security using standard tools, maybe make custom scripts too?
+- Crash signals don't seem to show up in Railway. Is it because of the restart policy? Is the email only sent if the max is exceeded?
+- - Looks like it. Maybe recommend using Railway's webhooks in Discord or Slack?
+- - Or configure max restarts to zero, but then it will require a manual restart. Might be worth it depending on threat model though
 - Allow creating signup links to change stash contents/password
 - Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
@@ -19,15 +30,21 @@
 -   Can cancelling requests make views non-atomic if a view uses multiple transactions? Are there any security risks with this?
 -   Standardise returning errors and using gin.H vs the endpoint specific download struct. That struct applies defaults which the other 2 approaches don't, so it could leak information
 -   Experiment using Cloudflare to prevent DDoS requests on the hashing endpoint. It's not a great idea to shift the hashing to the client due to WASM and different devices' RAM limitations. Can specifically limit that endpoint
+- Implement Cloudflare Turnstile or reCAPTCHA. Turnstile is better for privacy so probably use that
 -   Avoid sending successful responses inside a transaction because it could fail while committing?
 -   Add limits on self-locking so a hacker can't lock you out forever
 -   -   Attempting to get an authorisation code when locked should send the unlock date
 -   Repeat password in sign up form
 -   -   Admins should be able to reset it so if there's an unauthorised login, the user can block with a self lock, the admin can reset them and then they can block again without waiting
+- Use Discord API directly instead of discordgo
+- Use final scratch image instead of Apline for running the backend, the build has no dependencies, so I don't even need commands like "ls"
+- Remove clockwork and use Go's built-in mock time
+- Send warning message when a login uses the correct password but the account is locked
 - Implement more messengers:
 - - Email (SendGrid)
 - - ntfy.sh
 - - Matrix?
+- - Slack
 - - Probably not SMS or Signal as they require renting a phone number
 - - Not WhatsApp because their business API seems expensive
 -   CSRF?
@@ -62,6 +79,9 @@
 - Don't delete download sessions?
 - Improved audit logging
 - Reduce some of the duplication in test setup
+- Delete accounts if they're locked for too long (GDPR)
+- - Lock accounts if the user doesn't respond to the regular messenger check.
+- - The email messenger probably shouldn't ever be disabled automatically? Should it be manually disableable?
 
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
