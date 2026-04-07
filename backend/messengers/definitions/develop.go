@@ -24,7 +24,7 @@ func Develop1() *messengers.Definition {
 			return &Develop1Body{
 				FullMessage: fmt.Sprintf(
 					"\nmessage sent to user \"%v\":\n%v\n",
-					prepareCtx.Message.User.Username, formattedMessage,
+					prepareCtx.Message.User.Username, formattedMessage.Body,
 				),
 			}, nil
 		},

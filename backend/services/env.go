@@ -69,7 +69,12 @@ func LoadEnvironmentVariables() *common.Env {
 
 		ENABLE_DEVELOP_MESSENGER: common.OptionalBoolEnv("ENABLE_DEVELOP_MESSENGER", false),
 		DISCORD_TOKEN:            common.OptionalEnv("DISCORD_TOKEN", ""),
-		SENDGRID_TOKEN:           common.OptionalEnv("SENDGRID_TOKEN", ""),
+		SMTP_HOST:                common.OptionalEnv("SMTP_HOST", ""),
+		SMTP_PORT:                common.OptionalIntEnv("SMTP_PORT", 0),
+		SMTP_USERNAME:            common.OptionalEnv("SMTP_USERNAME", ""),
+		SMTP_PASSWORD:            common.OptionalEnv("SMTP_PASSWORD", ""),
+		SMTP_FROM_EMAIL:          common.OptionalEnv("SMTP_FROM_EMAIL", ""),
+		SMTP_FROM_NAME:           common.OptionalEnv("SMTP_FROM_NAME", "Cryptic Stash"),
 	}
 	ValidateEnvironmentVariables(env)
 	return env
@@ -96,5 +101,17 @@ func ValidateEnvironmentVariables(env *common.Env) {
 
 	if env.ENABLE_ENV_SETUP {
 		slog.Warn("setup mode is enabled. please complete the setup in the app and avoid leaving it in this state.")
+	}
+
+	if !common.AllOrNone(
+		env.SMTP_HOST == "",
+		env.SMTP_PORT == 0,
+		env.SMTP_USERNAME == "",
+		env.SMTP_PASSWORD == "",
+		env.SMTP_FROM_EMAIL == "",
+	) {
+		log.Fatal(
+			"SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD and SMTP_FROM_EMAIL must either all be set or all be unset.",
+		)
 	}
 }

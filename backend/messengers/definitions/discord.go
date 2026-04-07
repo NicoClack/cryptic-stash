@@ -105,7 +105,7 @@ func Discord1(app *common.App) *messengers.Definition {
 
 			return &Discord1Body{
 				Options:          options,
-				FormattedMessage: formattedMessage,
+				FormattedMessage: formattedMessage.Body,
 			}, nil
 		},
 		BodyType: &Discord1Body{},

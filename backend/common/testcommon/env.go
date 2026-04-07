@@ -56,6 +56,11 @@ func DefaultEnv() *common.Env {
 
 		ENABLE_DEVELOP_MESSENGER: false,
 		DISCORD_TOKEN:            "",
-		SENDGRID_TOKEN:           "",
+		SMTP_HOST:                "",
+		SMTP_PORT:                0,
+		SMTP_USERNAME:            "",
+		SMTP_PASSWORD:            "",
+		SMTP_FROM_EMAIL:          "",
+		SMTP_FROM_NAME:           "Cryptic Stash",
 	}
 }

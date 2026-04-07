@@ -67,7 +67,12 @@ type Env struct {
 
 	ENABLE_DEVELOP_MESSENGER bool
 	DISCORD_TOKEN            string
-	SENDGRID_TOKEN           string // TODO: implement
+	SMTP_HOST                string
+	SMTP_PORT                int
+	SMTP_USERNAME            string
+	SMTP_PASSWORD            string
+	SMTP_FROM_EMAIL          string
+	SMTP_FROM_NAME           string
 }
 type PasswordHashSettings struct {
 	Time   uint32
