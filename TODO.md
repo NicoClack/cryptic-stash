@@ -83,6 +83,11 @@
 - - Lock accounts if the user doesn't respond to the regular messenger check.
 - - The email messenger probably shouldn't ever be disabled automatically? Should it be manually disableable?
 - Delete old logs and other sources of PII periodically
+- Improve frontend/local dev security:
+- - Switch to Deno and limit postinstall scripts (locally and in CI)
+- - Use CSP to prevent fetches to other origins
+- - Use socket.dev to reduce chance of the frontend having malicious code? Create E2E test and see if any suspicious data is sent off
+- - Use npm-check-updates with a cooldown of a few days
 
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging

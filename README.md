@@ -21,7 +21,7 @@ Technical features:
 - - Cryptic Stash probably can't save you if your accounts are hacked, so as long as stashes can't be downloaded without the password (which doesn't have to be stored in your password manager), the inconvenience isn't worth it
 - - Plus relying on the admin too much could increase social engineering attacks
 - - It would also be harder for users to keep their messengers up-to-date
-- Improved rate limiting limits to concurrent hashing
+- Improved rate limiting and limits to concurrent hashing
 - More messengers
 - Further reduced dependencies
 - I'm currently trying to decide on a licence, although it will most likely be GPL3 or AGPL3
