@@ -108,12 +108,13 @@ func ValidateEnvironmentVariables(env *common.Env) {
 	if !common.AllOrNone(
 		env.SMTP_HOST == "",
 		env.SMTP_PORT == 0,
-		env.SMTP_USERNAME == "",
-		env.SMTP_PASSWORD == "",
 		env.SMTP_FROM_EMAIL == "",
 	) {
 		log.Fatal(
-			"SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD and SMTP_FROM_EMAIL must either all be set or all be unset.",
+			"SMTP_HOST, SMTP_PORT, SMTP_FROM_EMAIL must either all be set or all be unset.",
 		)
+	}
+	if !env.SMTP_REQUIRE_TLS && !env.IS_DEV {
+		slog.Warn("SMTP_REQUIRE_TLS should be set to true for production environments")
 	}
 }

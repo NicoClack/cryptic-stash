@@ -184,14 +184,19 @@ func SMTP1(app *common.App) *messengers.Definition {
 				}
 			}
 
-			stdErr = client.Auth(smtp.PlainAuth(
-				"",
-				app.Env.SMTP_USERNAME,
-				app.Env.SMTP_PASSWORD,
-				app.Env.SMTP_HOST,
-			))
-			if stdErr != nil {
-				return ErrWrapperSMTP.Wrap(stdErr)
+			// Dev SMTP servers like Mailpit don't use authentication
+			// This is safe because TLS is established above
+			ok, _ := client.Extension("AUTH")
+			if ok {
+				stdErr = client.Auth(smtp.PlainAuth(
+					"",
+					app.Env.SMTP_USERNAME,
+					app.Env.SMTP_PASSWORD,
+					app.Env.SMTP_HOST,
+				))
+				if stdErr != nil {
+					return ErrWrapperSMTP.Wrap(stdErr)
+				}
 			}
 
 			stdErr = client.Mail(from.Address)
