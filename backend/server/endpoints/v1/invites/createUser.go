@@ -1,4 +1,4 @@
-package signuplinks
+package invites
 
 import (
 	"context"

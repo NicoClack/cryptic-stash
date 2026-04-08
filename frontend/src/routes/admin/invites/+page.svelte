@@ -90,7 +90,7 @@
 		try {
 			const query = normalizeUsername(nameFilter.trim());
 			const suffix = query ? `?name=${encodeURIComponent(query)}` : "";
-			const response = await fetchAdminJson(fetch, `/api/v1/admin/signup-links/${suffix}`);
+			const response = await fetchAdminJson(fetch, `/api/v1/admin/invites/${suffix}`);
 			if (!response.ok) {
 				requestError = getErrorMessage(response);
 				return;
@@ -116,7 +116,7 @@
 			const expiresInSeconds =
 				isNaN(parsedHours) || parsedHours < 0 ? null : Math.floor(parsedHours * 3600);
 
-			const response = await fetchAdminJson(fetch, "/api/v1/admin/signup-links/create", {
+			const response = await fetchAdminJson(fetch, "/api/v1/admin/invites/create", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({

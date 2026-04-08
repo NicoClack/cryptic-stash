@@ -157,6 +157,7 @@ type MessengerService interface {
 type MessageType string
 
 const (
+	MessageInvite                                    = "invite"
 	MessageTest                          MessageType = "test"
 	MessageAdminError                    MessageType = "adminError"
 	MessageRegular                       MessageType = "regular"
@@ -174,6 +175,8 @@ const (
 type Message struct {
 	Type               MessageType
 	User               *ent.User
+	InviteMessage      string
+	URL                string
 	Code               string
 	Time               time.Time
 	DownloadSessionIDs []uuid.UUID

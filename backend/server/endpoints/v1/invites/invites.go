@@ -1,4 +1,4 @@
-package signuplinks
+package invites
 
 import "github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 

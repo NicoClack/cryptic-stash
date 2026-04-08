@@ -108,13 +108,9 @@
 		}
 
 		try {
-			const response = await fetchJson(
-				fetch,
-				`/api/v1/signup-links/${encodeURIComponent(signupId)}`,
-				{
-					headers: getAuthHeaders(),
-				},
-			);
+			const response = await fetchJson(fetch, `/api/v1/invites/${encodeURIComponent(signupId)}`, {
+				headers: getAuthHeaders(),
+			});
 			if (!response.ok) {
 				requestError = getErrorMessage(response);
 				return;
@@ -155,7 +151,7 @@
 		try {
 			const response = await fetchJson(
 				fetch,
-				`/api/v1/signup-links/${encodeURIComponent(signupId)}/create-user`,
+				`/api/v1/invites/${encodeURIComponent(signupId)}/create-user`,
 				{
 					method: "POST",
 					headers: {
