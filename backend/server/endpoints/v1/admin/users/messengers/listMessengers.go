@@ -3,7 +3,6 @@ package messengers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -63,11 +62,14 @@ func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
 			versionedType := common.GetVersionedType(messengerOb.Type, messengerOb.Version)
 			definition, ok := app.Messengers.GetPublicDefinition(versionedType)
 			if !ok {
-				return fmt.Errorf(
-					"user %v has %v messenger configured but it has no definition",
+				app.Logger.Warn(
+					"user has messenger configured but it has no definition. was that provider removed?",
+					"userID",
 					userOb.ID,
+					"messengerType",
 					versionedType,
 				)
+				continue
 			}
 
 			createdMessengerTypes[versionedType] = struct{}{}

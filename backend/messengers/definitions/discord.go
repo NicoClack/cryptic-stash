@@ -34,6 +34,7 @@ var ErrWrapperDiscord = common.NewDynamicErrorWrapper(func(err error) common.Wra
 		}
 		return wrappedErr
 	}
+	// TODO: retry other HTTP errors?
 	var restErr *discordgo.RESTError
 	if errors.As(err, &restErr) && restErr.Message != nil {
 		if restErr.Message.Code == discordgo.ErrCodeOpeningDirectMessagesTooFast {

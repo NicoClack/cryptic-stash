@@ -75,6 +75,10 @@ type Env struct {
 	SMTP_FROM_NAME           string
 	SMTP_REQUIRE_TLS         bool
 	SMTP_IMPLICIT_TLS        bool
+	SMTP2GO_API_KEY          string
+	SMTP2GO_BASE_URL         string
+	SMTP2GO_FROM_EMAIL       string
+	SMTP2GO_FROM_NAME        string
 }
 type PasswordHashSettings struct {
 	Time   uint32

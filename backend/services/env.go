@@ -4,6 +4,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/joho/godotenv"
@@ -77,9 +78,17 @@ func LoadEnvironmentVariables() *common.Env {
 		SMTP_FROM_NAME:           common.OptionalEnv("SMTP_FROM_NAME", "Cryptic Stash"),
 		SMTP_REQUIRE_TLS:         common.OptionalBoolEnv("SMTP_REQUIRE_TLS", true),
 		SMTP_IMPLICIT_TLS:        common.OptionalBoolEnv("SMTP_IMPLICIT_TLS", true),
+		SMTP2GO_API_KEY:          common.OptionalEnv("SMTP2GO_API_KEY", ""),
+		SMTP2GO_BASE_URL:         common.OptionalEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/v3"),
+		SMTP2GO_FROM_EMAIL:       common.OptionalEnv("SMTP2GO_FROM_EMAIL", ""),
+		SMTP2GO_FROM_NAME:        common.OptionalEnv("SMTP2GO_FROM_NAME", "Cryptic Stash"),
 	}
+	NormalizeEnvironmentVariables(env)
 	ValidateEnvironmentVariables(env)
 	return env
+}
+func NormalizeEnvironmentVariables(env *common.Env) {
+	env.SMTP2GO_BASE_URL = strings.TrimRight(strings.TrimSpace(env.SMTP2GO_BASE_URL), "/")
 }
 func ValidateEnvironmentVariables(env *common.Env) {
 	if !common.AllOrNone(
@@ -116,5 +125,21 @@ func ValidateEnvironmentVariables(env *common.Env) {
 	}
 	if !env.SMTP_REQUIRE_TLS && !env.IS_DEV {
 		slog.Warn("SMTP_REQUIRE_TLS should be set to true for production environments")
+	}
+
+	if !common.AllOrNone(
+		env.SMTP2GO_API_KEY == "",
+		env.SMTP2GO_FROM_EMAIL == "",
+	) {
+		log.Fatal(
+			"SMTP2GO_API_KEY and SMTP2GO_FROM_EMAIL must either both be set or both be unset.",
+		)
+	}
+
+	if env.SMTP_HOST != "" && env.SMTP2GO_API_KEY != "" {
+		slog.Warn(
+			"You have both SMTP and SMTP2GO email options configured, which can be confusing for users. You might want to " +
+				"migrate your users to one and disable the other.",
+		)
 	}
 }
