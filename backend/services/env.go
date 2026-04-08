@@ -75,6 +75,8 @@ func LoadEnvironmentVariables() *common.Env {
 		SMTP_PASSWORD:            common.OptionalEnv("SMTP_PASSWORD", ""),
 		SMTP_FROM_EMAIL:          common.OptionalEnv("SMTP_FROM_EMAIL", ""),
 		SMTP_FROM_NAME:           common.OptionalEnv("SMTP_FROM_NAME", "Cryptic Stash"),
+		SMTP_REQUIRE_TLS:         common.OptionalBoolEnv("SMTP_REQUIRE_TLS", true),
+		SMTP_IMPLICIT_TLS:        common.OptionalBoolEnv("SMTP_IMPLICIT_TLS", true),
 	}
 	ValidateEnvironmentVariables(env)
 	return env

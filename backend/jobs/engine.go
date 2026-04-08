@@ -16,6 +16,7 @@ import (
 const (
 	UnlimitedRetriesLimit = 10
 	ShutdownTimeout       = 15 * time.Second
+	JobTimeout            = 13 * time.Second
 )
 
 type Engine struct {
@@ -315,10 +316,14 @@ func (engine *Engine) runJob(
 		common.GetVersionedType(job.Type, job.Version),
 	)
 	logger.Info("running job")
+	ctx, cancel := context.WithTimeout(context.Background(), JobTimeout)
+	defer cancel()
+	ctx = context.WithValue(ctx, common.LoggerKey{}, logger)
+
 	stdErr := jobDefinition.Handler(&Context{
 		Job:        job,
 		Definition: jobDefinition,
-		Context:    context.TODO(), // TODO: put the logger in the context
+		Context:    ctx,
 		Logger:     logger,
 		Body:       job.Body,
 	})

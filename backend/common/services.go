@@ -73,6 +73,8 @@ type Env struct {
 	SMTP_PASSWORD            string
 	SMTP_FROM_EMAIL          string
 	SMTP_FROM_NAME           string
+	SMTP_REQUIRE_TLS         bool
+	SMTP_IMPLICIT_TLS        bool
 }
 type PasswordHashSettings struct {
 	Time   uint32

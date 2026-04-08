@@ -18,6 +18,10 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/messengers"
 )
 
+const (
+	smtpDialTimeout = 5 * time.Second
+)
+
 var ErrWrapperSMTP = common.NewDynamicErrorWrapper(func(err error) common.WrappedError {
 	wrappedErr := common.ErrWrapperAPI.Wrap(err)
 	if wrappedErr == nil {
@@ -54,13 +58,12 @@ type SMTP1Options struct {
 }
 
 type SMTP1Body struct {
-	Options          *SMTP1Options `json:"options"`
-	Subject          string        `json:"subject"`
-	FormattedMessage string        `json:"formattedMessage"`
+	ToAddress        stdmail.Address `json:"toAddress"`
+	Subject          string          `json:"subject"`
+	FormattedMessage string          `json:"formattedMessage"`
 }
 
 func formatSMTPMessage(fromAddress stdmail.Address, toAddress stdmail.Address, subject string, body string) []byte {
-	normalizedBody := strings.ReplaceAll(body, "\n", "\r\n")
 	messageBuffer := bytes.NewBuffer(nil)
 	messageBuffer.WriteString("From: ")
 	messageBuffer.WriteString(fromAddress.String())
@@ -74,7 +77,8 @@ func formatSMTPMessage(fromAddress stdmail.Address, toAddress stdmail.Address, s
 	messageBuffer.WriteString("MIME-Version: 1.0\r\n")
 	messageBuffer.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
 	messageBuffer.WriteString("Content-Transfer-Encoding: 8bit\r\n\r\n")
-	messageBuffer.WriteString(normalizedBody)
+
+	messageBuffer.WriteString(strings.ReplaceAll(body, "\n", "\r\n"))
 	return messageBuffer.Bytes()
 }
 
@@ -103,18 +107,17 @@ func SMTP1(app *common.App) *messengers.Definition {
 				return nil, wrappedErr
 			}
 
-			_, stdErr := stdmail.ParseAddress(options.Email)
+			toAddress, stdErr := stdmail.ParseAddress(options.Email)
 			if stdErr != nil {
 				return nil, stdErr
 			}
-
 			formattedMessage, wrappedErr := messengers.FormatDefaultMessage(prepareCtx.Message)
 			if wrappedErr != nil {
 				return nil, wrappedErr
 			}
 
 			return &SMTP1Body{
-				Options:          options,
+				ToAddress:        *toAddress,
 				Subject:          formattedMessage.Subject,
 				FormattedMessage: formattedMessage.Body,
 			}, nil
@@ -127,15 +130,34 @@ func SMTP1(app *common.App) *messengers.Definition {
 				return wrappedErr
 			}
 
-			toAddress, stdErr := stdmail.ParseAddress(body.Options.Email)
-			if stdErr != nil {
-				return ErrWrapperSMTP.Wrap(stdErr)
+			dialer := &net.Dialer{Timeout: smtpDialTimeout}
+
+			var connection net.Conn
+			if app.Env.SMTP_IMPLICIT_TLS {
+				tlsDialer := &tls.Dialer{
+					NetDialer: dialer,
+					Config: &tls.Config{
+						ServerName: app.Env.SMTP_HOST,
+						MinVersion: tls.VersionTLS12,
+					},
+				}
+				tlsConn, stdErr := tlsDialer.DialContext(messengerCtx.Context, "tcp", hostPort)
+				if stdErr != nil {
+					return ErrWrapperSMTP.Wrap(stdErr)
+				}
+				connection = tlsConn
+			} else {
+				var stdErr error
+				connection, stdErr = dialer.DialContext(messengerCtx.Context, "tcp", hostPort)
+				if stdErr != nil {
+					return ErrWrapperSMTP.Wrap(stdErr)
+				}
 			}
 
-			dialer := &net.Dialer{Timeout: 30 * time.Second}
-			connection, stdErr := dialer.DialContext(messengerCtx.Context, "tcp", hostPort)
-			if stdErr != nil {
-				return ErrWrapperSMTP.Wrap(stdErr)
+			wrappedErr = common.AddContextToConnection(connection, messengerCtx.Context)
+			if wrappedErr != nil {
+				_ = connection.Close()
+				return ErrWrapperSMTP.Wrap(wrappedErr)
 			}
 
 			client, stdErr := smtp.NewClient(connection, app.Env.SMTP_HOST)
@@ -143,20 +165,22 @@ func SMTP1(app *common.App) *messengers.Definition {
 				_ = connection.Close()
 				return ErrWrapperSMTP.Wrap(stdErr)
 			}
-			defer func() {
-				stdErr := client.Close()
-				if stdErr != nil {
-					messengerCtx.Logger.Warn("error closing SMTP client", "error", stdErr)
-				}
-			}()
+			defer client.Close()
 
-			if ok, _ := client.Extension("STARTTLS"); ok {
-				stdErr = client.StartTLS(&tls.Config{
-					ServerName: app.Env.SMTP_HOST,
-					MinVersion: tls.VersionTLS12,
-				})
-				if stdErr != nil {
-					return ErrWrapperSMTP.Wrap(stdErr)
+			if !app.Env.SMTP_IMPLICIT_TLS {
+				if ok, _ := client.Extension("STARTTLS"); ok {
+					stdErr = client.StartTLS(&tls.Config{
+						ServerName: app.Env.SMTP_HOST,
+						MinVersion: tls.VersionTLS12,
+					})
+					if stdErr != nil {
+						return ErrWrapperSMTP.Wrap(stdErr)
+					}
+				} else if app.Env.SMTP_REQUIRE_TLS {
+					_ = client.Quit()
+					return ErrWrapperSMTP.Wrap(
+						fmt.Errorf("SMTP_REQUIRE_TLS is true but SMTP server doesn't support STARTTLS"),
+					)
 				}
 			}
 
@@ -174,17 +198,17 @@ func SMTP1(app *common.App) *messengers.Definition {
 			if stdErr != nil {
 				return ErrWrapperSMTP.Wrap(stdErr)
 			}
-			stdErr = client.Rcpt(toAddress.Address)
+			stdErr = client.Rcpt(body.ToAddress.Address)
 			if stdErr != nil {
 				return ErrWrapperSMTP.Wrap(stdErr)
 			}
-
 			writer, stdErr := client.Data()
 			if stdErr != nil {
 				return ErrWrapperSMTP.Wrap(stdErr)
 			}
-
-			_, stdErr = writer.Write(formatSMTPMessage(from, *toAddress, body.Subject, body.FormattedMessage))
+			_, stdErr = writer.Write(
+				formatSMTPMessage(from, body.ToAddress, body.Subject, body.FormattedMessage),
+			)
 			if stdErr != nil {
 				_ = writer.Close()
 				return ErrWrapperSMTP.Wrap(stdErr)
@@ -198,7 +222,6 @@ func SMTP1(app *common.App) *messengers.Definition {
 			if stdErr != nil {
 				return ErrWrapperSMTP.Wrap(stdErr)
 			}
-
 			messengerCtx.ConfirmSent()
 			return nil
 		},

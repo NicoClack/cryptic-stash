@@ -12,6 +12,11 @@
 - - If using usernames on signup page, could mitigate by limiting failed uses of a signup link and requiring a unique credit card for public signups (if I ever implement that)
 - - Can fake salts by hashing something deterministic like the email with a static pepper. If the pepper is leaked, I can just rotate it. If the database is leaked, the attacker has the stash records anyway. This approach means I don't need to store the random data I'm sending to ensure consistent results 
 - - Encrypt user emails with static env?
+- Create account system for users to manage their stashes
+- - Require FIDO2 passkeys/physical security keys
+- - Allow optional 2FA FIDO2 with "userVerification" set to "discouraged" by default, allowing it to be set to "required". Intended for login via password manager + security key
+- - User logins can be reset by the admin generating a link. Maybe it could also require a code sent to their email?
+- - Admin logins can be reset by changing env vars
 - Add password strength requirements, maybe using https://github.com/dropbox/zxcvbn or https://github.com/zxcvbn-ts/zxcvbn ? Use matcher-pwned
 - Add /.well-known/change-password redirect
 - Add /.well-known/security.txt redirect to GitHub
@@ -39,6 +44,7 @@
 - Use Discord API directly instead of discordgo
 - Use final scratch image instead of Apline for running the backend, the build has no dependencies, so I don't even need commands like "ls"
 - Remove clockwork and use Go's built-in mock time
+- Pass transactions explicitly
 - Send warning message when a login uses the correct password but the account is locked
 - Implement more messengers:
 - - Email (SendGrid)

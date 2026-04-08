@@ -68,9 +68,9 @@ type Discord1Body struct {
 
 func Discord1(app *common.App) *messengers.Definition {
 	getSession := func() (*discordgo.Session, common.WrappedError) {
-		session, err := discordgo.New("Bot " + app.Env.DISCORD_TOKEN)
-		if err != nil {
-			return nil, ErrWrapperDiscord.Wrap(err)
+		session, stdErr := discordgo.New("Bot " + app.Env.DISCORD_TOKEN)
+		if stdErr != nil {
+			return nil, ErrWrapperDiscord.Wrap(stdErr)
 		}
 
 		session.ShouldRetryOnRateLimit = false

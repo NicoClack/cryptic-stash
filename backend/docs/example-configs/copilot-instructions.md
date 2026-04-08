@@ -7,3 +7,4 @@ The project is a monorepo with a frontend folder, which uses SvelteKit and a bac
 - Prefer tabs to spaces, particularly with Go code, avoid adding space indentation in addition to the existing tabs on that line. This is to make diffs easier to read, but don't try to fix formatting too much, I'll run the formatter on save
 - Before completing a request, ensure your changes didn't introduce any immediate syntax or linting errors. Use the language server for this initial check instead of the CLI. You can skip this step if your change isn't fully complete yet and you need further input
 - Use `golangci-lint` for formatting instead of `gofmt`
+- Comments should only explain WHY not WHAT, unless you're providing example code in the chat and that level of detail is appropriate. If you think you need to explain WHAT, splitting into separate or at least inline functions with descriptive names is most likely the clearer option.
