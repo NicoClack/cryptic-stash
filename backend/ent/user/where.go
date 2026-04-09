@@ -331,21 +331,21 @@ func DownloadSessionsValidFromLTE(v time.Time) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldDownloadSessionsValidFrom, v))
 }
 
-// HasStash applies the HasEdge predicate on the "stash" edge.
-func HasStash() predicate.User {
+// HasStashes applies the HasEdge predicate on the "stashes" edge.
+func HasStashes() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, StashTable, StashColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, StashesTable, StashesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasStashWith applies the HasEdge predicate on the "stash" edge with a given conditions (other predicates).
-func HasStashWith(preds ...predicate.Stash) predicate.User {
+// HasStashesWith applies the HasEdge predicate on the "stashes" edge with a given conditions (other predicates).
+func HasStashesWith(preds ...predicate.Stash) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newStashStep()
+		step := newStashesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -400,21 +400,21 @@ func HasDownloadSessionsWith(preds ...predicate.DownloadSession) predicate.User 
 	})
 }
 
-// HasSignupLink applies the HasEdge predicate on the "signupLink" edge.
-func HasSignupLink() predicate.User {
+// HasInvite applies the HasEdge predicate on the "invite" edge.
+func HasInvite() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, SignupLinkTable, SignupLinkColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, InviteTable, InviteColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSignupLinkWith applies the HasEdge predicate on the "signupLink" edge with a given conditions (other predicates).
-func HasSignupLinkWith(preds ...predicate.SignupLink) predicate.User {
+// HasInviteWith applies the HasEdge predicate on the "invite" edge with a given conditions (other predicates).
+func HasInviteWith(preds ...predicate.Invite) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newSignupLinkStep()
+		step := newInviteStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

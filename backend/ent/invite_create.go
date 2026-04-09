@@ -12,57 +12,57 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// SignupLinkCreate is the builder for creating a SignupLink entity.
-type SignupLinkCreate struct {
+// InviteCreate is the builder for creating a Invite entity.
+type InviteCreate struct {
 	config
-	mutation *SignupLinkMutation
+	mutation *InviteMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (_c *SignupLinkCreate) SetCreatedAt(v time.Time) *SignupLinkCreate {
+func (_c *InviteCreate) SetCreatedAt(v time.Time) *InviteCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetUpdatedAt sets the "updatedAt" field.
-func (_c *SignupLinkCreate) SetUpdatedAt(v time.Time) *SignupLinkCreate {
+func (_c *InviteCreate) SetUpdatedAt(v time.Time) *InviteCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *SignupLinkCreate) SetName(v string) *SignupLinkCreate {
-	_c.mutation.SetName(v)
+// SetEmail sets the "email" field.
+func (_c *InviteCreate) SetEmail(v string) *InviteCreate {
+	_c.mutation.SetEmail(v)
 	return _c
 }
 
 // SetHashedCode sets the "hashedCode" field.
-func (_c *SignupLinkCreate) SetHashedCode(v []byte) *SignupLinkCreate {
+func (_c *InviteCreate) SetHashedCode(v []byte) *InviteCreate {
 	_c.mutation.SetHashedCode(v)
 	return _c
 }
 
 // SetExpiresAt sets the "expiresAt" field.
-func (_c *SignupLinkCreate) SetExpiresAt(v time.Time) *SignupLinkCreate {
+func (_c *InviteCreate) SetExpiresAt(v time.Time) *InviteCreate {
 	_c.mutation.SetExpiresAt(v)
 	return _c
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *SignupLinkCreate) SetUserAgent(v string) *SignupLinkCreate {
+func (_c *InviteCreate) SetUserAgent(v string) *InviteCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_c *SignupLinkCreate) SetNillableUserAgent(v *string) *SignupLinkCreate {
+func (_c *InviteCreate) SetNillableUserAgent(v *string) *InviteCreate {
 	if v != nil {
 		_c.SetUserAgent(*v)
 	}
@@ -70,13 +70,13 @@ func (_c *SignupLinkCreate) SetNillableUserAgent(v *string) *SignupLinkCreate {
 }
 
 // SetIP sets the "ip" field.
-func (_c *SignupLinkCreate) SetIP(v string) *SignupLinkCreate {
+func (_c *InviteCreate) SetIP(v string) *InviteCreate {
 	_c.mutation.SetIP(v)
 	return _c
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_c *SignupLinkCreate) SetNillableIP(v *string) *SignupLinkCreate {
+func (_c *InviteCreate) SetNillableIP(v *string) *InviteCreate {
 	if v != nil {
 		_c.SetIP(*v)
 	}
@@ -84,13 +84,13 @@ func (_c *SignupLinkCreate) SetNillableIP(v *string) *SignupLinkCreate {
 }
 
 // SetUserID sets the "userID" field.
-func (_c *SignupLinkCreate) SetUserID(v uuid.UUID) *SignupLinkCreate {
+func (_c *InviteCreate) SetUserID(v uuid.UUID) *InviteCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetNillableUserID sets the "userID" field if the given value is not nil.
-func (_c *SignupLinkCreate) SetNillableUserID(v *uuid.UUID) *SignupLinkCreate {
+func (_c *InviteCreate) SetNillableUserID(v *uuid.UUID) *InviteCreate {
 	if v != nil {
 		_c.SetUserID(*v)
 	}
@@ -98,13 +98,13 @@ func (_c *SignupLinkCreate) SetNillableUserID(v *uuid.UUID) *SignupLinkCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *SignupLinkCreate) SetID(v uuid.UUID) *SignupLinkCreate {
+func (_c *InviteCreate) SetID(v uuid.UUID) *InviteCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *SignupLinkCreate) SetNillableID(v *uuid.UUID) *SignupLinkCreate {
+func (_c *InviteCreate) SetNillableID(v *uuid.UUID) *InviteCreate {
 	if v != nil {
 		_c.SetID(*v)
 	}
@@ -112,23 +112,23 @@ func (_c *SignupLinkCreate) SetNillableID(v *uuid.UUID) *SignupLinkCreate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *SignupLinkCreate) SetUser(v *User) *SignupLinkCreate {
+func (_c *InviteCreate) SetUser(v *User) *InviteCreate {
 	return _c.SetUserID(v.ID)
 }
 
-// Mutation returns the SignupLinkMutation object of the builder.
-func (_c *SignupLinkCreate) Mutation() *SignupLinkMutation {
+// Mutation returns the InviteMutation object of the builder.
+func (_c *InviteCreate) Mutation() *InviteMutation {
 	return _c.mutation
 }
 
-// Save creates the SignupLink in the database.
-func (_c *SignupLinkCreate) Save(ctx context.Context) (*SignupLink, error) {
+// Save creates the Invite in the database.
+func (_c *InviteCreate) Save(ctx context.Context) (*Invite, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *SignupLinkCreate) SaveX(ctx context.Context) *SignupLink {
+func (_c *InviteCreate) SaveX(ctx context.Context) *Invite {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -137,71 +137,71 @@ func (_c *SignupLinkCreate) SaveX(ctx context.Context) *SignupLink {
 }
 
 // Exec executes the query.
-func (_c *SignupLinkCreate) Exec(ctx context.Context) error {
+func (_c *InviteCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SignupLinkCreate) ExecX(ctx context.Context) {
+func (_c *InviteCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *SignupLinkCreate) defaults() {
+func (_c *InviteCreate) defaults() {
 	if _, ok := _c.mutation.UserAgent(); !ok {
-		v := signuplink.DefaultUserAgent
+		v := invite.DefaultUserAgent
 		_c.mutation.SetUserAgent(v)
 	}
 	if _, ok := _c.mutation.IP(); !ok {
-		v := signuplink.DefaultIP
+		v := invite.DefaultIP
 		_c.mutation.SetIP(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
-		v := signuplink.DefaultID()
+		v := invite.DefaultID()
 		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *SignupLinkCreate) check() error {
+func (_c *InviteCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "SignupLink.createdAt"`)}
+		return &ValidationError{Name: "createdAt", err: errors.New(`ent: missing required field "Invite.createdAt"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "SignupLink.updatedAt"`)}
+		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "Invite.updatedAt"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "SignupLink.name"`)}
+	if _, ok := _c.mutation.Email(); !ok {
+		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Invite.email"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := signuplink.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SignupLink.name": %w`, err)}
+	if v, ok := _c.mutation.Email(); ok {
+		if err := invite.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Invite.email": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.HashedCode(); !ok {
-		return &ValidationError{Name: "hashedCode", err: errors.New(`ent: missing required field "SignupLink.hashedCode"`)}
+		return &ValidationError{Name: "hashedCode", err: errors.New(`ent: missing required field "Invite.hashedCode"`)}
 	}
 	if v, ok := _c.mutation.HashedCode(); ok {
-		if err := signuplink.HashedCodeValidator(v); err != nil {
-			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "SignupLink.hashedCode": %w`, err)}
+		if err := invite.HashedCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "Invite.hashedCode": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
-		return &ValidationError{Name: "expiresAt", err: errors.New(`ent: missing required field "SignupLink.expiresAt"`)}
+		return &ValidationError{Name: "expiresAt", err: errors.New(`ent: missing required field "Invite.expiresAt"`)}
 	}
 	if _, ok := _c.mutation.UserAgent(); !ok {
-		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "SignupLink.userAgent"`)}
+		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Invite.userAgent"`)}
 	}
 	if _, ok := _c.mutation.IP(); !ok {
-		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "SignupLink.ip"`)}
+		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "Invite.ip"`)}
 	}
 	return nil
 }
 
-func (_c *SignupLinkCreate) sqlSave(ctx context.Context) (*SignupLink, error) {
+func (_c *InviteCreate) sqlSave(ctx context.Context) (*Invite, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -224,10 +224,10 @@ func (_c *SignupLinkCreate) sqlSave(ctx context.Context) (*SignupLink, error) {
 	return _node, nil
 }
 
-func (_c *SignupLinkCreate) createSpec() (*SignupLink, *sqlgraph.CreateSpec) {
+func (_c *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 	var (
-		_node = &SignupLink{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(signuplink.Table, sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID))
+		_node = &Invite{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(invite.Table, sqlgraph.NewFieldSpec(invite.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = _c.conflict
 	if id, ok := _c.mutation.ID(); ok {
@@ -235,39 +235,39 @@ func (_c *SignupLinkCreate) createSpec() (*SignupLink, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(signuplink.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(signuplink.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(signuplink.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Email(); ok {
+		_spec.SetField(invite.FieldEmail, field.TypeString, value)
+		_node.Email = value
 	}
 	if value, ok := _c.mutation.HashedCode(); ok {
-		_spec.SetField(signuplink.FieldHashedCode, field.TypeBytes, value)
+		_spec.SetField(invite.FieldHashedCode, field.TypeBytes, value)
 		_node.HashedCode = value
 	}
 	if value, ok := _c.mutation.ExpiresAt(); ok {
-		_spec.SetField(signuplink.FieldExpiresAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
-		_spec.SetField(signuplink.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
 		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(signuplink.FieldIP, field.TypeString, value)
+		_spec.SetField(invite.FieldIP, field.TypeString, value)
 		_node.IP = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   signuplink.UserTable,
-			Columns: []string{signuplink.UserColumn},
+			Table:   invite.UserTable,
+			Columns: []string{invite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -285,7 +285,7 @@ func (_c *SignupLinkCreate) createSpec() (*SignupLink, *sqlgraph.CreateSpec) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.SignupLink.Create().
+//	client.Invite.Create().
 //		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -294,13 +294,13 @@ func (_c *SignupLinkCreate) createSpec() (*SignupLink, *sqlgraph.CreateSpec) {
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.SignupLinkUpsert) {
+//		Update(func(u *ent.InviteUpsert) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (_c *SignupLinkCreate) OnConflict(opts ...sql.ConflictOption) *SignupLinkUpsertOne {
+func (_c *InviteCreate) OnConflict(opts ...sql.ConflictOption) *InviteUpsertOne {
 	_c.conflict = opts
-	return &SignupLinkUpsertOne{
+	return &InviteUpsertOne{
 		create: _c,
 	}
 }
@@ -308,147 +308,147 @@ func (_c *SignupLinkCreate) OnConflict(opts ...sql.ConflictOption) *SignupLinkUp
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.SignupLink.Create().
+//	client.Invite.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (_c *SignupLinkCreate) OnConflictColumns(columns ...string) *SignupLinkUpsertOne {
+func (_c *InviteCreate) OnConflictColumns(columns ...string) *InviteUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &SignupLinkUpsertOne{
+	return &InviteUpsertOne{
 		create: _c,
 	}
 }
 
 type (
-	// SignupLinkUpsertOne is the builder for "upsert"-ing
-	//  one SignupLink node.
-	SignupLinkUpsertOne struct {
-		create *SignupLinkCreate
+	// InviteUpsertOne is the builder for "upsert"-ing
+	//  one Invite node.
+	InviteUpsertOne struct {
+		create *InviteCreate
 	}
 
-	// SignupLinkUpsert is the "OnConflict" setter.
-	SignupLinkUpsert struct {
+	// InviteUpsert is the "OnConflict" setter.
+	InviteUpsert struct {
 		*sql.UpdateSet
 	}
 )
 
 // SetCreatedAt sets the "createdAt" field.
-func (u *SignupLinkUpsert) SetCreatedAt(v time.Time) *SignupLinkUpsert {
-	u.Set(signuplink.FieldCreatedAt, v)
+func (u *InviteUpsert) SetCreatedAt(v time.Time) *InviteUpsert {
+	u.Set(invite.FieldCreatedAt, v)
 	return u
 }
 
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateCreatedAt() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldCreatedAt)
+func (u *InviteUpsert) UpdateCreatedAt() *InviteUpsert {
+	u.SetExcluded(invite.FieldCreatedAt)
 	return u
 }
 
 // SetUpdatedAt sets the "updatedAt" field.
-func (u *SignupLinkUpsert) SetUpdatedAt(v time.Time) *SignupLinkUpsert {
-	u.Set(signuplink.FieldUpdatedAt, v)
+func (u *InviteUpsert) SetUpdatedAt(v time.Time) *InviteUpsert {
+	u.Set(invite.FieldUpdatedAt, v)
 	return u
 }
 
 // UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateUpdatedAt() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldUpdatedAt)
+func (u *InviteUpsert) UpdateUpdatedAt() *InviteUpsert {
+	u.SetExcluded(invite.FieldUpdatedAt)
 	return u
 }
 
-// SetName sets the "name" field.
-func (u *SignupLinkUpsert) SetName(v string) *SignupLinkUpsert {
-	u.Set(signuplink.FieldName, v)
+// SetEmail sets the "email" field.
+func (u *InviteUpsert) SetEmail(v string) *InviteUpsert {
+	u.Set(invite.FieldEmail, v)
 	return u
 }
 
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateName() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldName)
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateEmail() *InviteUpsert {
+	u.SetExcluded(invite.FieldEmail)
 	return u
 }
 
 // SetHashedCode sets the "hashedCode" field.
-func (u *SignupLinkUpsert) SetHashedCode(v []byte) *SignupLinkUpsert {
-	u.Set(signuplink.FieldHashedCode, v)
+func (u *InviteUpsert) SetHashedCode(v []byte) *InviteUpsert {
+	u.Set(invite.FieldHashedCode, v)
 	return u
 }
 
 // UpdateHashedCode sets the "hashedCode" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateHashedCode() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldHashedCode)
+func (u *InviteUpsert) UpdateHashedCode() *InviteUpsert {
+	u.SetExcluded(invite.FieldHashedCode)
 	return u
 }
 
 // SetExpiresAt sets the "expiresAt" field.
-func (u *SignupLinkUpsert) SetExpiresAt(v time.Time) *SignupLinkUpsert {
-	u.Set(signuplink.FieldExpiresAt, v)
+func (u *InviteUpsert) SetExpiresAt(v time.Time) *InviteUpsert {
+	u.Set(invite.FieldExpiresAt, v)
 	return u
 }
 
 // UpdateExpiresAt sets the "expiresAt" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateExpiresAt() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldExpiresAt)
+func (u *InviteUpsert) UpdateExpiresAt() *InviteUpsert {
+	u.SetExcluded(invite.FieldExpiresAt)
 	return u
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SignupLinkUpsert) SetUserAgent(v string) *SignupLinkUpsert {
-	u.Set(signuplink.FieldUserAgent, v)
+func (u *InviteUpsert) SetUserAgent(v string) *InviteUpsert {
+	u.Set(invite.FieldUserAgent, v)
 	return u
 }
 
 // UpdateUserAgent sets the "userAgent" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateUserAgent() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldUserAgent)
+func (u *InviteUpsert) UpdateUserAgent() *InviteUpsert {
+	u.SetExcluded(invite.FieldUserAgent)
 	return u
 }
 
 // SetIP sets the "ip" field.
-func (u *SignupLinkUpsert) SetIP(v string) *SignupLinkUpsert {
-	u.Set(signuplink.FieldIP, v)
+func (u *InviteUpsert) SetIP(v string) *InviteUpsert {
+	u.Set(invite.FieldIP, v)
 	return u
 }
 
 // UpdateIP sets the "ip" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateIP() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldIP)
+func (u *InviteUpsert) UpdateIP() *InviteUpsert {
+	u.SetExcluded(invite.FieldIP)
 	return u
 }
 
 // SetUserID sets the "userID" field.
-func (u *SignupLinkUpsert) SetUserID(v uuid.UUID) *SignupLinkUpsert {
-	u.Set(signuplink.FieldUserID, v)
+func (u *InviteUpsert) SetUserID(v uuid.UUID) *InviteUpsert {
+	u.Set(invite.FieldUserID, v)
 	return u
 }
 
 // UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *SignupLinkUpsert) UpdateUserID() *SignupLinkUpsert {
-	u.SetExcluded(signuplink.FieldUserID)
+func (u *InviteUpsert) UpdateUserID() *InviteUpsert {
+	u.SetExcluded(invite.FieldUserID)
 	return u
 }
 
 // ClearUserID clears the value of the "userID" field.
-func (u *SignupLinkUpsert) ClearUserID() *SignupLinkUpsert {
-	u.SetNull(signuplink.FieldUserID)
+func (u *InviteUpsert) ClearUserID() *InviteUpsert {
+	u.SetNull(invite.FieldUserID)
 	return u
 }
 
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	client.SignupLink.Create().
+//	client.Invite.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(signuplink.FieldID)
+//				u.SetIgnore(invite.FieldID)
 //			}),
 //		).
 //		Exec(ctx)
-func (u *SignupLinkUpsertOne) UpdateNewValues() *SignupLinkUpsertOne {
+func (u *InviteUpsertOne) UpdateNewValues() *InviteUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(signuplink.FieldID)
+			s.SetIgnore(invite.FieldID)
 		}
 	}))
 	return u
@@ -457,170 +457,170 @@ func (u *SignupLinkUpsertOne) UpdateNewValues() *SignupLinkUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.SignupLink.Create().
+//	client.Invite.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
-func (u *SignupLinkUpsertOne) Ignore() *SignupLinkUpsertOne {
+func (u *InviteUpsertOne) Ignore() *InviteUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *SignupLinkUpsertOne) DoNothing() *SignupLinkUpsertOne {
+func (u *InviteUpsertOne) DoNothing() *InviteUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the SignupLinkCreate.OnConflict
+// Update allows overriding fields `UPDATE` values. See the InviteCreate.OnConflict
 // documentation for more info.
-func (u *SignupLinkUpsertOne) Update(set func(*SignupLinkUpsert)) *SignupLinkUpsertOne {
+func (u *InviteUpsertOne) Update(set func(*InviteUpsert)) *InviteUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&SignupLinkUpsert{UpdateSet: update})
+		set(&InviteUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (u *SignupLinkUpsertOne) SetCreatedAt(v time.Time) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) SetCreatedAt(v time.Time) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetCreatedAt(v)
 	})
 }
 
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateCreatedAt() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) UpdateCreatedAt() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateCreatedAt()
 	})
 }
 
 // SetUpdatedAt sets the "updatedAt" field.
-func (u *SignupLinkUpsertOne) SetUpdatedAt(v time.Time) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) SetUpdatedAt(v time.Time) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetUpdatedAt(v)
 	})
 }
 
 // UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateUpdatedAt() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) UpdateUpdatedAt() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUpdatedAt()
 	})
 }
 
-// SetName sets the "name" field.
-func (u *SignupLinkUpsertOne) SetName(v string) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
-		s.SetName(v)
+// SetEmail sets the "email" field.
+func (u *InviteUpsertOne) SetEmail(v string) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetEmail(v)
 	})
 }
 
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateName() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
-		s.UpdateName()
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateEmail() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateEmail()
 	})
 }
 
 // SetHashedCode sets the "hashedCode" field.
-func (u *SignupLinkUpsertOne) SetHashedCode(v []byte) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) SetHashedCode(v []byte) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetHashedCode(v)
 	})
 }
 
 // UpdateHashedCode sets the "hashedCode" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateHashedCode() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) UpdateHashedCode() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateHashedCode()
 	})
 }
 
 // SetExpiresAt sets the "expiresAt" field.
-func (u *SignupLinkUpsertOne) SetExpiresAt(v time.Time) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) SetExpiresAt(v time.Time) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetExpiresAt(v)
 	})
 }
 
 // UpdateExpiresAt sets the "expiresAt" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateExpiresAt() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) UpdateExpiresAt() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateExpiresAt()
 	})
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SignupLinkUpsertOne) SetUserAgent(v string) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) SetUserAgent(v string) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetUserAgent(v)
 	})
 }
 
 // UpdateUserAgent sets the "userAgent" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateUserAgent() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) UpdateUserAgent() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUserAgent()
 	})
 }
 
 // SetIP sets the "ip" field.
-func (u *SignupLinkUpsertOne) SetIP(v string) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) SetIP(v string) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetIP(v)
 	})
 }
 
 // UpdateIP sets the "ip" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateIP() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) UpdateIP() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateIP()
 	})
 }
 
 // SetUserID sets the "userID" field.
-func (u *SignupLinkUpsertOne) SetUserID(v uuid.UUID) *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) SetUserID(v uuid.UUID) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *SignupLinkUpsertOne) UpdateUserID() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) UpdateUserID() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUserID()
 	})
 }
 
 // ClearUserID clears the value of the "userID" field.
-func (u *SignupLinkUpsertOne) ClearUserID() *SignupLinkUpsertOne {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertOne) ClearUserID() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
 		s.ClearUserID()
 	})
 }
 
 // Exec executes the query.
-func (u *SignupLinkUpsertOne) Exec(ctx context.Context) error {
+func (u *InviteUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for SignupLinkCreate.OnConflict")
+		return errors.New("ent: missing options for InviteCreate.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *SignupLinkUpsertOne) ExecX(ctx context.Context) {
+func (u *InviteUpsertOne) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SignupLinkUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+func (u *InviteUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 	if u.create.driver.Dialect() == dialect.MySQL {
 		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
 		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: SignupLinkUpsertOne.ID is not supported by MySQL driver. Use SignupLinkUpsertOne.Exec instead")
+		return id, errors.New("ent: InviteUpsertOne.ID is not supported by MySQL driver. Use InviteUpsertOne.Exec instead")
 	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
@@ -630,7 +630,7 @@ func (u *SignupLinkUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) 
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SignupLinkUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *InviteUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -638,28 +638,28 @@ func (u *SignupLinkUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// SignupLinkCreateBulk is the builder for creating many SignupLink entities in bulk.
-type SignupLinkCreateBulk struct {
+// InviteCreateBulk is the builder for creating many Invite entities in bulk.
+type InviteCreateBulk struct {
 	config
 	err      error
-	builders []*SignupLinkCreate
+	builders []*InviteCreate
 	conflict []sql.ConflictOption
 }
 
-// Save creates the SignupLink entities in the database.
-func (_c *SignupLinkCreateBulk) Save(ctx context.Context) ([]*SignupLink, error) {
+// Save creates the Invite entities in the database.
+func (_c *InviteCreateBulk) Save(ctx context.Context) ([]*Invite, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*SignupLink, len(_c.builders))
+	nodes := make([]*Invite, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*SignupLinkMutation)
+				mutation, ok := m.(*InviteMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -703,7 +703,7 @@ func (_c *SignupLinkCreateBulk) Save(ctx context.Context) ([]*SignupLink, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *SignupLinkCreateBulk) SaveX(ctx context.Context) []*SignupLink {
+func (_c *InviteCreateBulk) SaveX(ctx context.Context) []*Invite {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -712,13 +712,13 @@ func (_c *SignupLinkCreateBulk) SaveX(ctx context.Context) []*SignupLink {
 }
 
 // Exec executes the query.
-func (_c *SignupLinkCreateBulk) Exec(ctx context.Context) error {
+func (_c *InviteCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SignupLinkCreateBulk) ExecX(ctx context.Context) {
+func (_c *InviteCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
@@ -727,7 +727,7 @@ func (_c *SignupLinkCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.SignupLink.CreateBulk(builders...).
+//	client.Invite.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -735,13 +735,13 @@ func (_c *SignupLinkCreateBulk) ExecX(ctx context.Context) {
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.SignupLinkUpsert) {
+//		Update(func(u *ent.InviteUpsert) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (_c *SignupLinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *SignupLinkUpsertBulk {
+func (_c *InviteCreateBulk) OnConflict(opts ...sql.ConflictOption) *InviteUpsertBulk {
 	_c.conflict = opts
-	return &SignupLinkUpsertBulk{
+	return &InviteUpsertBulk{
 		create: _c,
 	}
 }
@@ -749,39 +749,39 @@ func (_c *SignupLinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *SignupLi
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.SignupLink.Create().
+//	client.Invite.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (_c *SignupLinkCreateBulk) OnConflictColumns(columns ...string) *SignupLinkUpsertBulk {
+func (_c *InviteCreateBulk) OnConflictColumns(columns ...string) *InviteUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &SignupLinkUpsertBulk{
+	return &InviteUpsertBulk{
 		create: _c,
 	}
 }
 
-// SignupLinkUpsertBulk is the builder for "upsert"-ing
-// a bulk of SignupLink nodes.
-type SignupLinkUpsertBulk struct {
-	create *SignupLinkCreateBulk
+// InviteUpsertBulk is the builder for "upsert"-ing
+// a bulk of Invite nodes.
+type InviteUpsertBulk struct {
+	create *InviteCreateBulk
 }
 
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.SignupLink.Create().
+//	client.Invite.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(signuplink.FieldID)
+//				u.SetIgnore(invite.FieldID)
 //			}),
 //		).
 //		Exec(ctx)
-func (u *SignupLinkUpsertBulk) UpdateNewValues() *SignupLinkUpsertBulk {
+func (u *InviteUpsertBulk) UpdateNewValues() *InviteUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(signuplink.FieldID)
+				s.SetIgnore(invite.FieldID)
 			}
 		}
 	}))
@@ -791,167 +791,167 @@ func (u *SignupLinkUpsertBulk) UpdateNewValues() *SignupLinkUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.SignupLink.Create().
+//	client.Invite.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-func (u *SignupLinkUpsertBulk) Ignore() *SignupLinkUpsertBulk {
+func (u *InviteUpsertBulk) Ignore() *InviteUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *SignupLinkUpsertBulk) DoNothing() *SignupLinkUpsertBulk {
+func (u *InviteUpsertBulk) DoNothing() *InviteUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the SignupLinkCreateBulk.OnConflict
+// Update allows overriding fields `UPDATE` values. See the InviteCreateBulk.OnConflict
 // documentation for more info.
-func (u *SignupLinkUpsertBulk) Update(set func(*SignupLinkUpsert)) *SignupLinkUpsertBulk {
+func (u *InviteUpsertBulk) Update(set func(*InviteUpsert)) *InviteUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&SignupLinkUpsert{UpdateSet: update})
+		set(&InviteUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (u *SignupLinkUpsertBulk) SetCreatedAt(v time.Time) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) SetCreatedAt(v time.Time) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetCreatedAt(v)
 	})
 }
 
 // UpdateCreatedAt sets the "createdAt" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateCreatedAt() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) UpdateCreatedAt() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateCreatedAt()
 	})
 }
 
 // SetUpdatedAt sets the "updatedAt" field.
-func (u *SignupLinkUpsertBulk) SetUpdatedAt(v time.Time) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) SetUpdatedAt(v time.Time) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetUpdatedAt(v)
 	})
 }
 
 // UpdateUpdatedAt sets the "updatedAt" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateUpdatedAt() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) UpdateUpdatedAt() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUpdatedAt()
 	})
 }
 
-// SetName sets the "name" field.
-func (u *SignupLinkUpsertBulk) SetName(v string) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
-		s.SetName(v)
+// SetEmail sets the "email" field.
+func (u *InviteUpsertBulk) SetEmail(v string) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetEmail(v)
 	})
 }
 
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateName() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
-		s.UpdateName()
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateEmail() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateEmail()
 	})
 }
 
 // SetHashedCode sets the "hashedCode" field.
-func (u *SignupLinkUpsertBulk) SetHashedCode(v []byte) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) SetHashedCode(v []byte) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetHashedCode(v)
 	})
 }
 
 // UpdateHashedCode sets the "hashedCode" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateHashedCode() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) UpdateHashedCode() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateHashedCode()
 	})
 }
 
 // SetExpiresAt sets the "expiresAt" field.
-func (u *SignupLinkUpsertBulk) SetExpiresAt(v time.Time) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) SetExpiresAt(v time.Time) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetExpiresAt(v)
 	})
 }
 
 // UpdateExpiresAt sets the "expiresAt" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateExpiresAt() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) UpdateExpiresAt() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateExpiresAt()
 	})
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SignupLinkUpsertBulk) SetUserAgent(v string) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) SetUserAgent(v string) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetUserAgent(v)
 	})
 }
 
 // UpdateUserAgent sets the "userAgent" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateUserAgent() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) UpdateUserAgent() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUserAgent()
 	})
 }
 
 // SetIP sets the "ip" field.
-func (u *SignupLinkUpsertBulk) SetIP(v string) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) SetIP(v string) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetIP(v)
 	})
 }
 
 // UpdateIP sets the "ip" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateIP() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) UpdateIP() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateIP()
 	})
 }
 
 // SetUserID sets the "userID" field.
-func (u *SignupLinkUpsertBulk) SetUserID(v uuid.UUID) *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) SetUserID(v uuid.UUID) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.SetUserID(v)
 	})
 }
 
 // UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *SignupLinkUpsertBulk) UpdateUserID() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) UpdateUserID() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUserID()
 	})
 }
 
 // ClearUserID clears the value of the "userID" field.
-func (u *SignupLinkUpsertBulk) ClearUserID() *SignupLinkUpsertBulk {
-	return u.Update(func(s *SignupLinkUpsert) {
+func (u *InviteUpsertBulk) ClearUserID() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
 		s.ClearUserID()
 	})
 }
 
 // Exec executes the query.
-func (u *SignupLinkUpsertBulk) Exec(ctx context.Context) error {
+func (u *InviteUpsertBulk) Exec(ctx context.Context) error {
 	if u.create.err != nil {
 		return u.create.err
 	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SignupLinkCreateBulk instead", i)
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the InviteCreateBulk instead", i)
 		}
 	}
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for SignupLinkCreateBulk.OnConflict")
+		return errors.New("ent: missing options for InviteCreateBulk.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *SignupLinkUpsertBulk) ExecX(ctx context.Context) {
+func (u *InviteUpsertBulk) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}

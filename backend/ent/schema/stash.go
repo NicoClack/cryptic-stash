@@ -21,6 +21,7 @@ func (Stash) Fields() []ent.Field {
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.Time("lastDownloadAt").Optional(),
+		field.String("publicName").NotEmpty().MaxLen(256),
 		// Encrypted with encryptionDataKey and prefixed with the nonce
 		field.Bytes("content").NotEmpty().MaxLen(10_000_000), // 10MB
 		field.Bytes("fileName").NotEmpty().MaxLen(256),
@@ -33,6 +34,7 @@ func (Stash) Fields() []ent.Field {
 		field.Uint32("hashTime"),
 		field.Uint32("hashMemory"),
 		field.Uint8("hashThreads"),
+
 		field.UUID("userID", uuid.Nil),
 	}
 }
@@ -40,7 +42,7 @@ func (Stash) Fields() []ent.Field {
 // Edges of the Stash.
 func (Stash) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("stash").
+		edge.From("user", User.Type).Ref("stashes").
 			Field("userID").Unique().Required(),
 	}
 }

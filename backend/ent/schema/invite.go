@@ -10,19 +10,18 @@ import (
 	"github.com/google/uuid"
 )
 
-// SignupLink holds the schema definition for the SignupLink entity.
-type SignupLink struct {
+// Invite holds the schema definition for the Invite entity.
+type Invite struct {
 	ent.Schema
 }
 
-// Fields of the SignupLink.
-func (SignupLink) Fields() []ent.Field {
+// Fields of the Invite.
+func (Invite) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
-		// For differentiating between signup links and to provide a suggested username
-		field.String("name").MaxLen(32),
+		field.String("email").MinLen(3).MaxLen(128),
 		field.Bytes("hashedCode"). // Using SHA-256
 						Unique().
 						MinLen(32).
@@ -30,19 +29,19 @@ func (SignupLink) Fields() []ent.Field {
 		field.Time("expiresAt"),
 		field.String("userAgent").Default(""),
 		field.String("ip").Default(""),
-		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this signup link, if any
+		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any
 	}
 }
 
-// Edges of the SignupLink.
-func (SignupLink) Edges() []ent.Edge {
+// Edges of the Invite.
+func (Invite) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("signupLink").
+		edge.From("user", User.Type).Ref("invite").
 			Field("userID").Unique(),
 	}
 }
 
-func (SignupLink) Indexes() []ent.Index {
+func (Invite) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("hashedCode"),
 		index.Fields("createdAt"),

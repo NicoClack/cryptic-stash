@@ -25,6 +25,8 @@ type Stash struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// LastDownloadAt holds the value of the "lastDownloadAt" field.
 	LastDownloadAt time.Time `json:"lastDownloadAt,omitempty"`
+	// PublicName holds the value of the "publicName" field.
+	PublicName string `json:"publicName,omitempty"`
 	// Content holds the value of the "content" field.
 	Content []byte `json:"content,omitempty"`
 	// FileName holds the value of the "fileName" field.
@@ -76,6 +78,8 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case stash.FieldHashTime, stash.FieldHashMemory, stash.FieldHashThreads:
 			values[i] = new(sql.NullInt64)
+		case stash.FieldPublicName:
+			values[i] = new(sql.NullString)
 		case stash.FieldCreatedAt, stash.FieldUpdatedAt, stash.FieldLastDownloadAt:
 			values[i] = new(sql.NullTime)
 		case stash.FieldID, stash.FieldUserID:
@@ -118,6 +122,12 @@ func (_m *Stash) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field lastDownloadAt", values[i])
 			} else if value.Valid {
 				_m.LastDownloadAt = value.Time
+			}
+		case stash.FieldPublicName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field publicName", values[i])
+			} else if value.Valid {
+				_m.PublicName = value.String
 			}
 		case stash.FieldContent:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -216,6 +226,9 @@ func (_m *Stash) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("lastDownloadAt=")
 	builder.WriteString(_m.LastDownloadAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("publicName=")
+	builder.WriteString(_m.PublicName)
 	builder.WriteString(", ")
 	builder.WriteString("content=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Content))

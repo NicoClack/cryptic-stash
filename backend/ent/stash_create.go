@@ -51,6 +51,12 @@ func (_c *StashCreate) SetNillableLastDownloadAt(v *time.Time) *StashCreate {
 	return _c
 }
 
+// SetPublicName sets the "publicName" field.
+func (_c *StashCreate) SetPublicName(v string) *StashCreate {
+	_c.mutation.SetPublicName(v)
+	return _c
+}
+
 // SetContent sets the "content" field.
 func (_c *StashCreate) SetContent(v []byte) *StashCreate {
 	_c.mutation.SetContent(v)
@@ -167,6 +173,14 @@ func (_c *StashCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updatedAt", err: errors.New(`ent: missing required field "Stash.updatedAt"`)}
 	}
+	if _, ok := _c.mutation.PublicName(); !ok {
+		return &ValidationError{Name: "publicName", err: errors.New(`ent: missing required field "Stash.publicName"`)}
+	}
+	if v, ok := _c.mutation.PublicName(); ok {
+		if err := stash.PublicNameValidator(v); err != nil {
+			return &ValidationError{Name: "publicName", err: fmt.Errorf(`ent: validator failed for field "Stash.publicName": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Stash.content"`)}
 	}
@@ -262,6 +276,10 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 		_spec.SetField(stash.FieldLastDownloadAt, field.TypeTime, value)
 		_node.LastDownloadAt = value
 	}
+	if value, ok := _c.mutation.PublicName(); ok {
+		_spec.SetField(stash.FieldPublicName, field.TypeString, value)
+		_node.PublicName = value
+	}
 	if value, ok := _c.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 		_node.Content = value
@@ -292,7 +310,7 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
@@ -398,6 +416,18 @@ func (u *StashUpsert) UpdateLastDownloadAt() *StashUpsert {
 // ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
 func (u *StashUpsert) ClearLastDownloadAt() *StashUpsert {
 	u.SetNull(stash.FieldLastDownloadAt)
+	return u
+}
+
+// SetPublicName sets the "publicName" field.
+func (u *StashUpsert) SetPublicName(v string) *StashUpsert {
+	u.Set(stash.FieldPublicName, v)
+	return u
+}
+
+// UpdatePublicName sets the "publicName" field to the value that was provided on create.
+func (u *StashUpsert) UpdatePublicName() *StashUpsert {
+	u.SetExcluded(stash.FieldPublicName)
 	return u
 }
 
@@ -609,6 +639,20 @@ func (u *StashUpsertOne) UpdateLastDownloadAt() *StashUpsertOne {
 func (u *StashUpsertOne) ClearLastDownloadAt() *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
 		s.ClearLastDownloadAt()
+	})
+}
+
+// SetPublicName sets the "publicName" field.
+func (u *StashUpsertOne) SetPublicName(v string) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetPublicName(v)
+	})
+}
+
+// UpdatePublicName sets the "publicName" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdatePublicName() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdatePublicName()
 	})
 }
 
@@ -1006,6 +1050,20 @@ func (u *StashUpsertBulk) UpdateLastDownloadAt() *StashUpsertBulk {
 func (u *StashUpsertBulk) ClearLastDownloadAt() *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
 		s.ClearLastDownloadAt()
+	})
+}
+
+// SetPublicName sets the "publicName" field.
+func (u *StashUpsertBulk) SetPublicName(v string) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetPublicName(v)
+	})
+}
+
+// UpdatePublicName sets the "publicName" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdatePublicName() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdatePublicName()
 	})
 }
 

@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// DownloadSession is the client for interacting with the DownloadSession builders.
 	DownloadSession *DownloadSessionClient
+	// Invite is the client for interacting with the Invite builders.
+	Invite *InviteClient
 	// Job is the client for interacting with the Job builders.
 	Job *JobClient
 	// KeyValue is the client for interacting with the KeyValue builders.
@@ -24,8 +26,6 @@ type Tx struct {
 	LoginAlert *LoginAlertClient
 	// PeriodicTask is the client for interacting with the PeriodicTask builders.
 	PeriodicTask *PeriodicTaskClient
-	// SignupLink is the client for interacting with the SignupLink builders.
-	SignupLink *SignupLinkClient
 	// Stash is the client for interacting with the Stash builders.
 	Stash *StashClient
 	// TwoFactorAction is the client for interacting with the TwoFactorAction builders.
@@ -166,12 +166,12 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.DownloadSession = NewDownloadSessionClient(tx.config)
+	tx.Invite = NewInviteClient(tx.config)
 	tx.Job = NewJobClient(tx.config)
 	tx.KeyValue = NewKeyValueClient(tx.config)
 	tx.LogEntry = NewLogEntryClient(tx.config)
 	tx.LoginAlert = NewLoginAlertClient(tx.config)
 	tx.PeriodicTask = NewPeriodicTaskClient(tx.config)
-	tx.SignupLink = NewSignupLinkClient(tx.config)
 	tx.Stash = NewStashClient(tx.config)
 	tx.TwoFactorAction = NewTwoFactorActionClient(tx.config)
 	tx.User = NewUserClient(tx.config)

@@ -71,6 +71,11 @@ func LastDownloadAt(v time.Time) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldLastDownloadAt, v))
 }
 
+// PublicName applies equality check predicate on the "publicName" field. It's identical to PublicNameEQ.
+func PublicName(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldPublicName, v))
+}
+
 // Content applies equality check predicate on the "content" field. It's identical to ContentEQ.
 func Content(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldContent, v))
@@ -239,6 +244,71 @@ func LastDownloadAtIsNil() predicate.Stash {
 // LastDownloadAtNotNil applies the NotNil predicate on the "lastDownloadAt" field.
 func LastDownloadAtNotNil() predicate.Stash {
 	return predicate.Stash(sql.FieldNotNull(FieldLastDownloadAt))
+}
+
+// PublicNameEQ applies the EQ predicate on the "publicName" field.
+func PublicNameEQ(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldPublicName, v))
+}
+
+// PublicNameNEQ applies the NEQ predicate on the "publicName" field.
+func PublicNameNEQ(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldPublicName, v))
+}
+
+// PublicNameIn applies the In predicate on the "publicName" field.
+func PublicNameIn(vs ...string) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldPublicName, vs...))
+}
+
+// PublicNameNotIn applies the NotIn predicate on the "publicName" field.
+func PublicNameNotIn(vs ...string) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldPublicName, vs...))
+}
+
+// PublicNameGT applies the GT predicate on the "publicName" field.
+func PublicNameGT(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldPublicName, v))
+}
+
+// PublicNameGTE applies the GTE predicate on the "publicName" field.
+func PublicNameGTE(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldPublicName, v))
+}
+
+// PublicNameLT applies the LT predicate on the "publicName" field.
+func PublicNameLT(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldPublicName, v))
+}
+
+// PublicNameLTE applies the LTE predicate on the "publicName" field.
+func PublicNameLTE(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldPublicName, v))
+}
+
+// PublicNameContains applies the Contains predicate on the "publicName" field.
+func PublicNameContains(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldContains(FieldPublicName, v))
+}
+
+// PublicNameHasPrefix applies the HasPrefix predicate on the "publicName" field.
+func PublicNameHasPrefix(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldHasPrefix(FieldPublicName, v))
+}
+
+// PublicNameHasSuffix applies the HasSuffix predicate on the "publicName" field.
+func PublicNameHasSuffix(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldHasSuffix(FieldPublicName, v))
+}
+
+// PublicNameEqualFold applies the EqualFold predicate on the "publicName" field.
+func PublicNameEqualFold(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldEqualFold(FieldPublicName, v))
+}
+
+// PublicNameContainsFold applies the ContainsFold predicate on the "publicName" field.
+func PublicNameContainsFold(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldContainsFold(FieldPublicName, v))
 }
 
 // ContentEQ applies the EQ predicate on the "content" field.
@@ -546,7 +616,7 @@ func HasUser() predicate.Stash {
 	return predicate.Stash(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

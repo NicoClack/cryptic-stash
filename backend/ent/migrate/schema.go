@@ -41,6 +41,44 @@ var (
 			},
 		},
 	}
+	// InvitesColumns holds the columns for the "invites" table.
+	InvitesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "email", Type: field.TypeString, Size: 128},
+		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "user_agent", Type: field.TypeString, Default: ""},
+		{Name: "ip", Type: field.TypeString, Default: ""},
+		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
+	}
+	// InvitesTable holds the schema information for the "invites" table.
+	InvitesTable = &schema.Table{
+		Name:       "invites",
+		Columns:    InvitesColumns,
+		PrimaryKey: []*schema.Column{InvitesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "invites_users_invite",
+				Columns:    []*schema.Column{InvitesColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "invite_hashed_code",
+				Unique:  false,
+				Columns: []*schema.Column{InvitesColumns[4]},
+			},
+			{
+				Name:    "invite_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{InvitesColumns[1]},
+			},
+		},
+	}
 	// JobsColumns holds the columns for the "jobs" table.
 	JobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -186,50 +224,13 @@ var (
 			},
 		},
 	}
-	// SignupLinksColumns holds the columns for the "signup_links" table.
-	SignupLinksColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString, Size: 32},
-		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
-		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "user_agent", Type: field.TypeString, Default: ""},
-		{Name: "ip", Type: field.TypeString, Default: ""},
-		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
-	}
-	// SignupLinksTable holds the schema information for the "signup_links" table.
-	SignupLinksTable = &schema.Table{
-		Name:       "signup_links",
-		Columns:    SignupLinksColumns,
-		PrimaryKey: []*schema.Column{SignupLinksColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "signup_links_users_signupLink",
-				Columns:    []*schema.Column{SignupLinksColumns[8]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "signuplink_hashed_code",
-				Unique:  false,
-				Columns: []*schema.Column{SignupLinksColumns[4]},
-			},
-			{
-				Name:    "signuplink_created_at",
-				Unique:  false,
-				Columns: []*schema.Column{SignupLinksColumns[1]},
-			},
-		},
-	}
 	// StashesColumns holds the columns for the "stashes" table.
 	StashesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "last_download_at", Type: field.TypeTime, Nullable: true},
+		{Name: "public_name", Type: field.TypeString, Size: 256},
 		{Name: "content", Type: field.TypeBytes, Size: 10000000},
 		{Name: "file_name", Type: field.TypeBytes, Size: 256},
 		{Name: "encryption_data_key", Type: field.TypeBytes, Size: 128},
@@ -237,7 +238,7 @@ var (
 		{Name: "hash_time", Type: field.TypeUint32},
 		{Name: "hash_memory", Type: field.TypeUint32},
 		{Name: "hash_threads", Type: field.TypeUint8},
-		{Name: "user_id", Type: field.TypeUUID, Unique: true},
+		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// StashesTable holds the schema information for the "stashes" table.
 	StashesTable = &schema.Table{
@@ -246,8 +247,8 @@ var (
 		PrimaryKey: []*schema.Column{StashesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "stashes_users_stash",
-				Columns:    []*schema.Column{StashesColumns[11]},
+				Symbol:     "stashes_users_stashes",
+				Columns:    []*schema.Column{StashesColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -335,12 +336,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DownloadSessionsTable,
+		InvitesTable,
 		JobsTable,
 		KeyValuesTable,
 		LogEntriesTable,
 		LoginAlertsTable,
 		PeriodicTasksTable,
-		SignupLinksTable,
 		StashesTable,
 		TwoFactorActionsTable,
 		UsersTable,
@@ -350,10 +351,10 @@ var (
 
 func init() {
 	DownloadSessionsTable.ForeignKeys[0].RefTable = UsersTable
+	InvitesTable.ForeignKeys[0].RefTable = UsersTable
 	LogEntriesTable.ForeignKeys[0].RefTable = UsersTable
 	LoginAlertsTable.ForeignKeys[0].RefTable = DownloadSessionsTable
 	LoginAlertsTable.ForeignKeys[1].RefTable = UserMessengersTable
-	SignupLinksTable.ForeignKeys[0].RefTable = UsersTable
 	StashesTable.ForeignKeys[0].RefTable = UsersTable
 	UserMessengersTable.ForeignKeys[0].RefTable = UsersTable
 }

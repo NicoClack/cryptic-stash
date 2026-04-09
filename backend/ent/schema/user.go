@@ -33,13 +33,13 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("stash", Stash.Type).
-			Annotations(entsql.OnDelete(entsql.Cascade)).Unique(),
+		edge.To("stashes", Stash.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("messengers", UserMessenger.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("downloadSessions", DownloadSession.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To("signupLink", SignupLink.Type).
+		edge.To("invite", Invite.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)).Unique(),
 		edge.To("logs", LogEntry.Type).
 			Annotations(entsql.OnDelete(entsql.SetNull)),

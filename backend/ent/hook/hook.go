@@ -21,6 +21,18 @@ func (f DownloadSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DownloadSessionMutation", m)
 }
 
+// The InviteFunc type is an adapter to allow the use of ordinary
+// function as Invite mutator.
+type InviteFunc func(context.Context, *ent.InviteMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InviteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.InviteMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InviteMutation", m)
+}
+
 // The JobFunc type is an adapter to allow the use of ordinary
 // function as Job mutator.
 type JobFunc func(context.Context, *ent.JobMutation) (ent.Value, error)
@@ -79,18 +91,6 @@ func (f PeriodicTaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PeriodicTaskMutation", m)
-}
-
-// The SignupLinkFunc type is an adapter to allow the use of ordinary
-// function as SignupLink mutator.
-type SignupLinkFunc func(context.Context, *ent.SignupLinkMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f SignupLinkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.SignupLinkMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SignupLinkMutation", m)
 }
 
 // The StashFunc type is an adapter to allow the use of ordinary

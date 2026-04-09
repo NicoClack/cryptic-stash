@@ -75,7 +75,7 @@ func (_q *StashQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(stash.Table, stash.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, stash.UserTable, stash.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, stash.UserTable, stash.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil

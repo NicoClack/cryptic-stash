@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 )
 
-// SignupLinkDelete is the builder for deleting a SignupLink entity.
-type SignupLinkDelete struct {
+// InviteDelete is the builder for deleting a Invite entity.
+type InviteDelete struct {
 	config
 	hooks    []Hook
-	mutation *SignupLinkMutation
+	mutation *InviteMutation
 }
 
-// Where appends a list predicates to the SignupLinkDelete builder.
-func (_d *SignupLinkDelete) Where(ps ...predicate.SignupLink) *SignupLinkDelete {
+// Where appends a list predicates to the InviteDelete builder.
+func (_d *InviteDelete) Where(ps ...predicate.Invite) *InviteDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *SignupLinkDelete) Exec(ctx context.Context) (int, error) {
+func (_d *InviteDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SignupLinkDelete) ExecX(ctx context.Context) int {
+func (_d *InviteDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *SignupLinkDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *SignupLinkDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(signuplink.Table, sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID))
+func (_d *InviteDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(invite.Table, sqlgraph.NewFieldSpec(invite.FieldID, field.TypeUUID))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *SignupLinkDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// SignupLinkDeleteOne is the builder for deleting a single SignupLink entity.
-type SignupLinkDeleteOne struct {
-	_d *SignupLinkDelete
+// InviteDeleteOne is the builder for deleting a single Invite entity.
+type InviteDeleteOne struct {
+	_d *InviteDelete
 }
 
-// Where appends a list predicates to the SignupLinkDelete builder.
-func (_d *SignupLinkDeleteOne) Where(ps ...predicate.SignupLink) *SignupLinkDeleteOne {
+// Where appends a list predicates to the InviteDelete builder.
+func (_d *InviteDeleteOne) Where(ps ...predicate.Invite) *InviteDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *SignupLinkDeleteOne) Exec(ctx context.Context) error {
+func (_d *InviteDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{signuplink.Label}
+		return &NotFoundError{invite.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SignupLinkDeleteOne) ExecX(ctx context.Context) {
+func (_d *InviteDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

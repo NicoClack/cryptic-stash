@@ -21,6 +21,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldLastDownloadAt holds the string denoting the lastdownloadat field in the database.
 	FieldLastDownloadAt = "last_download_at"
+	// FieldPublicName holds the string denoting the publicname field in the database.
+	FieldPublicName = "public_name"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
 	// FieldFileName holds the string denoting the filename field in the database.
@@ -56,6 +58,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldLastDownloadAt,
+	FieldPublicName,
 	FieldContent,
 	FieldFileName,
 	FieldEncryptionDataKey,
@@ -79,6 +82,8 @@ func ValidColumn(column string) bool {
 var (
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updatedAt" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// PublicNameValidator is a validator for the "publicName" field. It is called by the builders before save.
+	PublicNameValidator func(string) error
 	// ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	ContentValidator func([]byte) error
 	// FileNameValidator is a validator for the "fileName" field. It is called by the builders before save.
@@ -114,6 +119,11 @@ func ByLastDownloadAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastDownloadAt, opts...).ToFunc()
 }
 
+// ByPublicName orders the results by the publicName field.
+func ByPublicName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublicName, opts...).ToFunc()
+}
+
 // ByHashTime orders the results by the hashTime field.
 func ByHashTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHashTime, opts...).ToFunc()
@@ -144,6 +154,6 @@ func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, UserTable, UserColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }

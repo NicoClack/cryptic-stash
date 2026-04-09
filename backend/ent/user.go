@@ -9,8 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
-	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
@@ -40,14 +39,14 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Stash holds the value of the stash edge.
-	Stash *Stash `json:"stash,omitempty"`
+	// Stashes holds the value of the stashes edge.
+	Stashes []*Stash `json:"stashes,omitempty"`
 	// Messengers holds the value of the messengers edge.
 	Messengers []*UserMessenger `json:"messengers,omitempty"`
 	// DownloadSessions holds the value of the downloadSessions edge.
 	DownloadSessions []*DownloadSession `json:"downloadSessions,omitempty"`
-	// SignupLink holds the value of the signupLink edge.
-	SignupLink *SignupLink `json:"signupLink,omitempty"`
+	// Invite holds the value of the invite edge.
+	Invite *Invite `json:"invite,omitempty"`
 	// Logs holds the value of the logs edge.
 	Logs []*LogEntry `json:"logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -55,15 +54,13 @@ type UserEdges struct {
 	loadedTypes [5]bool
 }
 
-// StashOrErr returns the Stash value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) StashOrErr() (*Stash, error) {
-	if e.Stash != nil {
-		return e.Stash, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: stash.Label}
+// StashesOrErr returns the Stashes value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) StashesOrErr() ([]*Stash, error) {
+	if e.loadedTypes[0] {
+		return e.Stashes, nil
 	}
-	return nil, &NotLoadedError{edge: "stash"}
+	return nil, &NotLoadedError{edge: "stashes"}
 }
 
 // MessengersOrErr returns the Messengers value or an error if the edge
@@ -84,15 +81,15 @@ func (e UserEdges) DownloadSessionsOrErr() ([]*DownloadSession, error) {
 	return nil, &NotLoadedError{edge: "downloadSessions"}
 }
 
-// SignupLinkOrErr returns the SignupLink value or an error if the edge
+// InviteOrErr returns the Invite value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) SignupLinkOrErr() (*SignupLink, error) {
-	if e.SignupLink != nil {
-		return e.SignupLink, nil
+func (e UserEdges) InviteOrErr() (*Invite, error) {
+	if e.Invite != nil {
+		return e.Invite, nil
 	} else if e.loadedTypes[3] {
-		return nil, &NotFoundError{label: signuplink.Label}
+		return nil, &NotFoundError{label: invite.Label}
 	}
-	return nil, &NotLoadedError{edge: "signupLink"}
+	return nil, &NotLoadedError{edge: "invite"}
 }
 
 // LogsOrErr returns the Logs value or an error if the edge
@@ -188,9 +185,9 @@ func (_m *User) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryStash queries the "stash" edge of the User entity.
-func (_m *User) QueryStash() *StashQuery {
-	return NewUserClient(_m.config).QueryStash(_m)
+// QueryStashes queries the "stashes" edge of the User entity.
+func (_m *User) QueryStashes() *StashQuery {
+	return NewUserClient(_m.config).QueryStashes(_m)
 }
 
 // QueryMessengers queries the "messengers" edge of the User entity.
@@ -203,9 +200,9 @@ func (_m *User) QueryDownloadSessions() *DownloadSessionQuery {
 	return NewUserClient(_m.config).QueryDownloadSessions(_m)
 }
 
-// QuerySignupLink queries the "signupLink" edge of the User entity.
-func (_m *User) QuerySignupLink() *SignupLinkQuery {
-	return NewUserClient(_m.config).QuerySignupLink(_m)
+// QueryInvite queries the "invite" edge of the User entity.
+func (_m *User) QueryInvite() *InviteQuery {
+	return NewUserClient(_m.config).QueryInvite(_m)
 }
 
 // QueryLogs queries the "logs" edge of the User entity.

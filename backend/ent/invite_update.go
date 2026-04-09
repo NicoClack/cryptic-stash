@@ -11,33 +11,33 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// SignupLinkUpdate is the builder for updating SignupLink entities.
-type SignupLinkUpdate struct {
+// InviteUpdate is the builder for updating Invite entities.
+type InviteUpdate struct {
 	config
 	hooks    []Hook
-	mutation *SignupLinkMutation
+	mutation *InviteMutation
 }
 
-// Where appends a list predicates to the SignupLinkUpdate builder.
-func (_u *SignupLinkUpdate) Where(ps ...predicate.SignupLink) *SignupLinkUpdate {
+// Where appends a list predicates to the InviteUpdate builder.
+func (_u *InviteUpdate) Where(ps ...predicate.Invite) *InviteUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (_u *SignupLinkUpdate) SetCreatedAt(v time.Time) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetCreatedAt(v time.Time) *InviteUpdate {
 	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
-func (_u *SignupLinkUpdate) SetNillableCreatedAt(v *time.Time) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetNillableCreatedAt(v *time.Time) *InviteUpdate {
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
@@ -45,39 +45,39 @@ func (_u *SignupLinkUpdate) SetNillableCreatedAt(v *time.Time) *SignupLinkUpdate
 }
 
 // SetUpdatedAt sets the "updatedAt" field.
-func (_u *SignupLinkUpdate) SetUpdatedAt(v time.Time) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetUpdatedAt(v time.Time) *InviteUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *SignupLinkUpdate) SetName(v string) *SignupLinkUpdate {
-	_u.mutation.SetName(v)
+// SetEmail sets the "email" field.
+func (_u *InviteUpdate) SetEmail(v string) *InviteUpdate {
+	_u.mutation.SetEmail(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *SignupLinkUpdate) SetNillableName(v *string) *SignupLinkUpdate {
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *InviteUpdate) SetNillableEmail(v *string) *InviteUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetEmail(*v)
 	}
 	return _u
 }
 
 // SetHashedCode sets the "hashedCode" field.
-func (_u *SignupLinkUpdate) SetHashedCode(v []byte) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetHashedCode(v []byte) *InviteUpdate {
 	_u.mutation.SetHashedCode(v)
 	return _u
 }
 
 // SetExpiresAt sets the "expiresAt" field.
-func (_u *SignupLinkUpdate) SetExpiresAt(v time.Time) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetExpiresAt(v time.Time) *InviteUpdate {
 	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
 // SetNillableExpiresAt sets the "expiresAt" field if the given value is not nil.
-func (_u *SignupLinkUpdate) SetNillableExpiresAt(v *time.Time) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetNillableExpiresAt(v *time.Time) *InviteUpdate {
 	if v != nil {
 		_u.SetExpiresAt(*v)
 	}
@@ -85,13 +85,13 @@ func (_u *SignupLinkUpdate) SetNillableExpiresAt(v *time.Time) *SignupLinkUpdate
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SignupLinkUpdate) SetUserAgent(v string) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetUserAgent(v string) *InviteUpdate {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SignupLinkUpdate) SetNillableUserAgent(v *string) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetNillableUserAgent(v *string) *InviteUpdate {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -99,13 +99,13 @@ func (_u *SignupLinkUpdate) SetNillableUserAgent(v *string) *SignupLinkUpdate {
 }
 
 // SetIP sets the "ip" field.
-func (_u *SignupLinkUpdate) SetIP(v string) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetIP(v string) *InviteUpdate {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SignupLinkUpdate) SetNillableIP(v *string) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetNillableIP(v *string) *InviteUpdate {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -113,13 +113,13 @@ func (_u *SignupLinkUpdate) SetNillableIP(v *string) *SignupLinkUpdate {
 }
 
 // SetUserID sets the "userID" field.
-func (_u *SignupLinkUpdate) SetUserID(v uuid.UUID) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetUserID(v uuid.UUID) *InviteUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "userID" field if the given value is not nil.
-func (_u *SignupLinkUpdate) SetNillableUserID(v *uuid.UUID) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetNillableUserID(v *uuid.UUID) *InviteUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -127,35 +127,35 @@ func (_u *SignupLinkUpdate) SetNillableUserID(v *uuid.UUID) *SignupLinkUpdate {
 }
 
 // ClearUserID clears the value of the "userID" field.
-func (_u *SignupLinkUpdate) ClearUserID() *SignupLinkUpdate {
+func (_u *InviteUpdate) ClearUserID() *InviteUpdate {
 	_u.mutation.ClearUserID()
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *SignupLinkUpdate) SetUser(v *User) *SignupLinkUpdate {
+func (_u *InviteUpdate) SetUser(v *User) *InviteUpdate {
 	return _u.SetUserID(v.ID)
 }
 
-// Mutation returns the SignupLinkMutation object of the builder.
-func (_u *SignupLinkUpdate) Mutation() *SignupLinkMutation {
+// Mutation returns the InviteMutation object of the builder.
+func (_u *InviteUpdate) Mutation() *InviteMutation {
 	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (_u *SignupLinkUpdate) ClearUser() *SignupLinkUpdate {
+func (_u *InviteUpdate) ClearUser() *InviteUpdate {
 	_u.mutation.ClearUser()
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *SignupLinkUpdate) Save(ctx context.Context) (int, error) {
+func (_u *InviteUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SignupLinkUpdate) SaveX(ctx context.Context) int {
+func (_u *InviteUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -164,46 +164,46 @@ func (_u *SignupLinkUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *SignupLinkUpdate) Exec(ctx context.Context) error {
+func (_u *InviteUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SignupLinkUpdate) ExecX(ctx context.Context) {
+func (_u *InviteUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *SignupLinkUpdate) defaults() {
+func (_u *InviteUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := signuplink.UpdateDefaultUpdatedAt()
+		v := invite.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SignupLinkUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := signuplink.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SignupLink.name": %w`, err)}
+func (_u *InviteUpdate) check() error {
+	if v, ok := _u.mutation.Email(); ok {
+		if err := invite.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Invite.email": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.HashedCode(); ok {
-		if err := signuplink.HashedCodeValidator(v); err != nil {
-			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "SignupLink.hashedCode": %w`, err)}
+		if err := invite.HashedCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "Invite.hashedCode": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (_u *SignupLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *InviteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(signuplink.Table, signuplink.Columns, sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(invite.Table, invite.Columns, sqlgraph.NewFieldSpec(invite.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -212,32 +212,32 @@ func (_u *SignupLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		}
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(signuplink.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(signuplink.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(signuplink.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(invite.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.HashedCode(); ok {
-		_spec.SetField(signuplink.FieldHashedCode, field.TypeBytes, value)
+		_spec.SetField(invite.FieldHashedCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
-		_spec.SetField(signuplink.FieldExpiresAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldExpiresAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(signuplink.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(signuplink.FieldIP, field.TypeString, value)
+		_spec.SetField(invite.FieldIP, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   signuplink.UserTable,
-			Columns: []string{signuplink.UserColumn},
+			Table:   invite.UserTable,
+			Columns: []string{invite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -249,8 +249,8 @@ func (_u *SignupLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   signuplink.UserTable,
-			Columns: []string{signuplink.UserColumn},
+			Table:   invite.UserTable,
+			Columns: []string{invite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -263,7 +263,7 @@ func (_u *SignupLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{signuplink.Label}
+			err = &NotFoundError{invite.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -273,22 +273,22 @@ func (_u *SignupLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	return _node, nil
 }
 
-// SignupLinkUpdateOne is the builder for updating a single SignupLink entity.
-type SignupLinkUpdateOne struct {
+// InviteUpdateOne is the builder for updating a single Invite entity.
+type InviteUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *SignupLinkMutation
+	mutation *InviteMutation
 }
 
 // SetCreatedAt sets the "createdAt" field.
-func (_u *SignupLinkUpdateOne) SetCreatedAt(v time.Time) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetCreatedAt(v time.Time) *InviteUpdateOne {
 	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "createdAt" field if the given value is not nil.
-func (_u *SignupLinkUpdateOne) SetNillableCreatedAt(v *time.Time) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetNillableCreatedAt(v *time.Time) *InviteUpdateOne {
 	if v != nil {
 		_u.SetCreatedAt(*v)
 	}
@@ -296,39 +296,39 @@ func (_u *SignupLinkUpdateOne) SetNillableCreatedAt(v *time.Time) *SignupLinkUpd
 }
 
 // SetUpdatedAt sets the "updatedAt" field.
-func (_u *SignupLinkUpdateOne) SetUpdatedAt(v time.Time) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetUpdatedAt(v time.Time) *InviteUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *SignupLinkUpdateOne) SetName(v string) *SignupLinkUpdateOne {
-	_u.mutation.SetName(v)
+// SetEmail sets the "email" field.
+func (_u *InviteUpdateOne) SetEmail(v string) *InviteUpdateOne {
+	_u.mutation.SetEmail(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *SignupLinkUpdateOne) SetNillableName(v *string) *SignupLinkUpdateOne {
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *InviteUpdateOne) SetNillableEmail(v *string) *InviteUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetEmail(*v)
 	}
 	return _u
 }
 
 // SetHashedCode sets the "hashedCode" field.
-func (_u *SignupLinkUpdateOne) SetHashedCode(v []byte) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetHashedCode(v []byte) *InviteUpdateOne {
 	_u.mutation.SetHashedCode(v)
 	return _u
 }
 
 // SetExpiresAt sets the "expiresAt" field.
-func (_u *SignupLinkUpdateOne) SetExpiresAt(v time.Time) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetExpiresAt(v time.Time) *InviteUpdateOne {
 	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
 // SetNillableExpiresAt sets the "expiresAt" field if the given value is not nil.
-func (_u *SignupLinkUpdateOne) SetNillableExpiresAt(v *time.Time) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetNillableExpiresAt(v *time.Time) *InviteUpdateOne {
 	if v != nil {
 		_u.SetExpiresAt(*v)
 	}
@@ -336,13 +336,13 @@ func (_u *SignupLinkUpdateOne) SetNillableExpiresAt(v *time.Time) *SignupLinkUpd
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SignupLinkUpdateOne) SetUserAgent(v string) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetUserAgent(v string) *InviteUpdateOne {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SignupLinkUpdateOne) SetNillableUserAgent(v *string) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetNillableUserAgent(v *string) *InviteUpdateOne {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -350,13 +350,13 @@ func (_u *SignupLinkUpdateOne) SetNillableUserAgent(v *string) *SignupLinkUpdate
 }
 
 // SetIP sets the "ip" field.
-func (_u *SignupLinkUpdateOne) SetIP(v string) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetIP(v string) *InviteUpdateOne {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SignupLinkUpdateOne) SetNillableIP(v *string) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetNillableIP(v *string) *InviteUpdateOne {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -364,13 +364,13 @@ func (_u *SignupLinkUpdateOne) SetNillableIP(v *string) *SignupLinkUpdateOne {
 }
 
 // SetUserID sets the "userID" field.
-func (_u *SignupLinkUpdateOne) SetUserID(v uuid.UUID) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetUserID(v uuid.UUID) *InviteUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "userID" field if the given value is not nil.
-func (_u *SignupLinkUpdateOne) SetNillableUserID(v *uuid.UUID) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetNillableUserID(v *uuid.UUID) *InviteUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -378,48 +378,48 @@ func (_u *SignupLinkUpdateOne) SetNillableUserID(v *uuid.UUID) *SignupLinkUpdate
 }
 
 // ClearUserID clears the value of the "userID" field.
-func (_u *SignupLinkUpdateOne) ClearUserID() *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) ClearUserID() *InviteUpdateOne {
 	_u.mutation.ClearUserID()
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *SignupLinkUpdateOne) SetUser(v *User) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) SetUser(v *User) *InviteUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
-// Mutation returns the SignupLinkMutation object of the builder.
-func (_u *SignupLinkUpdateOne) Mutation() *SignupLinkMutation {
+// Mutation returns the InviteMutation object of the builder.
+func (_u *InviteUpdateOne) Mutation() *InviteMutation {
 	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (_u *SignupLinkUpdateOne) ClearUser() *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) ClearUser() *InviteUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
 }
 
-// Where appends a list predicates to the SignupLinkUpdate builder.
-func (_u *SignupLinkUpdateOne) Where(ps ...predicate.SignupLink) *SignupLinkUpdateOne {
+// Where appends a list predicates to the InviteUpdate builder.
+func (_u *InviteUpdateOne) Where(ps ...predicate.Invite) *InviteUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *SignupLinkUpdateOne) Select(field string, fields ...string) *SignupLinkUpdateOne {
+func (_u *InviteUpdateOne) Select(field string, fields ...string) *InviteUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated SignupLink entity.
-func (_u *SignupLinkUpdateOne) Save(ctx context.Context) (*SignupLink, error) {
+// Save executes the query and returns the updated Invite entity.
+func (_u *InviteUpdateOne) Save(ctx context.Context) (*Invite, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SignupLinkUpdateOne) SaveX(ctx context.Context) *SignupLink {
+func (_u *InviteUpdateOne) SaveX(ctx context.Context) *Invite {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -428,59 +428,59 @@ func (_u *SignupLinkUpdateOne) SaveX(ctx context.Context) *SignupLink {
 }
 
 // Exec executes the query on the entity.
-func (_u *SignupLinkUpdateOne) Exec(ctx context.Context) error {
+func (_u *InviteUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SignupLinkUpdateOne) ExecX(ctx context.Context) {
+func (_u *InviteUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *SignupLinkUpdateOne) defaults() {
+func (_u *InviteUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := signuplink.UpdateDefaultUpdatedAt()
+		v := invite.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SignupLinkUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := signuplink.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "SignupLink.name": %w`, err)}
+func (_u *InviteUpdateOne) check() error {
+	if v, ok := _u.mutation.Email(); ok {
+		if err := invite.EmailValidator(v); err != nil {
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Invite.email": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.HashedCode(); ok {
-		if err := signuplink.HashedCodeValidator(v); err != nil {
-			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "SignupLink.hashedCode": %w`, err)}
+		if err := invite.HashedCodeValidator(v); err != nil {
+			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "Invite.hashedCode": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (_u *SignupLinkUpdateOne) sqlSave(ctx context.Context) (_node *SignupLink, err error) {
+func (_u *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(signuplink.Table, signuplink.Columns, sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(invite.Table, invite.Columns, sqlgraph.NewFieldSpec(invite.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SignupLink.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Invite.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, signuplink.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, invite.FieldID)
 		for _, f := range fields {
-			if !signuplink.ValidColumn(f) {
+			if !invite.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != signuplink.FieldID {
+			if f != invite.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -493,32 +493,32 @@ func (_u *SignupLinkUpdateOne) sqlSave(ctx context.Context) (_node *SignupLink, 
 		}
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(signuplink.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(signuplink.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(signuplink.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(invite.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.HashedCode(); ok {
-		_spec.SetField(signuplink.FieldHashedCode, field.TypeBytes, value)
+		_spec.SetField(invite.FieldHashedCode, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
-		_spec.SetField(signuplink.FieldExpiresAt, field.TypeTime, value)
+		_spec.SetField(invite.FieldExpiresAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(signuplink.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(signuplink.FieldIP, field.TypeString, value)
+		_spec.SetField(invite.FieldIP, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   signuplink.UserTable,
-			Columns: []string{signuplink.UserColumn},
+			Table:   invite.UserTable,
+			Columns: []string{invite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -530,8 +530,8 @@ func (_u *SignupLinkUpdateOne) sqlSave(ctx context.Context) (_node *SignupLink, 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   signuplink.UserTable,
-			Columns: []string{signuplink.UserColumn},
+			Table:   invite.UserTable,
+			Columns: []string{invite.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -542,12 +542,12 @@ func (_u *SignupLinkUpdateOne) sqlSave(ctx context.Context) (_node *SignupLink, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &SignupLink{config: _u.config}
+	_node = &Invite{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{signuplink.Label}
+			err = &NotFoundError{invite.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

@@ -11,58 +11,58 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// SignupLinkQuery is the builder for querying SignupLink entities.
-type SignupLinkQuery struct {
+// InviteQuery is the builder for querying Invite entities.
+type InviteQuery struct {
 	config
 	ctx        *QueryContext
-	order      []signuplink.OrderOption
+	order      []invite.OrderOption
 	inters     []Interceptor
-	predicates []predicate.SignupLink
+	predicates []predicate.Invite
 	withUser   *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the SignupLinkQuery builder.
-func (_q *SignupLinkQuery) Where(ps ...predicate.SignupLink) *SignupLinkQuery {
+// Where adds a new predicate for the InviteQuery builder.
+func (_q *InviteQuery) Where(ps ...predicate.Invite) *InviteQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *SignupLinkQuery) Limit(limit int) *SignupLinkQuery {
+func (_q *InviteQuery) Limit(limit int) *InviteQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *SignupLinkQuery) Offset(offset int) *SignupLinkQuery {
+func (_q *InviteQuery) Offset(offset int) *InviteQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *SignupLinkQuery) Unique(unique bool) *SignupLinkQuery {
+func (_q *InviteQuery) Unique(unique bool) *InviteQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *SignupLinkQuery) Order(o ...signuplink.OrderOption) *SignupLinkQuery {
+func (_q *InviteQuery) Order(o ...invite.OrderOption) *InviteQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (_q *SignupLinkQuery) QueryUser() *UserQuery {
+func (_q *InviteQuery) QueryUser() *UserQuery {
 	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -73,9 +73,9 @@ func (_q *SignupLinkQuery) QueryUser() *UserQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(signuplink.Table, signuplink.FieldID, selector),
+			sqlgraph.From(invite.Table, invite.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, signuplink.UserTable, signuplink.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, invite.UserTable, invite.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -83,21 +83,21 @@ func (_q *SignupLinkQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// First returns the first SignupLink entity from the query.
-// Returns a *NotFoundError when no SignupLink was found.
-func (_q *SignupLinkQuery) First(ctx context.Context) (*SignupLink, error) {
+// First returns the first Invite entity from the query.
+// Returns a *NotFoundError when no Invite was found.
+func (_q *InviteQuery) First(ctx context.Context) (*Invite, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{signuplink.Label}
+		return nil, &NotFoundError{invite.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *SignupLinkQuery) FirstX(ctx context.Context) *SignupLink {
+func (_q *InviteQuery) FirstX(ctx context.Context) *Invite {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -105,22 +105,22 @@ func (_q *SignupLinkQuery) FirstX(ctx context.Context) *SignupLink {
 	return node
 }
 
-// FirstID returns the first SignupLink ID from the query.
-// Returns a *NotFoundError when no SignupLink ID was found.
-func (_q *SignupLinkQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+// FirstID returns the first Invite ID from the query.
+// Returns a *NotFoundError when no Invite ID was found.
+func (_q *InviteQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{signuplink.Label}
+		err = &NotFoundError{invite.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *SignupLinkQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (_q *InviteQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -128,10 +128,10 @@ func (_q *SignupLinkQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// Only returns a single SignupLink entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one SignupLink entity is found.
-// Returns a *NotFoundError when no SignupLink entities are found.
-func (_q *SignupLinkQuery) Only(ctx context.Context) (*SignupLink, error) {
+// Only returns a single Invite entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Invite entity is found.
+// Returns a *NotFoundError when no Invite entities are found.
+func (_q *InviteQuery) Only(ctx context.Context) (*Invite, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -140,14 +140,14 @@ func (_q *SignupLinkQuery) Only(ctx context.Context) (*SignupLink, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{signuplink.Label}
+		return nil, &NotFoundError{invite.Label}
 	default:
-		return nil, &NotSingularError{signuplink.Label}
+		return nil, &NotSingularError{invite.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *SignupLinkQuery) OnlyX(ctx context.Context) *SignupLink {
+func (_q *InviteQuery) OnlyX(ctx context.Context) *Invite {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -155,10 +155,10 @@ func (_q *SignupLinkQuery) OnlyX(ctx context.Context) *SignupLink {
 	return node
 }
 
-// OnlyID is like Only, but returns the only SignupLink ID in the query.
-// Returns a *NotSingularError when more than one SignupLink ID is found.
+// OnlyID is like Only, but returns the only Invite ID in the query.
+// Returns a *NotSingularError when more than one Invite ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *SignupLinkQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *InviteQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -167,15 +167,15 @@ func (_q *SignupLinkQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error)
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{signuplink.Label}
+		err = &NotFoundError{invite.Label}
 	default:
-		err = &NotSingularError{signuplink.Label}
+		err = &NotSingularError{invite.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *SignupLinkQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (_q *InviteQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -183,18 +183,18 @@ func (_q *SignupLinkQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// All executes the query and returns a list of SignupLinks.
-func (_q *SignupLinkQuery) All(ctx context.Context) ([]*SignupLink, error) {
+// All executes the query and returns a list of Invites.
+func (_q *InviteQuery) All(ctx context.Context) ([]*Invite, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*SignupLink, *SignupLinkQuery]()
-	return withInterceptors[[]*SignupLink](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Invite, *InviteQuery]()
+	return withInterceptors[[]*Invite](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *SignupLinkQuery) AllX(ctx context.Context) []*SignupLink {
+func (_q *InviteQuery) AllX(ctx context.Context) []*Invite {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -202,20 +202,20 @@ func (_q *SignupLinkQuery) AllX(ctx context.Context) []*SignupLink {
 	return nodes
 }
 
-// IDs executes the query and returns a list of SignupLink IDs.
-func (_q *SignupLinkQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+// IDs executes the query and returns a list of Invite IDs.
+func (_q *InviteQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(signuplink.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(invite.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *SignupLinkQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (_q *InviteQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -224,16 +224,16 @@ func (_q *SignupLinkQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (_q *SignupLinkQuery) Count(ctx context.Context) (int, error) {
+func (_q *InviteQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*SignupLinkQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*InviteQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *SignupLinkQuery) CountX(ctx context.Context) int {
+func (_q *InviteQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -242,7 +242,7 @@ func (_q *SignupLinkQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *SignupLinkQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *InviteQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -255,7 +255,7 @@ func (_q *SignupLinkQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *SignupLinkQuery) ExistX(ctx context.Context) bool {
+func (_q *InviteQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -263,18 +263,18 @@ func (_q *SignupLinkQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the SignupLinkQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the InviteQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *SignupLinkQuery) Clone() *SignupLinkQuery {
+func (_q *InviteQuery) Clone() *InviteQuery {
 	if _q == nil {
 		return nil
 	}
-	return &SignupLinkQuery{
+	return &InviteQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]signuplink.OrderOption{}, _q.order...),
+		order:      append([]invite.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.SignupLink{}, _q.predicates...),
+		predicates: append([]predicate.Invite{}, _q.predicates...),
 		withUser:   _q.withUser.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -284,7 +284,7 @@ func (_q *SignupLinkQuery) Clone() *SignupLinkQuery {
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *SignupLinkQuery) WithUser(opts ...func(*UserQuery)) *SignupLinkQuery {
+func (_q *InviteQuery) WithUser(opts ...func(*UserQuery)) *InviteQuery {
 	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
@@ -303,15 +303,15 @@ func (_q *SignupLinkQuery) WithUser(opts ...func(*UserQuery)) *SignupLinkQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.SignupLink.Query().
-//		GroupBy(signuplink.FieldCreatedAt).
+//	client.Invite.Query().
+//		GroupBy(invite.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *SignupLinkQuery) GroupBy(field string, fields ...string) *SignupLinkGroupBy {
+func (_q *InviteQuery) GroupBy(field string, fields ...string) *InviteGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SignupLinkGroupBy{build: _q}
+	grbuild := &InviteGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = signuplink.Label
+	grbuild.label = invite.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -325,23 +325,23 @@ func (_q *SignupLinkQuery) GroupBy(field string, fields ...string) *SignupLinkGr
 //		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
-//	client.SignupLink.Query().
-//		Select(signuplink.FieldCreatedAt).
+//	client.Invite.Query().
+//		Select(invite.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *SignupLinkQuery) Select(fields ...string) *SignupLinkSelect {
+func (_q *InviteQuery) Select(fields ...string) *InviteSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &SignupLinkSelect{SignupLinkQuery: _q}
-	sbuild.label = signuplink.Label
+	sbuild := &InviteSelect{InviteQuery: _q}
+	sbuild.label = invite.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a SignupLinkSelect configured with the given aggregations.
-func (_q *SignupLinkQuery) Aggregate(fns ...AggregateFunc) *SignupLinkSelect {
+// Aggregate returns a InviteSelect configured with the given aggregations.
+func (_q *InviteQuery) Aggregate(fns ...AggregateFunc) *InviteSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *SignupLinkQuery) prepareQuery(ctx context.Context) error {
+func (_q *InviteQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -353,7 +353,7 @@ func (_q *SignupLinkQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !signuplink.ValidColumn(f) {
+		if !invite.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -367,19 +367,19 @@ func (_q *SignupLinkQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *SignupLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SignupLink, error) {
+func (_q *InviteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Invite, error) {
 	var (
-		nodes       = []*SignupLink{}
+		nodes       = []*Invite{}
 		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
 			_q.withUser != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*SignupLink).scanValues(nil, columns)
+		return (*Invite).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &SignupLink{config: _q.config}
+		node := &Invite{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -395,16 +395,16 @@ func (_q *SignupLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*S
 	}
 	if query := _q.withUser; query != nil {
 		if err := _q.loadUser(ctx, query, nodes, nil,
-			func(n *SignupLink, e *User) { n.Edges.User = e }); err != nil {
+			func(n *Invite, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *SignupLinkQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*SignupLink, init func(*SignupLink), assign func(*SignupLink, *User)) error {
+func (_q *InviteQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Invite, init func(*Invite), assign func(*Invite, *User)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*SignupLink)
+	nodeids := make(map[uuid.UUID][]*Invite)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -432,7 +432,7 @@ func (_q *SignupLinkQuery) loadUser(ctx context.Context, query *UserQuery, nodes
 	return nil
 }
 
-func (_q *SignupLinkQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *InviteQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -441,8 +441,8 @@ func (_q *SignupLinkQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *SignupLinkQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(signuplink.Table, signuplink.Columns, sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID))
+func (_q *InviteQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(invite.Table, invite.Columns, sqlgraph.NewFieldSpec(invite.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -451,14 +451,14 @@ func (_q *SignupLinkQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, signuplink.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, invite.FieldID)
 		for i := range fields {
-			if fields[i] != signuplink.FieldID {
+			if fields[i] != invite.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
 		if _q.withUser != nil {
-			_spec.Node.AddColumnOnce(signuplink.FieldUserID)
+			_spec.Node.AddColumnOnce(invite.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -484,12 +484,12 @@ func (_q *SignupLinkQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *SignupLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *InviteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(signuplink.Table)
+	t1 := builder.Table(invite.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = signuplink.Columns
+		columns = invite.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -516,28 +516,28 @@ func (_q *SignupLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// SignupLinkGroupBy is the group-by builder for SignupLink entities.
-type SignupLinkGroupBy struct {
+// InviteGroupBy is the group-by builder for Invite entities.
+type InviteGroupBy struct {
 	selector
-	build *SignupLinkQuery
+	build *InviteQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *SignupLinkGroupBy) Aggregate(fns ...AggregateFunc) *SignupLinkGroupBy {
+func (_g *InviteGroupBy) Aggregate(fns ...AggregateFunc) *InviteGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *SignupLinkGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *InviteGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SignupLinkQuery, *SignupLinkGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*InviteQuery, *InviteGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *SignupLinkGroupBy) sqlScan(ctx context.Context, root *SignupLinkQuery, v any) error {
+func (_g *InviteGroupBy) sqlScan(ctx context.Context, root *InviteQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -564,28 +564,28 @@ func (_g *SignupLinkGroupBy) sqlScan(ctx context.Context, root *SignupLinkQuery,
 	return sql.ScanSlice(rows, v)
 }
 
-// SignupLinkSelect is the builder for selecting fields of SignupLink entities.
-type SignupLinkSelect struct {
-	*SignupLinkQuery
+// InviteSelect is the builder for selecting fields of Invite entities.
+type InviteSelect struct {
+	*InviteQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *SignupLinkSelect) Aggregate(fns ...AggregateFunc) *SignupLinkSelect {
+func (_s *InviteSelect) Aggregate(fns ...AggregateFunc) *InviteSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *SignupLinkSelect) Scan(ctx context.Context, v any) error {
+func (_s *InviteSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SignupLinkQuery, *SignupLinkSelect](ctx, _s.SignupLinkQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*InviteQuery, *InviteSelect](ctx, _s.InviteQuery, _s, _s.inters, v)
 }
 
-func (_s *SignupLinkSelect) sqlScan(ctx context.Context, root *SignupLinkQuery, v any) error {
+func (_s *InviteSelect) sqlScan(ctx context.Context, root *InviteQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

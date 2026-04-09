@@ -70,6 +70,20 @@ func (_u *StashUpdate) ClearLastDownloadAt() *StashUpdate {
 	return _u
 }
 
+// SetPublicName sets the "publicName" field.
+func (_u *StashUpdate) SetPublicName(v string) *StashUpdate {
+	_u.mutation.SetPublicName(v)
+	return _u
+}
+
+// SetNillablePublicName sets the "publicName" field if the given value is not nil.
+func (_u *StashUpdate) SetNillablePublicName(v *string) *StashUpdate {
+	if v != nil {
+		_u.SetPublicName(*v)
+	}
+	return _u
+}
+
 // SetContent sets the "content" field.
 func (_u *StashUpdate) SetContent(v []byte) *StashUpdate {
 	_u.mutation.SetContent(v)
@@ -225,6 +239,11 @@ func (_u *StashUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *StashUpdate) check() error {
+	if v, ok := _u.mutation.PublicName(); ok {
+		if err := stash.PublicNameValidator(v); err != nil {
+			return &ValidationError{Name: "publicName", err: fmt.Errorf(`ent: validator failed for field "Stash.publicName": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Content(); ok {
 		if err := stash.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Stash.content": %w`, err)}
@@ -275,6 +294,9 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.LastDownloadAtCleared() {
 		_spec.ClearField(stash.FieldLastDownloadAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.PublicName(); ok {
+		_spec.SetField(stash.FieldPublicName, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 	}
@@ -307,7 +329,7 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
@@ -320,7 +342,7 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
@@ -391,6 +413,20 @@ func (_u *StashUpdateOne) SetNillableLastDownloadAt(v *time.Time) *StashUpdateOn
 // ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
 func (_u *StashUpdateOne) ClearLastDownloadAt() *StashUpdateOne {
 	_u.mutation.ClearLastDownloadAt()
+	return _u
+}
+
+// SetPublicName sets the "publicName" field.
+func (_u *StashUpdateOne) SetPublicName(v string) *StashUpdateOne {
+	_u.mutation.SetPublicName(v)
+	return _u
+}
+
+// SetNillablePublicName sets the "publicName" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillablePublicName(v *string) *StashUpdateOne {
+	if v != nil {
+		_u.SetPublicName(*v)
+	}
 	return _u
 }
 
@@ -562,6 +598,11 @@ func (_u *StashUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *StashUpdateOne) check() error {
+	if v, ok := _u.mutation.PublicName(); ok {
+		if err := stash.PublicNameValidator(v); err != nil {
+			return &ValidationError{Name: "publicName", err: fmt.Errorf(`ent: validator failed for field "Stash.publicName": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Content(); ok {
 		if err := stash.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Stash.content": %w`, err)}
@@ -629,6 +670,9 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 	if _u.mutation.LastDownloadAtCleared() {
 		_spec.ClearField(stash.FieldLastDownloadAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.PublicName(); ok {
+		_spec.SetField(stash.FieldPublicName, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 	}
@@ -661,7 +705,7 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
@@ -674,7 +718,7 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},

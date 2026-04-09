@@ -13,12 +13,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
 	"github.com/NicoClack/cryptic-stash/backend/ent/keyvalue"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/periodictask"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -84,12 +84,12 @@ func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			downloadsession.Table: downloadsession.ValidColumn,
+			invite.Table:          invite.ValidColumn,
 			job.Table:             job.ValidColumn,
 			keyvalue.Table:        keyvalue.ValidColumn,
 			logentry.Table:        logentry.ValidColumn,
 			loginalert.Table:      loginalert.ValidColumn,
 			periodictask.Table:    periodictask.ValidColumn,
-			signuplink.Table:      signuplink.ValidColumn,
 			stash.Table:           stash.ValidColumn,
 			twofactoraction.Table: twofactoraction.ValidColumn,
 			user.Table:            user.ValidColumn,

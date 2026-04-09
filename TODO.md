@@ -1,5 +1,7 @@
 # TODO
 
+- Finish renaming signup links to invites
+- Replace env.STASH_ENCRYPTION_KEY with key derivation algorithm
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
 - Rate limit hashing
 - - Limit number of concurrent hash requests to avoid using too much RAM
@@ -11,12 +13,19 @@
 - - Invites should specify the email and not allow it to be changed, like n8n
 - - If using usernames on signup page, could mitigate by limiting failed uses of a signup link and requiring a unique credit card for public signups (if I ever implement that)
 - - Can fake salts by hashing something deterministic like the email with a static pepper. If the pepper is leaked, I can just rotate it. If the database is leaked, the attacker has the stash records anyway. This approach means I don't need to store the random data I'm sending to ensure consistent results 
-- - Encrypt user emails with static env?
 - Create account system for users to manage their stashes
 - - Require FIDO2 passkeys/physical security keys
 - - Allow optional 2FA FIDO2 with "userVerification" set to "discouraged" by default, allowing it to be set to "required". Intended for login via password manager + security key
 - - User logins can be reset by the admin generating a link. Maybe it could also require a code sent to their email?
 - - Admin logins can be reset by changing env vars
+- Implement some form of E2E encryption
+- - My design is probably secure but would be best to stick to a standard system if possible. Although it looks like different password managers use different ones
+- - I think OPAQUE has been mathematically proven but its Go implementation is too new.
+- - - https://eprint.iacr.org/2018/163.pdf
+- - - https://github.com/bytemare/opaque
+- - - https://blog.cloudflare.com/opaque-oblivious-passwords/
+- - - https://csrc.nist.gov/csrc/media/presentations/2024/crclub-2024-10-16/images-media/crypto-club-20241016--hugo--OPAQUE.pdf
+- - Secure Remote Password isn't mathematically proven but has so far been secure enough for important services like 1Password to use (though they might be moving away from it). Might be easier to implement
 - Add password strength requirements, maybe using https://github.com/dropbox/zxcvbn or https://github.com/zxcvbn-ts/zxcvbn ? Use matcher-pwned
 - Add /.well-known/change-password redirect
 - Add /.well-known/security.txt redirect to GitHub

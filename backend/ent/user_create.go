@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -95,23 +95,19 @@ func (_c *UserCreate) SetNillableID(v *uuid.UUID) *UserCreate {
 	return _c
 }
 
-// SetStashID sets the "stash" edge to the Stash entity by ID.
-func (_c *UserCreate) SetStashID(id uuid.UUID) *UserCreate {
-	_c.mutation.SetStashID(id)
+// AddStashIDs adds the "stashes" edge to the Stash entity by IDs.
+func (_c *UserCreate) AddStashIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddStashIDs(ids...)
 	return _c
 }
 
-// SetNillableStashID sets the "stash" edge to the Stash entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableStashID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		_c = _c.SetStashID(*id)
+// AddStashes adds the "stashes" edges to the Stash entity.
+func (_c *UserCreate) AddStashes(v ...*Stash) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return _c
-}
-
-// SetStash sets the "stash" edge to the Stash entity.
-func (_c *UserCreate) SetStash(v *Stash) *UserCreate {
-	return _c.SetStashID(v.ID)
+	return _c.AddStashIDs(ids...)
 }
 
 // AddMessengerIDs adds the "messengers" edge to the UserMessenger entity by IDs.
@@ -144,23 +140,23 @@ func (_c *UserCreate) AddDownloadSessions(v ...*DownloadSession) *UserCreate {
 	return _c.AddDownloadSessionIDs(ids...)
 }
 
-// SetSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID.
-func (_c *UserCreate) SetSignupLinkID(id uuid.UUID) *UserCreate {
-	_c.mutation.SetSignupLinkID(id)
+// SetInviteID sets the "invite" edge to the Invite entity by ID.
+func (_c *UserCreate) SetInviteID(id uuid.UUID) *UserCreate {
+	_c.mutation.SetInviteID(id)
 	return _c
 }
 
-// SetNillableSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableSignupLinkID(id *uuid.UUID) *UserCreate {
+// SetNillableInviteID sets the "invite" edge to the Invite entity by ID if the given value is not nil.
+func (_c *UserCreate) SetNillableInviteID(id *uuid.UUID) *UserCreate {
 	if id != nil {
-		_c = _c.SetSignupLinkID(*id)
+		_c = _c.SetInviteID(*id)
 	}
 	return _c
 }
 
-// SetSignupLink sets the "signupLink" edge to the SignupLink entity.
-func (_c *UserCreate) SetSignupLink(v *SignupLink) *UserCreate {
-	return _c.SetSignupLinkID(v.ID)
+// SetInvite sets the "invite" edge to the Invite entity.
+func (_c *UserCreate) SetInvite(v *Invite) *UserCreate {
+	return _c.SetInviteID(v.ID)
 }
 
 // AddLogIDs adds the "logs" edge to the LogEntry entity by IDs.
@@ -305,12 +301,12 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldDownloadSessionsValidFrom, field.TypeTime, value)
 		_node.DownloadSessionsValidFrom = value
 	}
-	if nodes := _c.mutation.StashIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.StashesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StashTable,
-			Columns: []string{user.StashColumn},
+			Table:   user.StashesTable,
+			Columns: []string{user.StashesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID),
@@ -353,15 +349,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.SignupLinkIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.InviteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.SignupLinkTable,
-			Columns: []string{user.SignupLinkColumn},
+			Table:   user.InviteTable,
+			Columns: []string{user.InviteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
