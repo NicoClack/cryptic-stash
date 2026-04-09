@@ -20,10 +20,10 @@ VALUES
 			FROM
 				next_uuid
 		),
-		"admin",
-		DATE ("now"),
-		DATE ("now"),
-		DATE ("now")
+		'admin',
+		DATE ('now'),
+		DATE ('now'),
+		DATE ('now')
 	);
 
 -- +goose Down
@@ -31,6 +31,6 @@ DROP VIEW IF EXISTS next_uuid;
 
 DELETE FROM users
 WHERE
-	username = "admin"
+	username = 'admin'
 LIMIT
 	1;
