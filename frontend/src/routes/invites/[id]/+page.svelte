@@ -57,8 +57,7 @@
 		const inviteId = getInviteId();
 		const code = getInviteCode();
 		if (!code) {
-			requestError =
-				"Missing invite code. Use the full invite link from your welcome email or admin.";
+			requestError = "Missing invite code. Use the full invite link from your admin.";
 			isLoadingLink = false;
 			return;
 		}
