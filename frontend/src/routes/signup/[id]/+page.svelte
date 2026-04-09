@@ -8,7 +8,7 @@
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
 
-	interface SignupLinkResponse {
+	interface InviteResponse {
 		suggestedName: string;
 		expiresAt: string;
 	}
@@ -37,16 +37,16 @@
 		return value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
 	}
 
-	function getSignupCode(): string {
+	function getInviteCode(): string {
 		return page.url.searchParams.get("code")?.trim() ?? "";
 	}
 
-	function getSignupId(): string {
+	function getInviteId(): string {
 		return page.params.id ?? "";
 	}
 
 	function getAuthHeaders(): HeadersInit {
-		const code = getSignupCode();
+		const code = getInviteCode();
 		if (!code) {
 			return {};
 		}
@@ -94,21 +94,22 @@
 		}
 	}
 
-	async function loadSignupLink() {
+	async function loadInvite() {
 		requestError = null;
 		successMessage = null;
 		isLoadingLink = true;
 
-		const signupId = getSignupId();
-		const code = getSignupCode();
+		const inviteId = getInviteId();
+		const code = getInviteCode();
 		if (!code) {
-			requestError = "Missing signup code. Use the full signup link from your admin.";
+			requestError =
+				"Missing invite code. Use the full invite link from your welcome email or admin.";
 			isLoadingLink = false;
 			return;
 		}
 
 		try {
-			const response = await fetchJson(fetch, `/api/v1/invites/${encodeURIComponent(signupId)}`, {
+			const response = await fetchJson(fetch, `/api/v1/invites/${encodeURIComponent(inviteId)}`, {
 				headers: getAuthHeaders(),
 			});
 			if (!response.ok) {
@@ -116,7 +117,7 @@
 				return;
 			}
 
-			const data = response.data as SignupLinkResponse;
+			const data = response.data as InviteResponse;
 			suggestedName = data.suggestedName ?? "";
 			if (!username && suggestedName) {
 				username = suggestedName;
@@ -132,7 +133,7 @@
 
 		requestError = null;
 		successMessage = null;
-		const signupId = getSignupId();
+		const inviteId = getInviteId();
 		const normalizedUsername = normalizeUsername(username.trim());
 		if (!normalizedUsername) {
 			requestError = "Username is required.";
@@ -151,7 +152,7 @@
 		try {
 			const response = await fetchJson(
 				fetch,
-				`/api/v1/invites/${encodeURIComponent(signupId)}/create-user`,
+				`/api/v1/invites/${encodeURIComponent(inviteId)}/create-user`,
 				{
 					method: "POST",
 					headers: {
@@ -179,7 +180,7 @@
 		}
 	}
 
-	loadSignupLink();
+	loadInvite();
 </script>
 
 <PageMain class="max-w-3xl">
@@ -213,7 +214,7 @@
 			{/if}
 
 			{#if isLoadingLink}
-				<p class="text-sm text-muted-foreground">Validating signup link...</p>
+				<p class="text-sm text-muted-foreground">Validating invite...</p>
 			{:else}
 				<form class="space-y-4" onsubmit={handleSubmit}>
 					<Label>

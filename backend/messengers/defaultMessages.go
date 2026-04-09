@@ -26,7 +26,7 @@ var defaultMessageMap = map[common.MessageType]func(message *common.Message) *Fo
 	common.MessageInvite: func(message *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "You've been invited to Cryptic Stash",
-			Body:    fmt.Sprintf("%v\nClick here to sign up: %v", message.InviteMessage, message.URL),
+			Body:    fmt.Sprintf("%v\nClick here to get started: %v", message.InviteMessage, message.URL),
 		}
 	},
 	common.MessageUserUpdate: func(message *common.Message) *FormattedMessage {

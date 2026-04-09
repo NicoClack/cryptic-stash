@@ -13,7 +13,7 @@
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
 
-	interface SignupLink {
+	interface Invite {
 		id: string;
 		name: string;
 		createdAt: string;
@@ -22,16 +22,16 @@
 		ip: string;
 		userAgent: string;
 	}
-	interface SignupLinksResponse extends InnerResponse {
-		signupLinks: SignupLink[];
+	interface InviteLinksResponse extends InnerResponse {
+		inviteLinks?: Invite[];
 	}
-	interface CreateSignupLinkResponse extends InnerResponse {
+	interface CreateInviteResponse extends InnerResponse {
 		id: string;
 		code: string;
 		expiresAt: string;
 	}
 
-	type CreatedSignupLink = {
+	type CreatedInvite = {
 		id: string;
 		code: string;
 		expiresAt: string;
@@ -46,8 +46,8 @@
 	let inviteName = $state("");
 	let expiresInHours = $state("24");
 
-	let signupLinks = $state<SignupLink[]>([]);
-	let latestInvite = $state<CreatedSignupLink | null>(null);
+	let inviteLinks = $state<Invite[]>([]);
+	let latestInvite = $state<CreatedInvite | null>(null);
 	let copyState = $state<"idle" | "copied" | "failed">("idle");
 
 	function getErrorMessage(response: JsonResponse): string {
@@ -71,19 +71,19 @@
 		if (!latestInvite) return;
 
 		// TODO: use URL safe base64?
-		const signupUrl = new URL(
-			`/signup/${latestInvite.id}/?code=${encodeURIComponent(latestInvite.code)}`,
+		const inviteUrl = new URL(
+			`/invites/${latestInvite.id}/?code=${encodeURIComponent(latestInvite.code)}`,
 			document.baseURI,
 		).toString();
 		try {
-			await navigator.clipboard.writeText(signupUrl);
+			await navigator.clipboard.writeText(inviteUrl);
 			copyState = "copied";
 		} catch {
 			copyState = "failed";
 		}
 	}
 
-	async function loadSignupLinks() {
+	async function loadInviteLinks() {
 		isRefreshing = true;
 		requestError = null;
 
@@ -96,8 +96,8 @@
 				return;
 			}
 
-			const data = response.data as SignupLinksResponse;
-			signupLinks = data.signupLinks ?? [];
+			const data = response.data as InviteLinksResponse;
+			inviteLinks = data.inviteLinks ?? [];
 		} finally {
 			isLoading = false;
 			isRefreshing = false;
@@ -130,7 +130,7 @@
 				return;
 			}
 
-			const data = response.data as CreateSignupLinkResponse;
+			const data = response.data as CreateInviteResponse;
 			latestInvite = {
 				id: data.id,
 				code: data.code,
@@ -138,19 +138,19 @@
 			};
 			copyState = "idle";
 			inviteName = "";
-			await loadSignupLinks();
+			await loadInviteLinks();
 		} finally {
 			isCreating = false;
 		}
 	}
 
-	loadSignupLinks();
+	loadInviteLinks();
 </script>
 
 <PageMain class="max-w-5xl">
 	<div class="space-y-6">
 		<div class="space-y-2">
-			<h1 class="text-3xl text-balance font-semibold tracking-tight">Signup Links</h1>
+			<h1 class="text-3xl text-balance font-semibold tracking-tight">Invites</h1>
 		</div>
 
 		{#if requestError}
@@ -163,7 +163,7 @@
 
 		<Card>
 			<CardHeader>
-				<CardTitle>Create Signup Link</CardTitle>
+				<CardTitle>Create Invite</CardTitle>
 				<CardDescription>
 					The generated code is only returned once. Copy it immediately.
 				</CardDescription>
@@ -196,7 +196,7 @@
 					<div class="mt-4 rounded-md border border-border bg-muted/40 p-3 text-sm space-y-2">
 						<div>
 							<Button type="button" variant="outline" onclick={copyLatestInviteLink}>
-								Copy signup link
+								Copy invite link
 							</Button>
 							{#if copyState === "copied"}
 								<span class="ml-2 text-muted-foreground">Copied</span>
@@ -215,7 +215,7 @@
 
 		<Card>
 			<CardHeader>
-				<CardTitle>Existing Signup Links</CardTitle>
+				<CardTitle>Existing Invites</CardTitle>
 				<CardDescription>Filter by name prefix and review status for each link.</CardDescription>
 			</CardHeader>
 			<CardContent class="space-y-4">
@@ -223,7 +223,7 @@
 					class="flex flex-col gap-3 sm:flex-row"
 					onsubmit={(event) => {
 						event.preventDefault();
-						loadSignupLinks();
+						loadInviteLinks();
 					}}
 				>
 					<Input
@@ -241,23 +241,23 @@
 				</form>
 
 				{#if isLoading}
-					<p class="text-sm text-muted-foreground">Loading signup links...</p>
-				{:else if signupLinks.length === 0}
-					<p class="text-sm text-muted-foreground">No signup links found.</p>
+					<p class="text-sm text-muted-foreground">Loading invites...</p>
+				{:else if inviteLinks.length === 0}
+					<p class="text-sm text-muted-foreground">No invites found.</p>
 				{:else}
 					<div class="space-y-3">
-						{#each signupLinks as signupLink (signupLink.id)}
+						{#each inviteLinks as invite (invite.id)}
 							<div class="rounded-md border border-border p-3 space-y-2">
 								<div class="flex flex-wrap items-center justify-between gap-2">
-									<div class="font-medium">{signupLink.name || "(no name)"}</div>
-									<span class="text-xs text-muted-foreground">{signupLink.id}</span>
+									<div class="font-medium">{invite.name || "(no name)"}</div>
+									<span class="text-xs text-muted-foreground">{invite.id}</span>
 								</div>
 								<div class="grid gap-1 text-sm text-muted-foreground">
-									<div>Created: {formatTime(signupLink.createdAt)}</div>
-									<div>Expires: {formatTime(signupLink.expiresAt)}</div>
-									<div>User ID: {signupLink.userId || "Unused"}</div>
-									<div>IP: {signupLink.ip || "-"}</div>
-									<div class="break-all">User Agent: {signupLink.userAgent || "-"}</div>
+									<div>Created: {formatTime(invite.createdAt)}</div>
+									<div>Expires: {formatTime(invite.expiresAt)}</div>
+									<div>User ID: {invite.userId || "Unused"}</div>
+									<div>IP: {invite.ip || "-"}</div>
+									<div class="break-all">User Agent: {invite.userAgent || "-"}</div>
 								</div>
 							</div>
 						{/each}

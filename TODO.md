@@ -1,17 +1,17 @@
 # TODO
 
-- Finish renaming signup links to invites
+- Finish renaming invite-link terminology
 - Replace env.STASH_ENCRYPTION_KEY with key derivation algorithm
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
 - Rate limit hashing
 - - Limit number of concurrent hash requests to avoid using too much RAM
 - - Block IPs who get passwords wrong too often. Use exponential backoff
-- Use hash to store code in signup links rather than search param, that way it doesn't show up in logs
+- Use hash to store code in invite links rather than search param, that way it doesn't show up in logs
 - Prevent username enumeration? Does user ID enumeration matter if the login endpoint only accepts usernames?
 - - n8n just seems to mitigate with jitter, probably enough: https://github.com/n8n-io/n8n/pull/24553/changes
 - - Reset emails should always succeed unless triggered by an admin (maybe only implement the latter for now)
 - - Invites should specify the email and not allow it to be changed, like n8n
-- - If using usernames on signup page, could mitigate by limiting failed uses of a signup link and requiring a unique credit card for public signups (if I ever implement that)
+- - If using usernames on signup page, could mitigate by limiting failed uses of an invite link and requiring a unique credit card for public signups (if I ever implement that)
 - - Can fake salts by hashing something deterministic like the email with a static pepper. If the pepper is leaked, I can just rotate it. If the database is leaked, the attacker has the stash records anyway. This approach means I don't need to store the random data I'm sending to ensure consistent results 
 - Create account system for users to manage their stashes
 - - Require FIDO2 passkeys/physical security keys
@@ -33,7 +33,7 @@
 - Crash signals don't seem to show up in Railway. Is it because of the restart policy? Is the email only sent if the max is exceeded?
 - - Looks like it. Maybe recommend using Railway's webhooks in Discord or Slack?
 - - Or configure max restarts to zero, but then it will require a manual restart. Might be worth it depending on threat model though
-- Allow creating signup links to change stash contents/password
+- Allow updating stash contents/password
 - Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
 - Use HSTS in Production
@@ -90,7 +90,7 @@
 -   When the admin is locked, whether temporarily or permanently, errors should make the server enter some kind of lockdown state? Need to weigh up pros and cons
 - Standardise error handling on the frontend
 - Use load functions on the frontend more consistently
-- Page when signup link doesn't include an ID?
+- Page when invite link doesn't include an ID?
 - Don't delete download sessions?
 - Improved audit logging
 - Reduce some of the duplication in test setup
