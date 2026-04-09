@@ -19,10 +19,6 @@
 	let successMessage = $state<string | null>(null);
 
 	let username = $state("");
-	let password = $state("");
-	let confirmPassword = $state("");
-	let fileName = $state("");
-	let fileContent = $state("");
 	let suggestedName = $state("");
 
 	function getErrorMessage(response: JsonResponse): string {
@@ -51,47 +47,6 @@
 			return {};
 		}
 		return { Authorization: `Bearer ${code}` };
-	}
-
-	function readFileAsBase64(file: File): Promise<string> {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.onerror = () => reject(new Error("Failed to read file"));
-			reader.onload = () => {
-				const result = reader.result;
-				if (typeof result !== "string") {
-					reject(new Error("File could not be encoded"));
-					return;
-				}
-
-				const splitIndex = result.indexOf(",");
-				if (splitIndex === -1) {
-					reject(new Error("File could not be encoded"));
-					return;
-				}
-
-				resolve(result.slice(splitIndex + 1));
-			};
-			reader.readAsDataURL(file);
-		});
-	}
-
-	async function handleFileChange(event: Event) {
-		const target = event.currentTarget as HTMLInputElement;
-		const selectedFile = target.files?.[0];
-
-		fileContent = "";
-		fileName = "";
-		if (!selectedFile) {
-			return;
-		}
-
-		fileName = selectedFile.name;
-		try {
-			fileContent = await readFileAsBase64(selectedFile);
-		} catch {
-			requestError = "Could not read selected file.";
-		}
 	}
 
 	async function loadInvite() {
@@ -139,14 +94,6 @@
 			requestError = "Username is required.";
 			return;
 		}
-		if (password !== confirmPassword) {
-			requestError = "Passwords do not match.";
-			return;
-		}
-		if (!fileContent || !fileName) {
-			requestError = "Please select a file to upload.";
-			return;
-		}
 
 		isCreating = true;
 		try {
@@ -161,9 +108,6 @@
 					},
 					body: JSON.stringify({
 						username: normalizedUsername,
-						password,
-						content: fileContent,
-						filename: fileName,
 					}),
 				},
 			);
@@ -172,9 +116,8 @@
 				return;
 			}
 
-			successMessage = "Account created. Please contact your admin to set up your messengers.";
-			password = "";
-			confirmPassword = "";
+			successMessage =
+				"Account created. Please contact your admin to set up your stash and messengers.";
 		} finally {
 			isCreating = false;
 		}
@@ -230,35 +173,6 @@
 								username = normalizeUsername((event.currentTarget as HTMLInputElement).value);
 							}}
 						/>
-					</Label>
-
-					<Label>
-						Password
-						<Input
-							bind:value={password}
-							required
-							type="password"
-							name="password"
-							autocomplete="new-password"
-							maxlength={256}
-						/>
-					</Label>
-
-					<Label>
-						Confirm Password
-						<Input
-							bind:value={confirmPassword}
-							required
-							type="password"
-							name="confirmPassword"
-							autocomplete="new-password"
-							maxlength={256}
-						/>
-					</Label>
-
-					<Label>
-						Stash File
-						<Input required type="file" name="stashFile" oninput={handleFileChange} />
 					</Label>
 
 					<Button type="submit" disabled={isCreating}>

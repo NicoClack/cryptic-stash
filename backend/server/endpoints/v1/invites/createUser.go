@@ -18,9 +18,6 @@ import (
 
 type CreateUserPayload struct {
 	Username string `binding:"required,min=1,max=32"       json:"username"`
-	Password string `binding:"required,min=8,max=256"      json:"password"` // #nosec G117
-	Content  string `binding:"required,min=1,max=10000000" json:"content"`  // 10 MB but base64 encoded
-	Filename string `binding:"required,min=1,max=256"      json:"filename"`
 }
 type CreateUserResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -31,7 +28,6 @@ type CreateUserResponse struct {
 // Can cancelling the request be used to bypass that?
 func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 	clock := app.Clock
-	hashSettings := app.Env.PASSWORD_HASH_SETTINGS
 
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		inviteID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
@@ -59,17 +55,6 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr
 		}
-		contentBytes, stdErr := base64.StdEncoding.DecodeString(body.Content)
-		if stdErr != nil {
-			return servercommon.NewError(stdErr).
-				SetStatus(http.StatusBadRequest).
-				AddDetail(servercommon.ErrorDetail{
-					Message: "content is not valid base64",
-					Code:    "MALFORMED_CONTENT",
-				}).
-				DisableLogging()
-		}
-
 		hashed := sha256.Sum256(givenCodeBytes)
 		inviteOb, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
@@ -106,23 +91,6 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 			return stdErr
 		}
 
-		salt := app.Core.GenerateSalt()
-		encryptionKey := app.Core.HashPassword(body.Password, salt, hashSettings)
-		stashDataKey := app.Core.GenerateEncryptionKey()
-		encryptedContent, wrappedErr := app.Core.Encrypt(contentBytes, stashDataKey)
-		if wrappedErr != nil {
-			return wrappedErr
-		}
-		encryptedFileName, wrappedErr := app.Core.Encrypt([]byte(body.Filename), stashDataKey)
-		if wrappedErr != nil {
-			return wrappedErr
-		}
-
-		encryptedDataKey, wrappedErr := app.Core.Encrypt(stashDataKey, encryptionKey)
-		if wrappedErr != nil {
-			return wrappedErr
-		}
-
 		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*CreateUserResponse, error) {
@@ -144,22 +112,6 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					}
 					return nil, stdErr
 				}
-				stdErr = tx.Stash.Create().
-					SetCreatedAt(now).
-					SetUpdatedAt(now).
-					SetContent(encryptedContent).
-					SetFileName(encryptedFileName).
-					SetEncryptionDataKey(encryptedDataKey).
-					SetPasswordSalt(salt).
-					SetHashTime(hashSettings.Time).
-					SetHashMemory(hashSettings.Memory).
-					SetHashThreads(hashSettings.Threads).
-					SetUser(userOb).
-					Exec(ctx)
-				if stdErr != nil {
-					return nil, stdErr
-				}
-
 				_, stdErr = tx.Invite.UpdateOneID(inviteID).
 					SetUser(userOb).
 					SetUserAgent(ginCtx.Request.UserAgent()).
