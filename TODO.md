@@ -1,5 +1,7 @@
 # TODO
 
+- Create account system with passkeys
+- Prevent disabling main email messenger
 - Replace env.STASH_ENCRYPTION_KEY with key derivation algorithm
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
 - Rate limit hashing

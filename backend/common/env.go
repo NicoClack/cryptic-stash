@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"log"
 	"math"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -14,6 +15,19 @@ func RequireEnv(name string) string {
 	value, specified := os.LookupEnv(name)
 	if !specified {
 		log.Fatalf("required environment variable \"%v\" hasn't been specified", name)
+	}
+
+	return value
+}
+
+func RequireURLEnv(name string) string {
+	value := strings.TrimSpace(RequireEnv(name))
+	parsedURL, stdErr := url.ParseRequestURI(value)
+	if stdErr != nil {
+		log.Fatalf("environment variable \"%s\" must be a valid absolute URL: %v", name, stdErr)
+	}
+	if parsedURL.Scheme == "" || parsedURL.Host == "" {
+		log.Fatalf("environment variable \"%s\" must include a URL scheme and host", name)
 	}
 
 	return value

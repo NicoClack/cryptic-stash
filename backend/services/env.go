@@ -27,6 +27,7 @@ func LoadEnvironmentVariables() *common.Env {
 		MOUNT_PATH:                    common.RequireEnv("MOUNT_PATH"),
 		PROXY_ORIGINAL_IP_HEADER_NAME: common.RequireEnv("PROXY_ORIGINAL_IP_HEADER_NAME"),
 		ALLOWED_ORIGINS:               common.RequireStrArrEnv("ALLOWED_ORIGINS"),
+		FRONTEND_BASE_URL:             common.RequireURLEnv("FRONTEND_BASE_URL"),
 		CLEAN_UP_INTERVAL:             common.RequireSecondsEnv("CLEAN_UP_INTERVAL"),
 		FULL_GC_INTERVAL:              common.RequireSecondsEnv("FULL_GC_INTERVAL"),
 
@@ -68,26 +69,29 @@ func LoadEnvironmentVariables() *common.Env {
 		PANIC_ON_ERROR:         common.OptionalBoolEnv("PANIC_ON_ERROR", false),
 		MESSAGE_ADMIN_ON_ERROR: common.OptionalBoolEnv("MESSAGE_ADMIN_ON_ERROR", true),
 
+		EMAIL_MESSENGER_TYPE:     common.RequireEnv("EMAIL_MESSENGER_TYPE"),
 		ENABLE_DEVELOP_MESSENGER: common.OptionalBoolEnv("ENABLE_DEVELOP_MESSENGER", false),
-		DISCORD_TOKEN:            common.OptionalEnv("DISCORD_TOKEN", ""),
-		SMTP_HOST:                common.OptionalEnv("SMTP_HOST", ""),
-		SMTP_PORT:                common.OptionalIntEnv("SMTP_PORT", 0),
-		SMTP_USERNAME:            common.OptionalEnv("SMTP_USERNAME", ""),
-		SMTP_PASSWORD:            common.OptionalEnv("SMTP_PASSWORD", ""),
-		SMTP_FROM_EMAIL:          common.OptionalEnv("SMTP_FROM_EMAIL", ""),
-		SMTP_FROM_NAME:           common.OptionalEnv("SMTP_FROM_NAME", "Cryptic Stash"),
-		SMTP_REQUIRE_TLS:         common.OptionalBoolEnv("SMTP_REQUIRE_TLS", true),
-		SMTP_IMPLICIT_TLS:        common.OptionalBoolEnv("SMTP_IMPLICIT_TLS", true),
-		SMTP2GO_API_KEY:          common.OptionalEnv("SMTP2GO_API_KEY", ""),
-		SMTP2GO_BASE_URL:         common.OptionalEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/v3"),
-		SMTP2GO_FROM_EMAIL:       common.OptionalEnv("SMTP2GO_FROM_EMAIL", ""),
-		SMTP2GO_FROM_NAME:        common.OptionalEnv("SMTP2GO_FROM_NAME", "Cryptic Stash"),
+
+		DISCORD_TOKEN:      common.OptionalEnv("DISCORD_TOKEN", ""),
+		SMTP_HOST:          common.OptionalEnv("SMTP_HOST", ""),
+		SMTP_PORT:          common.OptionalIntEnv("SMTP_PORT", 0),
+		SMTP_USERNAME:      common.OptionalEnv("SMTP_USERNAME", ""),
+		SMTP_PASSWORD:      common.OptionalEnv("SMTP_PASSWORD", ""),
+		SMTP_FROM_EMAIL:    common.OptionalEnv("SMTP_FROM_EMAIL", ""),
+		SMTP_FROM_NAME:     common.OptionalEnv("SMTP_FROM_NAME", "Cryptic Stash"),
+		SMTP_REQUIRE_TLS:   common.OptionalBoolEnv("SMTP_REQUIRE_TLS", true),
+		SMTP_IMPLICIT_TLS:  common.OptionalBoolEnv("SMTP_IMPLICIT_TLS", true),
+		SMTP2GO_API_KEY:    common.OptionalEnv("SMTP2GO_API_KEY", ""),
+		SMTP2GO_BASE_URL:   common.OptionalEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/v3"),
+		SMTP2GO_FROM_EMAIL: common.OptionalEnv("SMTP2GO_FROM_EMAIL", ""),
+		SMTP2GO_FROM_NAME:  common.OptionalEnv("SMTP2GO_FROM_NAME", "Cryptic Stash"),
 	}
 	NormalizeEnvironmentVariables(env)
 	ValidateEnvironmentVariables(env)
 	return env
 }
 func NormalizeEnvironmentVariables(env *common.Env) {
+	env.FRONTEND_BASE_URL = strings.TrimRight(strings.TrimSpace(env.FRONTEND_BASE_URL), "/")
 	env.SMTP2GO_BASE_URL = strings.TrimRight(strings.TrimSpace(env.SMTP2GO_BASE_URL), "/")
 }
 func ValidateEnvironmentVariables(env *common.Env) {
@@ -141,5 +145,11 @@ func ValidateEnvironmentVariables(env *common.Env) {
 			"You have both SMTP and SMTP2GO email options configured, which can be confusing for users. You might want to " +
 				"migrate your users to one and disable the other.",
 		)
+	}
+
+	if env.EMAIL_MESSENGER_TYPE != "smtp_1" &&
+		env.EMAIL_MESSENGER_TYPE != "smtp2go_1" &&
+		env.EMAIL_MESSENGER_TYPE != "develop_1" {
+		log.Fatal("EMAIL_MESSENGER_TYPE must be one of: smtp_1, smtp2go_1, develop_1")
 	}
 }

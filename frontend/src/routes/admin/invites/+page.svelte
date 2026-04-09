@@ -12,10 +12,11 @@
 	} from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
+	import { Textarea } from "$lib/components/ui/textarea";
 
 	interface Invite {
 		id: string;
-		name: string;
+		email: string;
 		createdAt: string;
 		expiresAt: string;
 		userId?: string;
@@ -31,6 +32,9 @@
 		expiresAt: string;
 	}
 
+	const DEFAULT_INVITE_MESSAGE =
+		"<YOUR NAME HERE> invited you to Cryptic Stash, an end-to-end encrypted storage site for securely storing 2FA recovery codes in case you lose your devices.";
+
 	type CreatedInvite = {
 		id: string;
 		code: string;
@@ -42,8 +46,9 @@
 	let isRefreshing = $state(false);
 	let requestError = $state<string | null>(null);
 
-	let nameFilter = $state("");
-	let inviteName = $state("");
+	let emailFilter = $state("");
+	let email = $state("");
+	let message = $state(DEFAULT_INVITE_MESSAGE);
 	let expiresInHours = $state("24");
 
 	let inviteLinks = $state<Invite[]>([]);
@@ -63,8 +68,8 @@
 		return date.toLocaleString();
 	}
 
-	function normalizeUsername(value: string): string {
-		return value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+	function normalizeEmail(value: string): string {
+		return value.trim().toLowerCase();
 	}
 
 	async function copyLatestInviteLink() {
@@ -88,8 +93,8 @@
 		requestError = null;
 
 		try {
-			const query = normalizeUsername(nameFilter.trim());
-			const suffix = query ? `?name=${encodeURIComponent(query)}` : "";
+			const query = normalizeEmail(emailFilter);
+			const suffix = query ? `?email=${encodeURIComponent(query)}` : "";
 			const response = await fetchAdminJson(fetch, `/api/v1/admin/invites/${suffix}`);
 			if (!response.ok) {
 				requestError = getErrorMessage(response);
@@ -112,6 +117,18 @@
 		requestError = null;
 
 		try {
+			const normalizedEmail = normalizeEmail(email);
+			if (!normalizedEmail) {
+				requestError = "Email is required";
+				return;
+			}
+
+			const trimmedMessage = message.trim();
+			if (!trimmedMessage) {
+				requestError = "Message is required";
+				return;
+			}
+
 			const parsedHours = Number(expiresInHours);
 			const expiresInSeconds =
 				isNaN(parsedHours) || parsedHours < 0 ? null : Math.floor(parsedHours * 3600);
@@ -120,7 +137,8 @@
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					name: normalizeUsername(inviteName.trim()),
+					email: normalizedEmail,
+					inviteMessage: trimmedMessage,
 					expiresIn: expiresInSeconds,
 				}),
 			});
@@ -137,7 +155,8 @@
 				expiresAt: data.expiresAt,
 			};
 			copyState = "idle";
-			inviteName = "";
+			email = "";
+			message = DEFAULT_INVITE_MESSAGE;
 			await loadInviteLinks();
 		} finally {
 			isCreating = false;
@@ -165,21 +184,27 @@
 			<CardHeader>
 				<CardTitle>Create Invite</CardTitle>
 				<CardDescription>
-					The generated code is only returned once. Copy it immediately.
+					The generated code is only returned once and the invite email is sent immediately.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<form class="flex flex-col gap-4" onsubmit={handleCreate}>
 					<Label>
-						Suggested username (optional)
+						Email
 						<Input
-							bind:value={inviteName}
-							name="name"
-							maxlength={32}
+							bind:value={email}
+							name="email"
+							type="email"
+							required
+							maxlength={128}
 							oninput={(event) => {
-								inviteName = normalizeUsername((event.currentTarget as HTMLInputElement).value);
+								email = normalizeEmail((event.currentTarget as HTMLInputElement).value);
 							}}
 						/>
+					</Label>
+					<Label>
+						Message
+						<Textarea bind:value={message} name="inviteMessage" required maxlength={500} rows={4} />
 					</Label>
 					<Label>
 						Expires In (hours)
@@ -227,11 +252,11 @@
 					}}
 				>
 					<Input
-						bind:value={nameFilter}
-						name="nameFilter"
-						placeholder="Filter by name prefix"
+						bind:value={emailFilter}
+						name="emailFilter"
+						placeholder="Filter by email prefix"
 						oninput={(event) => {
-							nameFilter = normalizeUsername((event.currentTarget as HTMLInputElement).value);
+							emailFilter = normalizeEmail((event.currentTarget as HTMLInputElement).value);
 						}}
 					/>
 					<!-- TODO: remove button, search on type -->
@@ -249,7 +274,7 @@
 						{#each inviteLinks as invite (invite.id)}
 							<div class="rounded-md border border-border p-3 space-y-2">
 								<div class="flex flex-wrap items-center justify-between gap-2">
-									<div class="font-medium">{invite.name || "(no name)"}</div>
+									<div class="font-medium">{invite.email}</div>
 									<span class="text-xs text-muted-foreground">{invite.id}</span>
 								</div>
 								<div class="grid gap-1 text-sm text-muted-foreground">

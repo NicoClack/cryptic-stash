@@ -14,6 +14,7 @@ func DefaultEnv() *common.Env {
 		MOUNT_PATH:                    "temp-test-storage",
 		PROXY_ORIGINAL_IP_HEADER_NAME: "test-proxy-original-ip",
 		ALLOWED_ORIGINS:               []string{},
+		FRONTEND_BASE_URL:             "https://frontend.example.com",
 		CLEAN_UP_INTERVAL:             time.Hour,
 		FULL_GC_INTERVAL:              0,
 
@@ -62,5 +63,6 @@ func DefaultEnv() *common.Env {
 		SMTP_PASSWORD:            "",
 		SMTP_FROM_EMAIL:          "",
 		SMTP_FROM_NAME:           "Cryptic Stash",
+		EMAIL_MESSENGER_TYPE:     "",
 	}
 }

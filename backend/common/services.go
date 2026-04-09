@@ -25,6 +25,7 @@ type Env struct {
 	MOUNT_PATH                    string
 	PROXY_ORIGINAL_IP_HEADER_NAME string
 	ALLOWED_ORIGINS               []string
+	FRONTEND_BASE_URL             string
 	// Things like deleting expired login download sessions
 	CLEAN_UP_INTERVAL time.Duration
 	FULL_GC_INTERVAL  time.Duration
@@ -65,20 +66,22 @@ type Env struct {
 	PANIC_ON_ERROR         bool
 	MESSAGE_ADMIN_ON_ERROR bool
 
+	EMAIL_MESSENGER_TYPE     string
 	ENABLE_DEVELOP_MESSENGER bool
-	DISCORD_TOKEN            string
-	SMTP_HOST                string
-	SMTP_PORT                int
-	SMTP_USERNAME            string
-	SMTP_PASSWORD            string
-	SMTP_FROM_EMAIL          string
-	SMTP_FROM_NAME           string
-	SMTP_REQUIRE_TLS         bool
-	SMTP_IMPLICIT_TLS        bool
-	SMTP2GO_API_KEY          string
-	SMTP2GO_BASE_URL         string
-	SMTP2GO_FROM_EMAIL       string
-	SMTP2GO_FROM_NAME        string
+
+	DISCORD_TOKEN      string
+	SMTP_HOST          string
+	SMTP_PORT          int
+	SMTP_USERNAME      string
+	SMTP_PASSWORD      string
+	SMTP_FROM_EMAIL    string
+	SMTP_FROM_NAME     string
+	SMTP_REQUIRE_TLS   bool
+	SMTP_IMPLICIT_TLS  bool
+	SMTP2GO_API_KEY    string
+	SMTP2GO_BASE_URL   string
+	SMTP2GO_FROM_EMAIL string
+	SMTP2GO_FROM_NAME  string
 }
 type PasswordHashSettings struct {
 	Time   uint32
