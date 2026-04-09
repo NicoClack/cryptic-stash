@@ -35,7 +35,7 @@ func SelfLock(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr
 		}
 		until := clock.Now().Add(
@@ -50,7 +50,7 @@ func SelfLock(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) (*ent.User, error) {
 				userOb, stdErr := tx.User.Query().
 					Where(user.Username(body.Username)).
-					WithStash().
+					WithStashes().
 					Only(ctx)
 				if stdErr != nil {
 					return nil, servercommon.SendUnauthorizedIfNotFound(stdErr)
@@ -66,7 +66,10 @@ func SelfLock(app *servercommon.ServerApp) gin.HandlerFunc {
 			return servercommon.NewUnauthorizedError()
 		}
 
-		stashOb := userOb.Edges.Stash
+		if len(userOb.Edges.Stashes) == 0 {
+			return servercommon.NewUnauthorizedError()
+		}
+		stashOb := userOb.Edges.Stashes[0] // TODO: support multiple stashes
 		if stashOb == nil {
 			return servercommon.NewUnauthorizedError()
 		}

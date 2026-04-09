@@ -9,7 +9,7 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
@@ -34,7 +34,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 	hashSettings := app.Env.PASSWORD_HASH_SETTINGS
 
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		signupID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
+		inviteID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
 		if ctxErr != nil {
 			return ctxErr
 		}
@@ -56,7 +56,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr
 		}
 		contentBytes, stdErr := base64.StdEncoding.DecodeString(body.Content)
@@ -71,19 +71,19 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		}
 
 		hashed := sha256.Sum256(givenCodeBytes)
-		signupOb, stdErr := dbcommon.WithReadTx(
+		inviteOb, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*ent.SignupLink, error) {
-				signupOb, stdErr := tx.SignupLink.Query().
+			func(tx *ent.Tx, ctx context.Context) (*ent.Invite, error) {
+				inviteOb, stdErr := tx.Invite.Query().
 					Where(
-						signuplink.ID(signupID),
-						signuplink.HashedCode(hashed[:]),
+						invite.ID(inviteID),
+						invite.HashedCode(hashed[:]),
 					).
 					Only(ctx)
 				if stdErr != nil {
 					return nil, servercommon.SendUnauthorizedIfNotFound(stdErr)
 				}
-				if signupOb.UserID != uuid.Nil || clock.Now().After(signupOb.ExpiresAt) {
+				if inviteOb.UserID != uuid.Nil || clock.Now().After(inviteOb.ExpiresAt) {
 					return nil, servercommon.NewUnauthorizedError()
 				}
 
@@ -99,7 +99,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					)
 				}
 
-				return signupOb, nil
+				return inviteOb, nil
 			},
 		)
 		if stdErr != nil {
@@ -132,7 +132,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
 					SetDownloadSessionsValidFrom(now).
-					SetSignupLinkID(signupOb.ID).
+					SetInviteID(inviteOb.ID).
 					Save(ctx)
 				if stdErr != nil {
 					if ent.IsConstraintError(stdErr) && strings.Contains(stdErr.Error(), "username") {
@@ -160,7 +160,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, stdErr
 				}
 
-				_, stdErr = tx.SignupLink.UpdateOneID(signupID).
+				_, stdErr = tx.Invite.UpdateOneID(inviteID).
 					SetUser(userOb).
 					SetUserAgent(ginCtx.Request.UserAgent()).
 					SetIP(ginCtx.ClientIP()).

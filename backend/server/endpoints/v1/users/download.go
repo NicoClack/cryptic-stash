@@ -38,7 +38,7 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr
 		}
 		givenAuthCodeBytes, stdErr := base64.StdEncoding.DecodeString(body.AuthorizationCode)
@@ -62,9 +62,8 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 						downloadsession.HashedAuthCode(hashedAuthCode[:]),
 					)).
 					WithUser(func(userQuery *ent.UserQuery) {
-						userQuery.WithStash()
+						userQuery.WithStashes()
 						userQuery.WithMessengers()
-						userQuery.WithStash()
 					}).
 					WithLoginAlerts(func(laQuery *ent.LoginAlertQuery) {
 						laQuery.WithUserMessenger()
@@ -105,7 +104,10 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 		}
 
 		userOb := downloadSessionOb.Edges.User
-		stashOb := userOb.Edges.Stash
+		if len(userOb.Edges.Stashes) == 0 {
+			return servercommon.NewUnauthorizedError()
+		}
+		stashOb := userOb.Edges.Stashes[0] // TODO: support multiple stashes
 		if stashOb == nil {
 			return servercommon.NewUnauthorizedError()
 		}

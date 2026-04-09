@@ -14,8 +14,8 @@ import (
 )
 
 type CreatePayload struct {
-	Name      string `binding:"omitempty,min=1,max=32" json:"name"`
-	ExpiresIn int64  `binding:"omitempty"              json:"expiresIn"`
+	Email     string `binding:"omitempty,email" json:"email"`
+	ExpiresIn int64  `binding:"omitempty"       json:"expiresIn"`
 }
 type CreateResponse struct {
 	Errors    []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -32,17 +32,15 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if body.Name != "" {
-			if serverErr := servercommon.ValidateUsername(body.Name); serverErr != nil {
-				return serverErr
-			}
+		if serverErr := servercommon.ValidateUserEmail(body.Email); serverErr != nil {
+			return serverErr
 		}
 
-		expiresIn := app.Env.SIGNUP_LINK_DEFAULT_EXPIRY
+		expiresIn := app.Env.INVITE_DEFAULT_EXPIRY
 		if body.ExpiresIn > 0 {
 			expiresIn = time.Duration(body.ExpiresIn) * time.Second
 		}
-		expiresIn = min(expiresIn, app.Env.SIGNUP_LINK_MAX_EXPIRY)
+		expiresIn = min(expiresIn, app.Env.INVITE_MAX_EXPIRY)
 
 		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
@@ -52,10 +50,10 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 				now := clock.Now()
 				expiresAt := now.Add(expiresIn)
 
-				signupOb, stdErr := tx.SignupLink.Create().
+				inviteOb, stdErr := tx.Invite.Create().
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
-					SetName(body.Name).
+					SetEmail(body.Email).
 					SetHashedCode(hashed[:]).
 					SetExpiresAt(expiresAt).
 					Save(ctx)
@@ -65,7 +63,7 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				return &CreateResponse{
 					Errors:    []servercommon.ErrorDetail{},
-					ID:        signupOb.ID.String(),
+					ID:        inviteOb.ID.String(),
 					Code:      base64.StdEncoding.EncodeToString(code),
 					ExpiresAt: expiresAt,
 				}, nil

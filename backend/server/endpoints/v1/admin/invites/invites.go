@@ -5,7 +5,7 @@ import (
 )
 
 func ConfigureEndpoints(group *servercommon.Group) {
-	group.GET("/", List(group.App))
-	group.GET("/:id", Get(group.App))
+	group.GET("/", ListInvites(group.App))
+	group.GET("/:id", GetInvite(group.App))
 	group.POST("/create", Create(group.App))
 }

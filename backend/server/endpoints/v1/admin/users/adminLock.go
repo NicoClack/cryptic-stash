@@ -25,7 +25,7 @@ func AdminLock(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr
 		}
 

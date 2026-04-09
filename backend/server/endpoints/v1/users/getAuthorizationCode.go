@@ -36,7 +36,7 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if serverErr := servercommon.ValidateUsername(body.Username); serverErr != nil {
+		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr
 		}
 
@@ -46,7 +46,7 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 				userOb, stdErr := tx.User.Query().
 					Where(user.Username(body.Username)).
 					WithMessengers().
-					WithStash().
+					WithStashes().
 					Only(ctx)
 				if stdErr != nil {
 					return nil, servercommon.SendUnauthorizedIfNotFound(stdErr)
@@ -61,7 +61,10 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 			return servercommon.NewUnauthorizedError()
 		}
 
-		stashOb := userOb.Edges.Stash
+		if len(userOb.Edges.Stashes) == 0 {
+			return servercommon.NewUnauthorizedError()
+		}
+		stashOb := userOb.Edges.Stashes[0] // TODO: update to support multiple stashes
 		if stashOb == nil {
 			return servercommon.NewUnauthorizedError()
 		}

@@ -9,23 +9,23 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-type GetSignupLinkResponse struct {
-	Errors        []servercommon.ErrorDetail `binding:"required" json:"errors"`
-	SuggestedName string                     `                   json:"suggestedName"`
-	ExpiresAt     time.Time                  `                   json:"expiresAt"`
+type GetInviteResponse struct {
+	Errors    []servercommon.ErrorDetail `binding:"required" json:"errors"`
+	Email     string                     `                   json:"email"`
+	ExpiresAt time.Time                  `                   json:"expiresAt"`
 }
 
-func GetSignupLink(app *servercommon.ServerApp) gin.HandlerFunc {
+func GetInvite(app *servercommon.ServerApp) gin.HandlerFunc {
 	clock := app.Clock
 
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		signupID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
+		inviteID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
 		if ctxErr != nil {
 			return ctxErr
 		}
@@ -46,26 +46,26 @@ func GetSignupLink(app *servercommon.ServerApp) gin.HandlerFunc {
 		hashed := sha256.Sum256(givenCodeBytes)
 		resp, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*GetSignupLinkResponse, error) {
-				signupOb, stdErr := tx.SignupLink.Query().
+			func(tx *ent.Tx, ctx context.Context) (*GetInviteResponse, error) {
+				inviteOb, stdErr := tx.Invite.Query().
 					Where(
-						signuplink.ID(signupID),
-						signuplink.HashedCode(hashed[:]),
+						invite.ID(inviteID),
+						invite.HashedCode(hashed[:]),
 					).
 					Only(ctx)
 				if stdErr != nil {
 					return nil, servercommon.SendUnauthorizedIfNotFound(stdErr)
 				}
 
-				if clock.Now().After(signupOb.ExpiresAt) ||
-					signupOb.UserID != uuid.Nil {
+				if clock.Now().After(inviteOb.ExpiresAt) ||
+					inviteOb.UserID != uuid.Nil {
 					return nil, servercommon.NewUnauthorizedError()
 				}
 
-				return &GetSignupLinkResponse{
-					Errors:        []servercommon.ErrorDetail{},
-					SuggestedName: signupOb.Name,
-					ExpiresAt:     signupOb.ExpiresAt,
+				return &GetInviteResponse{
+					Errors:    []servercommon.ErrorDetail{},
+					Email:     inviteOb.Email,
+					ExpiresAt: inviteOb.ExpiresAt,
 				}, nil
 			},
 		)

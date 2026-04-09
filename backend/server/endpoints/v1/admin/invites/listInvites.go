@@ -7,19 +7,19 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-type ListSignupLinksResponse struct {
-	Errors      []servercommon.ErrorDetail `binding:"required" json:"errors"`
-	SignupLinks []*SignupLink              `binding:"required" json:"signupLinks"`
+type ListInvitesResponse struct {
+	Errors  []servercommon.ErrorDetail `binding:"required" json:"errors"`
+	Invites []*Invite                  `binding:"required" json:"invites"`
 }
-type SignupLink struct {
+type Invite struct {
 	ID        string    `binding:"required" json:"id"`
-	Name      string    `                   json:"name"`
+	Email     string    `                   json:"email"`
 	CreatedAt time.Time `                   json:"createdAt"`
 	ExpiresAt time.Time `                   json:"expiresAt"`
 	UserID    string    `                   json:"userId,omitempty"`
@@ -27,52 +27,52 @@ type SignupLink struct {
 	UserAgent string    `                   json:"userAgent"`
 }
 
-func List(app *servercommon.ServerApp) gin.HandlerFunc {
+func ListInvites(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		name := ginCtx.Query("name")
+		email := ginCtx.Query("email")
 
-		signupObs, stdErr := dbcommon.WithReadTx(
+		inviteObs, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) ([]*ent.SignupLink, error) {
-				signupQuery := tx.SignupLink.Query()
-				if name != "" {
-					signupQuery = signupQuery.Where(signuplink.NameHasPrefix(name))
+			func(tx *ent.Tx, ctx context.Context) ([]*ent.Invite, error) {
+				inviteQuery := tx.Invite.Query()
+				if email != "" {
+					inviteQuery = inviteQuery.Where(invite.EmailHasPrefix(email))
 				}
-				return signupQuery.Select(
-					signuplink.FieldID,
-					signuplink.FieldName,
-					signuplink.FieldCreatedAt,
-					signuplink.FieldExpiresAt,
-					signuplink.FieldIP,
-					signuplink.FieldUserAgent,
-					signuplink.FieldUserID,
-				).Order(ent.Desc(signuplink.FieldCreatedAt)).All(ctx)
+				return inviteQuery.Select(
+					invite.FieldID,
+					invite.FieldEmail,
+					invite.FieldCreatedAt,
+					invite.FieldExpiresAt,
+					invite.FieldIP,
+					invite.FieldUserAgent,
+					invite.FieldUserID,
+				).Order(ent.Desc(invite.FieldCreatedAt)).All(ctx)
 			},
 		)
 		if stdErr != nil {
 			return stdErr
 		}
 
-		resp := make([]*SignupLink, 0, len(signupObs))
-		for _, signupOb := range signupObs {
+		resp := make([]*Invite, 0, len(inviteObs))
+		for _, inviteOb := range inviteObs {
 			userID := ""
-			if signupOb.UserID != uuid.Nil {
-				userID = signupOb.UserID.String()
+			if inviteOb.UserID != uuid.Nil {
+				userID = inviteOb.UserID.String()
 			}
-			resp = append(resp, &SignupLink{
-				ID:        signupOb.ID.String(),
-				Name:      signupOb.Name,
-				CreatedAt: signupOb.CreatedAt,
-				ExpiresAt: signupOb.ExpiresAt,
+			resp = append(resp, &Invite{
+				ID:        inviteOb.ID.String(),
+				Email:     inviteOb.Email,
+				CreatedAt: inviteOb.CreatedAt,
+				ExpiresAt: inviteOb.ExpiresAt,
 				UserID:    userID,
-				IP:        signupOb.IP,
-				UserAgent: signupOb.UserAgent,
+				IP:        inviteOb.IP,
+				UserAgent: inviteOb.UserAgent,
 			})
 		}
 
-		ginCtx.JSON(http.StatusOK, ListSignupLinksResponse{
-			Errors:      []servercommon.ErrorDetail{},
-			SignupLinks: resp,
+		ginCtx.JSON(http.StatusOK, ListInvitesResponse{
+			Errors:  []servercommon.ErrorDetail{},
+			Invites: resp,
 		})
 		return nil
 	})

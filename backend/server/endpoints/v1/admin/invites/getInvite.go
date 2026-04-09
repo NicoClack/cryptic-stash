@@ -7,17 +7,17 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 // TODO: add properties to say if the link was used?
-type GetSignupLinkAdminResponse struct {
+type GetInviteResponse struct {
 	Errors    []servercommon.ErrorDetail `binding:"required" json:"errors"`
 	ID        string                     `                   json:"id"`
-	Name      string                     `                   json:"name"`
+	Email     string                     `                   json:"email"`
 	CreatedAt time.Time                  `                   json:"createdAt"`
 	ExpiresAt time.Time                  `                   json:"expiresAt"`
 	UserID    string                     `                   json:"userId,omitempty"`
@@ -25,37 +25,37 @@ type GetSignupLinkAdminResponse struct {
 	UserAgent string                     `                   json:"userAgent"`
 }
 
-func Get(app *servercommon.ServerApp) gin.HandlerFunc {
+func GetInvite(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		signupID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
+		inviteID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
 		if ctxErr != nil {
 			return ctxErr
 		}
 
 		resp, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*GetSignupLinkAdminResponse, error) {
-				signupOb, stdErr := tx.SignupLink.Query().
-					Where(signuplink.ID(signupID)).
+			func(tx *ent.Tx, ctx context.Context) (*GetInviteResponse, error) {
+				inviteOb, stdErr := tx.Invite.Query().
+					Where(invite.ID(inviteID)).
 					Only(ctx)
 				if stdErr != nil {
 					return nil, stdErr
 				}
 
 				userID := ""
-				if signupOb.UserID != uuid.Nil {
-					userID = signupOb.UserID.String()
+				if inviteOb.UserID != uuid.Nil {
+					userID = inviteOb.UserID.String()
 				}
 
-				return &GetSignupLinkAdminResponse{
+				return &GetInviteResponse{
 					Errors:    []servercommon.ErrorDetail{},
-					ID:        signupOb.ID.String(),
-					Name:      signupOb.Name,
-					CreatedAt: signupOb.CreatedAt,
-					ExpiresAt: signupOb.ExpiresAt,
+					ID:        inviteOb.ID.String(),
+					Email:     inviteOb.Email,
+					CreatedAt: inviteOb.CreatedAt,
+					ExpiresAt: inviteOb.ExpiresAt,
 					UserID:    userID,
-					IP:        signupOb.IP,
-					UserAgent: signupOb.UserAgent,
+					IP:        inviteOb.IP,
+					UserAgent: inviteOb.UserAgent,
 				}, nil
 			},
 		)

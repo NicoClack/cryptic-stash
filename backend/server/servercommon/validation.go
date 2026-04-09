@@ -1,16 +1,13 @@
 package servercommon
 
 import (
-	"regexp"
-
 	"github.com/NicoClack/cryptic-stash/backend/common"
 )
 
-var usernamePattern = regexp.MustCompile(`^[a-z0-9_-]+$`)
-
-func ValidateUsername(username string) *Error {
-	if !usernamePattern.MatchString(username) || username == common.AdminUsername {
-		return NewInvalidUsernameError()
+// Should be used in combination with the "email" validation tag
+func ValidateUserEmail(email string) *Error {
+	if email == common.AdminUsername {
+		return NewInvalidUserEmailError()
 	}
 	return nil
 }
