@@ -13,6 +13,7 @@
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
 	import { Textarea } from "$lib/components/ui/textarea";
+	import { formatTime, normalizeEmail } from "$lib/utils";
 
 	interface Invite {
 		id: string;
@@ -61,15 +62,6 @@
 			return String(firstError.message);
 		}
 		return `Request failed with status ${response.status}`;
-	}
-
-	function formatTime(dateValue: string): string {
-		const date = new Date(dateValue);
-		return date.toLocaleString();
-	}
-
-	function normalizeEmail(value: string): string {
-		return value.trim().toLowerCase();
 	}
 
 	async function copyLatestInviteLink() {

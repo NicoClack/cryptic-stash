@@ -109,6 +109,7 @@
 - - Use npm-check-updates with a cooldown of a few days
 
 - Move from gin, its maintenance isn't great
+- When messengers are changed, send a message to all of the previous messengers
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 -   Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints
