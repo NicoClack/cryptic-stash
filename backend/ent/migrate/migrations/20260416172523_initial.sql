@@ -6,7 +6,7 @@ CREATE UNIQUE INDEX `download_sessions_hashed_auth_code_key` ON `download_sessio
 -- create index "downloadsession_hashed_auth_code_user_id" to table: "download_sessions"
 CREATE INDEX `downloadsession_hashed_auth_code_user_id` ON `download_sessions` (`hashed_auth_code`, `user_id`);
 -- create "invites" table
-CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `user_agent` text NOT NULL DEFAULT (''), `ip` text NOT NULL DEFAULT (''), `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `user_agent` text NOT NULL DEFAULT (''), `ip` text NOT NULL DEFAULT (''), `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "invites_hashed_code_key" to table: "invites"
 CREATE UNIQUE INDEX `invites_hashed_code_key` ON `invites` (`hashed_code`);
 -- create index "invites_user_id_key" to table: "invites"
