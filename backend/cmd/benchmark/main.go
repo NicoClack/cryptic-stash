@@ -22,12 +22,12 @@ type guess struct {
 func main() {
 	// TODO: revise these explanations, runtime.GC() made a massive difference
 	password := flag.String("password", "", "the password to try to guess")
-	hashTime := flag.Uint("hash-time", 0, "the time parameter for Argon2ID")
-	hashMemory := flag.Uint("hash-memory", 0, "the memory parameter for Argon2ID in KiB")
+	hashTime := flag.Uint("hash-time", 0, "the time parameter for Argon2id")
+	hashMemory := flag.Uint("hash-memory", 0, "the memory parameter for Argon2id in KiB")
 	hashThreads := flag.Uint(
 		"hash-threads",
 		0,
-		"the threads parameter for Argon2ID (note: changing this affects the hashes produced)",
+		"the threads parameter for Argon2id (note: changing this affects the hashes produced)",
 	)
 	benchmarkThreads := flag.Int64(
 		"benchmark-threads",

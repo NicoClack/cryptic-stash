@@ -53,6 +53,7 @@
 -   -   Admins should be able to reset it so if there's an unauthorised login, the user can block with a self lock, the admin can reset them and then they can block again without waiting
 - Use Discord API directly instead of discordgo
 - Use final scratch image instead of Apline for running the backend, the build has no dependencies, so I don't even need commands like "ls"
+- https://snyk.io/blog/go-security-cheatsheet-for-go-developers/
 - Remove clockwork and use Go's built-in mock time
 - Pass transactions explicitly
 - Send warning message when a login uses the correct password but the account is locked
@@ -89,6 +90,8 @@
 -   -   -   How does this safely go down again? Going up isn't particularly safe either
 -   -   Admin endpoints don't need this security, as long as they fail early if unauthorised
 -   When the admin is locked, whether temporarily or permanently, errors should make the server enter some kind of lockdown state? Need to weigh up pros and cons
+- Split alerts and other emails into 2 different addresses
+- govulncheck GitHub Action
 - Standardise error handling on the frontend
 - Use load functions on the frontend more consistently
 - Page when invite link doesn't include an ID?
@@ -105,6 +108,7 @@
 - - Use socket.dev to reduce chance of the frontend having malicious code? Create E2E test and see if any suspicious data is sent off
 - - Use npm-check-updates with a cooldown of a few days
 
+- Move from gin, its maintenance isn't great
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 -   Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints
@@ -136,7 +140,7 @@
 
 How password managers work. Maybe a zero trust system is actually possible?
 
-Is it safe to hash an Argon2ID hash with Argon2ID?
+Is it safe to hash an Argon2id hash with Argon2id?
 https://blog.ircmaxell.com/2015/03/security-issue-combining-bcrypt-with.html
 
 Can long passwords be used to DoS?

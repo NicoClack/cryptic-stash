@@ -77,7 +77,7 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, stdErr
 				}
 
-				inMemoryUserOb, stdErr := newInMemoryUser(body.Email, emailMessengerType, emailMessengerVersion)
+				inMemoryUser, stdErr := newInMemoryUser(body.Email, emailMessengerType, emailMessengerVersion)
 				if stdErr != nil {
 					return nil, stdErr
 				}
@@ -86,7 +86,7 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 					app.Env.EMAIL_MESSENGER_TYPE,
 					&common.Message{
 						Type:          common.MessageInvite,
-						User:          inMemoryUserOb,
+						User:          inMemoryUser,
 						InviteMessage: inviteMessage,
 						URL: getInviteURL(
 							inviteOb.ID.String(),
@@ -131,6 +131,7 @@ func newInMemoryUser(
 			return nil, stdErr
 		}
 	}
+	// TODO: validate options
 
 	return &ent.User{
 		Username: email,
