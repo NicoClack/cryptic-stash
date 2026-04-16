@@ -3,6 +3,7 @@
 package invite
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -25,6 +26,8 @@ const (
 	FieldHashedCode = "hashed_code"
 	// FieldExpiresAt holds the string denoting the expiresat field in the database.
 	FieldExpiresAt = "expires_at"
+	// FieldExpiredReason holds the string denoting the expiredreason field in the database.
+	FieldExpiredReason = "expired_reason"
 	// FieldUserAgent holds the string denoting the useragent field in the database.
 	FieldUserAgent = "user_agent"
 	// FieldIP holds the string denoting the ip field in the database.
@@ -52,6 +55,7 @@ var Columns = []string{
 	FieldEmail,
 	FieldHashedCode,
 	FieldExpiresAt,
+	FieldExpiredReason,
 	FieldUserAgent,
 	FieldIP,
 	FieldUserID,
@@ -82,6 +86,29 @@ var (
 	DefaultID func() uuid.UUID
 )
 
+// ExpiredReason defines the type for the "expiredReason" enum field.
+type ExpiredReason string
+
+// ExpiredReason values.
+const (
+	ExpiredReasonREVOKED        ExpiredReason = "REVOKED"
+	ExpiredReasonUSERNAME_TAKEN ExpiredReason = "USERNAME_TAKEN"
+)
+
+func (er ExpiredReason) String() string {
+	return string(er)
+}
+
+// ExpiredReasonValidator is a validator for the "expiredReason" field enum values. It is called by the builders before save.
+func ExpiredReasonValidator(er ExpiredReason) error {
+	switch er {
+	case ExpiredReasonREVOKED, ExpiredReasonUSERNAME_TAKEN:
+		return nil
+	default:
+		return fmt.Errorf("invite: invalid enum value for expiredReason field: %q", er)
+	}
+}
+
 // OrderOption defines the ordering options for the Invite queries.
 type OrderOption func(*sql.Selector)
 
@@ -108,6 +135,11 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiresAt orders the results by the expiresAt field.
 func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
+}
+
+// ByExpiredReason orders the results by the expiredReason field.
+func ByExpiredReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiredReason, opts...).ToFunc()
 }
 
 // ByUserAgent orders the results by the userAgent field.

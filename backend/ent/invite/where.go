@@ -321,6 +321,36 @@ func ExpiresAtLTE(v time.Time) predicate.Invite {
 	return predicate.Invite(sql.FieldLTE(FieldExpiresAt, v))
 }
 
+// ExpiredReasonEQ applies the EQ predicate on the "expiredReason" field.
+func ExpiredReasonEQ(v ExpiredReason) predicate.Invite {
+	return predicate.Invite(sql.FieldEQ(FieldExpiredReason, v))
+}
+
+// ExpiredReasonNEQ applies the NEQ predicate on the "expiredReason" field.
+func ExpiredReasonNEQ(v ExpiredReason) predicate.Invite {
+	return predicate.Invite(sql.FieldNEQ(FieldExpiredReason, v))
+}
+
+// ExpiredReasonIn applies the In predicate on the "expiredReason" field.
+func ExpiredReasonIn(vs ...ExpiredReason) predicate.Invite {
+	return predicate.Invite(sql.FieldIn(FieldExpiredReason, vs...))
+}
+
+// ExpiredReasonNotIn applies the NotIn predicate on the "expiredReason" field.
+func ExpiredReasonNotIn(vs ...ExpiredReason) predicate.Invite {
+	return predicate.Invite(sql.FieldNotIn(FieldExpiredReason, vs...))
+}
+
+// ExpiredReasonIsNil applies the IsNil predicate on the "expiredReason" field.
+func ExpiredReasonIsNil() predicate.Invite {
+	return predicate.Invite(sql.FieldIsNull(FieldExpiredReason))
+}
+
+// ExpiredReasonNotNil applies the NotNil predicate on the "expiredReason" field.
+func ExpiredReasonNotNil() predicate.Invite {
+	return predicate.Invite(sql.FieldNotNull(FieldExpiredReason))
+}
+
 // UserAgentEQ applies the EQ predicate on the "userAgent" field.
 func UserAgentEQ(v string) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldUserAgent, v))

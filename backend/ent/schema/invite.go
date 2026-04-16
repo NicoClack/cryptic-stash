@@ -27,6 +27,10 @@ func (Invite) Fields() []ent.Field {
 						MinLen(32).
 						MaxLen(32),
 		field.Time("expiresAt"),
+		// Used to make an invite expire early without userID being set.
+		field.Enum("expiredReason").
+			Values("revoked", "username_taken").
+			Optional().Nillable(),
 		field.String("userAgent").Default(""),
 		field.String("ip").Default(""),
 		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any

@@ -909,6 +909,7 @@ type InviteMutation struct {
 	email         *string
 	hashedCode    *[]byte
 	expiresAt     *time.Time
+	expiredReason *invite.ExpiredReason
 	userAgent     *string
 	ip            *string
 	clearedFields map[string]struct{}
@@ -1203,6 +1204,55 @@ func (m *InviteMutation) ResetExpiresAt() {
 	m.expiresAt = nil
 }
 
+// SetExpiredReason sets the "expiredReason" field.
+func (m *InviteMutation) SetExpiredReason(ir invite.ExpiredReason) {
+	m.expiredReason = &ir
+}
+
+// ExpiredReason returns the value of the "expiredReason" field in the mutation.
+func (m *InviteMutation) ExpiredReason() (r invite.ExpiredReason, exists bool) {
+	v := m.expiredReason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiredReason returns the old "expiredReason" field's value of the Invite entity.
+// If the Invite object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InviteMutation) OldExpiredReason(ctx context.Context) (v *invite.ExpiredReason, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiredReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiredReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiredReason: %w", err)
+	}
+	return oldValue.ExpiredReason, nil
+}
+
+// ClearExpiredReason clears the value of the "expiredReason" field.
+func (m *InviteMutation) ClearExpiredReason() {
+	m.expiredReason = nil
+	m.clearedFields[invite.FieldExpiredReason] = struct{}{}
+}
+
+// ExpiredReasonCleared returns if the "expiredReason" field was cleared in this mutation.
+func (m *InviteMutation) ExpiredReasonCleared() bool {
+	_, ok := m.clearedFields[invite.FieldExpiredReason]
+	return ok
+}
+
+// ResetExpiredReason resets all changes to the "expiredReason" field.
+func (m *InviteMutation) ResetExpiredReason() {
+	m.expiredReason = nil
+	delete(m.clearedFields, invite.FieldExpiredReason)
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (m *InviteMutation) SetUserAgent(s string) {
 	m.userAgent = &s
@@ -1385,7 +1435,7 @@ func (m *InviteMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *InviteMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.createdAt != nil {
 		fields = append(fields, invite.FieldCreatedAt)
 	}
@@ -1400,6 +1450,9 @@ func (m *InviteMutation) Fields() []string {
 	}
 	if m.expiresAt != nil {
 		fields = append(fields, invite.FieldExpiresAt)
+	}
+	if m.expiredReason != nil {
+		fields = append(fields, invite.FieldExpiredReason)
 	}
 	if m.userAgent != nil {
 		fields = append(fields, invite.FieldUserAgent)
@@ -1428,6 +1481,8 @@ func (m *InviteMutation) Field(name string) (ent.Value, bool) {
 		return m.HashedCode()
 	case invite.FieldExpiresAt:
 		return m.ExpiresAt()
+	case invite.FieldExpiredReason:
+		return m.ExpiredReason()
 	case invite.FieldUserAgent:
 		return m.UserAgent()
 	case invite.FieldIP:
@@ -1453,6 +1508,8 @@ func (m *InviteMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldHashedCode(ctx)
 	case invite.FieldExpiresAt:
 		return m.OldExpiresAt(ctx)
+	case invite.FieldExpiredReason:
+		return m.OldExpiredReason(ctx)
 	case invite.FieldUserAgent:
 		return m.OldUserAgent(ctx)
 	case invite.FieldIP:
@@ -1502,6 +1559,13 @@ func (m *InviteMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExpiresAt(v)
+		return nil
+	case invite.FieldExpiredReason:
+		v, ok := value.(invite.ExpiredReason)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiredReason(v)
 		return nil
 	case invite.FieldUserAgent:
 		v, ok := value.(string)
@@ -1554,6 +1618,9 @@ func (m *InviteMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *InviteMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(invite.FieldExpiredReason) {
+		fields = append(fields, invite.FieldExpiredReason)
+	}
 	if m.FieldCleared(invite.FieldUserID) {
 		fields = append(fields, invite.FieldUserID)
 	}
@@ -1571,6 +1638,9 @@ func (m *InviteMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *InviteMutation) ClearField(name string) error {
 	switch name {
+	case invite.FieldExpiredReason:
+		m.ClearExpiredReason()
+		return nil
 	case invite.FieldUserID:
 		m.ClearUserID()
 		return nil
@@ -1596,6 +1666,9 @@ func (m *InviteMutation) ResetField(name string) error {
 		return nil
 	case invite.FieldExpiresAt:
 		m.ResetExpiresAt()
+		return nil
+	case invite.FieldExpiredReason:
+		m.ResetExpiredReason()
 		return nil
 	case invite.FieldUserAgent:
 		m.ResetUserAgent()

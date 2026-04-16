@@ -49,6 +49,7 @@ var (
 		{Name: "email", Type: field.TypeString, Size: 128},
 		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "expired_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"REVOKED", "USERNAME_TAKEN"}},
 		{Name: "user_agent", Type: field.TypeString, Default: ""},
 		{Name: "ip", Type: field.TypeString, Default: ""},
 		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
@@ -61,7 +62,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "invites_users_invite",
-				Columns:    []*schema.Column{InvitesColumns[8]},
+				Columns:    []*schema.Column{InvitesColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -92,7 +93,7 @@ var (
 		{Name: "priority", Type: field.TypeInt8},
 		{Name: "weight", Type: field.TypeInt},
 		{Name: "body", Type: field.TypeJSON},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "running", "failed"}, Default: "pending"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "running", "completed", "failed"}, Default: "pending"},
 		{Name: "retries", Type: field.TypeInt, Default: 0},
 		{Name: "retried_fraction", Type: field.TypeFloat64, Default: 0},
 		{Name: "logged_stall_warning", Type: field.TypeBool, Default: false},

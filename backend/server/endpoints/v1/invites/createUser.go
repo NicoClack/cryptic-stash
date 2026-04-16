@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
@@ -16,8 +17,13 @@ import (
 	"github.com/google/uuid"
 )
 
+var ErrUsernameTaken = servercommon.NewUnauthorizedError().
+	SetChild(
+		common.NewErrorWithCategories("username already taken", common.ErrTypeClient),
+	)
+
 type CreateUserPayload struct {
-	Username string `binding:"required,min=1,max=32"       json:"username"`
+	// TODO: require some sort of password
 }
 type CreateUserResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -52,11 +58,8 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
-		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
-			return serverErr
-		}
 		hashed := sha256.Sum256(givenCodeBytes)
-		inviteOb, stdErr := dbcommon.WithReadTx(
+		inviteOb, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*ent.Invite, error) {
 				inviteOb, stdErr := tx.Invite.Query().
@@ -68,20 +71,25 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				if stdErr != nil {
 					return nil, servercommon.SendUnauthorizedIfNotFound(stdErr)
 				}
-				if inviteOb.UserID != uuid.Nil || clock.Now().After(inviteOb.ExpiresAt) {
+				if inviteOb.UserID != uuid.Nil || // Already used
+					clock.Now().After(inviteOb.ExpiresAt) ||
+					inviteOb.ExpiredReason != nil { // Expired for another reason
 					return nil, servercommon.NewUnauthorizedError()
 				}
 
-				exists, stdErr := tx.User.Query().Where(user.Username(body.Username)).Exist(ctx)
+				exists, stdErr := tx.User.Query().Where(user.Username(inviteOb.Email)).Exist(ctx)
 				if stdErr != nil {
 					return nil, stdErr
 				}
 				if exists {
-					return nil, servercommon.NewBadRequestError(
-						"username",
-						"username already exists",
-						"USERNAME_ALREADY_EXISTS",
-					)
+					// It doesn't matter if this leaks the existence of the account as the invite should have only
+					// been sent to the owner of this email.
+					stdErr = tx.Invite.UpdateOneID(inviteID).
+						SetExpiredReason("username_taken").Exec(ctx)
+					if stdErr != nil {
+						return nil, stdErr
+					}
+					return nil, ErrUsernameTaken.Clone()
 				}
 
 				return inviteOb, nil
@@ -96,7 +104,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) (*CreateUserResponse, error) {
 				now := clock.Now()
 				userOb, stdErr := tx.User.Create().
-					SetUsername(body.Username).
+					SetUsername(inviteOb.Email).
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
 					SetDownloadSessionsValidFrom(now).
@@ -104,11 +112,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					Save(ctx)
 				if stdErr != nil {
 					if ent.IsConstraintError(stdErr) && strings.Contains(stdErr.Error(), "username") {
-						return nil, servercommon.NewBadRequestError(
-							"username",
-							"username already exists",
-							"USERNAME_ALREADY_EXISTS",
-						)
+						return nil, ErrUsernameTaken.Clone()
 					}
 					return nil, stdErr
 				}

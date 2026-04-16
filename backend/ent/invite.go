@@ -29,6 +29,8 @@ type Invite struct {
 	HashedCode []byte `json:"hashedCode,omitempty"`
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
+	// ExpiredReason holds the value of the "expiredReason" field.
+	ExpiredReason *invite.ExpiredReason `json:"expiredReason,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
 	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
@@ -68,7 +70,7 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case invite.FieldHashedCode:
 			values[i] = new([]byte)
-		case invite.FieldEmail, invite.FieldUserAgent, invite.FieldIP:
+		case invite.FieldEmail, invite.FieldExpiredReason, invite.FieldUserAgent, invite.FieldIP:
 			values[i] = new(sql.NullString)
 		case invite.FieldCreatedAt, invite.FieldUpdatedAt, invite.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -124,6 +126,13 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field expiresAt", values[i])
 			} else if value.Valid {
 				_m.ExpiresAt = value.Time
+			}
+		case invite.FieldExpiredReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field expiredReason", values[i])
+			} else if value.Valid {
+				_m.ExpiredReason = new(invite.ExpiredReason)
+				*_m.ExpiredReason = invite.ExpiredReason(value.String)
 			}
 		case invite.FieldUserAgent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -198,6 +207,11 @@ func (_m *Invite) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("expiresAt=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := _m.ExpiredReason; v != nil {
+		builder.WriteString("expiredReason=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("userAgent=")
 	builder.WriteString(_m.UserAgent)

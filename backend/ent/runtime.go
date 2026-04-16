@@ -95,11 +95,11 @@ func init() {
 		}
 	}()
 	// inviteDescUserAgent is the schema descriptor for userAgent field.
-	inviteDescUserAgent := inviteFields[6].Descriptor()
+	inviteDescUserAgent := inviteFields[7].Descriptor()
 	// invite.DefaultUserAgent holds the default value on creation for the userAgent field.
 	invite.DefaultUserAgent = inviteDescUserAgent.Default.(string)
 	// inviteDescIP is the schema descriptor for ip field.
-	inviteDescIP := inviteFields[7].Descriptor()
+	inviteDescIP := inviteFields[8].Descriptor()
 	// invite.DefaultIP holds the default value on creation for the ip field.
 	invite.DefaultIP = inviteDescIP.Default.(string)
 	// inviteDescID is the schema descriptor for id field.

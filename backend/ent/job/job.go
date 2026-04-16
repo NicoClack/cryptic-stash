@@ -99,9 +99,10 @@ const DefaultStatus = StatusPending
 
 // Status values.
 const (
-	StatusPending Status = "pending"
-	StatusRunning Status = "running"
-	StatusFailed  Status = "failed"
+	StatusPending   Status = "pending"
+	StatusRunning   Status = "running"
+	StatusCompleted Status = "completed"
+	StatusFailed    Status = "failed"
 )
 
 func (s Status) String() string {
@@ -111,7 +112,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPending, StatusRunning, StatusFailed:
+	case StatusPending, StatusRunning, StatusCompleted, StatusFailed:
 		return nil
 	default:
 		return fmt.Errorf("job: invalid enum value for status field: %q", s)

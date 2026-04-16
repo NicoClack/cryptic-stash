@@ -55,6 +55,20 @@ func (_c *InviteCreate) SetExpiresAt(v time.Time) *InviteCreate {
 	return _c
 }
 
+// SetExpiredReason sets the "expiredReason" field.
+func (_c *InviteCreate) SetExpiredReason(v invite.ExpiredReason) *InviteCreate {
+	_c.mutation.SetExpiredReason(v)
+	return _c
+}
+
+// SetNillableExpiredReason sets the "expiredReason" field if the given value is not nil.
+func (_c *InviteCreate) SetNillableExpiredReason(v *invite.ExpiredReason) *InviteCreate {
+	if v != nil {
+		_c.SetExpiredReason(*v)
+	}
+	return _c
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (_c *InviteCreate) SetUserAgent(v string) *InviteCreate {
 	_c.mutation.SetUserAgent(v)
@@ -192,6 +206,11 @@ func (_c *InviteCreate) check() error {
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expiresAt", err: errors.New(`ent: missing required field "Invite.expiresAt"`)}
 	}
+	if v, ok := _c.mutation.ExpiredReason(); ok {
+		if err := invite.ExpiredReasonValidator(v); err != nil {
+			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.UserAgent(); !ok {
 		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Invite.userAgent"`)}
 	}
@@ -253,6 +272,10 @@ func (_c *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(invite.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
+	}
+	if value, ok := _c.mutation.ExpiredReason(); ok {
+		_spec.SetField(invite.FieldExpiredReason, field.TypeEnum, value)
+		_node.ExpiredReason = &value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
@@ -388,6 +411,24 @@ func (u *InviteUpsert) SetExpiresAt(v time.Time) *InviteUpsert {
 // UpdateExpiresAt sets the "expiresAt" field to the value that was provided on create.
 func (u *InviteUpsert) UpdateExpiresAt() *InviteUpsert {
 	u.SetExcluded(invite.FieldExpiresAt)
+	return u
+}
+
+// SetExpiredReason sets the "expiredReason" field.
+func (u *InviteUpsert) SetExpiredReason(v invite.ExpiredReason) *InviteUpsert {
+	u.Set(invite.FieldExpiredReason, v)
+	return u
+}
+
+// UpdateExpiredReason sets the "expiredReason" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateExpiredReason() *InviteUpsert {
+	u.SetExcluded(invite.FieldExpiredReason)
+	return u
+}
+
+// ClearExpiredReason clears the value of the "expiredReason" field.
+func (u *InviteUpsert) ClearExpiredReason() *InviteUpsert {
+	u.SetNull(invite.FieldExpiredReason)
 	return u
 }
 
@@ -548,6 +589,27 @@ func (u *InviteUpsertOne) SetExpiresAt(v time.Time) *InviteUpsertOne {
 func (u *InviteUpsertOne) UpdateExpiresAt() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateExpiresAt()
+	})
+}
+
+// SetExpiredReason sets the "expiredReason" field.
+func (u *InviteUpsertOne) SetExpiredReason(v invite.ExpiredReason) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetExpiredReason(v)
+	})
+}
+
+// UpdateExpiredReason sets the "expiredReason" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateExpiredReason() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateExpiredReason()
+	})
+}
+
+// ClearExpiredReason clears the value of the "expiredReason" field.
+func (u *InviteUpsertOne) ClearExpiredReason() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearExpiredReason()
 	})
 }
 
@@ -882,6 +944,27 @@ func (u *InviteUpsertBulk) SetExpiresAt(v time.Time) *InviteUpsertBulk {
 func (u *InviteUpsertBulk) UpdateExpiresAt() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateExpiresAt()
+	})
+}
+
+// SetExpiredReason sets the "expiredReason" field.
+func (u *InviteUpsertBulk) SetExpiredReason(v invite.ExpiredReason) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetExpiredReason(v)
+	})
+}
+
+// UpdateExpiredReason sets the "expiredReason" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateExpiredReason() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateExpiredReason()
+	})
+}
+
+// ClearExpiredReason clears the value of the "expiredReason" field.
+func (u *InviteUpsertBulk) ClearExpiredReason() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearExpiredReason()
 	})
 }
 

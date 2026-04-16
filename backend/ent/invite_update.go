@@ -84,6 +84,26 @@ func (_u *InviteUpdate) SetNillableExpiresAt(v *time.Time) *InviteUpdate {
 	return _u
 }
 
+// SetExpiredReason sets the "expiredReason" field.
+func (_u *InviteUpdate) SetExpiredReason(v invite.ExpiredReason) *InviteUpdate {
+	_u.mutation.SetExpiredReason(v)
+	return _u
+}
+
+// SetNillableExpiredReason sets the "expiredReason" field if the given value is not nil.
+func (_u *InviteUpdate) SetNillableExpiredReason(v *invite.ExpiredReason) *InviteUpdate {
+	if v != nil {
+		_u.SetExpiredReason(*v)
+	}
+	return _u
+}
+
+// ClearExpiredReason clears the value of the "expiredReason" field.
+func (_u *InviteUpdate) ClearExpiredReason() *InviteUpdate {
+	_u.mutation.ClearExpiredReason()
+	return _u
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (_u *InviteUpdate) SetUserAgent(v string) *InviteUpdate {
 	_u.mutation.SetUserAgent(v)
@@ -196,6 +216,11 @@ func (_u *InviteUpdate) check() error {
 			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "Invite.hashedCode": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ExpiredReason(); ok {
+		if err := invite.ExpiredReasonValidator(v); err != nil {
+			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -225,6 +250,12 @@ func (_u *InviteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(invite.FieldExpiresAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.ExpiredReason(); ok {
+		_spec.SetField(invite.FieldExpiredReason, field.TypeEnum, value)
+	}
+	if _u.mutation.ExpiredReasonCleared() {
+		_spec.ClearField(invite.FieldExpiredReason, field.TypeEnum)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
@@ -332,6 +363,26 @@ func (_u *InviteUpdateOne) SetNillableExpiresAt(v *time.Time) *InviteUpdateOne {
 	if v != nil {
 		_u.SetExpiresAt(*v)
 	}
+	return _u
+}
+
+// SetExpiredReason sets the "expiredReason" field.
+func (_u *InviteUpdateOne) SetExpiredReason(v invite.ExpiredReason) *InviteUpdateOne {
+	_u.mutation.SetExpiredReason(v)
+	return _u
+}
+
+// SetNillableExpiredReason sets the "expiredReason" field if the given value is not nil.
+func (_u *InviteUpdateOne) SetNillableExpiredReason(v *invite.ExpiredReason) *InviteUpdateOne {
+	if v != nil {
+		_u.SetExpiredReason(*v)
+	}
+	return _u
+}
+
+// ClearExpiredReason clears the value of the "expiredReason" field.
+func (_u *InviteUpdateOne) ClearExpiredReason() *InviteUpdateOne {
+	_u.mutation.ClearExpiredReason()
 	return _u
 }
 
@@ -460,6 +511,11 @@ func (_u *InviteUpdateOne) check() error {
 			return &ValidationError{Name: "hashedCode", err: fmt.Errorf(`ent: validator failed for field "Invite.hashedCode": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ExpiredReason(); ok {
+		if err := invite.ExpiredReasonValidator(v); err != nil {
+			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -506,6 +562,12 @@ func (_u *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err erro
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(invite.FieldExpiresAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.ExpiredReason(); ok {
+		_spec.SetField(invite.FieldExpiredReason, field.TypeEnum, value)
+	}
+	if _u.mutation.ExpiredReasonCleared() {
+		_spec.ClearField(invite.FieldExpiredReason, field.TypeEnum)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
