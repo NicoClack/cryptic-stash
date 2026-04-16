@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 )
@@ -65,6 +66,18 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 				encodedCode := base64.StdEncoding.EncodeToString(code)
 				now := clock.Now()
 				expiresAt := now.Add(expiresIn)
+
+				exists, stdErr := tx.User.Query().Where(user.Username(body.Email)).Exist(ctx)
+				if stdErr != nil {
+					return nil, stdErr
+				}
+				if exists {
+					return nil, servercommon.NewBadRequestError(
+						"email",
+						"username already taken",
+						"USERNAME_TAKEN",
+					)
+				}
 
 				inviteOb, stdErr := tx.Invite.Create().
 					SetCreatedAt(now).
