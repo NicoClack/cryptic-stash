@@ -33,7 +33,7 @@
 	}
 
 	const DEFAULT_INVITE_MESSAGE =
-		"<YOUR NAME HERE> invited you to Cryptic Stash, an end-to-end encrypted storage site for securely storing 2FA recovery codes in case you lose your devices.";
+		"<YOUR NAME HERE> invited you to Cryptic Stash, a secure end-to-end encrypted storage service for 2FA recovery codes in case you lose your devices.";
 
 	type CreatedInvite = {
 		id: string;
