@@ -63,7 +63,7 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) (*CreateResponse, error) {
 				code := app.Core.RandomAuthCode()
 				hashed := sha256.Sum256(code)
-				encodedCode := base64.StdEncoding.EncodeToString(code)
+				encodedCode := base64.RawURLEncoding.EncodeToString(code)
 				now := clock.Now()
 				expiresAt := now.Add(expiresIn)
 

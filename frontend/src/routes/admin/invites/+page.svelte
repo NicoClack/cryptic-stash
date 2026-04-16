@@ -67,9 +67,8 @@
 	async function copyLatestInviteLink() {
 		if (!latestInvite) return;
 
-		// TODO: use URL safe base64?
 		const inviteUrl = new URL(
-			`/invites/${latestInvite.id}/?code=${encodeURIComponent(latestInvite.code)}`,
+			`/invites/${latestInvite.id}/?code=${latestInvite.code}`,
 			document.baseURI,
 		).toString();
 		try {

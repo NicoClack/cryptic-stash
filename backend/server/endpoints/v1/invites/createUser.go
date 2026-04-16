@@ -45,7 +45,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		if serverErr != nil {
 			return serverErr
 		}
-		givenCodeBytes, stdErr := base64.StdEncoding.DecodeString(token)
+		givenCodeBytes, stdErr := base64.RawURLEncoding.DecodeString(token)
 		if stdErr != nil {
 			return servercommon.NewBadRequestError(
 				"authorization",
