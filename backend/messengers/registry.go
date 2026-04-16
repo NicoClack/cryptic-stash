@@ -62,7 +62,7 @@ type bodyWrapperType struct {
 	MessageType            common.MessageType
 	VersionedMessengerType string
 	DownloadSessionIDs     []uuid.UUID
-	Inner                  string
+	Inner                  json.RawMessage
 }
 type Context struct {
 	*JobContext
@@ -109,7 +109,7 @@ func (registry *Registry) Register(definition *Definition) {
 			}
 
 			newJobCtx := *jobCtx
-			newJobCtx.Body = json.RawMessage(body.Inner)
+			newJobCtx.Body = body.Inner
 			messengerCtx := &Context{
 				JobContext:    &newJobCtx,
 				confirmedSent: false,
@@ -270,7 +270,7 @@ func (registry *Registry) Send(
 			MessageType:            message.Type,
 			VersionedMessengerType: versionedType,
 			DownloadSessionIDs:     message.DownloadSessionIDs,
-			Inner:                  string(encoded),
+			Inner:                  encoded,
 		},
 		func(jobCreate *ent.JobCreate) {
 			jobCreate.SetDueAt(sendTime)
