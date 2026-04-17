@@ -11,6 +11,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
+	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
@@ -58,12 +59,13 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) (*ent.DownloadSession, error) {
 				downloadSessionOb, stdErr := tx.DownloadSession.Query().
 					Where(downloadsession.And(
-						downloadsession.HasUserWith(user.Username(body.Username)),
+						downloadsession.HasStashWith(stash.HasUserWith(user.Username(body.Username))),
 						downloadsession.HashedAuthCode(hashedAuthCode[:]),
 					)).
-					WithUser(func(userQuery *ent.UserQuery) {
-						userQuery.WithStashes()
-						userQuery.WithMessengers()
+					WithStash(func(stashQuery *ent.StashQuery) {
+						stashQuery.WithUser(func(userQuery *ent.UserQuery) {
+							userQuery.WithMessengers()
+						})
 					}).
 					WithLoginAlerts(func(laQuery *ent.LoginAlertQuery) {
 						laQuery.WithUserMessenger()
@@ -73,7 +75,7 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, servercommon.SendUnauthorizedIfNotFound(stdErr)
 				}
 				if clock.Now().After(downloadSessionOb.ValidUntil) ||
-					downloadSessionOb.Edges.User.DownloadSessionsValidFrom.After(downloadSessionOb.CreatedAt) {
+					downloadSessionOb.Edges.Stash.DownloadSessionsValidFrom.After(downloadSessionOb.CreatedAt) {
 					stdErr := tx.DownloadSession.DeleteOneID(downloadSessionOb.ID).Exec(ctx)
 					if stdErr != nil {
 						return nil, stdErr
@@ -99,18 +101,12 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 			})
 			return nil
 		}
-		if app.Core.IsUserLocked(downloadSessionOb.Edges.User) {
+		if app.Core.IsStashLocked(downloadSessionOb.Edges.Stash) {
 			return servercommon.NewUnauthorizedError()
 		}
 
-		userOb := downloadSessionOb.Edges.User
-		if len(userOb.Edges.Stashes) == 0 {
-			return servercommon.NewUnauthorizedError()
-		}
-		stashOb := userOb.Edges.Stashes[0] // TODO: support multiple stashes
-		if stashOb == nil {
-			return servercommon.NewUnauthorizedError()
-		}
+		stashOb := downloadSessionOb.Edges.Stash
+		userOb := stashOb.Edges.User
 		stashKek := app.Core.HashPassword(
 			body.Password,
 			stashOb.PasswordSalt,

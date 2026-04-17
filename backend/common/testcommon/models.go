@@ -15,7 +15,6 @@ func NewDummyUser(counter int, dbClient *ent.Client, ctx context.Context, clock 
 		SetUsername(fmt.Sprintf("user%v", counter)).
 		SetCreatedAt(now).
 		SetUpdatedAt(now).
-		SetDownloadSessionsValidFrom(now).
 		SaveX(ctx)
 	dbClient.Stash.Create().
 		SetCreatedAt(now).
@@ -26,6 +25,7 @@ func NewDummyUser(counter int, dbClient *ent.Client, ctx context.Context, clock 
 		SetPasswordSalt(core.GenerateSalt()).
 		SetHashTime(0).SetHashMemory(0).SetHashThreads(0).
 		SetUser(userOb).
+		SetDownloadSessionsValidFrom(now).
 		SaveX(ctx)
 	return userOb
 }

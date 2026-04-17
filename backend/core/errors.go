@@ -5,7 +5,7 @@ import "github.com/NicoClack/cryptic-stash/backend/common"
 const (
 	ErrTypeSendActiveDownloadSessionReminders = "send active download session reminders"
 	ErrTypeDeleteExpiredDownloadSessions      = "delete expired download sessions"
-	ErrTypeInvalidateUserDownloadSessions     = "invalidate user download sessions"
+	ErrTypeInvalidateDownloadSessionsForStash = "invalidate download sessions for stash"
 	ErrTypeEncrypt                            = "encrypt"
 	ErrTypeDecrypt                            = "decrypt"
 	// Lower level
@@ -27,9 +27,9 @@ var ErrWrapperDeleteExpiredDownloadSessions = common.NewErrorWrapper(
 	ErrTypeDeleteExpiredDownloadSessions,
 )
 
-var ErrWrapperInvalidateUserDownloadSessions = common.NewErrorWrapper(
+var ErrWrapperInvalidateDownloadSessionsForStash = common.NewErrorWrapper(
 	common.ErrTypeCore,
-	ErrTypeInvalidateUserDownloadSessions,
+	ErrTypeInvalidateDownloadSessionsForStash,
 )
 
 // These functions don't categorize their errors

@@ -9,7 +9,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
-	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 	"github.com/jonboulle/clockwork"
 )
@@ -33,14 +33,17 @@ func SendActiveDownloadSessionReminders(
 		)
 	}
 
-	userObs, stdErr := tx.User.Query().
+	stashObs, stdErr := tx.Stash.Query().
+		Where(stash.HasDownloadSessionsWith(downloadsession.ValidUntilGT(clock.Now()))).
 		WithDownloadSessions(func(sessionQuery *ent.DownloadSessionQuery) {
 			sessionQuery.
 				Where(downloadsession.ValidUntilGT(clock.Now())).
 				Order(ent.Asc(downloadsession.FieldValidFrom)).
 				Limit(1)
 		}).
-		WithMessengers(). // TODO: only load if there's an active download session?
+		WithUser(func(userQuery *ent.UserQuery) {
+			userQuery.WithMessengers()
+		}).
 		All(ctx)
 	if stdErr != nil {
 		return ErrWrapperSendActiveDownloadSessionReminders.Wrap(
@@ -48,22 +51,19 @@ func SendActiveDownloadSessionReminders(
 		)
 	}
 
-	messages := make([]*common.Message, 0, len(userObs))
-	for _, userOb := range userObs {
-		downloadSessionObs := userOb.Edges.DownloadSessions
-		if len(downloadSessionObs) == 0 {
-			continue
-		}
-		downloadSessionOb := downloadSessionObs[0]
+	messages := make([]*common.Message, 0, len(stashObs))
+	for _, stashOb := range stashObs {
+		downloadSessionObs := stashOb.Edges.DownloadSessions
 		downloadSessionIDs := make([]uuid.UUID, 0, len(downloadSessionObs))
-		for _, downloadSessionOb := range downloadSessionObs {
-			downloadSessionIDs = append(downloadSessionIDs, downloadSessionOb.ID)
+		for _, sessionOb := range downloadSessionObs {
+			downloadSessionIDs = append(downloadSessionIDs, sessionOb.ID)
 		}
 
 		messages = append(messages, &common.Message{
 			Type:               common.MessageActiveDownloadSessionReminder,
-			User:               userOb,
-			Time:               downloadSessionOb.ValidFrom,
+			User:               stashOb.Edges.User,
+			StashName:          stashOb.PublicName,
+			Time:               downloadSessionObs[0].ValidFrom,
 			DownloadSessionIDs: downloadSessionIDs,
 		})
 	}
@@ -92,33 +92,6 @@ func DeleteExpiredDownloadSessions(ctx context.Context, clock clockwork.Clock) c
 	return nil
 }
 
-func InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context, clock clockwork.Clock) common.WrappedError {
-	tx := ent.TxFromContext(ctx)
-	if tx == nil {
-		return ErrWrapperInvalidateUserDownloadSessions.Wrap(common.ErrNoTxInContext)
-	}
-
-	_, stdErr := tx.DownloadSession.Delete().
-		Where(downloadsession.HasUserWith(user.ID(userID))).
-		Exec(ctx)
-	if stdErr != nil {
-		return ErrWrapperInvalidateUserDownloadSessions.Wrap(
-			ErrWrapperDatabase.Wrap(stdErr),
-		)
-	}
-	now := clock.Now()
-	stdErr = tx.User.UpdateOneID(userID).
-		SetUpdatedAt(now).
-		SetDownloadSessionsValidFrom(now).
-		Exec(ctx)
-	if stdErr != nil {
-		return ErrWrapperInvalidateUserDownloadSessions.Wrap(
-			ErrWrapperDatabase.Wrap(stdErr),
-		)
-	}
-	return nil
-}
-
 func IsUserSufficientlyNotified(
 	downloadSessionOb *ent.DownloadSession,
 	messengers common.MessengerService,
@@ -127,7 +100,7 @@ func IsUserSufficientlyNotified(
 ) bool {
 	logger = logger.With(
 		"downloadSessionID", downloadSessionOb.ID,
-		"userID", downloadSessionOb.Edges.User.ID,
+		"userID", downloadSessionOb.Edges.Stash.Edges.User.ID,
 	)
 
 	allLoginAlerts := slices.Clone(downloadSessionOb.Edges.LoginAlerts)
@@ -147,7 +120,7 @@ func IsUserSufficientlyNotified(
 		)
 		groupedLoginAlerts[versionedType] = append(groupedLoginAlerts[versionedType], loginAlert)
 	}
-	messengerTypes := messengers.GetConfiguredMessengerTypes(downloadSessionOb.Edges.User)
+	messengerTypes := messengers.GetConfiguredMessengerTypes(downloadSessionOb.Edges.Stash.Edges.User)
 	earliestValidTime := clock.Now().Add(-env.ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL)
 	successfulMessengerTypes := []string{}
 	// Ignore the supplemental messengers when assessing this
@@ -230,14 +203,4 @@ func IsUserSufficientlyNotified(
 		"minSuccessfulMessengers", minSuccessfulMessengers,
 	)
 	return true
-}
-
-func IsUserLocked(userOb *ent.User, clock clockwork.Clock) bool {
-	if userOb.Locked {
-		return true
-	}
-	if userOb.LockedUntil == nil {
-		return false
-	}
-	return clock.Now().Before(*userOb.LockedUntil)
 }

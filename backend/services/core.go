@@ -66,8 +66,8 @@ func (service *Core) SendActiveDownloadSessionReminders(ctx context.Context) com
 func (service *Core) DeleteExpiredDownloadSessions(ctx context.Context) common.WrappedError {
 	return core.DeleteExpiredDownloadSessions(ctx, service.App.Clock)
 }
-func (service *Core) InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context) common.WrappedError {
-	return core.InvalidateUserDownloadSessions(userID, ctx, service.App.Clock)
+func (service *Core) InvalidateDownloadSessionsForStash(stashID uuid.UUID, ctx context.Context) common.WrappedError {
+	return core.InvalidateDownloadSessionsForStash(stashID, ctx, service.App.Clock)
 }
 func (service *Core) IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool {
 	return core.IsUserSufficientlyNotified(
@@ -77,8 +77,8 @@ func (service *Core) IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadS
 		service.App.Clock, service.App.Env,
 	)
 }
-func (service *Core) IsUserLocked(userOb *ent.User) bool {
-	return core.IsUserLocked(userOb, service.App.Clock)
+func (service *Core) IsStashLocked(stashOb *ent.Stash) bool {
+	return core.IsStashLocked(stashOb, service.App.Clock)
 }
 
 func (service *Core) Encrypt(data []byte, encryptionKey []byte) ([]byte, common.WrappedError) {

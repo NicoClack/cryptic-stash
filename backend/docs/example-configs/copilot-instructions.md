@@ -10,3 +10,5 @@ The project is a monorepo with a frontend folder, which uses SvelteKit and a bac
 - HTTP responses should be named resp (*http.Response), respBytes and respBody (decoded into struct) or similar
 - Use `golangci-lint` for formatting instead of `gofmt`
 - Comments should only explain WHY not WHAT, unless you're providing example code in the chat and that level of detail is appropriate. If you think you need to explain WHAT, splitting into separate or at least inline functions with descriptive names is most likely the clearer option.
+- Check the Ent schemas rather than analysing the generated code where possible
+- Prefer the using tools over the CLI for simple situations. ripgrep/grep/cat etc commands usually require me to review them, which slows down development. You can use the CLI if you think it will significantly reduce unnecessary info in your context or if you need to perform some sort of bulk action

@@ -57,8 +57,6 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetUsername(username).
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
-				SetDownloadSessionsValidFrom(now).
-				SetLockedUntil(now). // Has just expired
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -77,7 +75,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			if stdErr != nil {
 				return stdErr
 			}
-			stdErr = tx.Stash.Create().
+			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
 				SetContent(encryptedContent).
@@ -88,7 +86,9 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
-				Exec(ctx)
+				SetDownloadSessionsValidFrom(now).
+				SetSelfLockedUntil(now). // Has just expired
+				Save(ctx)
 			if stdErr != nil {
 				return stdErr
 			}
@@ -98,7 +98,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
-				SetUser(userOb).
+				SetStash(stashOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
@@ -181,7 +181,6 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 				SetUsername(username).
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
-				SetDownloadSessionsValidFrom(sessionsValidFrom).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -199,7 +198,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			if stdErr != nil {
 				return stdErr
 			}
-			stdErr = tx.Stash.Create().
+			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
 				SetContent(encryptedContent).
@@ -210,7 +209,8 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
-				Exec(ctx)
+				SetDownloadSessionsValidFrom(sessionsValidFrom).
+				Save(ctx)
 			if stdErr != nil {
 				return stdErr
 			}
@@ -221,7 +221,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
-				SetUser(userOb).
+				SetStash(stashOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
@@ -298,8 +298,6 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetUsername(username).
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
-				SetDownloadSessionsValidFrom(now).
-				SetLockedUntil(now.Add((24 * time.Hour) + time.Nanosecond)).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -317,7 +315,7 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			if stdErr != nil {
 				return stdErr
 			}
-			stdErr = tx.Stash.Create().
+			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
 				SetContent(encryptedContent).
@@ -328,7 +326,9 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
-				Exec(ctx)
+				SetDownloadSessionsValidFrom(now).
+				SetSelfLockedUntil(now.Add((24 * time.Hour) + time.Nanosecond)).
+				Save(ctx)
 			if stdErr != nil {
 				return stdErr
 			}
@@ -342,7 +342,7 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
-				SetUser(userOb).
+				SetStash(stashOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
@@ -462,9 +462,6 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
 				SetUsername(username).
-				SetDownloadSessionsValidFrom(now).
-				SetLockedUntil(now.Add(-time.Hour)). // Expired a little while ago
-				SetLocked(true).                     // But this takes priority
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -481,7 +478,7 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			if stdErr != nil {
 				return stdErr
 			}
-			stdErr = tx.Stash.Create().
+			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
 				SetContent(encryptedContent).
@@ -492,7 +489,10 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
 				SetHashThreads(app.Env.PASSWORD_HASH_SETTINGS.Threads).
 				SetUser(userOb).
-				Exec(ctx)
+				SetDownloadSessionsValidFrom(now).
+				SetSelfLockedUntil(now.Add(-time.Hour)). // Expired a little while ago
+				SetIsAdminLocked(true).                  // But this takes priority
+				Save(ctx)
 			if stdErr != nil {
 				return stdErr
 			}
@@ -506,7 +506,7 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			downloadSessionOb, stdErr := tx.DownloadSession.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
-				SetUser(userOb).
+				SetStash(stashOb).
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).

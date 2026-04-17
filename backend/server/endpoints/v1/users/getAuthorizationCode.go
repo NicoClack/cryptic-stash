@@ -57,15 +57,11 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 		if stdErr != nil {
 			return stdErr
 		}
-		if app.Core.IsUserLocked(userOb) {
-			return servercommon.NewUnauthorizedError()
-		}
-
 		if len(userOb.Edges.Stashes) == 0 {
 			return servercommon.NewUnauthorizedError()
 		}
 		stashOb := userOb.Edges.Stashes[0] // TODO: update to support multiple stashes
-		if stashOb == nil {
+		if app.Core.IsStashLocked(stashOb) {
 			return servercommon.NewUnauthorizedError()
 		}
 		stashKek := app.Core.HashPassword(
@@ -94,7 +90,7 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 				downloadSessionOb, stdErr := tx.DownloadSession.Create().
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
-					SetUser(userOb).
+					SetStash(stashOb).
 					SetHashedAuthCode(hashedAuthCode[:]).
 					SetValidFrom(validFrom).
 					SetValidUntil(validUntil).

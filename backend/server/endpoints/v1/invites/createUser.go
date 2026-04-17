@@ -107,7 +107,6 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					SetUsername(inviteOb.Email).
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
-					SetDownloadSessionsValidFrom(now).
 					SetInviteID(inviteOb.ID).
 					Save(ctx)
 				if stdErr != nil {

@@ -32,13 +32,13 @@ func (m *EmptyCoreService) SendActiveDownloadSessionReminders(ctx context.Contex
 func (m *EmptyCoreService) DeleteExpiredDownloadSessions(ctx context.Context) common.WrappedError {
 	return nil
 }
-func (m *EmptyCoreService) InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context) common.WrappedError {
+func (m *EmptyCoreService) InvalidateDownloadSessionsForStash(stashID uuid.UUID, ctx context.Context) common.WrappedError {
 	return nil
 }
 func (m *EmptyCoreService) IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool {
 	return false
 }
-func (m *EmptyCoreService) IsUserLocked(userOb *ent.User) bool {
+func (m *EmptyCoreService) IsStashLocked(stashOb *ent.Stash) bool {
 	return false
 }
 func (m *EmptyCoreService) Encrypt(data []byte, encryptionKey []byte) ([]byte, common.WrappedError) {

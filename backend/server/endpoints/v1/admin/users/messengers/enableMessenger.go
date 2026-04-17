@@ -70,9 +70,8 @@ func EnableMessenger(app *servercommon.ServerApp) gin.HandlerFunc {
 					return wrappedErr
 				}
 
-				// The user most likely isn't trying to log in if they've coordinated this with their admin
-				// And deleting the download sessions simplifies IsUserSufficientlyNotified
-				return app.Core.InvalidateUserDownloadSessions(userOb.ID, ctx)
+				// TODO: delete download sessions?
+				return nil
 			},
 		)
 		if stdErr != nil {

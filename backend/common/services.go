@@ -181,6 +181,7 @@ type Message struct {
 	User               *ent.User
 	InviteMessage      string
 	URL                string
+	StashName          string
 	Code               string
 	Time               time.Time
 	DownloadSessionIDs []uuid.UUID
@@ -254,6 +255,7 @@ type ServerService interface {
 	Shutdown()   // Should log warning rather than return an error
 }
 type CoreService interface {
+	// TODO: split this service up? Maybe should only be for functions that need db access?
 	CheckAdminCode(givenCode string) bool
 	CheckAdminCredentials(password string, totpCode string) bool
 	GetAdminCode(password string, totpCode string) (string, bool)
@@ -261,9 +263,9 @@ type CoreService interface {
 
 	SendActiveDownloadSessionReminders(ctx context.Context) WrappedError
 	DeleteExpiredDownloadSessions(ctx context.Context) WrappedError
-	InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context) WrappedError
+	InvalidateDownloadSessionsForStash(stashID uuid.UUID, ctx context.Context) WrappedError
 	IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool
-	IsUserLocked(userOb *ent.User) bool
+	IsStashLocked(stashOb *ent.Stash) bool
 
 	Encrypt(data []byte, encryptionKey []byte) ([]byte, WrappedError)
 	Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, WrappedError)

@@ -1,6 +1,10 @@
 # TODO
 
 - Create account system with passkeys
+- Remove admin auth code logic
+- Add unique userID + publicName index to stashes
+- Rework functions in core/users.go to take stashes instead
+- Remove 2FA actions
 - Prevent disabling main email messenger
 - Replace env.STASH_ENCRYPTION_KEY with key derivation algorithm
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
@@ -159,6 +163,7 @@ Prevent replay attacks on download endpoint with challenge-response system? Not 
 
 # Testing
 
+- Expand download tests to cover self/admin locks
 -   Create mock messenger
 -   -   Register it multiple times in place of the actual ones to ensure the contacts are being passed correctly?
 -   Continue fixing linting errors once golang ci v2 is working properly in VSCode
