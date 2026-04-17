@@ -5,13 +5,7 @@ SELECT
 	LOWER(hex (randomblob (4))) || '-' || LOWER(hex (randomblob (2))) || '-4' || SUBSTR(LOWER(hex (randomblob (2))), 2) || '-' || SUBSTR('89ab', ABS(RANDOM()) % 4 + 1, 1) || SUBSTR(LOWER(hex (randomblob (2))), 2) || '-' || LOWER(hex (randomblob (6))) AS val;
 
 INSERT INTO
-	users (
-		id,
-		username,
-		created_at,
-		updated_at,
-		download_sessions_valid_from
-	)
+	users (id, username, created_at, updated_at,)
 VALUES
 	(
 		(
@@ -23,7 +17,6 @@ VALUES
 		'admin',
 		DATE ('now'),
 		DATE ('now'),
-		DATE ('now')
 	);
 
 -- +goose Down
