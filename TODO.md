@@ -17,8 +17,10 @@
 - Create account system for users to manage their stashes
 - - Require FIDO2 passkeys/physical security keys
 - - Allow optional 2FA FIDO2 with "userVerification" set to "discouraged" by default, allowing it to be set to "required". Intended for login via password manager + security key
+- - Locking account permanently or temporarily should only require a single credential, either a first or a second factor. That way you can block attempts with just access to your password manager or a security key with someone else's device
 - - User logins can be reset by the admin generating a link. Maybe it could also require a code sent to their email?
 - - Admin logins can be reset by changing env vars
+- Send message when a stash password is correctly entered while it's locked
 - Implement some form of E2E encryption
 - - My design is probably secure but would be best to stick to a standard system if possible. Although it looks like different password managers use different ones
 - - I think OPAQUE has been mathematically proven but its Go implementation is too new.

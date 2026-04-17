@@ -31,15 +31,15 @@ func (DownloadSession) Fields() []ent.Field {
 		field.Time("validUntil"),
 		field.String("userAgent"),
 		field.String("ip"),
-		field.UUID("userID", uuid.Nil),
+		field.UUID("stashID", uuid.Nil),
 	}
 }
 
 // Edges of the DownloadSession.
 func (DownloadSession) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("downloadSessions").
-			Field("userID").Unique().Required(),
+		edge.From("stash", Stash.Type).Ref("downloadSessions").
+			Field("stashID").Unique().Required(),
 		edge.To("loginAlerts", LoginAlert.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
@@ -47,6 +47,6 @@ func (DownloadSession) Edges() []ent.Edge {
 
 func (DownloadSession) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("hashedAuthCode", "userID"),
+		index.Fields("hashedAuthCode", "stashID"),
 	}
 }

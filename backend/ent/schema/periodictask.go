@@ -5,7 +5,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -20,7 +19,7 @@ func (PeriodicTask) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
-		field.String("name").MinLen(1).MaxLen(128),
+		field.String("name").MinLen(1).MaxLen(128).Unique(),
 		// Note: there's no version because we should just be able to upgrade to new versions
 		// when the server restarts since there's no request body
 		field.Time("lastRanAt").Optional(),
@@ -30,10 +29,4 @@ func (PeriodicTask) Fields() []ent.Field {
 // Edges of the PeriodicJob.
 func (PeriodicTask) Edges() []ent.Edge {
 	return nil
-}
-
-func (PeriodicTask) Indexes() []ent.Index {
-	return []ent.Index{
-		index.Fields("name").Unique(),
-	}
 }

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -35,6 +36,12 @@ func (Stash) Fields() []ent.Field {
 		field.Uint32("hashMemory"),
 		field.Uint8("hashThreads"),
 
+		field.Bool("selfLocked").Default(false),
+		field.Bool("adminLocked").Default(false),
+		// Creating a temporary lock won't update selfLocked
+		field.Time("selfLockedUntil").Nillable().Optional(),
+		field.Time("downloadSessionsValidFrom"),
+
 		field.UUID("userID", uuid.Nil),
 	}
 }
@@ -44,5 +51,7 @@ func (Stash) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("stashes").
 			Field("userID").Unique().Required(),
+		edge.To("downloadSessions", DownloadSession.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
