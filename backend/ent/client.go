@@ -22,7 +22,9 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/keyvalue"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/periodictask"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -46,8 +48,12 @@ type Client struct {
 	LogEntry *LogEntryClient
 	// LoginAlert is the client for interacting with the LoginAlert builders.
 	LoginAlert *LoginAlertClient
+	// Passkey is the client for interacting with the Passkey builders.
+	Passkey *PasskeyClient
 	// PeriodicTask is the client for interacting with the PeriodicTask builders.
 	PeriodicTask *PeriodicTaskClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// Stash is the client for interacting with the Stash builders.
 	Stash *StashClient
 	// TwoFactorAction is the client for interacting with the TwoFactorAction builders.
@@ -73,7 +79,9 @@ func (c *Client) init() {
 	c.KeyValue = NewKeyValueClient(c.config)
 	c.LogEntry = NewLogEntryClient(c.config)
 	c.LoginAlert = NewLoginAlertClient(c.config)
+	c.Passkey = NewPasskeyClient(c.config)
 	c.PeriodicTask = NewPeriodicTaskClient(c.config)
+	c.Session = NewSessionClient(c.config)
 	c.Stash = NewStashClient(c.config)
 	c.TwoFactorAction = NewTwoFactorActionClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -176,7 +184,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		KeyValue:        NewKeyValueClient(cfg),
 		LogEntry:        NewLogEntryClient(cfg),
 		LoginAlert:      NewLoginAlertClient(cfg),
+		Passkey:         NewPasskeyClient(cfg),
 		PeriodicTask:    NewPeriodicTaskClient(cfg),
+		Session:         NewSessionClient(cfg),
 		Stash:           NewStashClient(cfg),
 		TwoFactorAction: NewTwoFactorActionClient(cfg),
 		User:            NewUserClient(cfg),
@@ -206,7 +216,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		KeyValue:        NewKeyValueClient(cfg),
 		LogEntry:        NewLogEntryClient(cfg),
 		LoginAlert:      NewLoginAlertClient(cfg),
+		Passkey:         NewPasskeyClient(cfg),
 		PeriodicTask:    NewPeriodicTaskClient(cfg),
+		Session:         NewSessionClient(cfg),
 		Stash:           NewStashClient(cfg),
 		TwoFactorAction: NewTwoFactorActionClient(cfg),
 		User:            NewUserClient(cfg),
@@ -241,7 +253,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.DownloadSession, c.Invite, c.Job, c.KeyValue, c.LogEntry, c.LoginAlert,
-		c.PeriodicTask, c.Stash, c.TwoFactorAction, c.User, c.UserMessenger,
+		c.Passkey, c.PeriodicTask, c.Session, c.Stash, c.TwoFactorAction, c.User,
+		c.UserMessenger,
 	} {
 		n.Use(hooks...)
 	}
@@ -252,7 +265,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.DownloadSession, c.Invite, c.Job, c.KeyValue, c.LogEntry, c.LoginAlert,
-		c.PeriodicTask, c.Stash, c.TwoFactorAction, c.User, c.UserMessenger,
+		c.Passkey, c.PeriodicTask, c.Session, c.Stash, c.TwoFactorAction, c.User,
+		c.UserMessenger,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -273,8 +287,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LogEntry.mutate(ctx, m)
 	case *LoginAlertMutation:
 		return c.LoginAlert.mutate(ctx, m)
+	case *PasskeyMutation:
+		return c.Passkey.mutate(ctx, m)
 	case *PeriodicTaskMutation:
 		return c.PeriodicTask.mutate(ctx, m)
+	case *SessionMutation:
+		return c.Session.mutate(ctx, m)
 	case *StashMutation:
 		return c.Stash.mutate(ctx, m)
 	case *TwoFactorActionMutation:
@@ -396,15 +414,15 @@ func (c *DownloadSessionClient) GetX(ctx context.Context, id uuid.UUID) *Downloa
 	return obj
 }
 
-// QueryUser queries the user edge of a DownloadSession.
-func (c *DownloadSessionClient) QueryUser(_m *DownloadSession) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
+// QueryStash queries the stash edge of a DownloadSession.
+func (c *DownloadSessionClient) QueryStash(_m *DownloadSession) *StashQuery {
+	query := (&StashClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(downloadsession.Table, downloadsession.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, downloadsession.UserTable, downloadsession.UserColumn),
+			sqlgraph.To(stash.Table, stash.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, downloadsession.StashTable, downloadsession.StashColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1182,6 +1200,155 @@ func (c *LoginAlertClient) mutate(ctx context.Context, m *LoginAlertMutation) (V
 	}
 }
 
+// PasskeyClient is a client for the Passkey schema.
+type PasskeyClient struct {
+	config
+}
+
+// NewPasskeyClient returns a client for the Passkey from the given config.
+func NewPasskeyClient(c config) *PasskeyClient {
+	return &PasskeyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `passkey.Hooks(f(g(h())))`.
+func (c *PasskeyClient) Use(hooks ...Hook) {
+	c.hooks.Passkey = append(c.hooks.Passkey, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `passkey.Intercept(f(g(h())))`.
+func (c *PasskeyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Passkey = append(c.inters.Passkey, interceptors...)
+}
+
+// Create returns a builder for creating a Passkey entity.
+func (c *PasskeyClient) Create() *PasskeyCreate {
+	mutation := newPasskeyMutation(c.config, OpCreate)
+	return &PasskeyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Passkey entities.
+func (c *PasskeyClient) CreateBulk(builders ...*PasskeyCreate) *PasskeyCreateBulk {
+	return &PasskeyCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PasskeyClient) MapCreateBulk(slice any, setFunc func(*PasskeyCreate, int)) *PasskeyCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PasskeyCreateBulk{err: fmt.Errorf("calling to PasskeyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PasskeyCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PasskeyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Passkey.
+func (c *PasskeyClient) Update() *PasskeyUpdate {
+	mutation := newPasskeyMutation(c.config, OpUpdate)
+	return &PasskeyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PasskeyClient) UpdateOne(_m *Passkey) *PasskeyUpdateOne {
+	mutation := newPasskeyMutation(c.config, OpUpdateOne, withPasskey(_m))
+	return &PasskeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PasskeyClient) UpdateOneID(id uuid.UUID) *PasskeyUpdateOne {
+	mutation := newPasskeyMutation(c.config, OpUpdateOne, withPasskeyID(id))
+	return &PasskeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Passkey.
+func (c *PasskeyClient) Delete() *PasskeyDelete {
+	mutation := newPasskeyMutation(c.config, OpDelete)
+	return &PasskeyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PasskeyClient) DeleteOne(_m *Passkey) *PasskeyDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PasskeyClient) DeleteOneID(id uuid.UUID) *PasskeyDeleteOne {
+	builder := c.Delete().Where(passkey.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PasskeyDeleteOne{builder}
+}
+
+// Query returns a query builder for Passkey.
+func (c *PasskeyClient) Query() *PasskeyQuery {
+	return &PasskeyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePasskey},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Passkey entity by its id.
+func (c *PasskeyClient) Get(ctx context.Context, id uuid.UUID) (*Passkey, error) {
+	return c.Query().Where(passkey.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PasskeyClient) GetX(ctx context.Context, id uuid.UUID) *Passkey {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Passkey.
+func (c *PasskeyClient) QueryUser(_m *Passkey) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(passkey.Table, passkey.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, passkey.UserTable, passkey.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PasskeyClient) Hooks() []Hook {
+	return c.hooks.Passkey
+}
+
+// Interceptors returns the client interceptors.
+func (c *PasskeyClient) Interceptors() []Interceptor {
+	return c.inters.Passkey
+}
+
+func (c *PasskeyClient) mutate(ctx context.Context, m *PasskeyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PasskeyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PasskeyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PasskeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PasskeyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Passkey mutation op: %q", m.Op())
+	}
+}
+
 // PeriodicTaskClient is a client for the PeriodicTask schema.
 type PeriodicTaskClient struct {
 	config
@@ -1315,6 +1482,155 @@ func (c *PeriodicTaskClient) mutate(ctx context.Context, m *PeriodicTaskMutation
 	}
 }
 
+// SessionClient is a client for the Session schema.
+type SessionClient struct {
+	config
+}
+
+// NewSessionClient returns a client for the Session from the given config.
+func NewSessionClient(c config) *SessionClient {
+	return &SessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `session.Hooks(f(g(h())))`.
+func (c *SessionClient) Use(hooks ...Hook) {
+	c.hooks.Session = append(c.hooks.Session, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `session.Intercept(f(g(h())))`.
+func (c *SessionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Session = append(c.inters.Session, interceptors...)
+}
+
+// Create returns a builder for creating a Session entity.
+func (c *SessionClient) Create() *SessionCreate {
+	mutation := newSessionMutation(c.config, OpCreate)
+	return &SessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Session entities.
+func (c *SessionClient) CreateBulk(builders ...*SessionCreate) *SessionCreateBulk {
+	return &SessionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SessionClient) MapCreateBulk(slice any, setFunc func(*SessionCreate, int)) *SessionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SessionCreateBulk{err: fmt.Errorf("calling to SessionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SessionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Session.
+func (c *SessionClient) Update() *SessionUpdate {
+	mutation := newSessionMutation(c.config, OpUpdate)
+	return &SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SessionClient) UpdateOne(_m *Session) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(_m))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SessionClient) UpdateOneID(id uuid.UUID) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Session.
+func (c *SessionClient) Delete() *SessionDelete {
+	mutation := newSessionMutation(c.config, OpDelete)
+	return &SessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SessionClient) DeleteOne(_m *Session) *SessionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SessionClient) DeleteOneID(id uuid.UUID) *SessionDeleteOne {
+	builder := c.Delete().Where(session.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SessionDeleteOne{builder}
+}
+
+// Query returns a query builder for Session.
+func (c *SessionClient) Query() *SessionQuery {
+	return &SessionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSession},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Session entity by its id.
+func (c *SessionClient) Get(ctx context.Context, id uuid.UUID) (*Session, error) {
+	return c.Query().Where(session.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SessionClient) GetX(ctx context.Context, id uuid.UUID) *Session {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Session.
+func (c *SessionClient) QueryUser(_m *Session) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SessionClient) Hooks() []Hook {
+	return c.hooks.Session
+}
+
+// Interceptors returns the client interceptors.
+func (c *SessionClient) Interceptors() []Interceptor {
+	return c.inters.Session
+}
+
+func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Session mutation op: %q", m.Op())
+	}
+}
+
 // StashClient is a client for the Stash schema.
 type StashClient struct {
 	config
@@ -1432,6 +1748,22 @@ func (c *StashClient) QueryUser(_m *Stash) *UserQuery {
 			sqlgraph.From(stash.Table, stash.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, stash.UserTable, stash.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDownloadSessions queries the downloadSessions edge of a Stash.
+func (c *StashClient) QueryDownloadSessions(_m *Stash) *DownloadSessionQuery {
+	query := (&DownloadSessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stash.Table, stash.FieldID, id),
+			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, stash.DownloadSessionsTable, stash.DownloadSessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1737,22 +2069,6 @@ func (c *UserClient) QueryMessengers(_m *User) *UserMessengerQuery {
 	return query
 }
 
-// QueryDownloadSessions queries the downloadSessions edge of a User.
-func (c *UserClient) QueryDownloadSessions(_m *User) *DownloadSessionQuery {
-	query := (&DownloadSessionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.DownloadSessionsTable, user.DownloadSessionsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryInvite queries the invite edge of a User.
 func (c *UserClient) QueryInvite(_m *User) *InviteQuery {
 	query := (&InviteClient{config: c.config}).Query()
@@ -1762,6 +2078,38 @@ func (c *UserClient) QueryInvite(_m *User) *InviteQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(invite.Table, invite.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.InviteTable, user.InviteColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPasskeys queries the passkeys edge of a User.
+func (c *UserClient) QueryPasskeys(_m *User) *PasskeyQuery {
+	query := (&PasskeyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(passkey.Table, passkey.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PasskeysTable, user.PasskeysColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySessions queries the sessions edge of a User.
+func (c *UserClient) QuerySessions(_m *User) *SessionQuery {
+	query := (&SessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1978,11 +2326,12 @@ func (c *UserMessengerClient) mutate(ctx context.Context, m *UserMessengerMutati
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		DownloadSession, Invite, Job, KeyValue, LogEntry, LoginAlert, PeriodicTask,
-		Stash, TwoFactorAction, User, UserMessenger []ent.Hook
+		DownloadSession, Invite, Job, KeyValue, LogEntry, LoginAlert, Passkey,
+		PeriodicTask, Session, Stash, TwoFactorAction, User, UserMessenger []ent.Hook
 	}
 	inters struct {
-		DownloadSession, Invite, Job, KeyValue, LogEntry, LoginAlert, PeriodicTask,
-		Stash, TwoFactorAction, User, UserMessenger []ent.Interceptor
+		DownloadSession, Invite, Job, KeyValue, LogEntry, LoginAlert, Passkey,
+		PeriodicTask, Session, Stash, TwoFactorAction, User,
+		UserMessenger []ent.Interceptor
 	}
 )

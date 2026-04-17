@@ -14,7 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 )
 
@@ -113,23 +113,23 @@ func (_u *DownloadSessionUpdate) SetNillableIP(v *string) *DownloadSessionUpdate
 	return _u
 }
 
-// SetUserID sets the "userID" field.
-func (_u *DownloadSessionUpdate) SetUserID(v uuid.UUID) *DownloadSessionUpdate {
-	_u.mutation.SetUserID(v)
+// SetStashID sets the "stashID" field.
+func (_u *DownloadSessionUpdate) SetStashID(v uuid.UUID) *DownloadSessionUpdate {
+	_u.mutation.SetStashID(v)
 	return _u
 }
 
-// SetNillableUserID sets the "userID" field if the given value is not nil.
-func (_u *DownloadSessionUpdate) SetNillableUserID(v *uuid.UUID) *DownloadSessionUpdate {
+// SetNillableStashID sets the "stashID" field if the given value is not nil.
+func (_u *DownloadSessionUpdate) SetNillableStashID(v *uuid.UUID) *DownloadSessionUpdate {
 	if v != nil {
-		_u.SetUserID(*v)
+		_u.SetStashID(*v)
 	}
 	return _u
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (_u *DownloadSessionUpdate) SetUser(v *User) *DownloadSessionUpdate {
-	return _u.SetUserID(v.ID)
+// SetStash sets the "stash" edge to the Stash entity.
+func (_u *DownloadSessionUpdate) SetStash(v *Stash) *DownloadSessionUpdate {
+	return _u.SetStashID(v.ID)
 }
 
 // AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
@@ -152,9 +152,9 @@ func (_u *DownloadSessionUpdate) Mutation() *DownloadSessionMutation {
 	return _u.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (_u *DownloadSessionUpdate) ClearUser() *DownloadSessionUpdate {
-	_u.mutation.ClearUser()
+// ClearStash clears the "stash" edge to the Stash entity.
+func (_u *DownloadSessionUpdate) ClearStash() *DownloadSessionUpdate {
+	_u.mutation.ClearStash()
 	return _u
 }
 
@@ -222,8 +222,8 @@ func (_u *DownloadSessionUpdate) check() error {
 			return &ValidationError{Name: "hashedAuthCode", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.hashedAuthCode": %w`, err)}
 		}
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "DownloadSession.user"`)
+	if _u.mutation.StashCleared() && len(_u.mutation.StashIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "DownloadSession.stash"`)
 	}
 	return nil
 }
@@ -261,28 +261,28 @@ func (_u *DownloadSessionUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.StashCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   downloadsession.UserTable,
-			Columns: []string{downloadsession.UserColumn},
+			Table:   downloadsession.StashTable,
+			Columns: []string{downloadsession.StashColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.StashIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   downloadsession.UserTable,
-			Columns: []string{downloadsession.UserColumn},
+			Table:   downloadsession.StashTable,
+			Columns: []string{downloadsession.StashColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -437,23 +437,23 @@ func (_u *DownloadSessionUpdateOne) SetNillableIP(v *string) *DownloadSessionUpd
 	return _u
 }
 
-// SetUserID sets the "userID" field.
-func (_u *DownloadSessionUpdateOne) SetUserID(v uuid.UUID) *DownloadSessionUpdateOne {
-	_u.mutation.SetUserID(v)
+// SetStashID sets the "stashID" field.
+func (_u *DownloadSessionUpdateOne) SetStashID(v uuid.UUID) *DownloadSessionUpdateOne {
+	_u.mutation.SetStashID(v)
 	return _u
 }
 
-// SetNillableUserID sets the "userID" field if the given value is not nil.
-func (_u *DownloadSessionUpdateOne) SetNillableUserID(v *uuid.UUID) *DownloadSessionUpdateOne {
+// SetNillableStashID sets the "stashID" field if the given value is not nil.
+func (_u *DownloadSessionUpdateOne) SetNillableStashID(v *uuid.UUID) *DownloadSessionUpdateOne {
 	if v != nil {
-		_u.SetUserID(*v)
+		_u.SetStashID(*v)
 	}
 	return _u
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (_u *DownloadSessionUpdateOne) SetUser(v *User) *DownloadSessionUpdateOne {
-	return _u.SetUserID(v.ID)
+// SetStash sets the "stash" edge to the Stash entity.
+func (_u *DownloadSessionUpdateOne) SetStash(v *Stash) *DownloadSessionUpdateOne {
+	return _u.SetStashID(v.ID)
 }
 
 // AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
@@ -476,9 +476,9 @@ func (_u *DownloadSessionUpdateOne) Mutation() *DownloadSessionMutation {
 	return _u.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (_u *DownloadSessionUpdateOne) ClearUser() *DownloadSessionUpdateOne {
-	_u.mutation.ClearUser()
+// ClearStash clears the "stash" edge to the Stash entity.
+func (_u *DownloadSessionUpdateOne) ClearStash() *DownloadSessionUpdateOne {
+	_u.mutation.ClearStash()
 	return _u
 }
 
@@ -559,8 +559,8 @@ func (_u *DownloadSessionUpdateOne) check() error {
 			return &ValidationError{Name: "hashedAuthCode", err: fmt.Errorf(`ent: validator failed for field "DownloadSession.hashedAuthCode": %w`, err)}
 		}
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "DownloadSession.user"`)
+	if _u.mutation.StashCleared() && len(_u.mutation.StashIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "DownloadSession.stash"`)
 	}
 	return nil
 }
@@ -615,28 +615,28 @@ func (_u *DownloadSessionUpdateOne) sqlSave(ctx context.Context) (_node *Downloa
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.StashCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   downloadsession.UserTable,
-			Columns: []string{downloadsession.UserColumn},
+			Table:   downloadsession.StashTable,
+			Columns: []string{downloadsession.StashColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.StashIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   downloadsession.UserTable,
-			Columns: []string{downloadsession.UserColumn},
+			Table:   downloadsession.StashTable,
+			Columns: []string{downloadsession.StashColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

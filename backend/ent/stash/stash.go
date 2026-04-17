@@ -37,10 +37,20 @@ const (
 	FieldHashMemory = "hash_memory"
 	// FieldHashThreads holds the string denoting the hashthreads field in the database.
 	FieldHashThreads = "hash_threads"
+	// FieldSelfLocked holds the string denoting the selflocked field in the database.
+	FieldSelfLocked = "self_locked"
+	// FieldAdminLocked holds the string denoting the adminlocked field in the database.
+	FieldAdminLocked = "admin_locked"
+	// FieldSelfLockedUntil holds the string denoting the selflockeduntil field in the database.
+	FieldSelfLockedUntil = "self_locked_until"
+	// FieldDownloadSessionsValidFrom holds the string denoting the downloadsessionsvalidfrom field in the database.
+	FieldDownloadSessionsValidFrom = "download_sessions_valid_from"
 	// FieldUserID holds the string denoting the userid field in the database.
 	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeDownloadSessions holds the string denoting the downloadsessions edge name in mutations.
+	EdgeDownloadSessions = "downloadSessions"
 	// Table holds the table name of the stash in the database.
 	Table = "stashes"
 	// UserTable is the table that holds the user relation/edge.
@@ -50,6 +60,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
+	// DownloadSessionsTable is the table that holds the downloadSessions relation/edge.
+	DownloadSessionsTable = "download_sessions"
+	// DownloadSessionsInverseTable is the table name for the DownloadSession entity.
+	// It exists in this package in order to avoid circular dependency with the "downloadsession" package.
+	DownloadSessionsInverseTable = "download_sessions"
+	// DownloadSessionsColumn is the table column denoting the downloadSessions relation/edge.
+	DownloadSessionsColumn = "stash_id"
 )
 
 // Columns holds all SQL columns for stash fields.
@@ -66,6 +83,10 @@ var Columns = []string{
 	FieldHashTime,
 	FieldHashMemory,
 	FieldHashThreads,
+	FieldSelfLocked,
+	FieldAdminLocked,
+	FieldSelfLockedUntil,
+	FieldDownloadSessionsValidFrom,
 	FieldUserID,
 }
 
@@ -92,6 +113,10 @@ var (
 	EncryptionDataKeyValidator func([]byte) error
 	// PasswordSaltValidator is a validator for the "passwordSalt" field. It is called by the builders before save.
 	PasswordSaltValidator func([]byte) error
+	// DefaultSelfLocked holds the default value on creation for the "selfLocked" field.
+	DefaultSelfLocked bool
+	// DefaultAdminLocked holds the default value on creation for the "adminLocked" field.
+	DefaultAdminLocked bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -139,6 +164,26 @@ func ByHashThreads(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHashThreads, opts...).ToFunc()
 }
 
+// BySelfLocked orders the results by the selfLocked field.
+func BySelfLocked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSelfLocked, opts...).ToFunc()
+}
+
+// ByAdminLocked orders the results by the adminLocked field.
+func ByAdminLocked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAdminLocked, opts...).ToFunc()
+}
+
+// BySelfLockedUntil orders the results by the selfLockedUntil field.
+func BySelfLockedUntil(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSelfLockedUntil, opts...).ToFunc()
+}
+
+// ByDownloadSessionsValidFrom orders the results by the downloadSessionsValidFrom field.
+func ByDownloadSessionsValidFrom(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDownloadSessionsValidFrom, opts...).ToFunc()
+}
+
 // ByUserID orders the results by the userID field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
@@ -150,10 +195,31 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByDownloadSessionsCount orders the results by downloadSessions count.
+func ByDownloadSessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDownloadSessionsStep(), opts...)
+	}
+}
+
+// ByDownloadSessions orders the results by downloadSessions terms.
+func ByDownloadSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDownloadSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newDownloadSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DownloadSessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DownloadSessionsTable, DownloadSessionsColumn),
 	)
 }

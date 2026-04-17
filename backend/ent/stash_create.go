@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -99,6 +100,54 @@ func (_c *StashCreate) SetHashThreads(v uint8) *StashCreate {
 	return _c
 }
 
+// SetSelfLocked sets the "selfLocked" field.
+func (_c *StashCreate) SetSelfLocked(v bool) *StashCreate {
+	_c.mutation.SetSelfLocked(v)
+	return _c
+}
+
+// SetNillableSelfLocked sets the "selfLocked" field if the given value is not nil.
+func (_c *StashCreate) SetNillableSelfLocked(v *bool) *StashCreate {
+	if v != nil {
+		_c.SetSelfLocked(*v)
+	}
+	return _c
+}
+
+// SetAdminLocked sets the "adminLocked" field.
+func (_c *StashCreate) SetAdminLocked(v bool) *StashCreate {
+	_c.mutation.SetAdminLocked(v)
+	return _c
+}
+
+// SetNillableAdminLocked sets the "adminLocked" field if the given value is not nil.
+func (_c *StashCreate) SetNillableAdminLocked(v *bool) *StashCreate {
+	if v != nil {
+		_c.SetAdminLocked(*v)
+	}
+	return _c
+}
+
+// SetSelfLockedUntil sets the "selfLockedUntil" field.
+func (_c *StashCreate) SetSelfLockedUntil(v time.Time) *StashCreate {
+	_c.mutation.SetSelfLockedUntil(v)
+	return _c
+}
+
+// SetNillableSelfLockedUntil sets the "selfLockedUntil" field if the given value is not nil.
+func (_c *StashCreate) SetNillableSelfLockedUntil(v *time.Time) *StashCreate {
+	if v != nil {
+		_c.SetSelfLockedUntil(*v)
+	}
+	return _c
+}
+
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (_c *StashCreate) SetDownloadSessionsValidFrom(v time.Time) *StashCreate {
+	_c.mutation.SetDownloadSessionsValidFrom(v)
+	return _c
+}
+
 // SetUserID sets the "userID" field.
 func (_c *StashCreate) SetUserID(v uuid.UUID) *StashCreate {
 	_c.mutation.SetUserID(v)
@@ -122,6 +171,21 @@ func (_c *StashCreate) SetNillableID(v *uuid.UUID) *StashCreate {
 // SetUser sets the "user" edge to the User entity.
 func (_c *StashCreate) SetUser(v *User) *StashCreate {
 	return _c.SetUserID(v.ID)
+}
+
+// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by IDs.
+func (_c *StashCreate) AddDownloadSessionIDs(ids ...uuid.UUID) *StashCreate {
+	_c.mutation.AddDownloadSessionIDs(ids...)
+	return _c
+}
+
+// AddDownloadSessions adds the "downloadSessions" edges to the DownloadSession entity.
+func (_c *StashCreate) AddDownloadSessions(v ...*DownloadSession) *StashCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDownloadSessionIDs(ids...)
 }
 
 // Mutation returns the StashMutation object of the builder.
@@ -159,6 +223,14 @@ func (_c *StashCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *StashCreate) defaults() {
+	if _, ok := _c.mutation.SelfLocked(); !ok {
+		v := stash.DefaultSelfLocked
+		_c.mutation.SetSelfLocked(v)
+	}
+	if _, ok := _c.mutation.AdminLocked(); !ok {
+		v := stash.DefaultAdminLocked
+		_c.mutation.SetAdminLocked(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := stash.DefaultID()
 		_c.mutation.SetID(v)
@@ -221,6 +293,15 @@ func (_c *StashCreate) check() error {
 	}
 	if _, ok := _c.mutation.HashThreads(); !ok {
 		return &ValidationError{Name: "hashThreads", err: errors.New(`ent: missing required field "Stash.hashThreads"`)}
+	}
+	if _, ok := _c.mutation.SelfLocked(); !ok {
+		return &ValidationError{Name: "selfLocked", err: errors.New(`ent: missing required field "Stash.selfLocked"`)}
+	}
+	if _, ok := _c.mutation.AdminLocked(); !ok {
+		return &ValidationError{Name: "adminLocked", err: errors.New(`ent: missing required field "Stash.adminLocked"`)}
+	}
+	if _, ok := _c.mutation.DownloadSessionsValidFrom(); !ok {
+		return &ValidationError{Name: "downloadSessionsValidFrom", err: errors.New(`ent: missing required field "Stash.downloadSessionsValidFrom"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "Stash.userID"`)}
@@ -308,6 +389,22 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 		_spec.SetField(stash.FieldHashThreads, field.TypeUint8, value)
 		_node.HashThreads = value
 	}
+	if value, ok := _c.mutation.SelfLocked(); ok {
+		_spec.SetField(stash.FieldSelfLocked, field.TypeBool, value)
+		_node.SelfLocked = value
+	}
+	if value, ok := _c.mutation.AdminLocked(); ok {
+		_spec.SetField(stash.FieldAdminLocked, field.TypeBool, value)
+		_node.AdminLocked = value
+	}
+	if value, ok := _c.mutation.SelfLockedUntil(); ok {
+		_spec.SetField(stash.FieldSelfLockedUntil, field.TypeTime, value)
+		_node.SelfLockedUntil = &value
+	}
+	if value, ok := _c.mutation.DownloadSessionsValidFrom(); ok {
+		_spec.SetField(stash.FieldDownloadSessionsValidFrom, field.TypeTime, value)
+		_node.DownloadSessionsValidFrom = value
+	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -323,6 +420,22 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DownloadSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   stash.DownloadSessionsTable,
+			Columns: []string{stash.DownloadSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -530,6 +643,60 @@ func (u *StashUpsert) UpdateHashThreads() *StashUpsert {
 // AddHashThreads adds v to the "hashThreads" field.
 func (u *StashUpsert) AddHashThreads(v uint8) *StashUpsert {
 	u.Add(stash.FieldHashThreads, v)
+	return u
+}
+
+// SetSelfLocked sets the "selfLocked" field.
+func (u *StashUpsert) SetSelfLocked(v bool) *StashUpsert {
+	u.Set(stash.FieldSelfLocked, v)
+	return u
+}
+
+// UpdateSelfLocked sets the "selfLocked" field to the value that was provided on create.
+func (u *StashUpsert) UpdateSelfLocked() *StashUpsert {
+	u.SetExcluded(stash.FieldSelfLocked)
+	return u
+}
+
+// SetAdminLocked sets the "adminLocked" field.
+func (u *StashUpsert) SetAdminLocked(v bool) *StashUpsert {
+	u.Set(stash.FieldAdminLocked, v)
+	return u
+}
+
+// UpdateAdminLocked sets the "adminLocked" field to the value that was provided on create.
+func (u *StashUpsert) UpdateAdminLocked() *StashUpsert {
+	u.SetExcluded(stash.FieldAdminLocked)
+	return u
+}
+
+// SetSelfLockedUntil sets the "selfLockedUntil" field.
+func (u *StashUpsert) SetSelfLockedUntil(v time.Time) *StashUpsert {
+	u.Set(stash.FieldSelfLockedUntil, v)
+	return u
+}
+
+// UpdateSelfLockedUntil sets the "selfLockedUntil" field to the value that was provided on create.
+func (u *StashUpsert) UpdateSelfLockedUntil() *StashUpsert {
+	u.SetExcluded(stash.FieldSelfLockedUntil)
+	return u
+}
+
+// ClearSelfLockedUntil clears the value of the "selfLockedUntil" field.
+func (u *StashUpsert) ClearSelfLockedUntil() *StashUpsert {
+	u.SetNull(stash.FieldSelfLockedUntil)
+	return u
+}
+
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (u *StashUpsert) SetDownloadSessionsValidFrom(v time.Time) *StashUpsert {
+	u.Set(stash.FieldDownloadSessionsValidFrom, v)
+	return u
+}
+
+// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
+func (u *StashUpsert) UpdateDownloadSessionsValidFrom() *StashUpsert {
+	u.SetExcluded(stash.FieldDownloadSessionsValidFrom)
 	return u
 }
 
@@ -772,6 +939,69 @@ func (u *StashUpsertOne) AddHashThreads(v uint8) *StashUpsertOne {
 func (u *StashUpsertOne) UpdateHashThreads() *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
 		s.UpdateHashThreads()
+	})
+}
+
+// SetSelfLocked sets the "selfLocked" field.
+func (u *StashUpsertOne) SetSelfLocked(v bool) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetSelfLocked(v)
+	})
+}
+
+// UpdateSelfLocked sets the "selfLocked" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateSelfLocked() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateSelfLocked()
+	})
+}
+
+// SetAdminLocked sets the "adminLocked" field.
+func (u *StashUpsertOne) SetAdminLocked(v bool) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetAdminLocked(v)
+	})
+}
+
+// UpdateAdminLocked sets the "adminLocked" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateAdminLocked() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateAdminLocked()
+	})
+}
+
+// SetSelfLockedUntil sets the "selfLockedUntil" field.
+func (u *StashUpsertOne) SetSelfLockedUntil(v time.Time) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetSelfLockedUntil(v)
+	})
+}
+
+// UpdateSelfLockedUntil sets the "selfLockedUntil" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateSelfLockedUntil() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateSelfLockedUntil()
+	})
+}
+
+// ClearSelfLockedUntil clears the value of the "selfLockedUntil" field.
+func (u *StashUpsertOne) ClearSelfLockedUntil() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.ClearSelfLockedUntil()
+	})
+}
+
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (u *StashUpsertOne) SetDownloadSessionsValidFrom(v time.Time) *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.SetDownloadSessionsValidFrom(v)
+	})
+}
+
+// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateDownloadSessionsValidFrom() *StashUpsertOne {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateDownloadSessionsValidFrom()
 	})
 }
 
@@ -1183,6 +1413,69 @@ func (u *StashUpsertBulk) AddHashThreads(v uint8) *StashUpsertBulk {
 func (u *StashUpsertBulk) UpdateHashThreads() *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
 		s.UpdateHashThreads()
+	})
+}
+
+// SetSelfLocked sets the "selfLocked" field.
+func (u *StashUpsertBulk) SetSelfLocked(v bool) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetSelfLocked(v)
+	})
+}
+
+// UpdateSelfLocked sets the "selfLocked" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateSelfLocked() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateSelfLocked()
+	})
+}
+
+// SetAdminLocked sets the "adminLocked" field.
+func (u *StashUpsertBulk) SetAdminLocked(v bool) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetAdminLocked(v)
+	})
+}
+
+// UpdateAdminLocked sets the "adminLocked" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateAdminLocked() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateAdminLocked()
+	})
+}
+
+// SetSelfLockedUntil sets the "selfLockedUntil" field.
+func (u *StashUpsertBulk) SetSelfLockedUntil(v time.Time) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetSelfLockedUntil(v)
+	})
+}
+
+// UpdateSelfLockedUntil sets the "selfLockedUntil" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateSelfLockedUntil() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateSelfLockedUntil()
+	})
+}
+
+// ClearSelfLockedUntil clears the value of the "selfLockedUntil" field.
+func (u *StashUpsertBulk) ClearSelfLockedUntil() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.ClearSelfLockedUntil()
+	})
+}
+
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (u *StashUpsertBulk) SetDownloadSessionsValidFrom(v time.Time) *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.SetDownloadSessionsValidFrom(v)
+	})
+}
+
+// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateDownloadSessionsValidFrom() *StashUpsertBulk {
+	return u.Update(func(s *StashUpsert) {
+		s.UpdateDownloadSessionsValidFrom()
 	})
 }
 

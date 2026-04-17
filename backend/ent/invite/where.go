@@ -81,6 +81,16 @@ func ExpiresAt(v time.Time) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldExpiresAt, v))
 }
 
+// WebauthnChallenge applies equality check predicate on the "webauthnChallenge" field. It's identical to WebauthnChallengeEQ.
+func WebauthnChallenge(v []byte) predicate.Invite {
+	return predicate.Invite(sql.FieldEQ(FieldWebauthnChallenge, v))
+}
+
+// ChallengeExpiresAt applies equality check predicate on the "challengeExpiresAt" field. It's identical to ChallengeExpiresAtEQ.
+func ChallengeExpiresAt(v time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldEQ(FieldChallengeExpiresAt, v))
+}
+
 // UserAgent applies equality check predicate on the "userAgent" field. It's identical to UserAgentEQ.
 func UserAgent(v string) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldUserAgent, v))
@@ -349,6 +359,106 @@ func ExpiredReasonIsNil() predicate.Invite {
 // ExpiredReasonNotNil applies the NotNil predicate on the "expiredReason" field.
 func ExpiredReasonNotNil() predicate.Invite {
 	return predicate.Invite(sql.FieldNotNull(FieldExpiredReason))
+}
+
+// WebauthnChallengeEQ applies the EQ predicate on the "webauthnChallenge" field.
+func WebauthnChallengeEQ(v []byte) predicate.Invite {
+	return predicate.Invite(sql.FieldEQ(FieldWebauthnChallenge, v))
+}
+
+// WebauthnChallengeNEQ applies the NEQ predicate on the "webauthnChallenge" field.
+func WebauthnChallengeNEQ(v []byte) predicate.Invite {
+	return predicate.Invite(sql.FieldNEQ(FieldWebauthnChallenge, v))
+}
+
+// WebauthnChallengeIn applies the In predicate on the "webauthnChallenge" field.
+func WebauthnChallengeIn(vs ...[]byte) predicate.Invite {
+	return predicate.Invite(sql.FieldIn(FieldWebauthnChallenge, vs...))
+}
+
+// WebauthnChallengeNotIn applies the NotIn predicate on the "webauthnChallenge" field.
+func WebauthnChallengeNotIn(vs ...[]byte) predicate.Invite {
+	return predicate.Invite(sql.FieldNotIn(FieldWebauthnChallenge, vs...))
+}
+
+// WebauthnChallengeGT applies the GT predicate on the "webauthnChallenge" field.
+func WebauthnChallengeGT(v []byte) predicate.Invite {
+	return predicate.Invite(sql.FieldGT(FieldWebauthnChallenge, v))
+}
+
+// WebauthnChallengeGTE applies the GTE predicate on the "webauthnChallenge" field.
+func WebauthnChallengeGTE(v []byte) predicate.Invite {
+	return predicate.Invite(sql.FieldGTE(FieldWebauthnChallenge, v))
+}
+
+// WebauthnChallengeLT applies the LT predicate on the "webauthnChallenge" field.
+func WebauthnChallengeLT(v []byte) predicate.Invite {
+	return predicate.Invite(sql.FieldLT(FieldWebauthnChallenge, v))
+}
+
+// WebauthnChallengeLTE applies the LTE predicate on the "webauthnChallenge" field.
+func WebauthnChallengeLTE(v []byte) predicate.Invite {
+	return predicate.Invite(sql.FieldLTE(FieldWebauthnChallenge, v))
+}
+
+// WebauthnChallengeIsNil applies the IsNil predicate on the "webauthnChallenge" field.
+func WebauthnChallengeIsNil() predicate.Invite {
+	return predicate.Invite(sql.FieldIsNull(FieldWebauthnChallenge))
+}
+
+// WebauthnChallengeNotNil applies the NotNil predicate on the "webauthnChallenge" field.
+func WebauthnChallengeNotNil() predicate.Invite {
+	return predicate.Invite(sql.FieldNotNull(FieldWebauthnChallenge))
+}
+
+// ChallengeExpiresAtEQ applies the EQ predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtEQ(v time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldEQ(FieldChallengeExpiresAt, v))
+}
+
+// ChallengeExpiresAtNEQ applies the NEQ predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtNEQ(v time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldNEQ(FieldChallengeExpiresAt, v))
+}
+
+// ChallengeExpiresAtIn applies the In predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtIn(vs ...time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldIn(FieldChallengeExpiresAt, vs...))
+}
+
+// ChallengeExpiresAtNotIn applies the NotIn predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtNotIn(vs ...time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldNotIn(FieldChallengeExpiresAt, vs...))
+}
+
+// ChallengeExpiresAtGT applies the GT predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtGT(v time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldGT(FieldChallengeExpiresAt, v))
+}
+
+// ChallengeExpiresAtGTE applies the GTE predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtGTE(v time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldGTE(FieldChallengeExpiresAt, v))
+}
+
+// ChallengeExpiresAtLT applies the LT predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtLT(v time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldLT(FieldChallengeExpiresAt, v))
+}
+
+// ChallengeExpiresAtLTE applies the LTE predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtLTE(v time.Time) predicate.Invite {
+	return predicate.Invite(sql.FieldLTE(FieldChallengeExpiresAt, v))
+}
+
+// ChallengeExpiresAtIsNil applies the IsNil predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtIsNil() predicate.Invite {
+	return predicate.Invite(sql.FieldIsNull(FieldChallengeExpiresAt))
+}
+
+// ChallengeExpiresAtNotNil applies the NotNil predicate on the "challengeExpiresAt" field.
+func ChallengeExpiresAtNotNil() predicate.Invite {
+	return predicate.Invite(sql.FieldNotNull(FieldChallengeExpiresAt))
 }
 
 // UserAgentEQ applies the EQ predicate on the "userAgent" field.

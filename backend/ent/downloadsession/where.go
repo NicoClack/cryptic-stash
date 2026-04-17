@@ -91,9 +91,9 @@ func IP(v string) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldEQ(FieldIP, v))
 }
 
-// UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
-func UserID(v uuid.UUID) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldEQ(FieldUserID, v))
+// StashID applies equality check predicate on the "stashID" field. It's identical to StashIDEQ.
+func StashID(v uuid.UUID) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldEQ(FieldStashID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "createdAt" field.
@@ -426,41 +426,41 @@ func IPContainsFold(v string) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldContainsFold(FieldIP, v))
 }
 
-// UserIDEQ applies the EQ predicate on the "userID" field.
-func UserIDEQ(v uuid.UUID) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldEQ(FieldUserID, v))
+// StashIDEQ applies the EQ predicate on the "stashID" field.
+func StashIDEQ(v uuid.UUID) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldEQ(FieldStashID, v))
 }
 
-// UserIDNEQ applies the NEQ predicate on the "userID" field.
-func UserIDNEQ(v uuid.UUID) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldNEQ(FieldUserID, v))
+// StashIDNEQ applies the NEQ predicate on the "stashID" field.
+func StashIDNEQ(v uuid.UUID) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldNEQ(FieldStashID, v))
 }
 
-// UserIDIn applies the In predicate on the "userID" field.
-func UserIDIn(vs ...uuid.UUID) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldIn(FieldUserID, vs...))
+// StashIDIn applies the In predicate on the "stashID" field.
+func StashIDIn(vs ...uuid.UUID) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldIn(FieldStashID, vs...))
 }
 
-// UserIDNotIn applies the NotIn predicate on the "userID" field.
-func UserIDNotIn(vs ...uuid.UUID) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldNotIn(FieldUserID, vs...))
+// StashIDNotIn applies the NotIn predicate on the "stashID" field.
+func StashIDNotIn(vs ...uuid.UUID) predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldNotIn(FieldStashID, vs...))
 }
 
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.DownloadSession {
+// HasStash applies the HasEdge predicate on the "stash" edge.
+func HasStash() predicate.DownloadSession {
 	return predicate.DownloadSession(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, StashTable, StashColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.DownloadSession {
+// HasStashWith applies the HasEdge predicate on the "stash" edge with a given conditions (other predicates).
+func HasStashWith(preds ...predicate.Stash) predicate.DownloadSession {
 	return predicate.DownloadSession(func(s *sql.Selector) {
-		step := newUserStep()
+		step := newStashStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

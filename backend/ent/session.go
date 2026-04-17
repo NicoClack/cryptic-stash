@@ -9,13 +9,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// Invite is the model entity for the Invite schema.
-type Invite struct {
+// Session is the model entity for the Session schema.
+type Session struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
@@ -23,18 +23,10 @@ type Invite struct {
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// UpdatedAt holds the value of the "updatedAt" field.
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
-	// Email holds the value of the "email" field.
-	Email string `json:"email,omitempty"`
-	// HashedCode holds the value of the "hashedCode" field.
-	HashedCode []byte `json:"hashedCode,omitempty"`
+	// HashedToken holds the value of the "hashedToken" field.
+	HashedToken []byte `json:"hashedToken,omitempty"`
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
-	// ExpiredReason holds the value of the "expiredReason" field.
-	ExpiredReason *invite.ExpiredReason `json:"expiredReason,omitempty"`
-	// WebauthnChallenge holds the value of the "webauthnChallenge" field.
-	WebauthnChallenge *[]byte `json:"webauthnChallenge,omitempty"`
-	// ChallengeExpiresAt holds the value of the "challengeExpiresAt" field.
-	ChallengeExpiresAt *time.Time `json:"challengeExpiresAt,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
 	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
@@ -42,13 +34,13 @@ type Invite struct {
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the InviteQuery when eager-loading is set.
-	Edges        InviteEdges `json:"edges"`
+	// The values are being populated by the SessionQuery when eager-loading is set.
+	Edges        SessionEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// InviteEdges holds the relations/edges for other nodes in the graph.
-type InviteEdges struct {
+// SessionEdges holds the relations/edges for other nodes in the graph.
+type SessionEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -58,7 +50,7 @@ type InviteEdges struct {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e InviteEdges) UserOrErr() (*User, error) {
+func (e SessionEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
 	} else if e.loadedTypes[0] {
@@ -68,17 +60,17 @@ func (e InviteEdges) UserOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Invite) scanValues(columns []string) ([]any, error) {
+func (*Session) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case invite.FieldHashedCode, invite.FieldWebauthnChallenge:
+		case session.FieldHashedToken:
 			values[i] = new([]byte)
-		case invite.FieldEmail, invite.FieldExpiredReason, invite.FieldUserAgent, invite.FieldIP:
+		case session.FieldUserAgent, session.FieldIP:
 			values[i] = new(sql.NullString)
-		case invite.FieldCreatedAt, invite.FieldUpdatedAt, invite.FieldExpiresAt, invite.FieldChallengeExpiresAt:
+		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
-		case invite.FieldID, invite.FieldUserID:
+		case session.FieldID, session.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -88,82 +80,56 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Invite fields.
-func (_m *Invite) assignValues(columns []string, values []any) error {
+// to the Session fields.
+func (_m *Session) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case invite.FieldID:
+		case session.FieldID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
 			}
-		case invite.FieldCreatedAt:
+		case session.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case invite.FieldUpdatedAt:
+		case session.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case invite.FieldEmail:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field email", values[i])
-			} else if value.Valid {
-				_m.Email = value.String
-			}
-		case invite.FieldHashedCode:
+		case session.FieldHashedToken:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field hashedCode", values[i])
+				return fmt.Errorf("unexpected type %T for field hashedToken", values[i])
 			} else if value != nil {
-				_m.HashedCode = *value
+				_m.HashedToken = *value
 			}
-		case invite.FieldExpiresAt:
+		case session.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expiresAt", values[i])
 			} else if value.Valid {
 				_m.ExpiresAt = value.Time
 			}
-		case invite.FieldExpiredReason:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field expiredReason", values[i])
-			} else if value.Valid {
-				_m.ExpiredReason = new(invite.ExpiredReason)
-				*_m.ExpiredReason = invite.ExpiredReason(value.String)
-			}
-		case invite.FieldWebauthnChallenge:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field webauthnChallenge", values[i])
-			} else if value != nil {
-				_m.WebauthnChallenge = value
-			}
-		case invite.FieldChallengeExpiresAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field challengeExpiresAt", values[i])
-			} else if value.Valid {
-				_m.ChallengeExpiresAt = new(time.Time)
-				*_m.ChallengeExpiresAt = value.Time
-			}
-		case invite.FieldUserAgent:
+		case session.FieldUserAgent:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value.Valid {
 				_m.UserAgent = value.String
 			}
-		case invite.FieldIP:
+		case session.FieldIP:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value.Valid {
 				_m.IP = value.String
 			}
-		case invite.FieldUserID:
+		case session.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field userID", values[i])
 			} else if value != nil {
@@ -176,39 +142,39 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Invite.
+// Value returns the ent.Value that was dynamically selected and assigned to the Session.
 // This includes values selected through modifiers, order, etc.
-func (_m *Invite) Value(name string) (ent.Value, error) {
+func (_m *Session) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the Invite entity.
-func (_m *Invite) QueryUser() *UserQuery {
-	return NewInviteClient(_m.config).QueryUser(_m)
+// QueryUser queries the "user" edge of the Session entity.
+func (_m *Session) QueryUser() *UserQuery {
+	return NewSessionClient(_m.config).QueryUser(_m)
 }
 
-// Update returns a builder for updating this Invite.
-// Note that you need to call Invite.Unwrap() before calling this method if this Invite
+// Update returns a builder for updating this Session.
+// Note that you need to call Session.Unwrap() before calling this method if this Session
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Invite) Update() *InviteUpdateOne {
-	return NewInviteClient(_m.config).UpdateOne(_m)
+func (_m *Session) Update() *SessionUpdateOne {
+	return NewSessionClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the Invite entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Session entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *Invite) Unwrap() *Invite {
+func (_m *Session) Unwrap() *Session {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Invite is not a transactional entity")
+		panic("ent: Session is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *Invite) String() string {
+func (_m *Session) String() string {
 	var builder strings.Builder
-	builder.WriteString("Invite(")
+	builder.WriteString("Session(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("createdAt=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -216,29 +182,11 @@ func (_m *Invite) String() string {
 	builder.WriteString("updatedAt=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("email=")
-	builder.WriteString(_m.Email)
-	builder.WriteString(", ")
-	builder.WriteString("hashedCode=")
-	builder.WriteString(fmt.Sprintf("%v", _m.HashedCode))
+	builder.WriteString("hashedToken=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HashedToken))
 	builder.WriteString(", ")
 	builder.WriteString("expiresAt=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := _m.ExpiredReason; v != nil {
-		builder.WriteString("expiredReason=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := _m.WebauthnChallenge; v != nil {
-		builder.WriteString("webauthnChallenge=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := _m.ChallengeExpiresAt; v != nil {
-		builder.WriteString("challengeExpiresAt=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("userAgent=")
 	builder.WriteString(_m.UserAgent)
@@ -252,5 +200,5 @@ func (_m *Invite) String() string {
 	return builder.String()
 }
 
-// Invites is a parsable slice of Invite.
-type Invites []*Invite
+// Sessions is a parsable slice of Session.
+type Sessions []*Session

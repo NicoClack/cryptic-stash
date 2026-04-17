@@ -24,8 +24,14 @@ type LogEntry func(*sql.Selector)
 // LoginAlert is the predicate function for loginalert builders.
 type LoginAlert func(*sql.Selector)
 
+// Passkey is the predicate function for passkey builders.
+type Passkey func(*sql.Selector)
+
 // PeriodicTask is the predicate function for periodictask builders.
 type PeriodicTask func(*sql.Selector)
+
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
 
 // Stash is the predicate function for stash builders.
 type Stash func(*sql.Selector)

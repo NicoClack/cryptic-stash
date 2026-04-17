@@ -18,7 +18,7 @@ var (
 		{Name: "valid_until", Type: field.TypeTime},
 		{Name: "user_agent", Type: field.TypeString},
 		{Name: "ip", Type: field.TypeString},
-		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "stash_id", Type: field.TypeUUID},
 	}
 	// DownloadSessionsTable holds the schema information for the "download_sessions" table.
 	DownloadSessionsTable = &schema.Table{
@@ -27,15 +27,15 @@ var (
 		PrimaryKey: []*schema.Column{DownloadSessionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "download_sessions_users_downloadSessions",
+				Symbol:     "download_sessions_stashes_downloadSessions",
 				Columns:    []*schema.Column{DownloadSessionsColumns[8]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{StashesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "downloadsession_hashed_auth_code_user_id",
+				Name:    "downloadsession_hashed_auth_code_stash_id",
 				Unique:  false,
 				Columns: []*schema.Column{DownloadSessionsColumns[3], DownloadSessionsColumns[8]},
 			},
@@ -49,7 +49,9 @@ var (
 		{Name: "email", Type: field.TypeString, Size: 128},
 		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "expired_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"REVOKED", "USERNAME_TAKEN"}},
+		{Name: "expired_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"revoked", "username_taken"}},
+		{Name: "webauthn_challenge", Type: field.TypeBytes, Nullable: true, Size: 32},
+		{Name: "challenge_expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_agent", Type: field.TypeString, Default: ""},
 		{Name: "ip", Type: field.TypeString, Default: ""},
 		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
@@ -62,7 +64,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "invites_users_invite",
-				Columns:    []*schema.Column{InvitesColumns[9]},
+				Columns:    []*schema.Column{InvitesColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -204,12 +206,39 @@ var (
 			},
 		},
 	}
+	// PasskeysColumns holds the columns for the "passkeys" table.
+	PasskeysColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 64},
+		{Name: "credential_id", Type: field.TypeBytes, Unique: true},
+		{Name: "public_key", Type: field.TypeBytes},
+		{Name: "aaguid", Type: field.TypeBytes, Size: 16},
+		{Name: "sign_count", Type: field.TypeUint32, Default: 0},
+		{Name: "is_second_factor", Type: field.TypeBool, Default: false},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// PasskeysTable holds the schema information for the "passkeys" table.
+	PasskeysTable = &schema.Table{
+		Name:       "passkeys",
+		Columns:    PasskeysColumns,
+		PrimaryKey: []*schema.Column{PasskeysColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "passkeys_users_passkeys",
+				Columns:    []*schema.Column{PasskeysColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// PeriodicTasksColumns holds the columns for the "periodic_tasks" table.
 	PeriodicTasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "last_ran_at", Type: field.TypeTime, Nullable: true},
 	}
 	// PeriodicTasksTable holds the schema information for the "periodic_tasks" table.
@@ -217,11 +246,36 @@ var (
 		Name:       "periodic_tasks",
 		Columns:    PeriodicTasksColumns,
 		PrimaryKey: []*schema.Column{PeriodicTasksColumns[0]},
+	}
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "hashed_token", Type: field.TypeBytes, Unique: true, Size: 32},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "user_agent", Type: field.TypeString, Default: ""},
+		{Name: "ip", Type: field.TypeString, Default: ""},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sessions_users_sessions",
+				Columns:    []*schema.Column{SessionsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "periodictask_name",
-				Unique:  true,
-				Columns: []*schema.Column{PeriodicTasksColumns[3]},
+				Name:    "session_hashed_token_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{SessionsColumns[3], SessionsColumns[7]},
 			},
 		},
 	}
@@ -239,6 +293,10 @@ var (
 		{Name: "hash_time", Type: field.TypeUint32},
 		{Name: "hash_memory", Type: field.TypeUint32},
 		{Name: "hash_threads", Type: field.TypeUint8},
+		{Name: "self_locked", Type: field.TypeBool, Default: false},
+		{Name: "admin_locked", Type: field.TypeBool, Default: false},
+		{Name: "self_locked_until", Type: field.TypeTime, Nullable: true},
+		{Name: "download_sessions_valid_from", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// StashesTable holds the schema information for the "stashes" table.
@@ -249,7 +307,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "stashes_users_stashes",
-				Columns:    []*schema.Column{StashesColumns[12]},
+				Columns:    []*schema.Column{StashesColumns[16]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -285,9 +343,6 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "username", Type: field.TypeString, Unique: true},
-		{Name: "locked", Type: field.TypeBool, Default: false},
-		{Name: "locked_until", Type: field.TypeTime, Nullable: true},
-		{Name: "download_sessions_valid_from", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -342,7 +397,9 @@ var (
 		KeyValuesTable,
 		LogEntriesTable,
 		LoginAlertsTable,
+		PasskeysTable,
 		PeriodicTasksTable,
+		SessionsTable,
 		StashesTable,
 		TwoFactorActionsTable,
 		UsersTable,
@@ -351,11 +408,13 @@ var (
 )
 
 func init() {
-	DownloadSessionsTable.ForeignKeys[0].RefTable = UsersTable
+	DownloadSessionsTable.ForeignKeys[0].RefTable = StashesTable
 	InvitesTable.ForeignKeys[0].RefTable = UsersTable
 	LogEntriesTable.ForeignKeys[0].RefTable = UsersTable
 	LoginAlertsTable.ForeignKeys[0].RefTable = DownloadSessionsTable
 	LoginAlertsTable.ForeignKeys[1].RefTable = UserMessengersTable
+	PasskeysTable.ForeignKeys[0].RefTable = UsersTable
+	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	StashesTable.ForeignKeys[0].RefTable = UsersTable
 	UserMessengersTable.ForeignKeys[0].RefTable = UsersTable
 }

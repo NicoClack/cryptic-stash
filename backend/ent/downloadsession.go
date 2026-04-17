@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
-	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 )
 
@@ -33,8 +33,8 @@ type DownloadSession struct {
 	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
 	IP string `json:"ip,omitempty"`
-	// UserID holds the value of the "userID" field.
-	UserID uuid.UUID `json:"userID,omitempty"`
+	// StashID holds the value of the "stashID" field.
+	StashID uuid.UUID `json:"stashID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DownloadSessionQuery when eager-loading is set.
 	Edges        DownloadSessionEdges `json:"edges"`
@@ -43,8 +43,8 @@ type DownloadSession struct {
 
 // DownloadSessionEdges holds the relations/edges for other nodes in the graph.
 type DownloadSessionEdges struct {
-	// User holds the value of the user edge.
-	User *User `json:"user,omitempty"`
+	// Stash holds the value of the stash edge.
+	Stash *Stash `json:"stash,omitempty"`
 	// LoginAlerts holds the value of the loginAlerts edge.
 	LoginAlerts []*LoginAlert `json:"loginAlerts,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -52,15 +52,15 @@ type DownloadSessionEdges struct {
 	loadedTypes [2]bool
 }
 
-// UserOrErr returns the User value or an error if the edge
+// StashOrErr returns the Stash value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e DownloadSessionEdges) UserOrErr() (*User, error) {
-	if e.User != nil {
-		return e.User, nil
+func (e DownloadSessionEdges) StashOrErr() (*Stash, error) {
+	if e.Stash != nil {
+		return e.Stash, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: user.Label}
+		return nil, &NotFoundError{label: stash.Label}
 	}
-	return nil, &NotLoadedError{edge: "user"}
+	return nil, &NotLoadedError{edge: "stash"}
 }
 
 // LoginAlertsOrErr returns the LoginAlerts value or an error if the edge
@@ -83,7 +83,7 @@ func (*DownloadSession) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case downloadsession.FieldCreatedAt, downloadsession.FieldUpdatedAt, downloadsession.FieldValidFrom, downloadsession.FieldValidUntil:
 			values[i] = new(sql.NullTime)
-		case downloadsession.FieldID, downloadsession.FieldUserID:
+		case downloadsession.FieldID, downloadsession.FieldStashID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -148,11 +148,11 @@ func (_m *DownloadSession) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.IP = value.String
 			}
-		case downloadsession.FieldUserID:
+		case downloadsession.FieldStashID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field userID", values[i])
+				return fmt.Errorf("unexpected type %T for field stashID", values[i])
 			} else if value != nil {
-				_m.UserID = *value
+				_m.StashID = *value
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -167,9 +167,9 @@ func (_m *DownloadSession) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the DownloadSession entity.
-func (_m *DownloadSession) QueryUser() *UserQuery {
-	return NewDownloadSessionClient(_m.config).QueryUser(_m)
+// QueryStash queries the "stash" edge of the DownloadSession entity.
+func (_m *DownloadSession) QueryStash() *StashQuery {
+	return NewDownloadSessionClient(_m.config).QueryStash(_m)
 }
 
 // QueryLoginAlerts queries the "loginAlerts" edge of the DownloadSession entity.
@@ -221,8 +221,8 @@ func (_m *DownloadSession) String() string {
 	builder.WriteString("ip=")
 	builder.WriteString(_m.IP)
 	builder.WriteString(", ")
-	builder.WriteString("userID=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString("stashID=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StashID))
 	builder.WriteByte(')')
 	return builder.String()
 }

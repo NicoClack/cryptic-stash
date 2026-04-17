@@ -25,12 +25,6 @@ type User struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Username holds the value of the "username" field.
 	Username string `json:"username,omitempty"`
-	// Locked holds the value of the "locked" field.
-	Locked bool `json:"locked,omitempty"`
-	// LockedUntil holds the value of the "lockedUntil" field.
-	LockedUntil *time.Time `json:"lockedUntil,omitempty"`
-	// DownloadSessionsValidFrom holds the value of the "downloadSessionsValidFrom" field.
-	DownloadSessionsValidFrom time.Time `json:"downloadSessionsValidFrom,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -43,15 +37,17 @@ type UserEdges struct {
 	Stashes []*Stash `json:"stashes,omitempty"`
 	// Messengers holds the value of the messengers edge.
 	Messengers []*UserMessenger `json:"messengers,omitempty"`
-	// DownloadSessions holds the value of the downloadSessions edge.
-	DownloadSessions []*DownloadSession `json:"downloadSessions,omitempty"`
 	// Invite holds the value of the invite edge.
 	Invite *Invite `json:"invite,omitempty"`
+	// Passkeys holds the value of the passkeys edge.
+	Passkeys []*Passkey `json:"passkeys,omitempty"`
+	// Sessions holds the value of the sessions edge.
+	Sessions []*Session `json:"sessions,omitempty"`
 	// Logs holds the value of the logs edge.
 	Logs []*LogEntry `json:"logs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // StashesOrErr returns the Stashes value or an error if the edge
@@ -72,30 +68,39 @@ func (e UserEdges) MessengersOrErr() ([]*UserMessenger, error) {
 	return nil, &NotLoadedError{edge: "messengers"}
 }
 
-// DownloadSessionsOrErr returns the DownloadSessions value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) DownloadSessionsOrErr() ([]*DownloadSession, error) {
-	if e.loadedTypes[2] {
-		return e.DownloadSessions, nil
-	}
-	return nil, &NotLoadedError{edge: "downloadSessions"}
-}
-
 // InviteOrErr returns the Invite value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) InviteOrErr() (*Invite, error) {
 	if e.Invite != nil {
 		return e.Invite, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: invite.Label}
 	}
 	return nil, &NotLoadedError{edge: "invite"}
 }
 
+// PasskeysOrErr returns the Passkeys value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PasskeysOrErr() ([]*Passkey, error) {
+	if e.loadedTypes[3] {
+		return e.Passkeys, nil
+	}
+	return nil, &NotLoadedError{edge: "passkeys"}
+}
+
+// SessionsOrErr returns the Sessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[4] {
+		return e.Sessions, nil
+	}
+	return nil, &NotLoadedError{edge: "sessions"}
+}
+
 // LogsOrErr returns the Logs value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) LogsOrErr() ([]*LogEntry, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.Logs, nil
 	}
 	return nil, &NotLoadedError{edge: "logs"}
@@ -106,11 +111,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldLocked:
-			values[i] = new(sql.NullBool)
 		case user.FieldUsername:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldLockedUntil, user.FieldDownloadSessionsValidFrom:
+		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
@@ -153,25 +156,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Username = value.String
 			}
-		case user.FieldLocked:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field locked", values[i])
-			} else if value.Valid {
-				_m.Locked = value.Bool
-			}
-		case user.FieldLockedUntil:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field lockedUntil", values[i])
-			} else if value.Valid {
-				_m.LockedUntil = new(time.Time)
-				*_m.LockedUntil = value.Time
-			}
-		case user.FieldDownloadSessionsValidFrom:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field downloadSessionsValidFrom", values[i])
-			} else if value.Valid {
-				_m.DownloadSessionsValidFrom = value.Time
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -195,14 +179,19 @@ func (_m *User) QueryMessengers() *UserMessengerQuery {
 	return NewUserClient(_m.config).QueryMessengers(_m)
 }
 
-// QueryDownloadSessions queries the "downloadSessions" edge of the User entity.
-func (_m *User) QueryDownloadSessions() *DownloadSessionQuery {
-	return NewUserClient(_m.config).QueryDownloadSessions(_m)
-}
-
 // QueryInvite queries the "invite" edge of the User entity.
 func (_m *User) QueryInvite() *InviteQuery {
 	return NewUserClient(_m.config).QueryInvite(_m)
+}
+
+// QueryPasskeys queries the "passkeys" edge of the User entity.
+func (_m *User) QueryPasskeys() *PasskeyQuery {
+	return NewUserClient(_m.config).QueryPasskeys(_m)
+}
+
+// QuerySessions queries the "sessions" edge of the User entity.
+func (_m *User) QuerySessions() *SessionQuery {
+	return NewUserClient(_m.config).QuerySessions(_m)
 }
 
 // QueryLogs queries the "logs" edge of the User entity.
@@ -241,17 +230,6 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("username=")
 	builder.WriteString(_m.Username)
-	builder.WriteString(", ")
-	builder.WriteString("locked=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Locked))
-	builder.WriteString(", ")
-	if v := _m.LockedUntil; v != nil {
-		builder.WriteString("lockedUntil=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
-	builder.WriteString(", ")
-	builder.WriteString("downloadSessionsValidFrom=")
-	builder.WriteString(_m.DownloadSessionsValidFrom.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

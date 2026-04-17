@@ -24,8 +24,12 @@ type Tx struct {
 	LogEntry *LogEntryClient
 	// LoginAlert is the client for interacting with the LoginAlert builders.
 	LoginAlert *LoginAlertClient
+	// Passkey is the client for interacting with the Passkey builders.
+	Passkey *PasskeyClient
 	// PeriodicTask is the client for interacting with the PeriodicTask builders.
 	PeriodicTask *PeriodicTaskClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// Stash is the client for interacting with the Stash builders.
 	Stash *StashClient
 	// TwoFactorAction is the client for interacting with the TwoFactorAction builders.
@@ -171,7 +175,9 @@ func (tx *Tx) init() {
 	tx.KeyValue = NewKeyValueClient(tx.config)
 	tx.LogEntry = NewLogEntryClient(tx.config)
 	tx.LoginAlert = NewLoginAlertClient(tx.config)
+	tx.Passkey = NewPasskeyClient(tx.config)
 	tx.PeriodicTask = NewPeriodicTaskClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
 	tx.Stash = NewStashClient(tx.config)
 	tx.TwoFactorAction = NewTwoFactorActionClient(tx.config)
 	tx.User = NewUserClient(tx.config)

@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
-	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 )
 
@@ -68,9 +68,9 @@ func (_c *DownloadSessionCreate) SetIP(v string) *DownloadSessionCreate {
 	return _c
 }
 
-// SetUserID sets the "userID" field.
-func (_c *DownloadSessionCreate) SetUserID(v uuid.UUID) *DownloadSessionCreate {
-	_c.mutation.SetUserID(v)
+// SetStashID sets the "stashID" field.
+func (_c *DownloadSessionCreate) SetStashID(v uuid.UUID) *DownloadSessionCreate {
+	_c.mutation.SetStashID(v)
 	return _c
 }
 
@@ -88,9 +88,9 @@ func (_c *DownloadSessionCreate) SetNillableID(v *uuid.UUID) *DownloadSessionCre
 	return _c
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (_c *DownloadSessionCreate) SetUser(v *User) *DownloadSessionCreate {
-	return _c.SetUserID(v.ID)
+// SetStash sets the "stash" edge to the Stash entity.
+func (_c *DownloadSessionCreate) SetStash(v *Stash) *DownloadSessionCreate {
+	return _c.SetStashID(v.ID)
 }
 
 // AddLoginAlertIDs adds the "loginAlerts" edge to the LoginAlert entity by IDs.
@@ -177,11 +177,11 @@ func (_c *DownloadSessionCreate) check() error {
 	if _, ok := _c.mutation.IP(); !ok {
 		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "DownloadSession.ip"`)}
 	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "DownloadSession.userID"`)}
+	if _, ok := _c.mutation.StashID(); !ok {
+		return &ValidationError{Name: "stashID", err: errors.New(`ent: missing required field "DownloadSession.stashID"`)}
 	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "DownloadSession.user"`)}
+	if len(_c.mutation.StashIDs()) == 0 {
+		return &ValidationError{Name: "stash", err: errors.New(`ent: missing required edge "DownloadSession.stash"`)}
 	}
 	return nil
 }
@@ -247,21 +247,21 @@ func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.Creat
 		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
 		_node.IP = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.StashIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   downloadsession.UserTable,
-			Columns: []string{downloadsession.UserColumn},
+			Table:   downloadsession.StashTable,
+			Columns: []string{downloadsession.StashColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.UserID = nodes[0]
+		_node.StashID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LoginAlertsIDs(); len(nodes) > 0 {
@@ -416,15 +416,15 @@ func (u *DownloadSessionUpsert) UpdateIP() *DownloadSessionUpsert {
 	return u
 }
 
-// SetUserID sets the "userID" field.
-func (u *DownloadSessionUpsert) SetUserID(v uuid.UUID) *DownloadSessionUpsert {
-	u.Set(downloadsession.FieldUserID, v)
+// SetStashID sets the "stashID" field.
+func (u *DownloadSessionUpsert) SetStashID(v uuid.UUID) *DownloadSessionUpsert {
+	u.Set(downloadsession.FieldStashID, v)
 	return u
 }
 
-// UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *DownloadSessionUpsert) UpdateUserID() *DownloadSessionUpsert {
-	u.SetExcluded(downloadsession.FieldUserID)
+// UpdateStashID sets the "stashID" field to the value that was provided on create.
+func (u *DownloadSessionUpsert) UpdateStashID() *DownloadSessionUpsert {
+	u.SetExcluded(downloadsession.FieldStashID)
 	return u
 }
 
@@ -574,17 +574,17 @@ func (u *DownloadSessionUpsertOne) UpdateIP() *DownloadSessionUpsertOne {
 	})
 }
 
-// SetUserID sets the "userID" field.
-func (u *DownloadSessionUpsertOne) SetUserID(v uuid.UUID) *DownloadSessionUpsertOne {
+// SetStashID sets the "stashID" field.
+func (u *DownloadSessionUpsertOne) SetStashID(v uuid.UUID) *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.SetUserID(v)
+		s.SetStashID(v)
 	})
 }
 
-// UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *DownloadSessionUpsertOne) UpdateUserID() *DownloadSessionUpsertOne {
+// UpdateStashID sets the "stashID" field to the value that was provided on create.
+func (u *DownloadSessionUpsertOne) UpdateStashID() *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.UpdateUserID()
+		s.UpdateStashID()
 	})
 }
 
@@ -901,17 +901,17 @@ func (u *DownloadSessionUpsertBulk) UpdateIP() *DownloadSessionUpsertBulk {
 	})
 }
 
-// SetUserID sets the "userID" field.
-func (u *DownloadSessionUpsertBulk) SetUserID(v uuid.UUID) *DownloadSessionUpsertBulk {
+// SetStashID sets the "stashID" field.
+func (u *DownloadSessionUpsertBulk) SetStashID(v uuid.UUID) *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.SetUserID(v)
+		s.SetStashID(v)
 	})
 }
 
-// UpdateUserID sets the "userID" field to the value that was provided on create.
-func (u *DownloadSessionUpsertBulk) UpdateUserID() *DownloadSessionUpsertBulk {
+// UpdateStashID sets the "stashID" field to the value that was provided on create.
+func (u *DownloadSessionUpsertBulk) UpdateStashID() *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
-		s.UpdateUserID()
+		s.UpdateStashID()
 	})
 }
 

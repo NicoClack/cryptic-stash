@@ -104,6 +104,38 @@ func (_u *InviteUpdate) ClearExpiredReason() *InviteUpdate {
 	return _u
 }
 
+// SetWebauthnChallenge sets the "webauthnChallenge" field.
+func (_u *InviteUpdate) SetWebauthnChallenge(v []byte) *InviteUpdate {
+	_u.mutation.SetWebauthnChallenge(v)
+	return _u
+}
+
+// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
+func (_u *InviteUpdate) ClearWebauthnChallenge() *InviteUpdate {
+	_u.mutation.ClearWebauthnChallenge()
+	return _u
+}
+
+// SetChallengeExpiresAt sets the "challengeExpiresAt" field.
+func (_u *InviteUpdate) SetChallengeExpiresAt(v time.Time) *InviteUpdate {
+	_u.mutation.SetChallengeExpiresAt(v)
+	return _u
+}
+
+// SetNillableChallengeExpiresAt sets the "challengeExpiresAt" field if the given value is not nil.
+func (_u *InviteUpdate) SetNillableChallengeExpiresAt(v *time.Time) *InviteUpdate {
+	if v != nil {
+		_u.SetChallengeExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearChallengeExpiresAt clears the value of the "challengeExpiresAt" field.
+func (_u *InviteUpdate) ClearChallengeExpiresAt() *InviteUpdate {
+	_u.mutation.ClearChallengeExpiresAt()
+	return _u
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (_u *InviteUpdate) SetUserAgent(v string) *InviteUpdate {
 	_u.mutation.SetUserAgent(v)
@@ -221,6 +253,11 @@ func (_u *InviteUpdate) check() error {
 			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.WebauthnChallenge(); ok {
+		if err := invite.WebauthnChallengeValidator(v); err != nil {
+			return &ValidationError{Name: "webauthnChallenge", err: fmt.Errorf(`ent: validator failed for field "Invite.webauthnChallenge": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -256,6 +293,18 @@ func (_u *InviteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.ExpiredReasonCleared() {
 		_spec.ClearField(invite.FieldExpiredReason, field.TypeEnum)
+	}
+	if value, ok := _u.mutation.WebauthnChallenge(); ok {
+		_spec.SetField(invite.FieldWebauthnChallenge, field.TypeBytes, value)
+	}
+	if _u.mutation.WebauthnChallengeCleared() {
+		_spec.ClearField(invite.FieldWebauthnChallenge, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.ChallengeExpiresAt(); ok {
+		_spec.SetField(invite.FieldChallengeExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ChallengeExpiresAtCleared() {
+		_spec.ClearField(invite.FieldChallengeExpiresAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
@@ -383,6 +432,38 @@ func (_u *InviteUpdateOne) SetNillableExpiredReason(v *invite.ExpiredReason) *In
 // ClearExpiredReason clears the value of the "expiredReason" field.
 func (_u *InviteUpdateOne) ClearExpiredReason() *InviteUpdateOne {
 	_u.mutation.ClearExpiredReason()
+	return _u
+}
+
+// SetWebauthnChallenge sets the "webauthnChallenge" field.
+func (_u *InviteUpdateOne) SetWebauthnChallenge(v []byte) *InviteUpdateOne {
+	_u.mutation.SetWebauthnChallenge(v)
+	return _u
+}
+
+// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
+func (_u *InviteUpdateOne) ClearWebauthnChallenge() *InviteUpdateOne {
+	_u.mutation.ClearWebauthnChallenge()
+	return _u
+}
+
+// SetChallengeExpiresAt sets the "challengeExpiresAt" field.
+func (_u *InviteUpdateOne) SetChallengeExpiresAt(v time.Time) *InviteUpdateOne {
+	_u.mutation.SetChallengeExpiresAt(v)
+	return _u
+}
+
+// SetNillableChallengeExpiresAt sets the "challengeExpiresAt" field if the given value is not nil.
+func (_u *InviteUpdateOne) SetNillableChallengeExpiresAt(v *time.Time) *InviteUpdateOne {
+	if v != nil {
+		_u.SetChallengeExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearChallengeExpiresAt clears the value of the "challengeExpiresAt" field.
+func (_u *InviteUpdateOne) ClearChallengeExpiresAt() *InviteUpdateOne {
+	_u.mutation.ClearChallengeExpiresAt()
 	return _u
 }
 
@@ -516,6 +597,11 @@ func (_u *InviteUpdateOne) check() error {
 			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.WebauthnChallenge(); ok {
+		if err := invite.WebauthnChallengeValidator(v); err != nil {
+			return &ValidationError{Name: "webauthnChallenge", err: fmt.Errorf(`ent: validator failed for field "Invite.webauthnChallenge": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -568,6 +654,18 @@ func (_u *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err erro
 	}
 	if _u.mutation.ExpiredReasonCleared() {
 		_spec.ClearField(invite.FieldExpiredReason, field.TypeEnum)
+	}
+	if value, ok := _u.mutation.WebauthnChallenge(); ok {
+		_spec.SetField(invite.FieldWebauthnChallenge, field.TypeBytes, value)
+	}
+	if _u.mutation.WebauthnChallengeCleared() {
+		_spec.ClearField(invite.FieldWebauthnChallenge, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.ChallengeExpiresAt(); ok {
+		_spec.SetField(invite.FieldChallengeExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ChallengeExpiresAtCleared() {
+		_spec.ClearField(invite.FieldChallengeExpiresAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)

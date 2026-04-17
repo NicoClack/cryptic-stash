@@ -69,6 +69,26 @@ func (_c *InviteCreate) SetNillableExpiredReason(v *invite.ExpiredReason) *Invit
 	return _c
 }
 
+// SetWebauthnChallenge sets the "webauthnChallenge" field.
+func (_c *InviteCreate) SetWebauthnChallenge(v []byte) *InviteCreate {
+	_c.mutation.SetWebauthnChallenge(v)
+	return _c
+}
+
+// SetChallengeExpiresAt sets the "challengeExpiresAt" field.
+func (_c *InviteCreate) SetChallengeExpiresAt(v time.Time) *InviteCreate {
+	_c.mutation.SetChallengeExpiresAt(v)
+	return _c
+}
+
+// SetNillableChallengeExpiresAt sets the "challengeExpiresAt" field if the given value is not nil.
+func (_c *InviteCreate) SetNillableChallengeExpiresAt(v *time.Time) *InviteCreate {
+	if v != nil {
+		_c.SetChallengeExpiresAt(*v)
+	}
+	return _c
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (_c *InviteCreate) SetUserAgent(v string) *InviteCreate {
 	_c.mutation.SetUserAgent(v)
@@ -211,6 +231,11 @@ func (_c *InviteCreate) check() error {
 			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.WebauthnChallenge(); ok {
+		if err := invite.WebauthnChallengeValidator(v); err != nil {
+			return &ValidationError{Name: "webauthnChallenge", err: fmt.Errorf(`ent: validator failed for field "Invite.webauthnChallenge": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.UserAgent(); !ok {
 		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Invite.userAgent"`)}
 	}
@@ -276,6 +301,14 @@ func (_c *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ExpiredReason(); ok {
 		_spec.SetField(invite.FieldExpiredReason, field.TypeEnum, value)
 		_node.ExpiredReason = &value
+	}
+	if value, ok := _c.mutation.WebauthnChallenge(); ok {
+		_spec.SetField(invite.FieldWebauthnChallenge, field.TypeBytes, value)
+		_node.WebauthnChallenge = &value
+	}
+	if value, ok := _c.mutation.ChallengeExpiresAt(); ok {
+		_spec.SetField(invite.FieldChallengeExpiresAt, field.TypeTime, value)
+		_node.ChallengeExpiresAt = &value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeString, value)
@@ -429,6 +462,42 @@ func (u *InviteUpsert) UpdateExpiredReason() *InviteUpsert {
 // ClearExpiredReason clears the value of the "expiredReason" field.
 func (u *InviteUpsert) ClearExpiredReason() *InviteUpsert {
 	u.SetNull(invite.FieldExpiredReason)
+	return u
+}
+
+// SetWebauthnChallenge sets the "webauthnChallenge" field.
+func (u *InviteUpsert) SetWebauthnChallenge(v []byte) *InviteUpsert {
+	u.Set(invite.FieldWebauthnChallenge, v)
+	return u
+}
+
+// UpdateWebauthnChallenge sets the "webauthnChallenge" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateWebauthnChallenge() *InviteUpsert {
+	u.SetExcluded(invite.FieldWebauthnChallenge)
+	return u
+}
+
+// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
+func (u *InviteUpsert) ClearWebauthnChallenge() *InviteUpsert {
+	u.SetNull(invite.FieldWebauthnChallenge)
+	return u
+}
+
+// SetChallengeExpiresAt sets the "challengeExpiresAt" field.
+func (u *InviteUpsert) SetChallengeExpiresAt(v time.Time) *InviteUpsert {
+	u.Set(invite.FieldChallengeExpiresAt, v)
+	return u
+}
+
+// UpdateChallengeExpiresAt sets the "challengeExpiresAt" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateChallengeExpiresAt() *InviteUpsert {
+	u.SetExcluded(invite.FieldChallengeExpiresAt)
+	return u
+}
+
+// ClearChallengeExpiresAt clears the value of the "challengeExpiresAt" field.
+func (u *InviteUpsert) ClearChallengeExpiresAt() *InviteUpsert {
+	u.SetNull(invite.FieldChallengeExpiresAt)
 	return u
 }
 
@@ -610,6 +679,48 @@ func (u *InviteUpsertOne) UpdateExpiredReason() *InviteUpsertOne {
 func (u *InviteUpsertOne) ClearExpiredReason() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.ClearExpiredReason()
+	})
+}
+
+// SetWebauthnChallenge sets the "webauthnChallenge" field.
+func (u *InviteUpsertOne) SetWebauthnChallenge(v []byte) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetWebauthnChallenge(v)
+	})
+}
+
+// UpdateWebauthnChallenge sets the "webauthnChallenge" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateWebauthnChallenge() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateWebauthnChallenge()
+	})
+}
+
+// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
+func (u *InviteUpsertOne) ClearWebauthnChallenge() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearWebauthnChallenge()
+	})
+}
+
+// SetChallengeExpiresAt sets the "challengeExpiresAt" field.
+func (u *InviteUpsertOne) SetChallengeExpiresAt(v time.Time) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetChallengeExpiresAt(v)
+	})
+}
+
+// UpdateChallengeExpiresAt sets the "challengeExpiresAt" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateChallengeExpiresAt() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateChallengeExpiresAt()
+	})
+}
+
+// ClearChallengeExpiresAt clears the value of the "challengeExpiresAt" field.
+func (u *InviteUpsertOne) ClearChallengeExpiresAt() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearChallengeExpiresAt()
 	})
 }
 
@@ -965,6 +1076,48 @@ func (u *InviteUpsertBulk) UpdateExpiredReason() *InviteUpsertBulk {
 func (u *InviteUpsertBulk) ClearExpiredReason() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.ClearExpiredReason()
+	})
+}
+
+// SetWebauthnChallenge sets the "webauthnChallenge" field.
+func (u *InviteUpsertBulk) SetWebauthnChallenge(v []byte) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetWebauthnChallenge(v)
+	})
+}
+
+// UpdateWebauthnChallenge sets the "webauthnChallenge" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateWebauthnChallenge() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateWebauthnChallenge()
+	})
+}
+
+// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
+func (u *InviteUpsertBulk) ClearWebauthnChallenge() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearWebauthnChallenge()
+	})
+}
+
+// SetChallengeExpiresAt sets the "challengeExpiresAt" field.
+func (u *InviteUpsertBulk) SetChallengeExpiresAt(v time.Time) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetChallengeExpiresAt(v)
+	})
+}
+
+// UpdateChallengeExpiresAt sets the "challengeExpiresAt" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateChallengeExpiresAt() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateChallengeExpiresAt()
+	})
+}
+
+// ClearChallengeExpiresAt clears the value of the "challengeExpiresAt" field.
+func (u *InviteUpsertBulk) ClearChallengeExpiresAt() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearChallengeExpiresAt()
 	})
 }
 

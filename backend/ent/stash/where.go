@@ -111,6 +111,26 @@ func HashThreads(v uint8) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldHashThreads, v))
 }
 
+// SelfLocked applies equality check predicate on the "selfLocked" field. It's identical to SelfLockedEQ.
+func SelfLocked(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldSelfLocked, v))
+}
+
+// AdminLocked applies equality check predicate on the "adminLocked" field. It's identical to AdminLockedEQ.
+func AdminLocked(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldAdminLocked, v))
+}
+
+// SelfLockedUntil applies equality check predicate on the "selfLockedUntil" field. It's identical to SelfLockedUntilEQ.
+func SelfLockedUntil(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldSelfLockedUntil, v))
+}
+
+// DownloadSessionsValidFrom applies equality check predicate on the "downloadSessionsValidFrom" field. It's identical to DownloadSessionsValidFromEQ.
+func DownloadSessionsValidFrom(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldDownloadSessionsValidFrom, v))
+}
+
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldUserID, v))
@@ -591,6 +611,116 @@ func HashThreadsLTE(v uint8) predicate.Stash {
 	return predicate.Stash(sql.FieldLTE(FieldHashThreads, v))
 }
 
+// SelfLockedEQ applies the EQ predicate on the "selfLocked" field.
+func SelfLockedEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldSelfLocked, v))
+}
+
+// SelfLockedNEQ applies the NEQ predicate on the "selfLocked" field.
+func SelfLockedNEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldSelfLocked, v))
+}
+
+// AdminLockedEQ applies the EQ predicate on the "adminLocked" field.
+func AdminLockedEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldAdminLocked, v))
+}
+
+// AdminLockedNEQ applies the NEQ predicate on the "adminLocked" field.
+func AdminLockedNEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldAdminLocked, v))
+}
+
+// SelfLockedUntilEQ applies the EQ predicate on the "selfLockedUntil" field.
+func SelfLockedUntilEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilNEQ applies the NEQ predicate on the "selfLockedUntil" field.
+func SelfLockedUntilNEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilIn applies the In predicate on the "selfLockedUntil" field.
+func SelfLockedUntilIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldSelfLockedUntil, vs...))
+}
+
+// SelfLockedUntilNotIn applies the NotIn predicate on the "selfLockedUntil" field.
+func SelfLockedUntilNotIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldSelfLockedUntil, vs...))
+}
+
+// SelfLockedUntilGT applies the GT predicate on the "selfLockedUntil" field.
+func SelfLockedUntilGT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilGTE applies the GTE predicate on the "selfLockedUntil" field.
+func SelfLockedUntilGTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilLT applies the LT predicate on the "selfLockedUntil" field.
+func SelfLockedUntilLT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilLTE applies the LTE predicate on the "selfLockedUntil" field.
+func SelfLockedUntilLTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilIsNil applies the IsNil predicate on the "selfLockedUntil" field.
+func SelfLockedUntilIsNil() predicate.Stash {
+	return predicate.Stash(sql.FieldIsNull(FieldSelfLockedUntil))
+}
+
+// SelfLockedUntilNotNil applies the NotNil predicate on the "selfLockedUntil" field.
+func SelfLockedUntilNotNil() predicate.Stash {
+	return predicate.Stash(sql.FieldNotNull(FieldSelfLockedUntil))
+}
+
+// DownloadSessionsValidFromEQ applies the EQ predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromNEQ applies the NEQ predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromNEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromIn applies the In predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldDownloadSessionsValidFrom, vs...))
+}
+
+// DownloadSessionsValidFromNotIn applies the NotIn predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromNotIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldDownloadSessionsValidFrom, vs...))
+}
+
+// DownloadSessionsValidFromGT applies the GT predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromGT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromGTE applies the GTE predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromGTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromLT applies the LT predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromLT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromLTE applies the LTE predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromLTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldDownloadSessionsValidFrom, v))
+}
+
 // UserIDEQ applies the EQ predicate on the "userID" field.
 func UserIDEQ(v uuid.UUID) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldUserID, v))
@@ -626,6 +756,29 @@ func HasUser() predicate.Stash {
 func HasUserWith(preds ...predicate.User) predicate.Stash {
 	return predicate.Stash(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDownloadSessions applies the HasEdge predicate on the "downloadSessions" edge.
+func HasDownloadSessions() predicate.Stash {
+	return predicate.Stash(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DownloadSessionsTable, DownloadSessionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDownloadSessionsWith applies the HasEdge predicate on the "downloadSessions" edge with a given conditions (other predicates).
+func HasDownloadSessionsWith(preds ...predicate.DownloadSession) predicate.Stash {
+	return predicate.Stash(func(s *sql.Selector) {
+		step := newDownloadSessionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

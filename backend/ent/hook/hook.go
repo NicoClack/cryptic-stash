@@ -81,6 +81,18 @@ func (f LoginAlertFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LoginAlertMutation", m)
 }
 
+// The PasskeyFunc type is an adapter to allow the use of ordinary
+// function as Passkey mutator.
+type PasskeyFunc func(context.Context, *ent.PasskeyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PasskeyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PasskeyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PasskeyMutation", m)
+}
+
 // The PeriodicTaskFunc type is an adapter to allow the use of ordinary
 // function as PeriodicTask mutator.
 type PeriodicTaskFunc func(context.Context, *ent.PeriodicTaskMutation) (ent.Value, error)
@@ -91,6 +103,18 @@ func (f PeriodicTaskFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PeriodicTaskMutation", m)
+}
+
+// The SessionFunc type is an adapter to allow the use of ordinary
+// function as Session mutator.
+type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
 }
 
 // The StashFunc type is an adapter to allow the use of ordinary

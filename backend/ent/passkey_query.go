@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,60 +11,58 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
 
-// StashQuery is the builder for querying Stash entities.
-type StashQuery struct {
+// PasskeyQuery is the builder for querying Passkey entities.
+type PasskeyQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []stash.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.Stash
-	withUser             *UserQuery
-	withDownloadSessions *DownloadSessionQuery
+	ctx        *QueryContext
+	order      []passkey.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Passkey
+	withUser   *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the StashQuery builder.
-func (_q *StashQuery) Where(ps ...predicate.Stash) *StashQuery {
+// Where adds a new predicate for the PasskeyQuery builder.
+func (_q *PasskeyQuery) Where(ps ...predicate.Passkey) *PasskeyQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *StashQuery) Limit(limit int) *StashQuery {
+func (_q *PasskeyQuery) Limit(limit int) *PasskeyQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *StashQuery) Offset(offset int) *StashQuery {
+func (_q *PasskeyQuery) Offset(offset int) *PasskeyQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *StashQuery) Unique(unique bool) *StashQuery {
+func (_q *PasskeyQuery) Unique(unique bool) *PasskeyQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *StashQuery) Order(o ...stash.OrderOption) *StashQuery {
+func (_q *PasskeyQuery) Order(o ...passkey.OrderOption) *PasskeyQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (_q *StashQuery) QueryUser() *UserQuery {
+func (_q *PasskeyQuery) QueryUser() *UserQuery {
 	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -76,9 +73,9 @@ func (_q *StashQuery) QueryUser() *UserQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(stash.Table, stash.FieldID, selector),
+			sqlgraph.From(passkey.Table, passkey.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, stash.UserTable, stash.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, passkey.UserTable, passkey.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -86,43 +83,21 @@ func (_q *StashQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// QueryDownloadSessions chains the current query on the "downloadSessions" edge.
-func (_q *StashQuery) QueryDownloadSessions() *DownloadSessionQuery {
-	query := (&DownloadSessionClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(stash.Table, stash.FieldID, selector),
-			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, stash.DownloadSessionsTable, stash.DownloadSessionsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first Stash entity from the query.
-// Returns a *NotFoundError when no Stash was found.
-func (_q *StashQuery) First(ctx context.Context) (*Stash, error) {
+// First returns the first Passkey entity from the query.
+// Returns a *NotFoundError when no Passkey was found.
+func (_q *PasskeyQuery) First(ctx context.Context) (*Passkey, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{stash.Label}
+		return nil, &NotFoundError{passkey.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *StashQuery) FirstX(ctx context.Context) *Stash {
+func (_q *PasskeyQuery) FirstX(ctx context.Context) *Passkey {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -130,22 +105,22 @@ func (_q *StashQuery) FirstX(ctx context.Context) *Stash {
 	return node
 }
 
-// FirstID returns the first Stash ID from the query.
-// Returns a *NotFoundError when no Stash ID was found.
-func (_q *StashQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+// FirstID returns the first Passkey ID from the query.
+// Returns a *NotFoundError when no Passkey ID was found.
+func (_q *PasskeyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{stash.Label}
+		err = &NotFoundError{passkey.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *StashQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (_q *PasskeyQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -153,10 +128,10 @@ func (_q *StashQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// Only returns a single Stash entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Stash entity is found.
-// Returns a *NotFoundError when no Stash entities are found.
-func (_q *StashQuery) Only(ctx context.Context) (*Stash, error) {
+// Only returns a single Passkey entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Passkey entity is found.
+// Returns a *NotFoundError when no Passkey entities are found.
+func (_q *PasskeyQuery) Only(ctx context.Context) (*Passkey, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -165,14 +140,14 @@ func (_q *StashQuery) Only(ctx context.Context) (*Stash, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{stash.Label}
+		return nil, &NotFoundError{passkey.Label}
 	default:
-		return nil, &NotSingularError{stash.Label}
+		return nil, &NotSingularError{passkey.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *StashQuery) OnlyX(ctx context.Context) *Stash {
+func (_q *PasskeyQuery) OnlyX(ctx context.Context) *Passkey {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -180,10 +155,10 @@ func (_q *StashQuery) OnlyX(ctx context.Context) *Stash {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Stash ID in the query.
-// Returns a *NotSingularError when more than one Stash ID is found.
+// OnlyID is like Only, but returns the only Passkey ID in the query.
+// Returns a *NotSingularError when more than one Passkey ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *StashQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *PasskeyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -192,15 +167,15 @@ func (_q *StashQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{stash.Label}
+		err = &NotFoundError{passkey.Label}
 	default:
-		err = &NotSingularError{stash.Label}
+		err = &NotSingularError{passkey.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *StashQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (_q *PasskeyQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -208,18 +183,18 @@ func (_q *StashQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// All executes the query and returns a list of Stashes.
-func (_q *StashQuery) All(ctx context.Context) ([]*Stash, error) {
+// All executes the query and returns a list of Passkeys.
+func (_q *PasskeyQuery) All(ctx context.Context) ([]*Passkey, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Stash, *StashQuery]()
-	return withInterceptors[[]*Stash](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Passkey, *PasskeyQuery]()
+	return withInterceptors[[]*Passkey](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *StashQuery) AllX(ctx context.Context) []*Stash {
+func (_q *PasskeyQuery) AllX(ctx context.Context) []*Passkey {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -227,20 +202,20 @@ func (_q *StashQuery) AllX(ctx context.Context) []*Stash {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Stash IDs.
-func (_q *StashQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+// IDs executes the query and returns a list of Passkey IDs.
+func (_q *PasskeyQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(stash.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(passkey.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *StashQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (_q *PasskeyQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -249,16 +224,16 @@ func (_q *StashQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (_q *StashQuery) Count(ctx context.Context) (int, error) {
+func (_q *PasskeyQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*StashQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*PasskeyQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *StashQuery) CountX(ctx context.Context) int {
+func (_q *PasskeyQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -267,7 +242,7 @@ func (_q *StashQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *StashQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *PasskeyQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -280,7 +255,7 @@ func (_q *StashQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *StashQuery) ExistX(ctx context.Context) bool {
+func (_q *PasskeyQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -288,20 +263,19 @@ func (_q *StashQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the StashQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the PasskeyQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *StashQuery) Clone() *StashQuery {
+func (_q *PasskeyQuery) Clone() *PasskeyQuery {
 	if _q == nil {
 		return nil
 	}
-	return &StashQuery{
-		config:               _q.config,
-		ctx:                  _q.ctx.Clone(),
-		order:                append([]stash.OrderOption{}, _q.order...),
-		inters:               append([]Interceptor{}, _q.inters...),
-		predicates:           append([]predicate.Stash{}, _q.predicates...),
-		withUser:             _q.withUser.Clone(),
-		withDownloadSessions: _q.withDownloadSessions.Clone(),
+	return &PasskeyQuery{
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]passkey.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Passkey{}, _q.predicates...),
+		withUser:   _q.withUser.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -310,23 +284,12 @@ func (_q *StashQuery) Clone() *StashQuery {
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *StashQuery) WithUser(opts ...func(*UserQuery)) *StashQuery {
+func (_q *PasskeyQuery) WithUser(opts ...func(*UserQuery)) *PasskeyQuery {
 	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
 	_q.withUser = query
-	return _q
-}
-
-// WithDownloadSessions tells the query-builder to eager-load the nodes that are connected to
-// the "downloadSessions" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *StashQuery) WithDownloadSessions(opts ...func(*DownloadSessionQuery)) *StashQuery {
-	query := (&DownloadSessionClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withDownloadSessions = query
 	return _q
 }
 
@@ -340,15 +303,15 @@ func (_q *StashQuery) WithDownloadSessions(opts ...func(*DownloadSessionQuery)) 
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Stash.Query().
-//		GroupBy(stash.FieldCreatedAt).
+//	client.Passkey.Query().
+//		GroupBy(passkey.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *StashQuery) GroupBy(field string, fields ...string) *StashGroupBy {
+func (_q *PasskeyQuery) GroupBy(field string, fields ...string) *PasskeyGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &StashGroupBy{build: _q}
+	grbuild := &PasskeyGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = stash.Label
+	grbuild.label = passkey.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -362,23 +325,23 @@ func (_q *StashQuery) GroupBy(field string, fields ...string) *StashGroupBy {
 //		CreatedAt time.Time `json:"createdAt,omitempty"`
 //	}
 //
-//	client.Stash.Query().
-//		Select(stash.FieldCreatedAt).
+//	client.Passkey.Query().
+//		Select(passkey.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *StashQuery) Select(fields ...string) *StashSelect {
+func (_q *PasskeyQuery) Select(fields ...string) *PasskeySelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &StashSelect{StashQuery: _q}
-	sbuild.label = stash.Label
+	sbuild := &PasskeySelect{PasskeyQuery: _q}
+	sbuild.label = passkey.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a StashSelect configured with the given aggregations.
-func (_q *StashQuery) Aggregate(fns ...AggregateFunc) *StashSelect {
+// Aggregate returns a PasskeySelect configured with the given aggregations.
+func (_q *PasskeyQuery) Aggregate(fns ...AggregateFunc) *PasskeySelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *StashQuery) prepareQuery(ctx context.Context) error {
+func (_q *PasskeyQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -390,7 +353,7 @@ func (_q *StashQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !stash.ValidColumn(f) {
+		if !passkey.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -404,20 +367,19 @@ func (_q *StashQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *StashQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stash, error) {
+func (_q *PasskeyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Passkey, error) {
 	var (
-		nodes       = []*Stash{}
+		nodes       = []*Passkey{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			_q.withUser != nil,
-			_q.withDownloadSessions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Stash).scanValues(nil, columns)
+		return (*Passkey).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Stash{config: _q.config}
+		node := &Passkey{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -433,23 +395,16 @@ func (_q *StashQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stash,
 	}
 	if query := _q.withUser; query != nil {
 		if err := _q.loadUser(ctx, query, nodes, nil,
-			func(n *Stash, e *User) { n.Edges.User = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withDownloadSessions; query != nil {
-		if err := _q.loadDownloadSessions(ctx, query, nodes,
-			func(n *Stash) { n.Edges.DownloadSessions = []*DownloadSession{} },
-			func(n *Stash, e *DownloadSession) { n.Edges.DownloadSessions = append(n.Edges.DownloadSessions, e) }); err != nil {
+			func(n *Passkey, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *StashQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Stash, init func(*Stash), assign func(*Stash, *User)) error {
+func (_q *PasskeyQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Passkey, init func(*Passkey), assign func(*Passkey, *User)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Stash)
+	nodeids := make(map[uuid.UUID][]*Passkey)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -476,38 +431,8 @@ func (_q *StashQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*S
 	}
 	return nil
 }
-func (_q *StashQuery) loadDownloadSessions(ctx context.Context, query *DownloadSessionQuery, nodes []*Stash, init func(*Stash), assign func(*Stash, *DownloadSession)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Stash)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(downloadsession.FieldStashID)
-	}
-	query.Where(predicate.DownloadSession(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(stash.DownloadSessionsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.StashID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "stashID" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 
-func (_q *StashQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *PasskeyQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -516,8 +441,8 @@ func (_q *StashQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *StashQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(stash.Table, stash.Columns, sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID))
+func (_q *PasskeyQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(passkey.Table, passkey.Columns, sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -526,14 +451,14 @@ func (_q *StashQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, stash.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, passkey.FieldID)
 		for i := range fields {
-			if fields[i] != stash.FieldID {
+			if fields[i] != passkey.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
 		if _q.withUser != nil {
-			_spec.Node.AddColumnOnce(stash.FieldUserID)
+			_spec.Node.AddColumnOnce(passkey.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -559,12 +484,12 @@ func (_q *StashQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *StashQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *PasskeyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(stash.Table)
+	t1 := builder.Table(passkey.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = stash.Columns
+		columns = passkey.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -591,28 +516,28 @@ func (_q *StashQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// StashGroupBy is the group-by builder for Stash entities.
-type StashGroupBy struct {
+// PasskeyGroupBy is the group-by builder for Passkey entities.
+type PasskeyGroupBy struct {
 	selector
-	build *StashQuery
+	build *PasskeyQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *StashGroupBy) Aggregate(fns ...AggregateFunc) *StashGroupBy {
+func (_g *PasskeyGroupBy) Aggregate(fns ...AggregateFunc) *PasskeyGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *StashGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *PasskeyGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*StashQuery, *StashGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*PasskeyQuery, *PasskeyGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *StashGroupBy) sqlScan(ctx context.Context, root *StashQuery, v any) error {
+func (_g *PasskeyGroupBy) sqlScan(ctx context.Context, root *PasskeyQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -639,28 +564,28 @@ func (_g *StashGroupBy) sqlScan(ctx context.Context, root *StashQuery, v any) er
 	return sql.ScanSlice(rows, v)
 }
 
-// StashSelect is the builder for selecting fields of Stash entities.
-type StashSelect struct {
-	*StashQuery
+// PasskeySelect is the builder for selecting fields of Passkey entities.
+type PasskeySelect struct {
+	*PasskeyQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *StashSelect) Aggregate(fns ...AggregateFunc) *StashSelect {
+func (_s *PasskeySelect) Aggregate(fns ...AggregateFunc) *PasskeySelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *StashSelect) Scan(ctx context.Context, v any) error {
+func (_s *PasskeySelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*StashQuery, *StashSelect](ctx, _s.StashQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*PasskeyQuery, *PasskeySelect](ctx, _s.PasskeyQuery, _s, _s.inters, v)
 }
 
-func (_s *StashSelect) sqlScan(ctx context.Context, root *StashQuery, v any) error {
+func (_s *PasskeySelect) sqlScan(ctx context.Context, root *PasskeyQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

@@ -12,10 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -25,15 +26,16 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []user.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.User
-	withStashes          *StashQuery
-	withMessengers       *UserMessengerQuery
-	withDownloadSessions *DownloadSessionQuery
-	withInvite           *InviteQuery
-	withLogs             *LogEntryQuery
+	ctx            *QueryContext
+	order          []user.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.User
+	withStashes    *StashQuery
+	withMessengers *UserMessengerQuery
+	withInvite     *InviteQuery
+	withPasskeys   *PasskeyQuery
+	withSessions   *SessionQuery
+	withLogs       *LogEntryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -114,28 +116,6 @@ func (_q *UserQuery) QueryMessengers() *UserMessengerQuery {
 	return query
 }
 
-// QueryDownloadSessions chains the current query on the "downloadSessions" edge.
-func (_q *UserQuery) QueryDownloadSessions() *DownloadSessionQuery {
-	query := (&DownloadSessionClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(downloadsession.Table, downloadsession.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.DownloadSessionsTable, user.DownloadSessionsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryInvite chains the current query on the "invite" edge.
 func (_q *UserQuery) QueryInvite() *InviteQuery {
 	query := (&InviteClient{config: _q.config}).Query()
@@ -151,6 +131,50 @@ func (_q *UserQuery) QueryInvite() *InviteQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(invite.Table, invite.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.InviteTable, user.InviteColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPasskeys chains the current query on the "passkeys" edge.
+func (_q *UserQuery) QueryPasskeys() *PasskeyQuery {
+	query := (&PasskeyClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(passkey.Table, passkey.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PasskeysTable, user.PasskeysColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySessions chains the current query on the "sessions" edge.
+func (_q *UserQuery) QuerySessions() *SessionQuery {
+	query := (&SessionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -367,16 +391,17 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:               _q.config,
-		ctx:                  _q.ctx.Clone(),
-		order:                append([]user.OrderOption{}, _q.order...),
-		inters:               append([]Interceptor{}, _q.inters...),
-		predicates:           append([]predicate.User{}, _q.predicates...),
-		withStashes:          _q.withStashes.Clone(),
-		withMessengers:       _q.withMessengers.Clone(),
-		withDownloadSessions: _q.withDownloadSessions.Clone(),
-		withInvite:           _q.withInvite.Clone(),
-		withLogs:             _q.withLogs.Clone(),
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]user.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.User{}, _q.predicates...),
+		withStashes:    _q.withStashes.Clone(),
+		withMessengers: _q.withMessengers.Clone(),
+		withInvite:     _q.withInvite.Clone(),
+		withPasskeys:   _q.withPasskeys.Clone(),
+		withSessions:   _q.withSessions.Clone(),
+		withLogs:       _q.withLogs.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -405,17 +430,6 @@ func (_q *UserQuery) WithMessengers(opts ...func(*UserMessengerQuery)) *UserQuer
 	return _q
 }
 
-// WithDownloadSessions tells the query-builder to eager-load the nodes that are connected to
-// the "downloadSessions" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithDownloadSessions(opts ...func(*DownloadSessionQuery)) *UserQuery {
-	query := (&DownloadSessionClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withDownloadSessions = query
-	return _q
-}
-
 // WithInvite tells the query-builder to eager-load the nodes that are connected to
 // the "invite" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithInvite(opts ...func(*InviteQuery)) *UserQuery {
@@ -424,6 +438,28 @@ func (_q *UserQuery) WithInvite(opts ...func(*InviteQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withInvite = query
+	return _q
+}
+
+// WithPasskeys tells the query-builder to eager-load the nodes that are connected to
+// the "passkeys" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithPasskeys(opts ...func(*PasskeyQuery)) *UserQuery {
+	query := (&PasskeyClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPasskeys = query
+	return _q
+}
+
+// WithSessions tells the query-builder to eager-load the nodes that are connected to
+// the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
+	query := (&SessionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSessions = query
 	return _q
 }
 
@@ -516,11 +552,12 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			_q.withStashes != nil,
 			_q.withMessengers != nil,
-			_q.withDownloadSessions != nil,
 			_q.withInvite != nil,
+			_q.withPasskeys != nil,
+			_q.withSessions != nil,
 			_q.withLogs != nil,
 		}
 	)
@@ -556,16 +593,23 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := _q.withDownloadSessions; query != nil {
-		if err := _q.loadDownloadSessions(ctx, query, nodes,
-			func(n *User) { n.Edges.DownloadSessions = []*DownloadSession{} },
-			func(n *User, e *DownloadSession) { n.Edges.DownloadSessions = append(n.Edges.DownloadSessions, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := _q.withInvite; query != nil {
 		if err := _q.loadInvite(ctx, query, nodes, nil,
 			func(n *User, e *Invite) { n.Edges.Invite = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPasskeys; query != nil {
+		if err := _q.loadPasskeys(ctx, query, nodes,
+			func(n *User) { n.Edges.Passkeys = []*Passkey{} },
+			func(n *User, e *Passkey) { n.Edges.Passkeys = append(n.Edges.Passkeys, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSessions; query != nil {
+		if err := _q.loadSessions(ctx, query, nodes,
+			func(n *User) { n.Edges.Sessions = []*Session{} },
+			func(n *User, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -639,21 +683,18 @@ func (_q *UserQuery) loadMessengers(ctx context.Context, query *UserMessengerQue
 	}
 	return nil
 }
-func (_q *UserQuery) loadDownloadSessions(ctx context.Context, query *DownloadSessionQuery, nodes []*User, init func(*User), assign func(*User, *DownloadSession)) error {
+func (_q *UserQuery) loadInvite(ctx context.Context, query *InviteQuery, nodes []*User, init func(*User), assign func(*User, *Invite)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(downloadsession.FieldUserID)
+		query.ctx.AppendFieldOnce(invite.FieldUserID)
 	}
-	query.Where(predicate.DownloadSession(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.DownloadSessionsColumn), fks...))
+	query.Where(predicate.Invite(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.InviteColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -669,18 +710,51 @@ func (_q *UserQuery) loadDownloadSessions(ctx context.Context, query *DownloadSe
 	}
 	return nil
 }
-func (_q *UserQuery) loadInvite(ctx context.Context, query *InviteQuery, nodes []*User, init func(*User), assign func(*User, *Invite)) error {
+func (_q *UserQuery) loadPasskeys(ctx context.Context, query *PasskeyQuery, nodes []*User, init func(*User), assign func(*User, *Passkey)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(invite.FieldUserID)
+		query.ctx.AppendFieldOnce(passkey.FieldUserID)
 	}
-	query.Where(predicate.Invite(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.InviteColumn), fks...))
+	query.Where(predicate.Passkey(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PasskeysColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "userID" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*User, init func(*User), assign func(*User, *Session)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(session.FieldUserID)
+	}
+	query.Where(predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SessionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

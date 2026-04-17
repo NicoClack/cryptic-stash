@@ -41,6 +41,14 @@ type Stash struct {
 	HashMemory uint32 `json:"hashMemory,omitempty"`
 	// HashThreads holds the value of the "hashThreads" field.
 	HashThreads uint8 `json:"hashThreads,omitempty"`
+	// SelfLocked holds the value of the "selfLocked" field.
+	SelfLocked bool `json:"selfLocked,omitempty"`
+	// AdminLocked holds the value of the "adminLocked" field.
+	AdminLocked bool `json:"adminLocked,omitempty"`
+	// SelfLockedUntil holds the value of the "selfLockedUntil" field.
+	SelfLockedUntil *time.Time `json:"selfLockedUntil,omitempty"`
+	// DownloadSessionsValidFrom holds the value of the "downloadSessionsValidFrom" field.
+	DownloadSessionsValidFrom time.Time `json:"downloadSessionsValidFrom,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -53,9 +61,11 @@ type Stash struct {
 type StashEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// DownloadSessions holds the value of the downloadSessions edge.
+	DownloadSessions []*DownloadSession `json:"downloadSessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -69,6 +79,15 @@ func (e StashEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// DownloadSessionsOrErr returns the DownloadSessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e StashEdges) DownloadSessionsOrErr() ([]*DownloadSession, error) {
+	if e.loadedTypes[1] {
+		return e.DownloadSessions, nil
+	}
+	return nil, &NotLoadedError{edge: "downloadSessions"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Stash) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -76,11 +95,13 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case stash.FieldContent, stash.FieldFileName, stash.FieldEncryptionDataKey, stash.FieldPasswordSalt:
 			values[i] = new([]byte)
+		case stash.FieldSelfLocked, stash.FieldAdminLocked:
+			values[i] = new(sql.NullBool)
 		case stash.FieldHashTime, stash.FieldHashMemory, stash.FieldHashThreads:
 			values[i] = new(sql.NullInt64)
 		case stash.FieldPublicName:
 			values[i] = new(sql.NullString)
-		case stash.FieldCreatedAt, stash.FieldUpdatedAt, stash.FieldLastDownloadAt:
+		case stash.FieldCreatedAt, stash.FieldUpdatedAt, stash.FieldLastDownloadAt, stash.FieldSelfLockedUntil, stash.FieldDownloadSessionsValidFrom:
 			values[i] = new(sql.NullTime)
 		case stash.FieldID, stash.FieldUserID:
 			values[i] = new(uuid.UUID)
@@ -171,6 +192,31 @@ func (_m *Stash) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.HashThreads = uint8(value.Int64)
 			}
+		case stash.FieldSelfLocked:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field selfLocked", values[i])
+			} else if value.Valid {
+				_m.SelfLocked = value.Bool
+			}
+		case stash.FieldAdminLocked:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field adminLocked", values[i])
+			} else if value.Valid {
+				_m.AdminLocked = value.Bool
+			}
+		case stash.FieldSelfLockedUntil:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field selfLockedUntil", values[i])
+			} else if value.Valid {
+				_m.SelfLockedUntil = new(time.Time)
+				*_m.SelfLockedUntil = value.Time
+			}
+		case stash.FieldDownloadSessionsValidFrom:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field downloadSessionsValidFrom", values[i])
+			} else if value.Valid {
+				_m.DownloadSessionsValidFrom = value.Time
+			}
 		case stash.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field userID", values[i])
@@ -193,6 +239,11 @@ func (_m *Stash) Value(name string) (ent.Value, error) {
 // QueryUser queries the "user" edge of the Stash entity.
 func (_m *Stash) QueryUser() *UserQuery {
 	return NewStashClient(_m.config).QueryUser(_m)
+}
+
+// QueryDownloadSessions queries the "downloadSessions" edge of the Stash entity.
+func (_m *Stash) QueryDownloadSessions() *DownloadSessionQuery {
+	return NewStashClient(_m.config).QueryDownloadSessions(_m)
 }
 
 // Update returns a builder for updating this Stash.
@@ -250,6 +301,20 @@ func (_m *Stash) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("hashThreads=")
 	builder.WriteString(fmt.Sprintf("%v", _m.HashThreads))
+	builder.WriteString(", ")
+	builder.WriteString("selfLocked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SelfLocked))
+	builder.WriteString(", ")
+	builder.WriteString("adminLocked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AdminLocked))
+	builder.WriteString(", ")
+	if v := _m.SelfLockedUntil; v != nil {
+		builder.WriteString("selfLockedUntil=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("downloadSessionsValidFrom=")
+	builder.WriteString(_m.DownloadSessionsValidFrom.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
