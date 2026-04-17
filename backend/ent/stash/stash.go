@@ -37,10 +37,10 @@ const (
 	FieldHashMemory = "hash_memory"
 	// FieldHashThreads holds the string denoting the hashthreads field in the database.
 	FieldHashThreads = "hash_threads"
-	// FieldSelfLocked holds the string denoting the selflocked field in the database.
-	FieldSelfLocked = "self_locked"
-	// FieldAdminLocked holds the string denoting the adminlocked field in the database.
-	FieldAdminLocked = "admin_locked"
+	// FieldIsSelfLocked holds the string denoting the isselflocked field in the database.
+	FieldIsSelfLocked = "is_self_locked"
+	// FieldIsAdminLocked holds the string denoting the isadminlocked field in the database.
+	FieldIsAdminLocked = "is_admin_locked"
 	// FieldSelfLockedUntil holds the string denoting the selflockeduntil field in the database.
 	FieldSelfLockedUntil = "self_locked_until"
 	// FieldDownloadSessionsValidFrom holds the string denoting the downloadsessionsvalidfrom field in the database.
@@ -83,8 +83,8 @@ var Columns = []string{
 	FieldHashTime,
 	FieldHashMemory,
 	FieldHashThreads,
-	FieldSelfLocked,
-	FieldAdminLocked,
+	FieldIsSelfLocked,
+	FieldIsAdminLocked,
 	FieldSelfLockedUntil,
 	FieldDownloadSessionsValidFrom,
 	FieldUserID,
@@ -113,10 +113,10 @@ var (
 	EncryptionDataKeyValidator func([]byte) error
 	// PasswordSaltValidator is a validator for the "passwordSalt" field. It is called by the builders before save.
 	PasswordSaltValidator func([]byte) error
-	// DefaultSelfLocked holds the default value on creation for the "selfLocked" field.
-	DefaultSelfLocked bool
-	// DefaultAdminLocked holds the default value on creation for the "adminLocked" field.
-	DefaultAdminLocked bool
+	// DefaultIsSelfLocked holds the default value on creation for the "isSelfLocked" field.
+	DefaultIsSelfLocked bool
+	// DefaultIsAdminLocked holds the default value on creation for the "isAdminLocked" field.
+	DefaultIsAdminLocked bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -164,14 +164,14 @@ func ByHashThreads(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHashThreads, opts...).ToFunc()
 }
 
-// BySelfLocked orders the results by the selfLocked field.
-func BySelfLocked(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSelfLocked, opts...).ToFunc()
+// ByIsSelfLocked orders the results by the isSelfLocked field.
+func ByIsSelfLocked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsSelfLocked, opts...).ToFunc()
 }
 
-// ByAdminLocked orders the results by the adminLocked field.
-func ByAdminLocked(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAdminLocked, opts...).ToFunc()
+// ByIsAdminLocked orders the results by the isAdminLocked field.
+func ByIsAdminLocked(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsAdminLocked, opts...).ToFunc()
 }
 
 // BySelfLockedUntil orders the results by the selfLockedUntil field.

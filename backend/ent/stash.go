@@ -41,10 +41,10 @@ type Stash struct {
 	HashMemory uint32 `json:"hashMemory,omitempty"`
 	// HashThreads holds the value of the "hashThreads" field.
 	HashThreads uint8 `json:"hashThreads,omitempty"`
-	// SelfLocked holds the value of the "selfLocked" field.
-	SelfLocked bool `json:"selfLocked,omitempty"`
-	// AdminLocked holds the value of the "adminLocked" field.
-	AdminLocked bool `json:"adminLocked,omitempty"`
+	// IsSelfLocked holds the value of the "isSelfLocked" field.
+	IsSelfLocked bool `json:"isSelfLocked,omitempty"`
+	// IsAdminLocked holds the value of the "isAdminLocked" field.
+	IsAdminLocked bool `json:"isAdminLocked,omitempty"`
 	// SelfLockedUntil holds the value of the "selfLockedUntil" field.
 	SelfLockedUntil *time.Time `json:"selfLockedUntil,omitempty"`
 	// DownloadSessionsValidFrom holds the value of the "downloadSessionsValidFrom" field.
@@ -95,7 +95,7 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case stash.FieldContent, stash.FieldFileName, stash.FieldEncryptionDataKey, stash.FieldPasswordSalt:
 			values[i] = new([]byte)
-		case stash.FieldSelfLocked, stash.FieldAdminLocked:
+		case stash.FieldIsSelfLocked, stash.FieldIsAdminLocked:
 			values[i] = new(sql.NullBool)
 		case stash.FieldHashTime, stash.FieldHashMemory, stash.FieldHashThreads:
 			values[i] = new(sql.NullInt64)
@@ -192,17 +192,17 @@ func (_m *Stash) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.HashThreads = uint8(value.Int64)
 			}
-		case stash.FieldSelfLocked:
+		case stash.FieldIsSelfLocked:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field selfLocked", values[i])
+				return fmt.Errorf("unexpected type %T for field isSelfLocked", values[i])
 			} else if value.Valid {
-				_m.SelfLocked = value.Bool
+				_m.IsSelfLocked = value.Bool
 			}
-		case stash.FieldAdminLocked:
+		case stash.FieldIsAdminLocked:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field adminLocked", values[i])
+				return fmt.Errorf("unexpected type %T for field isAdminLocked", values[i])
 			} else if value.Valid {
-				_m.AdminLocked = value.Bool
+				_m.IsAdminLocked = value.Bool
 			}
 		case stash.FieldSelfLockedUntil:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -302,11 +302,11 @@ func (_m *Stash) String() string {
 	builder.WriteString("hashThreads=")
 	builder.WriteString(fmt.Sprintf("%v", _m.HashThreads))
 	builder.WriteString(", ")
-	builder.WriteString("selfLocked=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SelfLocked))
+	builder.WriteString("isSelfLocked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsSelfLocked))
 	builder.WriteString(", ")
-	builder.WriteString("adminLocked=")
-	builder.WriteString(fmt.Sprintf("%v", _m.AdminLocked))
+	builder.WriteString("isAdminLocked=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsAdminLocked))
 	builder.WriteString(", ")
 	if v := _m.SelfLockedUntil; v != nil {
 		builder.WriteString("selfLockedUntil=")

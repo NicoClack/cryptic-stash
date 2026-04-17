@@ -100,30 +100,30 @@ func (_c *StashCreate) SetHashThreads(v uint8) *StashCreate {
 	return _c
 }
 
-// SetSelfLocked sets the "selfLocked" field.
-func (_c *StashCreate) SetSelfLocked(v bool) *StashCreate {
-	_c.mutation.SetSelfLocked(v)
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (_c *StashCreate) SetIsSelfLocked(v bool) *StashCreate {
+	_c.mutation.SetIsSelfLocked(v)
 	return _c
 }
 
-// SetNillableSelfLocked sets the "selfLocked" field if the given value is not nil.
-func (_c *StashCreate) SetNillableSelfLocked(v *bool) *StashCreate {
+// SetNillableIsSelfLocked sets the "isSelfLocked" field if the given value is not nil.
+func (_c *StashCreate) SetNillableIsSelfLocked(v *bool) *StashCreate {
 	if v != nil {
-		_c.SetSelfLocked(*v)
+		_c.SetIsSelfLocked(*v)
 	}
 	return _c
 }
 
-// SetAdminLocked sets the "adminLocked" field.
-func (_c *StashCreate) SetAdminLocked(v bool) *StashCreate {
-	_c.mutation.SetAdminLocked(v)
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (_c *StashCreate) SetIsAdminLocked(v bool) *StashCreate {
+	_c.mutation.SetIsAdminLocked(v)
 	return _c
 }
 
-// SetNillableAdminLocked sets the "adminLocked" field if the given value is not nil.
-func (_c *StashCreate) SetNillableAdminLocked(v *bool) *StashCreate {
+// SetNillableIsAdminLocked sets the "isAdminLocked" field if the given value is not nil.
+func (_c *StashCreate) SetNillableIsAdminLocked(v *bool) *StashCreate {
 	if v != nil {
-		_c.SetAdminLocked(*v)
+		_c.SetIsAdminLocked(*v)
 	}
 	return _c
 }
@@ -223,13 +223,13 @@ func (_c *StashCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *StashCreate) defaults() {
-	if _, ok := _c.mutation.SelfLocked(); !ok {
-		v := stash.DefaultSelfLocked
-		_c.mutation.SetSelfLocked(v)
+	if _, ok := _c.mutation.IsSelfLocked(); !ok {
+		v := stash.DefaultIsSelfLocked
+		_c.mutation.SetIsSelfLocked(v)
 	}
-	if _, ok := _c.mutation.AdminLocked(); !ok {
-		v := stash.DefaultAdminLocked
-		_c.mutation.SetAdminLocked(v)
+	if _, ok := _c.mutation.IsAdminLocked(); !ok {
+		v := stash.DefaultIsAdminLocked
+		_c.mutation.SetIsAdminLocked(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := stash.DefaultID()
@@ -294,11 +294,11 @@ func (_c *StashCreate) check() error {
 	if _, ok := _c.mutation.HashThreads(); !ok {
 		return &ValidationError{Name: "hashThreads", err: errors.New(`ent: missing required field "Stash.hashThreads"`)}
 	}
-	if _, ok := _c.mutation.SelfLocked(); !ok {
-		return &ValidationError{Name: "selfLocked", err: errors.New(`ent: missing required field "Stash.selfLocked"`)}
+	if _, ok := _c.mutation.IsSelfLocked(); !ok {
+		return &ValidationError{Name: "isSelfLocked", err: errors.New(`ent: missing required field "Stash.isSelfLocked"`)}
 	}
-	if _, ok := _c.mutation.AdminLocked(); !ok {
-		return &ValidationError{Name: "adminLocked", err: errors.New(`ent: missing required field "Stash.adminLocked"`)}
+	if _, ok := _c.mutation.IsAdminLocked(); !ok {
+		return &ValidationError{Name: "isAdminLocked", err: errors.New(`ent: missing required field "Stash.isAdminLocked"`)}
 	}
 	if _, ok := _c.mutation.DownloadSessionsValidFrom(); !ok {
 		return &ValidationError{Name: "downloadSessionsValidFrom", err: errors.New(`ent: missing required field "Stash.downloadSessionsValidFrom"`)}
@@ -389,13 +389,13 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 		_spec.SetField(stash.FieldHashThreads, field.TypeUint8, value)
 		_node.HashThreads = value
 	}
-	if value, ok := _c.mutation.SelfLocked(); ok {
-		_spec.SetField(stash.FieldSelfLocked, field.TypeBool, value)
-		_node.SelfLocked = value
+	if value, ok := _c.mutation.IsSelfLocked(); ok {
+		_spec.SetField(stash.FieldIsSelfLocked, field.TypeBool, value)
+		_node.IsSelfLocked = value
 	}
-	if value, ok := _c.mutation.AdminLocked(); ok {
-		_spec.SetField(stash.FieldAdminLocked, field.TypeBool, value)
-		_node.AdminLocked = value
+	if value, ok := _c.mutation.IsAdminLocked(); ok {
+		_spec.SetField(stash.FieldIsAdminLocked, field.TypeBool, value)
+		_node.IsAdminLocked = value
 	}
 	if value, ok := _c.mutation.SelfLockedUntil(); ok {
 		_spec.SetField(stash.FieldSelfLockedUntil, field.TypeTime, value)
@@ -646,27 +646,27 @@ func (u *StashUpsert) AddHashThreads(v uint8) *StashUpsert {
 	return u
 }
 
-// SetSelfLocked sets the "selfLocked" field.
-func (u *StashUpsert) SetSelfLocked(v bool) *StashUpsert {
-	u.Set(stash.FieldSelfLocked, v)
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (u *StashUpsert) SetIsSelfLocked(v bool) *StashUpsert {
+	u.Set(stash.FieldIsSelfLocked, v)
 	return u
 }
 
-// UpdateSelfLocked sets the "selfLocked" field to the value that was provided on create.
-func (u *StashUpsert) UpdateSelfLocked() *StashUpsert {
-	u.SetExcluded(stash.FieldSelfLocked)
+// UpdateIsSelfLocked sets the "isSelfLocked" field to the value that was provided on create.
+func (u *StashUpsert) UpdateIsSelfLocked() *StashUpsert {
+	u.SetExcluded(stash.FieldIsSelfLocked)
 	return u
 }
 
-// SetAdminLocked sets the "adminLocked" field.
-func (u *StashUpsert) SetAdminLocked(v bool) *StashUpsert {
-	u.Set(stash.FieldAdminLocked, v)
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (u *StashUpsert) SetIsAdminLocked(v bool) *StashUpsert {
+	u.Set(stash.FieldIsAdminLocked, v)
 	return u
 }
 
-// UpdateAdminLocked sets the "adminLocked" field to the value that was provided on create.
-func (u *StashUpsert) UpdateAdminLocked() *StashUpsert {
-	u.SetExcluded(stash.FieldAdminLocked)
+// UpdateIsAdminLocked sets the "isAdminLocked" field to the value that was provided on create.
+func (u *StashUpsert) UpdateIsAdminLocked() *StashUpsert {
+	u.SetExcluded(stash.FieldIsAdminLocked)
 	return u
 }
 
@@ -942,31 +942,31 @@ func (u *StashUpsertOne) UpdateHashThreads() *StashUpsertOne {
 	})
 }
 
-// SetSelfLocked sets the "selfLocked" field.
-func (u *StashUpsertOne) SetSelfLocked(v bool) *StashUpsertOne {
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (u *StashUpsertOne) SetIsSelfLocked(v bool) *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.SetSelfLocked(v)
+		s.SetIsSelfLocked(v)
 	})
 }
 
-// UpdateSelfLocked sets the "selfLocked" field to the value that was provided on create.
-func (u *StashUpsertOne) UpdateSelfLocked() *StashUpsertOne {
+// UpdateIsSelfLocked sets the "isSelfLocked" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateIsSelfLocked() *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateSelfLocked()
+		s.UpdateIsSelfLocked()
 	})
 }
 
-// SetAdminLocked sets the "adminLocked" field.
-func (u *StashUpsertOne) SetAdminLocked(v bool) *StashUpsertOne {
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (u *StashUpsertOne) SetIsAdminLocked(v bool) *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.SetAdminLocked(v)
+		s.SetIsAdminLocked(v)
 	})
 }
 
-// UpdateAdminLocked sets the "adminLocked" field to the value that was provided on create.
-func (u *StashUpsertOne) UpdateAdminLocked() *StashUpsertOne {
+// UpdateIsAdminLocked sets the "isAdminLocked" field to the value that was provided on create.
+func (u *StashUpsertOne) UpdateIsAdminLocked() *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateAdminLocked()
+		s.UpdateIsAdminLocked()
 	})
 }
 
@@ -1416,31 +1416,31 @@ func (u *StashUpsertBulk) UpdateHashThreads() *StashUpsertBulk {
 	})
 }
 
-// SetSelfLocked sets the "selfLocked" field.
-func (u *StashUpsertBulk) SetSelfLocked(v bool) *StashUpsertBulk {
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (u *StashUpsertBulk) SetIsSelfLocked(v bool) *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.SetSelfLocked(v)
+		s.SetIsSelfLocked(v)
 	})
 }
 
-// UpdateSelfLocked sets the "selfLocked" field to the value that was provided on create.
-func (u *StashUpsertBulk) UpdateSelfLocked() *StashUpsertBulk {
+// UpdateIsSelfLocked sets the "isSelfLocked" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateIsSelfLocked() *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateSelfLocked()
+		s.UpdateIsSelfLocked()
 	})
 }
 
-// SetAdminLocked sets the "adminLocked" field.
-func (u *StashUpsertBulk) SetAdminLocked(v bool) *StashUpsertBulk {
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (u *StashUpsertBulk) SetIsAdminLocked(v bool) *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.SetAdminLocked(v)
+		s.SetIsAdminLocked(v)
 	})
 }
 
-// UpdateAdminLocked sets the "adminLocked" field to the value that was provided on create.
-func (u *StashUpsertBulk) UpdateAdminLocked() *StashUpsertBulk {
+// UpdateIsAdminLocked sets the "isAdminLocked" field to the value that was provided on create.
+func (u *StashUpsertBulk) UpdateIsAdminLocked() *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
-		s.UpdateAdminLocked()
+		s.UpdateIsAdminLocked()
 	})
 }
 

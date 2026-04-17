@@ -36,9 +36,9 @@ func (Stash) Fields() []ent.Field {
 		field.Uint32("hashMemory"),
 		field.Uint8("hashThreads"),
 
-		field.Bool("selfLocked").Default(false),
-		field.Bool("adminLocked").Default(false),
-		// Creating a temporary lock won't update selfLocked
+		field.Bool("isSelfLocked").Default(false),
+		field.Bool("isAdminLocked").Default(false),
+		// Creating a temporary lock won't update isSelfLocked
 		field.Time("selfLockedUntil").Nillable().Optional(),
 		field.Time("downloadSessionsValidFrom"),
 

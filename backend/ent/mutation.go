@@ -7530,8 +7530,8 @@ type StashMutation struct {
 	addhashMemory             *int32
 	hashThreads               *uint8
 	addhashThreads            *int8
-	selfLocked                *bool
-	adminLocked               *bool
+	isSelfLocked              *bool
+	isAdminLocked             *bool
 	selfLockedUntil           *time.Time
 	downloadSessionsValidFrom *time.Time
 	clearedFields             map[string]struct{}
@@ -8118,76 +8118,76 @@ func (m *StashMutation) ResetHashThreads() {
 	m.addhashThreads = nil
 }
 
-// SetSelfLocked sets the "selfLocked" field.
-func (m *StashMutation) SetSelfLocked(b bool) {
-	m.selfLocked = &b
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (m *StashMutation) SetIsSelfLocked(b bool) {
+	m.isSelfLocked = &b
 }
 
-// SelfLocked returns the value of the "selfLocked" field in the mutation.
-func (m *StashMutation) SelfLocked() (r bool, exists bool) {
-	v := m.selfLocked
+// IsSelfLocked returns the value of the "isSelfLocked" field in the mutation.
+func (m *StashMutation) IsSelfLocked() (r bool, exists bool) {
+	v := m.isSelfLocked
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSelfLocked returns the old "selfLocked" field's value of the Stash entity.
+// OldIsSelfLocked returns the old "isSelfLocked" field's value of the Stash entity.
 // If the Stash object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StashMutation) OldSelfLocked(ctx context.Context) (v bool, err error) {
+func (m *StashMutation) OldIsSelfLocked(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSelfLocked is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsSelfLocked is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSelfLocked requires an ID field in the mutation")
+		return v, errors.New("OldIsSelfLocked requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSelfLocked: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsSelfLocked: %w", err)
 	}
-	return oldValue.SelfLocked, nil
+	return oldValue.IsSelfLocked, nil
 }
 
-// ResetSelfLocked resets all changes to the "selfLocked" field.
-func (m *StashMutation) ResetSelfLocked() {
-	m.selfLocked = nil
+// ResetIsSelfLocked resets all changes to the "isSelfLocked" field.
+func (m *StashMutation) ResetIsSelfLocked() {
+	m.isSelfLocked = nil
 }
 
-// SetAdminLocked sets the "adminLocked" field.
-func (m *StashMutation) SetAdminLocked(b bool) {
-	m.adminLocked = &b
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (m *StashMutation) SetIsAdminLocked(b bool) {
+	m.isAdminLocked = &b
 }
 
-// AdminLocked returns the value of the "adminLocked" field in the mutation.
-func (m *StashMutation) AdminLocked() (r bool, exists bool) {
-	v := m.adminLocked
+// IsAdminLocked returns the value of the "isAdminLocked" field in the mutation.
+func (m *StashMutation) IsAdminLocked() (r bool, exists bool) {
+	v := m.isAdminLocked
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAdminLocked returns the old "adminLocked" field's value of the Stash entity.
+// OldIsAdminLocked returns the old "isAdminLocked" field's value of the Stash entity.
 // If the Stash object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StashMutation) OldAdminLocked(ctx context.Context) (v bool, err error) {
+func (m *StashMutation) OldIsAdminLocked(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAdminLocked is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsAdminLocked is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAdminLocked requires an ID field in the mutation")
+		return v, errors.New("OldIsAdminLocked requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAdminLocked: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsAdminLocked: %w", err)
 	}
-	return oldValue.AdminLocked, nil
+	return oldValue.IsAdminLocked, nil
 }
 
-// ResetAdminLocked resets all changes to the "adminLocked" field.
-func (m *StashMutation) ResetAdminLocked() {
-	m.adminLocked = nil
+// ResetIsAdminLocked resets all changes to the "isAdminLocked" field.
+func (m *StashMutation) ResetIsAdminLocked() {
+	m.isAdminLocked = nil
 }
 
 // SetSelfLockedUntil sets the "selfLockedUntil" field.
@@ -8460,11 +8460,11 @@ func (m *StashMutation) Fields() []string {
 	if m.hashThreads != nil {
 		fields = append(fields, stash.FieldHashThreads)
 	}
-	if m.selfLocked != nil {
-		fields = append(fields, stash.FieldSelfLocked)
+	if m.isSelfLocked != nil {
+		fields = append(fields, stash.FieldIsSelfLocked)
 	}
-	if m.adminLocked != nil {
-		fields = append(fields, stash.FieldAdminLocked)
+	if m.isAdminLocked != nil {
+		fields = append(fields, stash.FieldIsAdminLocked)
 	}
 	if m.selfLockedUntil != nil {
 		fields = append(fields, stash.FieldSelfLockedUntil)
@@ -8505,10 +8505,10 @@ func (m *StashMutation) Field(name string) (ent.Value, bool) {
 		return m.HashMemory()
 	case stash.FieldHashThreads:
 		return m.HashThreads()
-	case stash.FieldSelfLocked:
-		return m.SelfLocked()
-	case stash.FieldAdminLocked:
-		return m.AdminLocked()
+	case stash.FieldIsSelfLocked:
+		return m.IsSelfLocked()
+	case stash.FieldIsAdminLocked:
+		return m.IsAdminLocked()
 	case stash.FieldSelfLockedUntil:
 		return m.SelfLockedUntil()
 	case stash.FieldDownloadSessionsValidFrom:
@@ -8546,10 +8546,10 @@ func (m *StashMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldHashMemory(ctx)
 	case stash.FieldHashThreads:
 		return m.OldHashThreads(ctx)
-	case stash.FieldSelfLocked:
-		return m.OldSelfLocked(ctx)
-	case stash.FieldAdminLocked:
-		return m.OldAdminLocked(ctx)
+	case stash.FieldIsSelfLocked:
+		return m.OldIsSelfLocked(ctx)
+	case stash.FieldIsAdminLocked:
+		return m.OldIsAdminLocked(ctx)
 	case stash.FieldSelfLockedUntil:
 		return m.OldSelfLockedUntil(ctx)
 	case stash.FieldDownloadSessionsValidFrom:
@@ -8642,19 +8642,19 @@ func (m *StashMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetHashThreads(v)
 		return nil
-	case stash.FieldSelfLocked:
+	case stash.FieldIsSelfLocked:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSelfLocked(v)
+		m.SetIsSelfLocked(v)
 		return nil
-	case stash.FieldAdminLocked:
+	case stash.FieldIsAdminLocked:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAdminLocked(v)
+		m.SetIsAdminLocked(v)
 		return nil
 	case stash.FieldSelfLockedUntil:
 		v, ok := value.(time.Time)
@@ -8813,11 +8813,11 @@ func (m *StashMutation) ResetField(name string) error {
 	case stash.FieldHashThreads:
 		m.ResetHashThreads()
 		return nil
-	case stash.FieldSelfLocked:
-		m.ResetSelfLocked()
+	case stash.FieldIsSelfLocked:
+		m.ResetIsSelfLocked()
 		return nil
-	case stash.FieldAdminLocked:
-		m.ResetAdminLocked()
+	case stash.FieldIsAdminLocked:
+		m.ResetIsAdminLocked()
 		return nil
 	case stash.FieldSelfLockedUntil:
 		m.ResetSelfLockedUntil()

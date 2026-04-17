@@ -414,14 +414,14 @@ func init() {
 	stashDescPasswordSalt := stashFields[8].Descriptor()
 	// stash.PasswordSaltValidator is a validator for the "passwordSalt" field. It is called by the builders before save.
 	stash.PasswordSaltValidator = stashDescPasswordSalt.Validators[0].(func([]byte) error)
-	// stashDescSelfLocked is the schema descriptor for selfLocked field.
-	stashDescSelfLocked := stashFields[12].Descriptor()
-	// stash.DefaultSelfLocked holds the default value on creation for the selfLocked field.
-	stash.DefaultSelfLocked = stashDescSelfLocked.Default.(bool)
-	// stashDescAdminLocked is the schema descriptor for adminLocked field.
-	stashDescAdminLocked := stashFields[13].Descriptor()
-	// stash.DefaultAdminLocked holds the default value on creation for the adminLocked field.
-	stash.DefaultAdminLocked = stashDescAdminLocked.Default.(bool)
+	// stashDescIsSelfLocked is the schema descriptor for isSelfLocked field.
+	stashDescIsSelfLocked := stashFields[12].Descriptor()
+	// stash.DefaultIsSelfLocked holds the default value on creation for the isSelfLocked field.
+	stash.DefaultIsSelfLocked = stashDescIsSelfLocked.Default.(bool)
+	// stashDescIsAdminLocked is the schema descriptor for isAdminLocked field.
+	stashDescIsAdminLocked := stashFields[13].Descriptor()
+	// stash.DefaultIsAdminLocked holds the default value on creation for the isAdminLocked field.
+	stash.DefaultIsAdminLocked = stashDescIsAdminLocked.Default.(bool)
 	// stashDescID is the schema descriptor for id field.
 	stashDescID := stashFields[0].Descriptor()
 	// stash.DefaultID holds the default value on creation for the id field.

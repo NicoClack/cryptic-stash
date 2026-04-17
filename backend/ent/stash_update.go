@@ -172,30 +172,30 @@ func (_u *StashUpdate) AddHashThreads(v int8) *StashUpdate {
 	return _u
 }
 
-// SetSelfLocked sets the "selfLocked" field.
-func (_u *StashUpdate) SetSelfLocked(v bool) *StashUpdate {
-	_u.mutation.SetSelfLocked(v)
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (_u *StashUpdate) SetIsSelfLocked(v bool) *StashUpdate {
+	_u.mutation.SetIsSelfLocked(v)
 	return _u
 }
 
-// SetNillableSelfLocked sets the "selfLocked" field if the given value is not nil.
-func (_u *StashUpdate) SetNillableSelfLocked(v *bool) *StashUpdate {
+// SetNillableIsSelfLocked sets the "isSelfLocked" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableIsSelfLocked(v *bool) *StashUpdate {
 	if v != nil {
-		_u.SetSelfLocked(*v)
+		_u.SetIsSelfLocked(*v)
 	}
 	return _u
 }
 
-// SetAdminLocked sets the "adminLocked" field.
-func (_u *StashUpdate) SetAdminLocked(v bool) *StashUpdate {
-	_u.mutation.SetAdminLocked(v)
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (_u *StashUpdate) SetIsAdminLocked(v bool) *StashUpdate {
+	_u.mutation.SetIsAdminLocked(v)
 	return _u
 }
 
-// SetNillableAdminLocked sets the "adminLocked" field if the given value is not nil.
-func (_u *StashUpdate) SetNillableAdminLocked(v *bool) *StashUpdate {
+// SetNillableIsAdminLocked sets the "isAdminLocked" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableIsAdminLocked(v *bool) *StashUpdate {
 	if v != nil {
-		_u.SetAdminLocked(*v)
+		_u.SetIsAdminLocked(*v)
 	}
 	return _u
 }
@@ -426,11 +426,11 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedHashThreads(); ok {
 		_spec.AddField(stash.FieldHashThreads, field.TypeUint8, value)
 	}
-	if value, ok := _u.mutation.SelfLocked(); ok {
-		_spec.SetField(stash.FieldSelfLocked, field.TypeBool, value)
+	if value, ok := _u.mutation.IsSelfLocked(); ok {
+		_spec.SetField(stash.FieldIsSelfLocked, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.AdminLocked(); ok {
-		_spec.SetField(stash.FieldAdminLocked, field.TypeBool, value)
+	if value, ok := _u.mutation.IsAdminLocked(); ok {
+		_spec.SetField(stash.FieldIsAdminLocked, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.SelfLockedUntil(); ok {
 		_spec.SetField(stash.FieldSelfLockedUntil, field.TypeTime, value)
@@ -676,30 +676,30 @@ func (_u *StashUpdateOne) AddHashThreads(v int8) *StashUpdateOne {
 	return _u
 }
 
-// SetSelfLocked sets the "selfLocked" field.
-func (_u *StashUpdateOne) SetSelfLocked(v bool) *StashUpdateOne {
-	_u.mutation.SetSelfLocked(v)
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (_u *StashUpdateOne) SetIsSelfLocked(v bool) *StashUpdateOne {
+	_u.mutation.SetIsSelfLocked(v)
 	return _u
 }
 
-// SetNillableSelfLocked sets the "selfLocked" field if the given value is not nil.
-func (_u *StashUpdateOne) SetNillableSelfLocked(v *bool) *StashUpdateOne {
+// SetNillableIsSelfLocked sets the "isSelfLocked" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableIsSelfLocked(v *bool) *StashUpdateOne {
 	if v != nil {
-		_u.SetSelfLocked(*v)
+		_u.SetIsSelfLocked(*v)
 	}
 	return _u
 }
 
-// SetAdminLocked sets the "adminLocked" field.
-func (_u *StashUpdateOne) SetAdminLocked(v bool) *StashUpdateOne {
-	_u.mutation.SetAdminLocked(v)
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (_u *StashUpdateOne) SetIsAdminLocked(v bool) *StashUpdateOne {
+	_u.mutation.SetIsAdminLocked(v)
 	return _u
 }
 
-// SetNillableAdminLocked sets the "adminLocked" field if the given value is not nil.
-func (_u *StashUpdateOne) SetNillableAdminLocked(v *bool) *StashUpdateOne {
+// SetNillableIsAdminLocked sets the "isAdminLocked" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableIsAdminLocked(v *bool) *StashUpdateOne {
 	if v != nil {
-		_u.SetAdminLocked(*v)
+		_u.SetIsAdminLocked(*v)
 	}
 	return _u
 }
@@ -960,11 +960,11 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 	if value, ok := _u.mutation.AddedHashThreads(); ok {
 		_spec.AddField(stash.FieldHashThreads, field.TypeUint8, value)
 	}
-	if value, ok := _u.mutation.SelfLocked(); ok {
-		_spec.SetField(stash.FieldSelfLocked, field.TypeBool, value)
+	if value, ok := _u.mutation.IsSelfLocked(); ok {
+		_spec.SetField(stash.FieldIsSelfLocked, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.AdminLocked(); ok {
-		_spec.SetField(stash.FieldAdminLocked, field.TypeBool, value)
+	if value, ok := _u.mutation.IsAdminLocked(); ok {
+		_spec.SetField(stash.FieldIsAdminLocked, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.SelfLockedUntil(); ok {
 		_spec.SetField(stash.FieldSelfLockedUntil, field.TypeTime, value)

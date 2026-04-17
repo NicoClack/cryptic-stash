@@ -111,14 +111,14 @@ func HashThreads(v uint8) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldHashThreads, v))
 }
 
-// SelfLocked applies equality check predicate on the "selfLocked" field. It's identical to SelfLockedEQ.
-func SelfLocked(v bool) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldSelfLocked, v))
+// IsSelfLocked applies equality check predicate on the "isSelfLocked" field. It's identical to IsSelfLockedEQ.
+func IsSelfLocked(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsSelfLocked, v))
 }
 
-// AdminLocked applies equality check predicate on the "adminLocked" field. It's identical to AdminLockedEQ.
-func AdminLocked(v bool) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldAdminLocked, v))
+// IsAdminLocked applies equality check predicate on the "isAdminLocked" field. It's identical to IsAdminLockedEQ.
+func IsAdminLocked(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsAdminLocked, v))
 }
 
 // SelfLockedUntil applies equality check predicate on the "selfLockedUntil" field. It's identical to SelfLockedUntilEQ.
@@ -611,24 +611,24 @@ func HashThreadsLTE(v uint8) predicate.Stash {
 	return predicate.Stash(sql.FieldLTE(FieldHashThreads, v))
 }
 
-// SelfLockedEQ applies the EQ predicate on the "selfLocked" field.
-func SelfLockedEQ(v bool) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldSelfLocked, v))
+// IsSelfLockedEQ applies the EQ predicate on the "isSelfLocked" field.
+func IsSelfLockedEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsSelfLocked, v))
 }
 
-// SelfLockedNEQ applies the NEQ predicate on the "selfLocked" field.
-func SelfLockedNEQ(v bool) predicate.Stash {
-	return predicate.Stash(sql.FieldNEQ(FieldSelfLocked, v))
+// IsSelfLockedNEQ applies the NEQ predicate on the "isSelfLocked" field.
+func IsSelfLockedNEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldIsSelfLocked, v))
 }
 
-// AdminLockedEQ applies the EQ predicate on the "adminLocked" field.
-func AdminLockedEQ(v bool) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldAdminLocked, v))
+// IsAdminLockedEQ applies the EQ predicate on the "isAdminLocked" field.
+func IsAdminLockedEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsAdminLocked, v))
 }
 
-// AdminLockedNEQ applies the NEQ predicate on the "adminLocked" field.
-func AdminLockedNEQ(v bool) predicate.Stash {
-	return predicate.Stash(sql.FieldNEQ(FieldAdminLocked, v))
+// IsAdminLockedNEQ applies the NEQ predicate on the "isAdminLocked" field.
+func IsAdminLockedNEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldIsAdminLocked, v))
 }
 
 // SelfLockedUntilEQ applies the EQ predicate on the "selfLockedUntil" field.
