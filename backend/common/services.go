@@ -43,6 +43,7 @@ type Env struct {
 	INVITE_DEFAULT_EXPIRY time.Duration
 	INVITE_MAX_EXPIRY     time.Duration
 
+	SESSION_DURATION    time.Duration
 	UNLOCK_TIME         time.Duration
 	AUTH_CODE_VALID_FOR time.Duration
 	// Once used, how much longer the auth code remains valid for

@@ -35,6 +35,7 @@ func DefaultEnv() *common.Env {
 		INVITE_DEFAULT_EXPIRY: time.Hour * 24 * 2,
 		INVITE_MAX_EXPIRY:     time.Hour * 24 * 7,
 
+		SESSION_DURATION:                          time.Minute * 15,
 		UNLOCK_TIME:                               time.Hour * 24 * 7,
 		AUTH_CODE_VALID_FOR:                       time.Hour * 24 * 3,
 		USED_AUTH_CODE_VALID_FOR:                  time.Hour,
