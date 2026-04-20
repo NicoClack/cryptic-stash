@@ -6,9 +6,11 @@ CREATE UNIQUE INDEX `download_sessions_hashed_auth_code_key` ON `download_sessio
 -- create index "downloadsession_hashed_auth_code_stash_id" to table: "download_sessions"
 CREATE INDEX `downloadsession_hashed_auth_code_stash_id` ON `download_sessions` (`hashed_auth_code`, `stash_id`);
 -- create "invites" table
-CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `webauthn_challenge` blob NULL, `challenge_expires_at` datetime NULL, `user_agent` text NOT NULL DEFAULT (''), `ip` text NOT NULL DEFAULT (''), `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `pending_user_id` uuid NULL, `web_authn_challenge` blob NULL, `challenge_expires_at` datetime NULL, `user_agent` text NOT NULL DEFAULT (''), `ip` text NOT NULL DEFAULT (''), `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "invites_hashed_code_key" to table: "invites"
 CREATE UNIQUE INDEX `invites_hashed_code_key` ON `invites` (`hashed_code`);
+-- create index "invites_pending_user_id_key" to table: "invites"
+CREATE UNIQUE INDEX `invites_pending_user_id_key` ON `invites` (`pending_user_id`);
 -- create index "invites_user_id_key" to table: "invites"
 CREATE UNIQUE INDEX `invites_user_id_key` ON `invites` (`user_id`);
 -- create index "invite_hashed_code" to table: "invites"
@@ -115,6 +117,8 @@ DROP INDEX `invite_created_at`;
 DROP INDEX `invite_hashed_code`;
 -- reverse: create index "invites_user_id_key" to table: "invites"
 DROP INDEX `invites_user_id_key`;
+-- reverse: create index "invites_pending_user_id_key" to table: "invites"
+DROP INDEX `invites_pending_user_id_key`;
 -- reverse: create index "invites_hashed_code_key" to table: "invites"
 DROP INDEX `invites_hashed_code_key`;
 -- reverse: create "invites" table

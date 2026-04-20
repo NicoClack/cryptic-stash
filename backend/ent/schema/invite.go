@@ -31,7 +31,9 @@ func (Invite) Fields() []ent.Field {
 		field.Enum("expiredReason").
 			Values("revoked", "username_taken").
 			Optional().Nillable(),
-		field.Bytes("webauthnChallenge").Optional().Nillable().
+		field.UUID("pendingUserID", uuid.Nil).
+			Unique().Optional().Nillable(),
+		field.Bytes("webAuthnChallenge").Optional().Nillable().
 			MinLen(32).MaxLen(32),
 		field.Time("challengeExpiresAt").Optional().Nillable(),
 		field.String("userAgent").Default(""),

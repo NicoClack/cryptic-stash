@@ -69,9 +69,23 @@ func (_c *InviteCreate) SetNillableExpiredReason(v *invite.ExpiredReason) *Invit
 	return _c
 }
 
-// SetWebauthnChallenge sets the "webauthnChallenge" field.
-func (_c *InviteCreate) SetWebauthnChallenge(v []byte) *InviteCreate {
-	_c.mutation.SetWebauthnChallenge(v)
+// SetPendingUserID sets the "pendingUserID" field.
+func (_c *InviteCreate) SetPendingUserID(v uuid.UUID) *InviteCreate {
+	_c.mutation.SetPendingUserID(v)
+	return _c
+}
+
+// SetNillablePendingUserID sets the "pendingUserID" field if the given value is not nil.
+func (_c *InviteCreate) SetNillablePendingUserID(v *uuid.UUID) *InviteCreate {
+	if v != nil {
+		_c.SetPendingUserID(*v)
+	}
+	return _c
+}
+
+// SetWebAuthnChallenge sets the "webAuthnChallenge" field.
+func (_c *InviteCreate) SetWebAuthnChallenge(v []byte) *InviteCreate {
+	_c.mutation.SetWebAuthnChallenge(v)
 	return _c
 }
 
@@ -231,9 +245,9 @@ func (_c *InviteCreate) check() error {
 			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.WebauthnChallenge(); ok {
-		if err := invite.WebauthnChallengeValidator(v); err != nil {
-			return &ValidationError{Name: "webauthnChallenge", err: fmt.Errorf(`ent: validator failed for field "Invite.webauthnChallenge": %w`, err)}
+	if v, ok := _c.mutation.WebAuthnChallenge(); ok {
+		if err := invite.WebAuthnChallengeValidator(v); err != nil {
+			return &ValidationError{Name: "webAuthnChallenge", err: fmt.Errorf(`ent: validator failed for field "Invite.webAuthnChallenge": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.UserAgent(); !ok {
@@ -302,9 +316,13 @@ func (_c *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 		_spec.SetField(invite.FieldExpiredReason, field.TypeEnum, value)
 		_node.ExpiredReason = &value
 	}
-	if value, ok := _c.mutation.WebauthnChallenge(); ok {
-		_spec.SetField(invite.FieldWebauthnChallenge, field.TypeBytes, value)
-		_node.WebauthnChallenge = &value
+	if value, ok := _c.mutation.PendingUserID(); ok {
+		_spec.SetField(invite.FieldPendingUserID, field.TypeUUID, value)
+		_node.PendingUserID = &value
+	}
+	if value, ok := _c.mutation.WebAuthnChallenge(); ok {
+		_spec.SetField(invite.FieldWebAuthnChallenge, field.TypeBytes, value)
+		_node.WebAuthnChallenge = &value
 	}
 	if value, ok := _c.mutation.ChallengeExpiresAt(); ok {
 		_spec.SetField(invite.FieldChallengeExpiresAt, field.TypeTime, value)
@@ -465,21 +483,39 @@ func (u *InviteUpsert) ClearExpiredReason() *InviteUpsert {
 	return u
 }
 
-// SetWebauthnChallenge sets the "webauthnChallenge" field.
-func (u *InviteUpsert) SetWebauthnChallenge(v []byte) *InviteUpsert {
-	u.Set(invite.FieldWebauthnChallenge, v)
+// SetPendingUserID sets the "pendingUserID" field.
+func (u *InviteUpsert) SetPendingUserID(v uuid.UUID) *InviteUpsert {
+	u.Set(invite.FieldPendingUserID, v)
 	return u
 }
 
-// UpdateWebauthnChallenge sets the "webauthnChallenge" field to the value that was provided on create.
-func (u *InviteUpsert) UpdateWebauthnChallenge() *InviteUpsert {
-	u.SetExcluded(invite.FieldWebauthnChallenge)
+// UpdatePendingUserID sets the "pendingUserID" field to the value that was provided on create.
+func (u *InviteUpsert) UpdatePendingUserID() *InviteUpsert {
+	u.SetExcluded(invite.FieldPendingUserID)
 	return u
 }
 
-// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
-func (u *InviteUpsert) ClearWebauthnChallenge() *InviteUpsert {
-	u.SetNull(invite.FieldWebauthnChallenge)
+// ClearPendingUserID clears the value of the "pendingUserID" field.
+func (u *InviteUpsert) ClearPendingUserID() *InviteUpsert {
+	u.SetNull(invite.FieldPendingUserID)
+	return u
+}
+
+// SetWebAuthnChallenge sets the "webAuthnChallenge" field.
+func (u *InviteUpsert) SetWebAuthnChallenge(v []byte) *InviteUpsert {
+	u.Set(invite.FieldWebAuthnChallenge, v)
+	return u
+}
+
+// UpdateWebAuthnChallenge sets the "webAuthnChallenge" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateWebAuthnChallenge() *InviteUpsert {
+	u.SetExcluded(invite.FieldWebAuthnChallenge)
+	return u
+}
+
+// ClearWebAuthnChallenge clears the value of the "webAuthnChallenge" field.
+func (u *InviteUpsert) ClearWebAuthnChallenge() *InviteUpsert {
+	u.SetNull(invite.FieldWebAuthnChallenge)
 	return u
 }
 
@@ -682,24 +718,45 @@ func (u *InviteUpsertOne) ClearExpiredReason() *InviteUpsertOne {
 	})
 }
 
-// SetWebauthnChallenge sets the "webauthnChallenge" field.
-func (u *InviteUpsertOne) SetWebauthnChallenge(v []byte) *InviteUpsertOne {
+// SetPendingUserID sets the "pendingUserID" field.
+func (u *InviteUpsertOne) SetPendingUserID(v uuid.UUID) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
-		s.SetWebauthnChallenge(v)
+		s.SetPendingUserID(v)
 	})
 }
 
-// UpdateWebauthnChallenge sets the "webauthnChallenge" field to the value that was provided on create.
-func (u *InviteUpsertOne) UpdateWebauthnChallenge() *InviteUpsertOne {
+// UpdatePendingUserID sets the "pendingUserID" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdatePendingUserID() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
-		s.UpdateWebauthnChallenge()
+		s.UpdatePendingUserID()
 	})
 }
 
-// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
-func (u *InviteUpsertOne) ClearWebauthnChallenge() *InviteUpsertOne {
+// ClearPendingUserID clears the value of the "pendingUserID" field.
+func (u *InviteUpsertOne) ClearPendingUserID() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
-		s.ClearWebauthnChallenge()
+		s.ClearPendingUserID()
+	})
+}
+
+// SetWebAuthnChallenge sets the "webAuthnChallenge" field.
+func (u *InviteUpsertOne) SetWebAuthnChallenge(v []byte) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetWebAuthnChallenge(v)
+	})
+}
+
+// UpdateWebAuthnChallenge sets the "webAuthnChallenge" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateWebAuthnChallenge() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateWebAuthnChallenge()
+	})
+}
+
+// ClearWebAuthnChallenge clears the value of the "webAuthnChallenge" field.
+func (u *InviteUpsertOne) ClearWebAuthnChallenge() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearWebAuthnChallenge()
 	})
 }
 
@@ -1079,24 +1136,45 @@ func (u *InviteUpsertBulk) ClearExpiredReason() *InviteUpsertBulk {
 	})
 }
 
-// SetWebauthnChallenge sets the "webauthnChallenge" field.
-func (u *InviteUpsertBulk) SetWebauthnChallenge(v []byte) *InviteUpsertBulk {
+// SetPendingUserID sets the "pendingUserID" field.
+func (u *InviteUpsertBulk) SetPendingUserID(v uuid.UUID) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
-		s.SetWebauthnChallenge(v)
+		s.SetPendingUserID(v)
 	})
 }
 
-// UpdateWebauthnChallenge sets the "webauthnChallenge" field to the value that was provided on create.
-func (u *InviteUpsertBulk) UpdateWebauthnChallenge() *InviteUpsertBulk {
+// UpdatePendingUserID sets the "pendingUserID" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdatePendingUserID() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
-		s.UpdateWebauthnChallenge()
+		s.UpdatePendingUserID()
 	})
 }
 
-// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
-func (u *InviteUpsertBulk) ClearWebauthnChallenge() *InviteUpsertBulk {
+// ClearPendingUserID clears the value of the "pendingUserID" field.
+func (u *InviteUpsertBulk) ClearPendingUserID() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
-		s.ClearWebauthnChallenge()
+		s.ClearPendingUserID()
+	})
+}
+
+// SetWebAuthnChallenge sets the "webAuthnChallenge" field.
+func (u *InviteUpsertBulk) SetWebAuthnChallenge(v []byte) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetWebAuthnChallenge(v)
+	})
+}
+
+// UpdateWebAuthnChallenge sets the "webAuthnChallenge" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateWebAuthnChallenge() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateWebAuthnChallenge()
+	})
+}
+
+// ClearWebAuthnChallenge clears the value of the "webAuthnChallenge" field.
+func (u *InviteUpsertBulk) ClearWebAuthnChallenge() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearWebAuthnChallenge()
 	})
 }
 

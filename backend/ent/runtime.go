@@ -96,18 +96,18 @@ func init() {
 			return nil
 		}
 	}()
-	// inviteDescWebauthnChallenge is the schema descriptor for webauthnChallenge field.
-	inviteDescWebauthnChallenge := inviteFields[7].Descriptor()
-	// invite.WebauthnChallengeValidator is a validator for the "webauthnChallenge" field. It is called by the builders before save.
-	invite.WebauthnChallengeValidator = func() func([]byte) error {
-		validators := inviteDescWebauthnChallenge.Validators
+	// inviteDescWebAuthnChallenge is the schema descriptor for webAuthnChallenge field.
+	inviteDescWebAuthnChallenge := inviteFields[8].Descriptor()
+	// invite.WebAuthnChallengeValidator is a validator for the "webAuthnChallenge" field. It is called by the builders before save.
+	invite.WebAuthnChallengeValidator = func() func([]byte) error {
+		validators := inviteDescWebAuthnChallenge.Validators
 		fns := [...]func([]byte) error{
 			validators[0].(func([]byte) error),
 			validators[1].(func([]byte) error),
 		}
-		return func(webauthnChallenge []byte) error {
+		return func(webAuthnChallenge []byte) error {
 			for _, fn := range fns {
-				if err := fn(webauthnChallenge); err != nil {
+				if err := fn(webAuthnChallenge); err != nil {
 					return err
 				}
 			}
@@ -115,11 +115,11 @@ func init() {
 		}
 	}()
 	// inviteDescUserAgent is the schema descriptor for userAgent field.
-	inviteDescUserAgent := inviteFields[9].Descriptor()
+	inviteDescUserAgent := inviteFields[10].Descriptor()
 	// invite.DefaultUserAgent holds the default value on creation for the userAgent field.
 	invite.DefaultUserAgent = inviteDescUserAgent.Default.(string)
 	// inviteDescIP is the schema descriptor for ip field.
-	inviteDescIP := inviteFields[10].Descriptor()
+	inviteDescIP := inviteFields[11].Descriptor()
 	// invite.DefaultIP holds the default value on creation for the ip field.
 	invite.DefaultIP = inviteDescIP.Default.(string)
 	// inviteDescID is the schema descriptor for id field.

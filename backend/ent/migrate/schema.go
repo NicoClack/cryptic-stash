@@ -50,7 +50,8 @@ var (
 		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "expired_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"revoked", "username_taken"}},
-		{Name: "webauthn_challenge", Type: field.TypeBytes, Nullable: true, Size: 32},
+		{Name: "pending_user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "web_authn_challenge", Type: field.TypeBytes, Nullable: true, Size: 32},
 		{Name: "challenge_expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_agent", Type: field.TypeString, Default: ""},
 		{Name: "ip", Type: field.TypeString, Default: ""},
@@ -64,7 +65,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "invites_users_invite",
-				Columns:    []*schema.Column{InvitesColumns[11]},
+				Columns:    []*schema.Column{InvitesColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

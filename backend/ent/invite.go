@@ -31,8 +31,10 @@ type Invite struct {
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
 	// ExpiredReason holds the value of the "expiredReason" field.
 	ExpiredReason *invite.ExpiredReason `json:"expiredReason,omitempty"`
-	// WebauthnChallenge holds the value of the "webauthnChallenge" field.
-	WebauthnChallenge *[]byte `json:"webauthnChallenge,omitempty"`
+	// PendingUserID holds the value of the "pendingUserID" field.
+	PendingUserID *uuid.UUID `json:"pendingUserID,omitempty"`
+	// WebAuthnChallenge holds the value of the "webAuthnChallenge" field.
+	WebAuthnChallenge *[]byte `json:"webAuthnChallenge,omitempty"`
 	// ChallengeExpiresAt holds the value of the "challengeExpiresAt" field.
 	ChallengeExpiresAt *time.Time `json:"challengeExpiresAt,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
@@ -72,7 +74,9 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case invite.FieldHashedCode, invite.FieldWebauthnChallenge:
+		case invite.FieldPendingUserID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case invite.FieldHashedCode, invite.FieldWebAuthnChallenge:
 			values[i] = new([]byte)
 		case invite.FieldEmail, invite.FieldExpiredReason, invite.FieldUserAgent, invite.FieldIP:
 			values[i] = new(sql.NullString)
@@ -138,11 +142,18 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 				_m.ExpiredReason = new(invite.ExpiredReason)
 				*_m.ExpiredReason = invite.ExpiredReason(value.String)
 			}
-		case invite.FieldWebauthnChallenge:
+		case invite.FieldPendingUserID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field pendingUserID", values[i])
+			} else if value.Valid {
+				_m.PendingUserID = new(uuid.UUID)
+				*_m.PendingUserID = *value.S.(*uuid.UUID)
+			}
+		case invite.FieldWebAuthnChallenge:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field webauthnChallenge", values[i])
+				return fmt.Errorf("unexpected type %T for field webAuthnChallenge", values[i])
 			} else if value != nil {
-				_m.WebauthnChallenge = value
+				_m.WebAuthnChallenge = value
 			}
 		case invite.FieldChallengeExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -230,8 +241,13 @@ func (_m *Invite) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.WebauthnChallenge; v != nil {
-		builder.WriteString("webauthnChallenge=")
+	if v := _m.PendingUserID; v != nil {
+		builder.WriteString("pendingUserID=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.WebAuthnChallenge; v != nil {
+		builder.WriteString("webAuthnChallenge=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")

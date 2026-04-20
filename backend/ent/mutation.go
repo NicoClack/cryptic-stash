@@ -914,7 +914,8 @@ type InviteMutation struct {
 	hashedCode         *[]byte
 	expiresAt          *time.Time
 	expiredReason      *invite.ExpiredReason
-	webauthnChallenge  *[]byte
+	pendingUserID      *uuid.UUID
+	webAuthnChallenge  *[]byte
 	challengeExpiresAt *time.Time
 	userAgent          *string
 	ip                 *string
@@ -1259,53 +1260,102 @@ func (m *InviteMutation) ResetExpiredReason() {
 	delete(m.clearedFields, invite.FieldExpiredReason)
 }
 
-// SetWebauthnChallenge sets the "webauthnChallenge" field.
-func (m *InviteMutation) SetWebauthnChallenge(b []byte) {
-	m.webauthnChallenge = &b
+// SetPendingUserID sets the "pendingUserID" field.
+func (m *InviteMutation) SetPendingUserID(u uuid.UUID) {
+	m.pendingUserID = &u
 }
 
-// WebauthnChallenge returns the value of the "webauthnChallenge" field in the mutation.
-func (m *InviteMutation) WebauthnChallenge() (r []byte, exists bool) {
-	v := m.webauthnChallenge
+// PendingUserID returns the value of the "pendingUserID" field in the mutation.
+func (m *InviteMutation) PendingUserID() (r uuid.UUID, exists bool) {
+	v := m.pendingUserID
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldWebauthnChallenge returns the old "webauthnChallenge" field's value of the Invite entity.
+// OldPendingUserID returns the old "pendingUserID" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldWebauthnChallenge(ctx context.Context) (v *[]byte, err error) {
+func (m *InviteMutation) OldPendingUserID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWebauthnChallenge is only allowed on UpdateOne operations")
+		return v, errors.New("OldPendingUserID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWebauthnChallenge requires an ID field in the mutation")
+		return v, errors.New("OldPendingUserID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWebauthnChallenge: %w", err)
+		return v, fmt.Errorf("querying old value for OldPendingUserID: %w", err)
 	}
-	return oldValue.WebauthnChallenge, nil
+	return oldValue.PendingUserID, nil
 }
 
-// ClearWebauthnChallenge clears the value of the "webauthnChallenge" field.
-func (m *InviteMutation) ClearWebauthnChallenge() {
-	m.webauthnChallenge = nil
-	m.clearedFields[invite.FieldWebauthnChallenge] = struct{}{}
+// ClearPendingUserID clears the value of the "pendingUserID" field.
+func (m *InviteMutation) ClearPendingUserID() {
+	m.pendingUserID = nil
+	m.clearedFields[invite.FieldPendingUserID] = struct{}{}
 }
 
-// WebauthnChallengeCleared returns if the "webauthnChallenge" field was cleared in this mutation.
-func (m *InviteMutation) WebauthnChallengeCleared() bool {
-	_, ok := m.clearedFields[invite.FieldWebauthnChallenge]
+// PendingUserIDCleared returns if the "pendingUserID" field was cleared in this mutation.
+func (m *InviteMutation) PendingUserIDCleared() bool {
+	_, ok := m.clearedFields[invite.FieldPendingUserID]
 	return ok
 }
 
-// ResetWebauthnChallenge resets all changes to the "webauthnChallenge" field.
-func (m *InviteMutation) ResetWebauthnChallenge() {
-	m.webauthnChallenge = nil
-	delete(m.clearedFields, invite.FieldWebauthnChallenge)
+// ResetPendingUserID resets all changes to the "pendingUserID" field.
+func (m *InviteMutation) ResetPendingUserID() {
+	m.pendingUserID = nil
+	delete(m.clearedFields, invite.FieldPendingUserID)
+}
+
+// SetWebAuthnChallenge sets the "webAuthnChallenge" field.
+func (m *InviteMutation) SetWebAuthnChallenge(b []byte) {
+	m.webAuthnChallenge = &b
+}
+
+// WebAuthnChallenge returns the value of the "webAuthnChallenge" field in the mutation.
+func (m *InviteMutation) WebAuthnChallenge() (r []byte, exists bool) {
+	v := m.webAuthnChallenge
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWebAuthnChallenge returns the old "webAuthnChallenge" field's value of the Invite entity.
+// If the Invite object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InviteMutation) OldWebAuthnChallenge(ctx context.Context) (v *[]byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWebAuthnChallenge is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWebAuthnChallenge requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWebAuthnChallenge: %w", err)
+	}
+	return oldValue.WebAuthnChallenge, nil
+}
+
+// ClearWebAuthnChallenge clears the value of the "webAuthnChallenge" field.
+func (m *InviteMutation) ClearWebAuthnChallenge() {
+	m.webAuthnChallenge = nil
+	m.clearedFields[invite.FieldWebAuthnChallenge] = struct{}{}
+}
+
+// WebAuthnChallengeCleared returns if the "webAuthnChallenge" field was cleared in this mutation.
+func (m *InviteMutation) WebAuthnChallengeCleared() bool {
+	_, ok := m.clearedFields[invite.FieldWebAuthnChallenge]
+	return ok
+}
+
+// ResetWebAuthnChallenge resets all changes to the "webAuthnChallenge" field.
+func (m *InviteMutation) ResetWebAuthnChallenge() {
+	m.webAuthnChallenge = nil
+	delete(m.clearedFields, invite.FieldWebAuthnChallenge)
 }
 
 // SetChallengeExpiresAt sets the "challengeExpiresAt" field.
@@ -1539,7 +1589,7 @@ func (m *InviteMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *InviteMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.createdAt != nil {
 		fields = append(fields, invite.FieldCreatedAt)
 	}
@@ -1558,8 +1608,11 @@ func (m *InviteMutation) Fields() []string {
 	if m.expiredReason != nil {
 		fields = append(fields, invite.FieldExpiredReason)
 	}
-	if m.webauthnChallenge != nil {
-		fields = append(fields, invite.FieldWebauthnChallenge)
+	if m.pendingUserID != nil {
+		fields = append(fields, invite.FieldPendingUserID)
+	}
+	if m.webAuthnChallenge != nil {
+		fields = append(fields, invite.FieldWebAuthnChallenge)
 	}
 	if m.challengeExpiresAt != nil {
 		fields = append(fields, invite.FieldChallengeExpiresAt)
@@ -1593,8 +1646,10 @@ func (m *InviteMutation) Field(name string) (ent.Value, bool) {
 		return m.ExpiresAt()
 	case invite.FieldExpiredReason:
 		return m.ExpiredReason()
-	case invite.FieldWebauthnChallenge:
-		return m.WebauthnChallenge()
+	case invite.FieldPendingUserID:
+		return m.PendingUserID()
+	case invite.FieldWebAuthnChallenge:
+		return m.WebAuthnChallenge()
 	case invite.FieldChallengeExpiresAt:
 		return m.ChallengeExpiresAt()
 	case invite.FieldUserAgent:
@@ -1624,8 +1679,10 @@ func (m *InviteMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldExpiresAt(ctx)
 	case invite.FieldExpiredReason:
 		return m.OldExpiredReason(ctx)
-	case invite.FieldWebauthnChallenge:
-		return m.OldWebauthnChallenge(ctx)
+	case invite.FieldPendingUserID:
+		return m.OldPendingUserID(ctx)
+	case invite.FieldWebAuthnChallenge:
+		return m.OldWebAuthnChallenge(ctx)
 	case invite.FieldChallengeExpiresAt:
 		return m.OldChallengeExpiresAt(ctx)
 	case invite.FieldUserAgent:
@@ -1685,12 +1742,19 @@ func (m *InviteMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExpiredReason(v)
 		return nil
-	case invite.FieldWebauthnChallenge:
+	case invite.FieldPendingUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPendingUserID(v)
+		return nil
+	case invite.FieldWebAuthnChallenge:
 		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetWebauthnChallenge(v)
+		m.SetWebAuthnChallenge(v)
 		return nil
 	case invite.FieldChallengeExpiresAt:
 		v, ok := value.(time.Time)
@@ -1753,8 +1817,11 @@ func (m *InviteMutation) ClearedFields() []string {
 	if m.FieldCleared(invite.FieldExpiredReason) {
 		fields = append(fields, invite.FieldExpiredReason)
 	}
-	if m.FieldCleared(invite.FieldWebauthnChallenge) {
-		fields = append(fields, invite.FieldWebauthnChallenge)
+	if m.FieldCleared(invite.FieldPendingUserID) {
+		fields = append(fields, invite.FieldPendingUserID)
+	}
+	if m.FieldCleared(invite.FieldWebAuthnChallenge) {
+		fields = append(fields, invite.FieldWebAuthnChallenge)
 	}
 	if m.FieldCleared(invite.FieldChallengeExpiresAt) {
 		fields = append(fields, invite.FieldChallengeExpiresAt)
@@ -1779,8 +1846,11 @@ func (m *InviteMutation) ClearField(name string) error {
 	case invite.FieldExpiredReason:
 		m.ClearExpiredReason()
 		return nil
-	case invite.FieldWebauthnChallenge:
-		m.ClearWebauthnChallenge()
+	case invite.FieldPendingUserID:
+		m.ClearPendingUserID()
+		return nil
+	case invite.FieldWebAuthnChallenge:
+		m.ClearWebAuthnChallenge()
 		return nil
 	case invite.FieldChallengeExpiresAt:
 		m.ClearChallengeExpiresAt()
@@ -1814,8 +1884,11 @@ func (m *InviteMutation) ResetField(name string) error {
 	case invite.FieldExpiredReason:
 		m.ResetExpiredReason()
 		return nil
-	case invite.FieldWebauthnChallenge:
-		m.ResetWebauthnChallenge()
+	case invite.FieldPendingUserID:
+		m.ResetPendingUserID()
+		return nil
+	case invite.FieldWebAuthnChallenge:
+		m.ResetWebAuthnChallenge()
 		return nil
 	case invite.FieldChallengeExpiresAt:
 		m.ResetChallengeExpiresAt()
