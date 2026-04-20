@@ -2,11 +2,14 @@ package invites
 
 import (
 	"net/url"
+	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 )
+
+const webAuthnRegistrationTimeout = 5 * time.Minute
 
 // TODO: create auth service for this?
 
@@ -31,11 +34,20 @@ func newWebAuthnApp(app *servercommon.ServerApp) (*webauthn.WebAuthn, string) {
 	relayingPartyID := parsedURL.Hostname()
 
 	webAuthnApp, stdErr := webauthn.New(&webauthn.Config{
-		RPID:          relayingPartyID,
-		RPDisplayName: "Cryptic Stash",
-		RPOrigins:     []string{origin},
+		RPID:                        relayingPartyID,
+		RPDisplayName:               "Cryptic Stash",
+		RPOrigins:                   []string{origin},
+		RPTopOriginVerificationMode: protocol.TopOriginImplicitVerificationMode,
+		AttestationPreference:       protocol.PreferNoAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
 			UserVerification: protocol.VerificationRequired,
+		},
+		Timeouts: webauthn.TimeoutsConfig{
+			Registration: webauthn.TimeoutConfig{
+				Enforce:    true,
+				Timeout:    webAuthnRegistrationTimeout,
+				TimeoutUVD: webAuthnRegistrationTimeout,
+			},
 		},
 	})
 	if stdErr != nil {

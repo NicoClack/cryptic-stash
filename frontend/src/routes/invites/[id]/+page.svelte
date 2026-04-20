@@ -5,6 +5,7 @@
 	import PageMain from "$lib/components/PageMain.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Card, CardContent, CardHeader, CardTitle } from "$lib/components/ui/card";
+	import { decodeBase64UrlFormat, encodeBase64UrlFormat } from "$lib/utils";
 
 	interface InviteResponse {
 		email: string;
@@ -26,12 +27,16 @@
 		attestation?: string;
 	}
 
+	const inviteCode = page.url.searchParams.get("code")?.trim() ?? "";
+	const inviteId = page.params.id ?? "";
+
 	let isLoadingLink = $state(true);
 	let isCreating = $state(false);
 	let requestError = $state<string | null>(null);
 	let successMessage = $state<string | null>(null);
 
 	let email = $state("");
+	let credentialName = $state("");
 
 	function getErrorMessage(response: JsonResponse): string {
 		const firstError = response.data?.errors?.[0];
@@ -41,31 +46,9 @@
 		return `Request failed with status ${response.status}`;
 	}
 
-	function getInviteCode(): string {
-		return page.url.searchParams.get("code")?.trim() ?? "";
-	}
-
-	function getInviteId(): string {
-		return page.params.id ?? "";
-	}
-
 	function getAuthHeaders(): HeadersInit {
-		const code = getInviteCode();
-		if (!code) return {};
-		return { Authorization: `Bearer ${code}` };
-	}
-
-	function base64urlDecode(str: string): Uint8Array {
-		const padded = str + "=".repeat((4 - (str.length % 4)) % 4);
-		const binary = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
-		return Uint8Array.from(binary, (c) => c.charCodeAt(0));
-	}
-
-	function base64urlEncode(buffer: ArrayBuffer): string {
-		const bytes = new Uint8Array(buffer);
-		let binary = "";
-		for (const byte of bytes) binary += String.fromCharCode(byte);
-		return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+		if (!inviteCode) return {};
+		return { Authorization: `Bearer ${inviteCode}` };
 	}
 
 	async function loadInvite() {
@@ -73,9 +56,7 @@
 		successMessage = null;
 		isLoadingLink = true;
 
-		const inviteId = getInviteId();
-		const code = getInviteCode();
-		if (!code) {
+		if (!inviteCode) {
 			requestError = "Missing invite code. Use the full invite link from your admin.";
 			isLoadingLink = false;
 			return;
@@ -104,19 +85,26 @@
 
 		requestError = null;
 		successMessage = null;
+		credentialName = credentialName.trim();
+		if (!credentialName) {
+			requestError = "Enter a name for this passkey.";
+			return;
+		}
 
 		if (!window.PublicKeyCredential) {
 			requestError = "Your browser does not support passkeys. Please use a modern browser.";
 			return;
 		}
 
-		const inviteId = getInviteId();
 		isCreating = true;
 		try {
 			const optionsResponse = await fetchJson(
 				fetch,
-				`/api/v1/invites/${encodeURIComponent(inviteId)}/webauthn-options`,
-				{ headers: getAuthHeaders() },
+				`/api/v1/invites/${encodeURIComponent(inviteId)}/generate-options`,
+				{
+					method: "POST",
+					headers: getAuthHeaders(),
+				},
 			);
 			if (!optionsResponse.ok) {
 				requestError = getErrorMessage(optionsResponse);
@@ -125,19 +113,25 @@
 
 			const { publicKey } = optionsResponse.data as WebAuthnOptionsResponse;
 
-			const credentialOptions: PublicKeyCredentialCreationOptions = {
+			const credentialOptions = {
 				...publicKey,
-				challenge: base64urlDecode(publicKey.challenge),
+				attestation: publicKey.attestation as AttestationConveyancePreference | undefined,
+				pubKeyCredParams: publicKey.pubKeyCredParams.map((param) => ({
+					...param,
+					type: param.type as "public-key",
+				})),
+				challenge: decodeBase64UrlFormat(publicKey.challenge),
 				user: {
 					...publicKey.user,
-					id: base64urlDecode(publicKey.user.id),
+					id: decodeBase64UrlFormat(publicKey.user.id),
 				},
 				excludeCredentials: publicKey.excludeCredentials?.map((c) => ({
 					...c,
-					id: base64urlDecode(c.id),
+					id: decodeBase64UrlFormat(c.id),
 					type: c.type as PublicKeyCredentialType,
+					transports: c.transports as AuthenticatorTransport[] | undefined,
 				})),
-			};
+			} satisfies PublicKeyCredentialCreationOptions;
 
 			let credential: PublicKeyCredential;
 			try {
@@ -158,10 +152,10 @@
 			const credentialJSON = {
 				id: credential.id,
 				type: credential.type,
-				rawId: base64urlEncode(credential.rawId),
+				rawId: encodeBase64UrlFormat(credential.rawId),
 				response: {
-					clientDataJSON: base64urlEncode(attestationResponse.clientDataJSON),
-					attestationObject: base64urlEncode(attestationResponse.attestationObject),
+					clientDataJSON: encodeBase64UrlFormat(attestationResponse.clientDataJSON),
+					attestationObject: encodeBase64UrlFormat(attestationResponse.attestationObject),
 					transports: attestationResponse.getTransports?.() ?? [],
 				},
 			};
@@ -175,7 +169,10 @@
 						"Content-Type": "application/json",
 						...getAuthHeaders(),
 					},
-					body: JSON.stringify({ credential: credentialJSON }),
+					body: JSON.stringify({
+						credential: credentialJSON,
+						credentialName,
+					}),
 				},
 			);
 			if (!createResponse.ok) {
@@ -233,6 +230,16 @@
 						You'll register a passkey to securely access your stash. Your device will prompt you to
 						authenticate.
 					</p>
+					<label class="block space-y-2 text-sm">
+						<span class="text-muted-foreground">Passkey name</span>
+						<input
+							required
+							bind:value={credentialName}
+							type="text"
+							maxlength="64"
+							class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+						/>
+					</label>
 					<Button onclick={handleCreateAccount} disabled={isCreating} class="w-full">
 						{isCreating ? "Registering passkey..." : "Create account with passkey"}
 					</Button>
