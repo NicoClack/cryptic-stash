@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -31,11 +32,8 @@ func (Invite) Fields() []ent.Field {
 		field.Enum("expiredReason").
 			Values("revoked", "username_taken").
 			Optional().Nillable(),
-		field.UUID("pendingUserID", uuid.Nil).
-			Unique().Optional().Nillable(),
-		field.Bytes("webAuthnChallenge").Optional().Nillable().
-			MinLen(32).MaxLen(32),
-		field.Time("challengeExpiresAt").Optional().Nillable(),
+		field.JSON("webAuthnSession", &webauthn.SessionData{}).
+			Optional(),
 		field.String("userAgent").Default(""),
 		field.String("ip").Default(""),
 		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any

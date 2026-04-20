@@ -28,12 +28,8 @@ const (
 	FieldExpiresAt = "expires_at"
 	// FieldExpiredReason holds the string denoting the expiredreason field in the database.
 	FieldExpiredReason = "expired_reason"
-	// FieldPendingUserID holds the string denoting the pendinguserid field in the database.
-	FieldPendingUserID = "pending_user_id"
-	// FieldWebAuthnChallenge holds the string denoting the webauthnchallenge field in the database.
-	FieldWebAuthnChallenge = "web_authn_challenge"
-	// FieldChallengeExpiresAt holds the string denoting the challengeexpiresat field in the database.
-	FieldChallengeExpiresAt = "challenge_expires_at"
+	// FieldWebAuthnSession holds the string denoting the webauthnsession field in the database.
+	FieldWebAuthnSession = "web_authn_session"
 	// FieldUserAgent holds the string denoting the useragent field in the database.
 	FieldUserAgent = "user_agent"
 	// FieldIP holds the string denoting the ip field in the database.
@@ -62,9 +58,7 @@ var Columns = []string{
 	FieldHashedCode,
 	FieldExpiresAt,
 	FieldExpiredReason,
-	FieldPendingUserID,
-	FieldWebAuthnChallenge,
-	FieldChallengeExpiresAt,
+	FieldWebAuthnSession,
 	FieldUserAgent,
 	FieldIP,
 	FieldUserID,
@@ -87,8 +81,6 @@ var (
 	EmailValidator func(string) error
 	// HashedCodeValidator is a validator for the "hashedCode" field. It is called by the builders before save.
 	HashedCodeValidator func([]byte) error
-	// WebAuthnChallengeValidator is a validator for the "webAuthnChallenge" field. It is called by the builders before save.
-	WebAuthnChallengeValidator func([]byte) error
 	// DefaultUserAgent holds the default value on creation for the "userAgent" field.
 	DefaultUserAgent string
 	// DefaultIP holds the default value on creation for the "ip" field.
@@ -151,16 +143,6 @@ func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiredReason orders the results by the expiredReason field.
 func ByExpiredReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiredReason, opts...).ToFunc()
-}
-
-// ByPendingUserID orders the results by the pendingUserID field.
-func ByPendingUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPendingUserID, opts...).ToFunc()
-}
-
-// ByChallengeExpiresAt orders the results by the challengeExpiresAt field.
-func ByChallengeExpiresAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldChallengeExpiresAt, opts...).ToFunc()
 }
 
 // ByUserAgent orders the results by the userAgent field.

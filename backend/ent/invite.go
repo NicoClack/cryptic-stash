@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -31,12 +33,8 @@ type Invite struct {
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
 	// ExpiredReason holds the value of the "expiredReason" field.
 	ExpiredReason *invite.ExpiredReason `json:"expiredReason,omitempty"`
-	// PendingUserID holds the value of the "pendingUserID" field.
-	PendingUserID *uuid.UUID `json:"pendingUserID,omitempty"`
-	// WebAuthnChallenge holds the value of the "webAuthnChallenge" field.
-	WebAuthnChallenge *[]byte `json:"webAuthnChallenge,omitempty"`
-	// ChallengeExpiresAt holds the value of the "challengeExpiresAt" field.
-	ChallengeExpiresAt *time.Time `json:"challengeExpiresAt,omitempty"`
+	// WebAuthnSession holds the value of the "webAuthnSession" field.
+	WebAuthnSession *webauthn.SessionData `json:"webAuthnSession,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
 	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
@@ -74,13 +72,11 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case invite.FieldPendingUserID:
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case invite.FieldHashedCode, invite.FieldWebAuthnChallenge:
+		case invite.FieldHashedCode, invite.FieldWebAuthnSession:
 			values[i] = new([]byte)
 		case invite.FieldEmail, invite.FieldExpiredReason, invite.FieldUserAgent, invite.FieldIP:
 			values[i] = new(sql.NullString)
-		case invite.FieldCreatedAt, invite.FieldUpdatedAt, invite.FieldExpiresAt, invite.FieldChallengeExpiresAt:
+		case invite.FieldCreatedAt, invite.FieldUpdatedAt, invite.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case invite.FieldID, invite.FieldUserID:
 			values[i] = new(uuid.UUID)
@@ -142,25 +138,13 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 				_m.ExpiredReason = new(invite.ExpiredReason)
 				*_m.ExpiredReason = invite.ExpiredReason(value.String)
 			}
-		case invite.FieldPendingUserID:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field pendingUserID", values[i])
-			} else if value.Valid {
-				_m.PendingUserID = new(uuid.UUID)
-				*_m.PendingUserID = *value.S.(*uuid.UUID)
-			}
-		case invite.FieldWebAuthnChallenge:
+		case invite.FieldWebAuthnSession:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field webAuthnChallenge", values[i])
-			} else if value != nil {
-				_m.WebAuthnChallenge = value
-			}
-		case invite.FieldChallengeExpiresAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field challengeExpiresAt", values[i])
-			} else if value.Valid {
-				_m.ChallengeExpiresAt = new(time.Time)
-				*_m.ChallengeExpiresAt = value.Time
+				return fmt.Errorf("unexpected type %T for field webAuthnSession", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.WebAuthnSession); err != nil {
+					return fmt.Errorf("unmarshal field webAuthnSession: %w", err)
+				}
 			}
 		case invite.FieldUserAgent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -241,20 +225,8 @@ func (_m *Invite) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := _m.PendingUserID; v != nil {
-		builder.WriteString("pendingUserID=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := _m.WebAuthnChallenge; v != nil {
-		builder.WriteString("webAuthnChallenge=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := _m.ChallengeExpiresAt; v != nil {
-		builder.WriteString("challengeExpiresAt=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString("webAuthnSession=")
+	builder.WriteString(fmt.Sprintf("%v", _m.WebAuthnSession))
 	builder.WriteString(", ")
 	builder.WriteString("userAgent=")
 	builder.WriteString(_m.UserAgent)
