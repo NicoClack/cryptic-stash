@@ -4,8 +4,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
@@ -14,6 +14,8 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -23,17 +25,15 @@ var ErrUsernameTaken = servercommon.NewUnauthorizedError().
 	)
 
 type CreateUserPayload struct {
-	// TODO: require some sort of password
+	Credential json.RawMessage `json:"credential" binding:"required"`
 }
 type CreateUserResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
 }
 
-// TODO: prevent user enumeration.
-// Maybe just limiting the number of failed attempts per link would be enough?
-// Can cancelling the request be used to bypass that?
 func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 	clock := app.Clock
+	webAuthnOb, rpID := newWebAuthnApp(app)
 
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		inviteID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
@@ -58,10 +58,11 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
 			return ctxErr
 		}
+
 		hashed := sha256.Sum256(givenCodeBytes)
-		inviteOb, stdErr := dbcommon.WithReadWriteTx(
+		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*ent.Invite, error) {
+			func(tx *ent.Tx, ctx context.Context) (*CreateUserResponse, error) {
 				inviteOb, stdErr := tx.Invite.Query().
 					Where(
 						invite.ID(inviteID),
@@ -92,31 +93,97 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, ErrUsernameTaken.Clone()
 				}
 
-				return inviteOb, nil
-			},
-		)
-		if stdErr != nil {
-			return stdErr
-		}
+				if inviteOb.WebAuthnChallenge == nil || inviteOb.ChallengeExpiresAt == nil {
+					return nil, servercommon.NewBadRequestError(
+						"credential",
+						"no active WebAuthn challenge; request registration options first",
+						"NO_WEBAUTHN_CHALLENGE",
+					)
+				}
+				if inviteOb.PendingUserID == nil {
+					return nil, servercommon.NewBadRequestError(
+						"credential",
+						"no pending user ID; request registration options first",
+						"NO_PENDING_USER_ID",
+					)
+				}
+				if clock.Now().After(*inviteOb.ChallengeExpiresAt) {
+					return nil, servercommon.NewBadRequestError(
+						"credential",
+						"WebAuthn challenge expired; request new registration options",
+						"WEBAUTHN_CHALLENGE_EXPIRED",
+					)
+				}
 
-		resp, stdErr := dbcommon.WithReadWriteTx(
-			ginCtx.Request.Context(), app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*CreateUserResponse, error) {
+				pendingUserID := *inviteOb.PendingUserID
+				sessionOb := webauthn.SessionData{
+					Challenge:        base64.RawURLEncoding.EncodeToString(*inviteOb.WebAuthnChallenge),
+					RelyingPartyID:   rpID,
+					UserID:           pendingUserID[:],
+					UserVerification: protocol.VerificationPreferred,
+				}
+
+				parsedCredential, stdErr := protocol.ParseCredentialCreationResponseBytes(body.Credential)
+				if stdErr != nil {
+					return nil, servercommon.NewBadRequestError(
+						"credential",
+						"invalid WebAuthn credential",
+						"INVALID_WEBAUTHN_CREDENTIAL",
+					)
+				}
+
+				registrationUserOb := &webAuthnUser{
+					id:          pendingUserID[:],
+					name:        inviteOb.Email,
+					displayName: inviteOb.Email,
+				}
+				credentialOb, stdErr := webAuthnOb.CreateCredential(registrationUserOb, sessionOb, parsedCredential)
+				if stdErr != nil {
+					return nil, servercommon.NewBadRequestError(
+						"credential",
+						"WebAuthn credential verification failed",
+						"WEBAUTHN_VERIFICATION_FAILED",
+					)
+				}
+
+				aaguid := credentialOb.Authenticator.AAGUID
+				if len(aaguid) != 16 {
+					aaguid = make([]byte, 16)
+				}
+
 				now := clock.Now()
-				userOb, stdErr := tx.User.Create().
+				createdUserOb, stdErr := tx.User.Create().
+					SetID(pendingUserID).
 					SetUsername(inviteOb.Email).
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
 					SetInviteID(inviteOb.ID).
 					Save(ctx)
 				if stdErr != nil {
-					if ent.IsConstraintError(stdErr) && strings.Contains(stdErr.Error(), "username") {
+					if ent.IsConstraintError(stdErr) {
 						return nil, ErrUsernameTaken.Clone()
 					}
 					return nil, stdErr
 				}
+
+				_, stdErr = tx.Passkey.Create().
+					SetUserID(createdUserOb.ID).
+					SetName("Passkey").
+					SetCredentialID(credentialOb.ID).
+					SetPublicKey(credentialOb.PublicKey).
+					SetAaguid(aaguid).
+					SetSignCount(credentialOb.Authenticator.SignCount).
+					SetCreatedAt(now).
+					SetUpdatedAt(now).
+					Save(ctx)
+				if stdErr != nil {
+					return nil, stdErr
+				}
+
 				_, stdErr = tx.Invite.UpdateOneID(inviteID).
-					SetUser(userOb).
+					SetUser(createdUserOb).
+					ClearWebAuthnChallenge().
+					ClearChallengeExpiresAt().
 					SetUserAgent(ginCtx.Request.UserAgent()).
 					SetIP(ginCtx.ClientIP()).
 					Save(ctx)

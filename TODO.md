@@ -36,10 +36,14 @@
 - Add password strength requirements, maybe using https://github.com/dropbox/zxcvbn or https://github.com/zxcvbn-ts/zxcvbn ? Use matcher-pwned
 - Add /.well-known/change-password redirect
 - Add /.well-known/security.txt redirect to GitHub
+- Add /.well-known/passkey-endpoints so password managers know which pages to send the user to in order to configure passkeys
 - Test security using standard tools, maybe make custom scripts too?
 - Crash signals don't seem to show up in Railway. Is it because of the restart policy? Is the email only sent if the max is exceeded?
 - - Looks like it. Maybe recommend using Railway's webhooks in Discord or Slack?
 - - Or configure max restarts to zero, but then it will require a manual restart. Might be worth it depending on threat model though
+- - Recommend in the README to create a custom Railway notification for the project when a deployment is restarted?
+- Limit the number of download sessions that can be created by a single IP to prevent 2FA fatigue attacks
+- - Would also prevent denial of wallet attacks since each successful download session sends a message
 - Allow updating stash contents/password
 - Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect

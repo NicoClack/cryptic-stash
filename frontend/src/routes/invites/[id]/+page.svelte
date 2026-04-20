@@ -5,12 +5,25 @@
 	import PageMain from "$lib/components/PageMain.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Card, CardContent, CardHeader, CardTitle } from "$lib/components/ui/card";
-	import { Input } from "$lib/components/ui/input";
-	import { Label } from "$lib/components/ui/label";
 
 	interface InviteResponse {
-		suggestedName: string;
+		email: string;
 		expiresAt: string;
+	}
+
+	interface WebAuthnOptionsResponse {
+		publicKey: PublicKeyCredentialCreationOptionsJSON;
+	}
+
+	interface PublicKeyCredentialCreationOptionsJSON {
+		rp: { id: string; name: string };
+		user: { id: string; name: string; displayName: string };
+		challenge: string;
+		pubKeyCredParams: { type: string; alg: number }[];
+		timeout?: number;
+		excludeCredentials?: { id: string; type: string; transports?: string[] }[];
+		authenticatorSelection?: Record<string, unknown>;
+		attestation?: string;
 	}
 
 	let isLoadingLink = $state(true);
@@ -18,8 +31,7 @@
 	let requestError = $state<string | null>(null);
 	let successMessage = $state<string | null>(null);
 
-	let username = $state("");
-	let suggestedName = $state("");
+	let email = $state("");
 
 	function getErrorMessage(response: JsonResponse): string {
 		const firstError = response.data?.errors?.[0];
@@ -27,10 +39,6 @@
 			return String(firstError.message);
 		}
 		return `Request failed with status ${response.status}`;
-	}
-
-	function normalizeUsername(value: string): string {
-		return value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
 	}
 
 	function getInviteCode(): string {
@@ -43,10 +51,21 @@
 
 	function getAuthHeaders(): HeadersInit {
 		const code = getInviteCode();
-		if (!code) {
-			return {};
-		}
+		if (!code) return {};
 		return { Authorization: `Bearer ${code}` };
+	}
+
+	function base64urlDecode(str: string): Uint8Array {
+		const padded = str + "=".repeat((4 - (str.length % 4)) % 4);
+		const binary = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
+		return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+	}
+
+	function base64urlEncode(buffer: ArrayBuffer): string {
+		const bytes = new Uint8Array(buffer);
+		let binary = "";
+		for (const byte of bytes) binary += String.fromCharCode(byte);
+		return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 	}
 
 	async function loadInvite() {
@@ -72,31 +91,82 @@
 			}
 
 			const data = response.data as InviteResponse;
-			suggestedName = data.suggestedName ?? "";
-			if (!username && suggestedName) {
-				username = suggestedName;
+			if (!email && data.email) {
+				email = data.email;
 			}
 		} finally {
 			isLoadingLink = false;
 		}
 	}
 
-	async function handleSubmit(event: Event) {
-		event.preventDefault();
+	async function handleCreateAccount() {
 		if (isCreating) return;
 
 		requestError = null;
 		successMessage = null;
-		const inviteId = getInviteId();
-		const normalizedUsername = normalizeUsername(username.trim());
-		if (!normalizedUsername) {
-			requestError = "Username is required.";
+
+		if (!window.PublicKeyCredential) {
+			requestError = "Your browser does not support passkeys. Please use a modern browser.";
 			return;
 		}
 
+		const inviteId = getInviteId();
 		isCreating = true;
 		try {
-			const response = await fetchJson(
+			const optionsResponse = await fetchJson(
+				fetch,
+				`/api/v1/invites/${encodeURIComponent(inviteId)}/webauthn-options`,
+				{ headers: getAuthHeaders() },
+			);
+			if (!optionsResponse.ok) {
+				requestError = getErrorMessage(optionsResponse);
+				return;
+			}
+
+			const { publicKey } = optionsResponse.data as WebAuthnOptionsResponse;
+
+			const credentialOptions: PublicKeyCredentialCreationOptions = {
+				...publicKey,
+				challenge: base64urlDecode(publicKey.challenge),
+				user: {
+					...publicKey.user,
+					id: base64urlDecode(publicKey.user.id),
+				},
+				excludeCredentials: publicKey.excludeCredentials?.map((c) => ({
+					...c,
+					id: base64urlDecode(c.id),
+					type: c.type as PublicKeyCredentialType,
+				})),
+			};
+
+			let credential: PublicKeyCredential;
+			try {
+				credential = (await navigator.credentials.create({
+					publicKey: credentialOptions,
+				})) as PublicKeyCredential;
+			} catch {
+				requestError = "Passkey creation was cancelled or failed. Please try again.";
+				return;
+			}
+
+			if (!credential) {
+				requestError = "No credential returned. Please try again.";
+				return;
+			}
+
+			const attestationResponse = credential.response as AuthenticatorAttestationResponse;
+			const credentialJSON = {
+				id: credential.id,
+				type: credential.type,
+				rawId: base64urlEncode(credential.rawId),
+				response: {
+					clientDataJSON: base64urlEncode(attestationResponse.clientDataJSON),
+					attestationObject: base64urlEncode(attestationResponse.attestationObject),
+					transports: attestationResponse.getTransports?.() ?? [],
+				},
+			};
+
+			const createResponse = await fetchJson(
 				fetch,
 				`/api/v1/invites/${encodeURIComponent(inviteId)}/create-user`,
 				{
@@ -105,18 +175,15 @@
 						"Content-Type": "application/json",
 						...getAuthHeaders(),
 					},
-					body: JSON.stringify({
-						username: normalizedUsername,
-					}),
+					body: JSON.stringify({ credential: credentialJSON }),
 				},
 			);
-			if (!response.ok) {
-				requestError = getErrorMessage(response);
+			if (!createResponse.ok) {
+				requestError = getErrorMessage(createResponse);
 				return;
 			}
 
-			successMessage =
-				"Account created. Please contact your admin to set up your stash and messengers.";
+			successMessage = "Account created successfully. Your passkey has been registered.";
 		} finally {
 			isCreating = false;
 		}
@@ -157,27 +224,19 @@
 
 			{#if isLoadingLink}
 				<p class="text-sm text-muted-foreground">Validating invite...</p>
-			{:else}
-				<form class="space-y-4" onsubmit={handleSubmit}>
-					<Label>
-						Username
-						<Input
-							bind:value={username}
-							required
-							type="text"
-							name="username"
-							autocomplete="username"
-							maxlength={32}
-							oninput={(event) => {
-								username = normalizeUsername((event.currentTarget as HTMLInputElement).value);
-							}}
-						/>
-					</Label>
-
-					<Button type="submit" disabled={isCreating}>
-						{isCreating ? "Creating..." : "Create Account"}
+			{:else if !successMessage}
+				<div class="space-y-3">
+					<p class="text-sm text-muted-foreground">
+						Creating account for <span class="font-medium text-foreground">{email}</span>
+					</p>
+					<p class="text-sm text-muted-foreground">
+						You'll register a passkey to securely access your stash. Your device will prompt you to
+						authenticate.
+					</p>
+					<Button onclick={handleCreateAccount} disabled={isCreating} class="w-full">
+						{isCreating ? "Registering passkey..." : "Create account with passkey"}
 					</Button>
-				</form>
+				</div>
 			{/if}
 		</CardContent>
 	</Card>
