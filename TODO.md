@@ -1,6 +1,7 @@
 # TODO
 
 - Create account system with passkeys
+- Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
 - Remove admin auth code logic
 - Add unique userID + publicName index to stashes
 - Rework functions in core/users.go to take stashes instead
@@ -44,6 +45,7 @@
 - - Recommend in the README to create a custom Railway notification for the project when a deployment is restarted?
 - Limit the number of download sessions that can be created by a single IP to prevent 2FA fatigue attacks
 - - Would also prevent denial of wallet attacks since each successful download session sends a message
+- Display warning when signing into account if there's an active download session and prompt user to secure the stash
 - Allow updating stash contents/password
 - Use "Cache-Control": "no-store" on sensitive endpoints?
 - Disk usage keeps increasing. Maybe need to delete old job executions and logs? Implement the dump database endpoint so I can inspect
@@ -117,6 +119,7 @@
 - - Use CSP to prevent fetches to other origins
 - - Use socket.dev to reduce chance of the frontend having malicious code? Create E2E test and see if any suspicious data is sent off
 - - Use npm-check-updates with a cooldown of a few days
+- Use panic instead of Fatalf for startup errors?
 
 - Move from gin, its maintenance isn't great
 - When messengers are changed, send a message to all of the previous messengers

@@ -13,3 +13,4 @@ The project is a monorepo with a frontend folder, which uses SvelteKit and a bac
 - Check the Ent schemas rather than analysing the generated code where possible
 - Prefer the using tools over the CLI for simple situations. ripgrep/grep/cat etc commands usually require me to review them, which slows down development. You can use the CLI if you think it will significantly reduce unnecessary info in your context or if you need to perform some sort of bulk action
 - Differentiate between different types of error variables with names like stdErr (instance of standard error interface), wrappedError (common.WrappedError), serverError (\*servercommon.Error) commErr (\*common.Error). Generally avoid using "err"
+- The `testpackage` linter is being used so use _test packages for tests where possible

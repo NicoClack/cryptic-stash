@@ -63,6 +63,7 @@ func NewScheduler(app *common.App) *Scheduler {
 				)
 			}
 			app.RateLimiter.DeleteInactiveUsers()
+			app.TempKeyValue.PruneAll()
 		},
 		schedulers.SimpleFixedInterval(app.Env.CLEAN_UP_INTERVAL),
 	)

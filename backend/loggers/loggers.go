@@ -413,7 +413,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 						return false, nil
 					}
 
-					wrappedErr = handler.App.KeyValue.Set("LAST_CRASH_SIGNAL", now, ctx)
+					wrappedErr = handler.App.KeyValue.Set("LAST_CRASH_SIGNAL", now.UTC(), ctx)
 					if wrappedErr != nil {
 						return false, wrappedErr
 					}

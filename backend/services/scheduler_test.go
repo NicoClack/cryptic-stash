@@ -21,6 +21,7 @@ func TestSchedulerShutdown_HandlesConcurrentCalls(t *testing.T) {
 		Database:         testcommon.CreateDB(t),
 		Logger:           testcommon.NewTestLogger(),
 		Core:             mocks.NewEmptyCoreService(),
+		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
 	}
@@ -47,6 +48,7 @@ func TestSchedulerShutdown_NoOpWhenNotStarted(t *testing.T) {
 		Database:         testcommon.CreateDB(t),
 		Logger:           testcommon.NewTestLogger(),
 		Core:             mocks.NewEmptyCoreService(),
+		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
 	}
@@ -67,6 +69,7 @@ func TestSchedulerStart_SubsequentCallsAreNoOp(t *testing.T) {
 		Database:         testcommon.CreateDB(t),
 		Logger:           testcommon.NewTestLogger(),
 		Core:             mocks.NewEmptyCoreService(),
+		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
 	}

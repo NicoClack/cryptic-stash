@@ -99,6 +99,7 @@ type App struct {
 	ShutdownService  ShutdownService
 	Database         DatabaseService
 	KeyValue         KeyValueService
+	TempKeyValue     TempKeyValueService
 	TwoFactorActions TwoFactorActionService
 	Messengers       MessengerService
 	Server           ServerService
@@ -247,6 +248,13 @@ type KeyValueService interface {
 	Init()
 	Get(name string, ptr any, ctx context.Context) WrappedError
 	Set(name string, value any, ctx context.Context) WrappedError
+}
+type TempKeyValueService interface {
+	Get(storeName string, key string, ptr any) bool
+	Set(storeName string, key string, value any, expiresAt time.Time)
+	Delete(storeName string, key string)
+	Prune(storeName string)
+	PruneAll()
 }
 
 type ServerService interface {

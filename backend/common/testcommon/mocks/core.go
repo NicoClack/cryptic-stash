@@ -32,7 +32,11 @@ func (m *EmptyCoreService) SendActiveDownloadSessionReminders(ctx context.Contex
 func (m *EmptyCoreService) DeleteExpiredDownloadSessions(ctx context.Context) common.WrappedError {
 	return nil
 }
-func (m *EmptyCoreService) InvalidateDownloadSessionsForStash(stashID uuid.UUID, ctx context.Context) common.WrappedError {
+
+func (m *EmptyCoreService) InvalidateDownloadSessionsForStash(
+	stashID uuid.UUID,
+	ctx context.Context,
+) common.WrappedError {
 	return nil
 }
 func (m *EmptyCoreService) IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool {

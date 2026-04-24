@@ -19,9 +19,11 @@ func NewDummyUser(counter int, dbClient *ent.Client, ctx context.Context, clock 
 	dbClient.Stash.Create().
 		SetCreatedAt(now).
 		SetUpdatedAt(now).
+		SetPublicName("dummy stash").
 		SetContent([]byte{1}).
 		SetFileName([]byte{1}).
 		SetEncryptionDataKey(core.GenerateEncryptionKey()).
+		// ^ Normally this would be encrypted but it doesn't matter for this
 		SetPasswordSalt(core.GenerateSalt()).
 		SetHashTime(0).SetHashMemory(0).SetHashThreads(0).
 		SetUser(userOb).
