@@ -78,6 +78,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
+				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
 				SetEncryptionDataKey(encryptedDataKey).
@@ -201,6 +202,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
+				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
 				SetEncryptionDataKey(encryptedDataKey).
@@ -318,6 +320,7 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
+				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
 				SetEncryptionDataKey(encryptedDataKey).
@@ -481,6 +484,7 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 			stashOb, stdErr := tx.Stash.Create().
 				SetCreatedAt(now).
 				SetUpdatedAt(now).
+				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
 				SetEncryptionDataKey(encryptedDataKey).
