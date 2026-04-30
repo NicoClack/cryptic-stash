@@ -27,9 +27,9 @@ type GetInviteResponse struct {
 
 func GetInvite(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		inviteID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if ctxErr != nil {
-			return ctxErr
+		inviteID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
+		if serverErr != nil {
+			return serverErr
 		}
 
 		resp, stdErr := dbcommon.WithReadTx(

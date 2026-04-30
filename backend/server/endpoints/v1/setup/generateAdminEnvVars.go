@@ -21,8 +21,8 @@ type GenerateAdminEnvVarsResponse struct {
 func GenerateAdminEnvVars(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := GenerateAdminEnvVarsPayload{}
-		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
-			return ctxErr
+		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
+			return serverErr
 		}
 
 		envVars, totpURL, wrappedErr := app.Setup.GenerateAdminSetupConstants(body.Password)

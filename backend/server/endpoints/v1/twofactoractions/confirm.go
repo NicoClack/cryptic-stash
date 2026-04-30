@@ -22,12 +22,12 @@ type ConfirmResponse struct {
 func Confirm(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := ConfirmPayload{}
-		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
-			return ctxErr
+		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
+			return serverErr
 		}
-		actionID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if ctxErr != nil {
-			return ctxErr
+		actionID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
+		if serverErr != nil {
+			return serverErr
 		}
 
 		return dbcommon.WithWriteTx(

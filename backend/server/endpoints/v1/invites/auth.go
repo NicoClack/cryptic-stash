@@ -17,9 +17,9 @@ func useInvite[T any](
 	ginCtx *gin.Context, app *servercommon.ServerApp,
 	respFunc func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*T, error),
 ) (*T, error) {
-	inviteID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-	if ctxErr != nil {
-		return nil, ctxErr
+	inviteID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
+	if serverErr != nil {
+		return nil, serverErr
 	}
 
 	token, serverErr := servercommon.RequireAuthorizationScheme("Bearer", ginCtx)

@@ -33,8 +33,8 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := CreateUserPayload{}
-		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
-			return ctxErr
+		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
+			return serverErr
 		}
 		parsedCredential, stdErr := protocol.ParseCredentialCreationResponseBytes(body.Credential)
 		if stdErr != nil {

@@ -37,8 +37,8 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := CreatePayload{}
-		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
-			return ctxErr
+		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
+			return serverErr
 		}
 		if serverErr := servercommon.ValidateUserEmail(body.Email); serverErr != nil {
 			return serverErr

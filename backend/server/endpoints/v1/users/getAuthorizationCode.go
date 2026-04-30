@@ -33,8 +33,8 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := GetAuthorizationCodePayload{}
-		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
-			return ctxErr
+		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
+			return serverErr
 		}
 		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr

@@ -20,8 +20,8 @@ type CheckTotpResponse struct {
 func CheckTotp(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := CheckTotpPayload{}
-		if ctxErr := servercommon.ParseBody(&body, ginCtx); ctxErr != nil {
-			return ctxErr
+		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
+			return serverErr
 		}
 
 		ginCtx.JSON(http.StatusOK, CheckTotpResponse{

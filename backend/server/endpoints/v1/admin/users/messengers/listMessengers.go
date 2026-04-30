@@ -33,9 +33,9 @@ type Messenger struct {
 
 func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		userID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if ctxErr != nil {
-			return ctxErr
+		userID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
+		if serverErr != nil {
+			return serverErr
 		}
 		userOb, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
