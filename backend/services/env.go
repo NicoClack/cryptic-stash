@@ -4,7 +4,6 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"strings"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/joho/godotenv"
@@ -83,7 +82,7 @@ func LoadEnvironmentVariables() *common.Env {
 		SMTP_REQUIRE_TLS:   common.OptionalBoolEnv("SMTP_REQUIRE_TLS", true),
 		SMTP_IMPLICIT_TLS:  common.OptionalBoolEnv("SMTP_IMPLICIT_TLS", true),
 		SMTP2GO_API_KEY:    common.OptionalEnv("SMTP2GO_API_KEY", ""),
-		SMTP2GO_BASE_URL:   common.OptionalEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/v3"),
+		SMTP2GO_BASE_URL:   common.OptionalURLEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/v3"),
 		SMTP2GO_FROM_EMAIL: common.OptionalEnv("SMTP2GO_FROM_EMAIL", ""),
 		SMTP2GO_FROM_NAME:  common.OptionalEnv("SMTP2GO_FROM_NAME", "Cryptic Stash"),
 	}
@@ -92,8 +91,8 @@ func LoadEnvironmentVariables() *common.Env {
 	return env
 }
 func NormalizeEnvironmentVariables(env *common.Env) {
-	env.FRONTEND_BASE_URL = strings.TrimRight(strings.TrimSpace(env.FRONTEND_BASE_URL), "/")
-	env.SMTP2GO_BASE_URL = strings.TrimRight(strings.TrimSpace(env.SMTP2GO_BASE_URL), "/")
+	env.FRONTEND_BASE_URL = common.NormalizeBaseURL(env.FRONTEND_BASE_URL)
+	env.SMTP2GO_BASE_URL = common.NormalizeBaseURL(env.SMTP2GO_BASE_URL)
 }
 func ValidateEnvironmentVariables(env *common.Env) {
 	if !common.AllOrNone(

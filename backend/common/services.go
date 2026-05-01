@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/ent"
@@ -25,7 +26,7 @@ type Env struct {
 	MOUNT_PATH                    string
 	PROXY_ORIGINAL_IP_HEADER_NAME string
 	ALLOWED_ORIGINS               []string
-	FRONTEND_BASE_URL             string
+	FRONTEND_BASE_URL             *url.URL
 	// Things like deleting expired login download sessions
 	CLEAN_UP_INTERVAL time.Duration
 	FULL_GC_INTERVAL  time.Duration
@@ -80,7 +81,7 @@ type Env struct {
 	SMTP_REQUIRE_TLS   bool
 	SMTP_IMPLICIT_TLS  bool
 	SMTP2GO_API_KEY    string
-	SMTP2GO_BASE_URL   string
+	SMTP2GO_BASE_URL   *url.URL
 	SMTP2GO_FROM_EMAIL string
 	SMTP2GO_FROM_NAME  string
 }

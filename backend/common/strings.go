@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -87,4 +88,14 @@ func SanitizeFilename(filename string, defaultFilename string) string {
 	}
 
 	return sanitizedFilename
+}
+
+// Removes trailing slashes
+func NormalizeBaseURL(parsedURL *url.URL) *url.URL {
+	if parsedURL == nil {
+		return nil
+	}
+	normalizedURL := *parsedURL
+	normalizedURL.Path = strings.TrimSuffix(normalizedURL.Path, "/")
+	return &normalizedURL
 }

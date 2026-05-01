@@ -1,7 +1,6 @@
 package invites
 
 import (
-	"net/url"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
@@ -25,13 +24,8 @@ func (u *webAuthnUser) WebAuthnDisplayName() string                { return u.di
 func (u *webAuthnUser) WebAuthnCredentials() []webauthn.Credential { return nil }
 
 func newWebAuthnApp(app *servercommon.ServerApp) (*webauthn.WebAuthn, string) {
-	parsedURL, stdErr := url.Parse(app.Env.FRONTEND_BASE_URL)
-	if stdErr != nil {
-		panic("invalid FRONTEND_BASE_URL. error:\n" + stdErr.Error())
-	}
-
-	origin := parsedURL.Scheme + "://" + parsedURL.Host
-	relayingPartyID := parsedURL.Hostname()
+	origin := app.Env.FRONTEND_BASE_URL.Scheme + "://" + app.Env.FRONTEND_BASE_URL.Host
+	relayingPartyID := app.Env.FRONTEND_BASE_URL.Hostname()
 
 	webAuthnApp, stdErr := webauthn.New(&webauthn.Config{
 		RPID:                        relayingPartyID,

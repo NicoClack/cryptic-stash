@@ -1,6 +1,7 @@
 package testcommon
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
@@ -14,7 +15,7 @@ func DefaultEnv() *common.Env {
 		MOUNT_PATH:                    "temp-test-storage",
 		PROXY_ORIGINAL_IP_HEADER_NAME: "test-proxy-original-ip",
 		ALLOWED_ORIGINS:               []string{},
-		FRONTEND_BASE_URL:             "https://frontend.example.com",
+		FRONTEND_BASE_URL:             mustParseURL("https://frontend.example.com"),
 		CLEAN_UP_INTERVAL:             time.Hour,
 		FULL_GC_INTERVAL:              0,
 
@@ -66,4 +67,12 @@ func DefaultEnv() *common.Env {
 		SMTP_FROM_NAME:           "Cryptic Stash",
 		EMAIL_MESSENGER_TYPE:     "",
 	}
+}
+
+func mustParseURL(raw string) *url.URL {
+	parsed, stdErr := url.ParseRequestURI(raw)
+	if stdErr != nil {
+		panic("failed to parse URL: " + stdErr.Error())
+	}
+	return parsed
 }

@@ -164,8 +164,11 @@ func newInMemoryUser(
 func getInviteURL(
 	inviteID string,
 	code string,
-	frontendBaseURL string,
+	frontendBaseURL *url.URL,
 ) string {
-	invitePath := fmt.Sprintf("/invites/%s/?code=%s", inviteID, url.QueryEscape(code))
-	return frontendBaseURL + invitePath
+	rel := &url.URL{
+		Path:     fmt.Sprintf("/invites/%s/", inviteID),
+		RawQuery: "code=" + url.QueryEscape(code),
+	}
+	return frontendBaseURL.ResolveReference(rel).String()
 }

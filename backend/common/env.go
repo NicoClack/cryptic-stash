@@ -20,7 +20,7 @@ func RequireEnv(name string) string {
 	return value
 }
 
-func RequireURLEnv(name string) string {
+func RequireURLEnv(name string) *url.URL {
 	value := strings.TrimSpace(RequireEnv(name))
 	parsedURL, stdErr := url.ParseRequestURI(value)
 	if stdErr != nil {
@@ -30,7 +30,7 @@ func RequireURLEnv(name string) string {
 		log.Fatalf("environment variable \"%s\" must include a URL scheme and host", name)
 	}
 
-	return value
+	return parsedURL
 }
 
 func RequireStrArrEnv(name string) []string {
@@ -123,6 +123,26 @@ func OptionalEnv(name string, defaultValue string) string {
 	} else {
 		return defaultValue
 	}
+}
+
+func OptionalURLEnv(name string, defaultValue string) *url.URL {
+	_, specified := os.LookupEnv(name)
+	if specified {
+		return RequireURLEnv(name)
+	}
+
+	trimmedDefault := strings.TrimSpace(defaultValue)
+	if trimmedDefault == "" {
+		return nil
+	}
+	parsedDefault, stdErr := url.ParseRequestURI(trimmedDefault)
+	if stdErr != nil {
+		log.Fatalf("default value for environment variable \"%s\" must be a valid absolute URL: %v", name, stdErr)
+	}
+	if parsedDefault.Scheme == "" || parsedDefault.Host == "" {
+		log.Fatalf("default value for environment variable \"%s\" must include a URL scheme and host", name)
+	}
+	return parsedDefault
 }
 
 // Mainly used for the CLI commands eg. BENCHMARK_THREAD_COUNT

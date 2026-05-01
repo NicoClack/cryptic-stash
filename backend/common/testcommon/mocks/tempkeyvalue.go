@@ -7,11 +7,11 @@ import (
 type EmptyTempKeyValueService struct{}
 
 func NewEmptyTempKeyValueService() *EmptyTempKeyValueService {
-    return &EmptyTempKeyValueService{}
+	return &EmptyTempKeyValueService{}
 }
 
 func (m *EmptyTempKeyValueService) Get(storeName string, key string, ptr any) bool {
-    return false
+	return false
 }
 func (m *EmptyTempKeyValueService) Set(storeName string, key string, value any, expiresAt time.Time) {
 }
