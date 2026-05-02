@@ -37,6 +37,7 @@ const (
 	ErrTypeTwoFactorAction = "two factor action [package]"
 	ErrTypeMessengers      = "messengers [package]"
 	ErrTypeRateLimiting    = "rate limiting [package]"
+	ErrTypeAuth            = "auth [package]"
 	ErrTypeDbCommon        = "db common [package]"
 	ErrTypeServerCommon    = "server common [package]"
 	ErrTypeServices        = "services [package]"
@@ -490,7 +491,7 @@ type ErrorWrapper interface {
 	Wrap(err error) WrappedError
 }
 
-//nolint:recvcheck
+//nolint:recvcheck // cloning uses value receiver
 type ConstantErrorWrapper struct {
 	Categories []string
 	Child      ErrorWrapper

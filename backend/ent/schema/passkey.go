@@ -15,6 +15,7 @@ type Passkey struct {
 }
 
 func (Passkey) Fields() []ent.Field {
+	// TODO: encrypt some of this with server key, as webauthn.Credential suggests
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),

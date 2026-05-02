@@ -50,6 +50,7 @@ func main() {
 		slog.SetDefault(logger.Logger)
 	}
 	app.TempKeyValue = services.NewTempKeyValue(app)
+	app.Auth = services.NewAuth(app)
 	app.RateLimiter = services.NewRateLimiter(app)
 	app.Core = services.NewCore(app)
 	app.Setup = services.NewSetupService(app)

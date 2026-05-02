@@ -59,7 +59,9 @@ func withTx(
 	tx, stdErr := txCallback(ctx)
 	if stdErr != nil {
 		return ErrWrapperWithTx.Wrap(
-			ErrWrapperStartTx.Wrap(stdErr),
+			ErrWrapperStartTx.Wrap(
+				common.ErrWrapperDatabase.Wrap(stdErr),
+			),
 		)
 	}
 
@@ -98,7 +100,9 @@ func withTx(
 	stdErr = tx.Commit()
 	if stdErr != nil {
 		return ErrWrapperWithTx.Wrap(
-			ErrWrapperCommitTx.Wrap(stdErr),
+			ErrWrapperCommitTx.Wrap(
+				common.ErrWrapperDatabase.Wrap(stdErr),
+			),
 		)
 	}
 	return nil

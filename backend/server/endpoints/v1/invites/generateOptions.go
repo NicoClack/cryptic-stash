@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
@@ -17,24 +18,25 @@ type GenerateOptionsResponse struct {
 }
 
 func GenerateOptions(app *servercommon.ServerApp) gin.HandlerFunc {
-	webAuthnApp, _ := newWebAuthnApp(app)
-
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		resp, stdErr := useInvite(
 			ginCtx, app,
 			func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*GenerateOptionsResponse, error) {
 				pendingUserID := uuid.New()
-				creation, session, stdErr := webAuthnApp.BeginRegistration(&webAuthnUser{
-					id:          pendingUserID[:],
-					name:        inviteOb.Email,
-					displayName: inviteOb.Email,
-				})
-				if stdErr != nil {
-					return nil, stdErr
+				options, sessionData, wrappedErr := app.Auth.StartRegisterPasskey(
+					&auth.TempWebAuthnUser{
+						ID:          pendingUserID[:],
+						Name:        inviteOb.Email,
+						DisplayName: inviteOb.Email,
+					},
+					ctx,
+				)
+				if wrappedErr != nil {
+					return nil, wrappedErr
 				}
 
-				_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
-					SetWebAuthnSession(session).
+				_, stdErr := tx.Invite.UpdateOneID(inviteOb.ID).
+					SetWebAuthnSession(sessionData).
 					Save(ctx)
 				if stdErr != nil {
 					return nil, stdErr
@@ -42,7 +44,7 @@ func GenerateOptions(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				return &GenerateOptionsResponse{
 					Errors:    []servercommon.ErrorDetail{},
-					PublicKey: creation.Response,
+					PublicKey: options,
 				}, nil
 			},
 		)

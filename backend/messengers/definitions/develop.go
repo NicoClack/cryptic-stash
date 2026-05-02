@@ -13,7 +13,7 @@ type Develop1Body struct {
 
 func Develop1() *messengers.Definition {
 	return &messengers.Definition{
-		ID:      "develop",
+		ID:      "develop", // TODO: capitalise to match job name format?
 		Version: 1,
 		Name:    "Develop",
 		Prepare: func(prepareCtx *messengers.PrepareContext) (any, error) {

@@ -33,7 +33,7 @@ const (
 
 type disableErrorLoggingKey = struct{} // Used to prevent infinite loops
 
-//nolint:recvcheck
+//nolint:recvcheck // has to use some value receivers to implement slog.Handler
 type Handler struct {
 	App              *common.App
 	Level            slog.Level

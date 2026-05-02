@@ -16,6 +16,9 @@ import (
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/gin-gonic/gin"
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 	"github.com/jonboulle/clockwork"
 )
@@ -108,6 +111,47 @@ type App struct {
 	Setup            SetupService
 	Jobs             JobService
 	Scheduler        SchedulerService
+	Auth             AuthService
+}
+
+type AuthService interface {
+	WebAuthn() *webauthn.WebAuthn
+
+	StartLogin(ctx context.Context) (
+		sessionID string,
+		options protocol.PublicKeyCredentialRequestOptions,
+		wrappedErr WrappedError,
+	)
+	FinishLogin(
+		sessionID string,
+		ginCtx *gin.Context,
+		tx *ent.Tx,
+	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
+
+	StartRegisterPasskey(
+		user webauthn.User,
+		ctx context.Context,
+	) (
+		options protocol.PublicKeyCredentialCreationOptions,
+		sessionData *webauthn.SessionData,
+		wrappedErr WrappedError,
+	)
+	FinishRegisterPasskey(
+		user webauthn.User,
+		sessionData webauthn.SessionData,
+		credentialJSON []byte,
+		ctx context.Context,
+	) (*webauthn.Credential, WrappedError)
+
+	CreateSession(
+		userID uuid.UUID,
+		userAgent string,
+		ip string,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
+	// Note: must load user edge
+	ValidateSession(token string, tx *ent.Tx, ctx context.Context) (*ent.Session, WrappedError)
 }
 
 // If reason is "", the server will exit with a 0 exit code

@@ -1,6 +1,7 @@
 # TODO
 
 - Create account system with passkeys
+- Standardise passkey/credential naming
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
 - Remove admin auth code logic
 - Add unique userID + publicName index to stashes
@@ -120,6 +121,7 @@
 - - Use socket.dev to reduce chance of the frontend having malicious code? Create E2E test and see if any suspicious data is sent off
 - - Use npm-check-updates with a cooldown of a few days
 - Use panic instead of Fatalf for startup errors?
+- Restructure services so that implementations wrap errors defined in a more common package, e.g defined in twofactoractions/service.go. Messenger based implementation defined in twofactoractions/messengers/
 
 - Move from gin, its maintenance isn't great
 - When messengers are changed, send a message to all of the previous messengers

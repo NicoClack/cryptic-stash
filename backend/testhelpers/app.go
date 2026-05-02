@@ -100,6 +100,8 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 	db := testcommon.CreateDB(t)
 	app.Database = db
 	app.KeyValue = services.NewKeyValue(app)
+	app.TempKeyValue = services.NewTempKeyValue(app)
+	app.Auth = services.NewAuth(app)
 	app.Database.Start()
 	app.KeyValue.Init()
 	app.Logger.Start()
