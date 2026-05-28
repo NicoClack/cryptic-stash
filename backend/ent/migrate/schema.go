@@ -213,9 +213,9 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 64},
 		{Name: "credential_id", Type: field.TypeBytes, Unique: true},
 		{Name: "public_key", Type: field.TypeBytes},
-		{Name: "aaguid", Type: field.TypeBytes, Size: 16},
+		{Name: "aaguid", Type: field.TypeUUID, Nullable: true},
 		{Name: "sign_count", Type: field.TypeUint32, Default: 0},
-		{Name: "is_second_factor", Type: field.TypeBool, Default: false},
+		{Name: "is_second_group", Type: field.TypeBool, Default: false},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// PasskeysTable holds the schema information for the "passkeys" table.
@@ -255,6 +255,7 @@ var (
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "user_agent", Type: field.TypeString, Default: ""},
 		{Name: "ip", Type: field.TypeString, Default: ""},
+		{Name: "passkey_id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
@@ -264,17 +265,16 @@ var (
 		PrimaryKey: []*schema.Column{SessionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "sessions_users_sessions",
+				Symbol:     "sessions_passkeys_sessions",
 				Columns:    []*schema.Column{SessionsColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				RefColumns: []*schema.Column{PasskeysColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
-		},
-		Indexes: []*schema.Index{
 			{
-				Name:    "session_hashed_token_user_id",
-				Unique:  false,
-				Columns: []*schema.Column{SessionsColumns[3], SessionsColumns[7]},
+				Symbol:     "sessions_users_sessions",
+				Columns:    []*schema.Column{SessionsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -413,7 +413,8 @@ func init() {
 	LoginAlertsTable.ForeignKeys[0].RefTable = DownloadSessionsTable
 	LoginAlertsTable.ForeignKeys[1].RefTable = UserMessengersTable
 	PasskeysTable.ForeignKeys[0].RefTable = UsersTable
-	SessionsTable.ForeignKeys[0].RefTable = UsersTable
+	SessionsTable.ForeignKeys[0].RefTable = PasskeysTable
+	SessionsTable.ForeignKeys[1].RefTable = UsersTable
 	StashesTable.ForeignKeys[0].RefTable = UsersTable
 	UserMessengersTable.ForeignKeys[0].RefTable = UsersTable
 }

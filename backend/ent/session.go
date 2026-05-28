@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -31,6 +32,8 @@ type Session struct {
 	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
 	IP string `json:"ip,omitempty"`
+	// PasskeyID holds the value of the "passkeyID" field.
+	PasskeyID uuid.UUID `json:"passkeyID,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -43,9 +46,11 @@ type Session struct {
 type SessionEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Passkey holds the value of the passkey edge.
+	Passkey *Passkey `json:"passkey,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -59,6 +64,17 @@ func (e SessionEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// PasskeyOrErr returns the Passkey value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SessionEdges) PasskeyOrErr() (*Passkey, error) {
+	if e.Passkey != nil {
+		return e.Passkey, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: passkey.Label}
+	}
+	return nil, &NotLoadedError{edge: "passkey"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Session) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -70,7 +86,7 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
-		case session.FieldID, session.FieldUserID:
+		case session.FieldID, session.FieldPasskeyID, session.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -129,6 +145,12 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.IP = value.String
 			}
+		case session.FieldPasskeyID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field passkeyID", values[i])
+			} else if value != nil {
+				_m.PasskeyID = *value
+			}
 		case session.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field userID", values[i])
@@ -151,6 +173,11 @@ func (_m *Session) Value(name string) (ent.Value, error) {
 // QueryUser queries the "user" edge of the Session entity.
 func (_m *Session) QueryUser() *UserQuery {
 	return NewSessionClient(_m.config).QueryUser(_m)
+}
+
+// QueryPasskey queries the "passkey" edge of the Session entity.
+func (_m *Session) QueryPasskey() *PasskeyQuery {
+	return NewSessionClient(_m.config).QueryPasskey(_m)
 }
 
 // Update returns a builder for updating this Session.
@@ -193,6 +220,9 @@ func (_m *Session) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("ip=")
 	builder.WriteString(_m.IP)
+	builder.WriteString(", ")
+	builder.WriteString("passkeyID=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PasskeyID))
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

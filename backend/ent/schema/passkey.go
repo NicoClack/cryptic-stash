@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -34,5 +35,7 @@ func (Passkey) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("passkeys").
 			Field("userID").Unique().Required(),
+		edge.To("sessions", Session.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

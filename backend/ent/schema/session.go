@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -27,6 +26,8 @@ func (Session) Fields() []ent.Field {
 		field.Time("expiresAt"),
 		field.String("userAgent").Default(""),
 		field.String("ip").Default(""),
+
+		field.UUID("passkeyID", uuid.Nil), // For now, all sessions are created through a passkey
 		field.UUID("userID", uuid.Nil),
 	}
 }
@@ -35,11 +36,7 @@ func (Session) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("sessions").
 			Field("userID").Required().Unique(),
-	}
-}
-
-func (Session) Indexes() []ent.Index {
-	return []ent.Index{
-		index.Fields("hashedToken", "userID"),
+		edge.From("passkey", Passkey.Type).Ref("sessions").
+			Field("passkeyID").Required().Unique(),
 	}
 }

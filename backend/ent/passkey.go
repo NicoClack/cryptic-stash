@@ -30,11 +30,11 @@ type Passkey struct {
 	// PublicKey holds the value of the "publicKey" field.
 	PublicKey []byte `json:"publicKey,omitempty"`
 	// Aaguid holds the value of the "aaguid" field.
-	Aaguid []byte `json:"aaguid,omitempty"`
+	Aaguid uuid.UUID `json:"aaguid,omitempty"`
 	// SignCount holds the value of the "signCount" field.
 	SignCount uint32 `json:"signCount,omitempty"`
-	// IsSecondFactor holds the value of the "isSecondFactor" field.
-	IsSecondFactor bool `json:"isSecondFactor,omitempty"`
+	// IsSecondGroup holds the value of the "isSecondGroup" field.
+	IsSecondGroup bool `json:"isSecondGroup,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -47,9 +47,11 @@ type Passkey struct {
 type PasskeyEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Sessions holds the value of the sessions edge.
+	Sessions []*Session `json:"sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -63,14 +65,23 @@ func (e PasskeyEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// SessionsOrErr returns the Sessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e PasskeyEdges) SessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[1] {
+		return e.Sessions, nil
+	}
+	return nil, &NotLoadedError{edge: "sessions"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Passkey) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case passkey.FieldCredentialID, passkey.FieldPublicKey, passkey.FieldAaguid:
+		case passkey.FieldCredentialID, passkey.FieldPublicKey:
 			values[i] = new([]byte)
-		case passkey.FieldIsSecondFactor:
+		case passkey.FieldIsSecondGroup:
 			values[i] = new(sql.NullBool)
 		case passkey.FieldSignCount:
 			values[i] = new(sql.NullInt64)
@@ -78,7 +89,7 @@ func (*Passkey) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case passkey.FieldCreatedAt, passkey.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case passkey.FieldID, passkey.FieldUserID:
+		case passkey.FieldID, passkey.FieldAaguid, passkey.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -132,7 +143,7 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 				_m.PublicKey = *value
 			}
 		case passkey.FieldAaguid:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field aaguid", values[i])
 			} else if value != nil {
 				_m.Aaguid = *value
@@ -143,11 +154,11 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.SignCount = uint32(value.Int64)
 			}
-		case passkey.FieldIsSecondFactor:
+		case passkey.FieldIsSecondGroup:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field isSecondFactor", values[i])
+				return fmt.Errorf("unexpected type %T for field isSecondGroup", values[i])
 			} else if value.Valid {
-				_m.IsSecondFactor = value.Bool
+				_m.IsSecondGroup = value.Bool
 			}
 		case passkey.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -171,6 +182,11 @@ func (_m *Passkey) Value(name string) (ent.Value, error) {
 // QueryUser queries the "user" edge of the Passkey entity.
 func (_m *Passkey) QueryUser() *UserQuery {
 	return NewPasskeyClient(_m.config).QueryUser(_m)
+}
+
+// QuerySessions queries the "sessions" edge of the Passkey entity.
+func (_m *Passkey) QuerySessions() *SessionQuery {
+	return NewPasskeyClient(_m.config).QuerySessions(_m)
 }
 
 // Update returns a builder for updating this Passkey.
@@ -217,8 +233,8 @@ func (_m *Passkey) String() string {
 	builder.WriteString("signCount=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SignCount))
 	builder.WriteString(", ")
-	builder.WriteString("isSecondFactor=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsSecondFactor))
+	builder.WriteString("isSecondGroup=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsSecondGroup))
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

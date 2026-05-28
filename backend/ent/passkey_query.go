@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
@@ -20,11 +22,12 @@ import (
 // PasskeyQuery is the builder for querying Passkey entities.
 type PasskeyQuery struct {
 	config
-	ctx        *QueryContext
-	order      []passkey.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Passkey
-	withUser   *UserQuery
+	ctx          *QueryContext
+	order        []passkey.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Passkey
+	withUser     *UserQuery
+	withSessions *SessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +79,28 @@ func (_q *PasskeyQuery) QueryUser() *UserQuery {
 			sqlgraph.From(passkey.Table, passkey.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, passkey.UserTable, passkey.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySessions chains the current query on the "sessions" edge.
+func (_q *PasskeyQuery) QuerySessions() *SessionQuery {
+	query := (&SessionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(passkey.Table, passkey.FieldID, selector),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, passkey.SessionsTable, passkey.SessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +295,13 @@ func (_q *PasskeyQuery) Clone() *PasskeyQuery {
 		return nil
 	}
 	return &PasskeyQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]passkey.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Passkey{}, _q.predicates...),
-		withUser:   _q.withUser.Clone(),
+		config:       _q.config,
+		ctx:          _q.ctx.Clone(),
+		order:        append([]passkey.OrderOption{}, _q.order...),
+		inters:       append([]Interceptor{}, _q.inters...),
+		predicates:   append([]predicate.Passkey{}, _q.predicates...),
+		withUser:     _q.withUser.Clone(),
+		withSessions: _q.withSessions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -290,6 +316,17 @@ func (_q *PasskeyQuery) WithUser(opts ...func(*UserQuery)) *PasskeyQuery {
 		opt(query)
 	}
 	_q.withUser = query
+	return _q
+}
+
+// WithSessions tells the query-builder to eager-load the nodes that are connected to
+// the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *PasskeyQuery) WithSessions(opts ...func(*SessionQuery)) *PasskeyQuery {
+	query := (&SessionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSessions = query
 	return _q
 }
 
@@ -371,8 +408,9 @@ func (_q *PasskeyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pass
 	var (
 		nodes       = []*Passkey{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withUser != nil,
+			_q.withSessions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -396,6 +434,13 @@ func (_q *PasskeyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pass
 	if query := _q.withUser; query != nil {
 		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *Passkey, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSessions; query != nil {
+		if err := _q.loadSessions(ctx, query, nodes,
+			func(n *Passkey) { n.Edges.Sessions = []*Session{} },
+			func(n *Passkey, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -428,6 +473,36 @@ func (_q *PasskeyQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (_q *PasskeyQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Passkey, init func(*Passkey), assign func(*Passkey, *Session)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Passkey)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(session.FieldPasskeyID)
+	}
+	query.Where(predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(passkey.SessionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PasskeyID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "passkeyID" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

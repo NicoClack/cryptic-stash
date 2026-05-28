@@ -29,12 +29,14 @@ const (
 	FieldAaguid = "aaguid"
 	// FieldSignCount holds the string denoting the signcount field in the database.
 	FieldSignCount = "sign_count"
-	// FieldIsSecondFactor holds the string denoting the issecondfactor field in the database.
-	FieldIsSecondFactor = "is_second_factor"
+	// FieldIsSecondGroup holds the string denoting the issecondgroup field in the database.
+	FieldIsSecondGroup = "is_second_group"
 	// FieldUserID holds the string denoting the userid field in the database.
 	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeSessions holds the string denoting the sessions edge name in mutations.
+	EdgeSessions = "sessions"
 	// Table holds the table name of the passkey in the database.
 	Table = "passkeys"
 	// UserTable is the table that holds the user relation/edge.
@@ -44,6 +46,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
+	// SessionsTable is the table that holds the sessions relation/edge.
+	SessionsTable = "sessions"
+	// SessionsInverseTable is the table name for the Session entity.
+	// It exists in this package in order to avoid circular dependency with the "session" package.
+	SessionsInverseTable = "sessions"
+	// SessionsColumn is the table column denoting the sessions relation/edge.
+	SessionsColumn = "passkey_id"
 )
 
 // Columns holds all SQL columns for passkey fields.
@@ -56,7 +65,7 @@ var Columns = []string{
 	FieldPublicKey,
 	FieldAaguid,
 	FieldSignCount,
-	FieldIsSecondFactor,
+	FieldIsSecondGroup,
 	FieldUserID,
 }
 
@@ -75,12 +84,10 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// AaguidValidator is a validator for the "aaguid" field. It is called by the builders before save.
-	AaguidValidator func([]byte) error
 	// DefaultSignCount holds the default value on creation for the "signCount" field.
 	DefaultSignCount uint32
-	// DefaultIsSecondFactor holds the default value on creation for the "isSecondFactor" field.
-	DefaultIsSecondFactor bool
+	// DefaultIsSecondGroup holds the default value on creation for the "isSecondGroup" field.
+	DefaultIsSecondGroup bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -108,14 +115,19 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
+// ByAaguid orders the results by the aaguid field.
+func ByAaguid(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAaguid, opts...).ToFunc()
+}
+
 // BySignCount orders the results by the signCount field.
 func BySignCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSignCount, opts...).ToFunc()
 }
 
-// ByIsSecondFactor orders the results by the isSecondFactor field.
-func ByIsSecondFactor(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsSecondFactor, opts...).ToFunc()
+// ByIsSecondGroup orders the results by the isSecondGroup field.
+func ByIsSecondGroup(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsSecondGroup, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the userID field.
@@ -129,10 +141,31 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// BySessionsCount orders the results by sessions count.
+func BySessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSessionsStep(), opts...)
+	}
+}
+
+// BySessions orders the results by sessions terms.
+func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 	)
 }

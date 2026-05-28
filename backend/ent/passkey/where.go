@@ -82,7 +82,7 @@ func PublicKey(v []byte) predicate.Passkey {
 }
 
 // Aaguid applies equality check predicate on the "aaguid" field. It's identical to AaguidEQ.
-func Aaguid(v []byte) predicate.Passkey {
+func Aaguid(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldAaguid, v))
 }
 
@@ -91,9 +91,9 @@ func SignCount(v uint32) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldSignCount, v))
 }
 
-// IsSecondFactor applies equality check predicate on the "isSecondFactor" field. It's identical to IsSecondFactorEQ.
-func IsSecondFactor(v bool) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldIsSecondFactor, v))
+// IsSecondGroup applies equality check predicate on the "isSecondGroup" field. It's identical to IsSecondGroupEQ.
+func IsSecondGroup(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldIsSecondGroup, v))
 }
 
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
@@ -327,43 +327,53 @@ func PublicKeyLTE(v []byte) predicate.Passkey {
 }
 
 // AaguidEQ applies the EQ predicate on the "aaguid" field.
-func AaguidEQ(v []byte) predicate.Passkey {
+func AaguidEQ(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldAaguid, v))
 }
 
 // AaguidNEQ applies the NEQ predicate on the "aaguid" field.
-func AaguidNEQ(v []byte) predicate.Passkey {
+func AaguidNEQ(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldNEQ(FieldAaguid, v))
 }
 
 // AaguidIn applies the In predicate on the "aaguid" field.
-func AaguidIn(vs ...[]byte) predicate.Passkey {
+func AaguidIn(vs ...uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldIn(FieldAaguid, vs...))
 }
 
 // AaguidNotIn applies the NotIn predicate on the "aaguid" field.
-func AaguidNotIn(vs ...[]byte) predicate.Passkey {
+func AaguidNotIn(vs ...uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldNotIn(FieldAaguid, vs...))
 }
 
 // AaguidGT applies the GT predicate on the "aaguid" field.
-func AaguidGT(v []byte) predicate.Passkey {
+func AaguidGT(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldGT(FieldAaguid, v))
 }
 
 // AaguidGTE applies the GTE predicate on the "aaguid" field.
-func AaguidGTE(v []byte) predicate.Passkey {
+func AaguidGTE(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldGTE(FieldAaguid, v))
 }
 
 // AaguidLT applies the LT predicate on the "aaguid" field.
-func AaguidLT(v []byte) predicate.Passkey {
+func AaguidLT(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldLT(FieldAaguid, v))
 }
 
 // AaguidLTE applies the LTE predicate on the "aaguid" field.
-func AaguidLTE(v []byte) predicate.Passkey {
+func AaguidLTE(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldLTE(FieldAaguid, v))
+}
+
+// AaguidIsNil applies the IsNil predicate on the "aaguid" field.
+func AaguidIsNil() predicate.Passkey {
+	return predicate.Passkey(sql.FieldIsNull(FieldAaguid))
+}
+
+// AaguidNotNil applies the NotNil predicate on the "aaguid" field.
+func AaguidNotNil() predicate.Passkey {
+	return predicate.Passkey(sql.FieldNotNull(FieldAaguid))
 }
 
 // SignCountEQ applies the EQ predicate on the "signCount" field.
@@ -406,14 +416,14 @@ func SignCountLTE(v uint32) predicate.Passkey {
 	return predicate.Passkey(sql.FieldLTE(FieldSignCount, v))
 }
 
-// IsSecondFactorEQ applies the EQ predicate on the "isSecondFactor" field.
-func IsSecondFactorEQ(v bool) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldIsSecondFactor, v))
+// IsSecondGroupEQ applies the EQ predicate on the "isSecondGroup" field.
+func IsSecondGroupEQ(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldIsSecondGroup, v))
 }
 
-// IsSecondFactorNEQ applies the NEQ predicate on the "isSecondFactor" field.
-func IsSecondFactorNEQ(v bool) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNEQ(FieldIsSecondFactor, v))
+// IsSecondGroupNEQ applies the NEQ predicate on the "isSecondGroup" field.
+func IsSecondGroupNEQ(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldNEQ(FieldIsSecondGroup, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "userID" field.
@@ -451,6 +461,29 @@ func HasUser() predicate.Passkey {
 func HasUserWith(preds ...predicate.User) predicate.Passkey {
 	return predicate.Passkey(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSessions applies the HasEdge predicate on the "sessions" edge.
+func HasSessions() predicate.Passkey {
+	return predicate.Passkey(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
+func HasSessionsWith(preds ...predicate.Session) predicate.Passkey {
+	return predicate.Passkey(func(s *sql.Selector) {
+		step := newSessionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

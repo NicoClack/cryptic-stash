@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -77,6 +78,12 @@ func (_c *SessionCreate) SetNillableIP(v *string) *SessionCreate {
 	return _c
 }
 
+// SetPasskeyID sets the "passkeyID" field.
+func (_c *SessionCreate) SetPasskeyID(v uuid.UUID) *SessionCreate {
+	_c.mutation.SetPasskeyID(v)
+	return _c
+}
+
 // SetUserID sets the "userID" field.
 func (_c *SessionCreate) SetUserID(v uuid.UUID) *SessionCreate {
 	_c.mutation.SetUserID(v)
@@ -100,6 +107,11 @@ func (_c *SessionCreate) SetNillableID(v *uuid.UUID) *SessionCreate {
 // SetUser sets the "user" edge to the User entity.
 func (_c *SessionCreate) SetUser(v *User) *SessionCreate {
 	return _c.SetUserID(v.ID)
+}
+
+// SetPasskey sets the "passkey" edge to the Passkey entity.
+func (_c *SessionCreate) SetPasskey(v *Passkey) *SessionCreate {
+	return _c.SetPasskeyID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -176,11 +188,17 @@ func (_c *SessionCreate) check() error {
 	if _, ok := _c.mutation.IP(); !ok {
 		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "Session.ip"`)}
 	}
+	if _, ok := _c.mutation.PasskeyID(); !ok {
+		return &ValidationError{Name: "passkeyID", err: errors.New(`ent: missing required field "Session.passkeyID"`)}
+	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "Session.userID"`)}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Session.user"`)}
+	}
+	if len(_c.mutation.PasskeyIDs()) == 0 {
+		return &ValidationError{Name: "passkey", err: errors.New(`ent: missing required edge "Session.passkey"`)}
 	}
 	return nil
 }
@@ -257,6 +275,23 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PasskeyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.PasskeyTable,
+			Columns: []string{session.PasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PasskeyID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -380,6 +415,18 @@ func (u *SessionUpsert) SetIP(v string) *SessionUpsert {
 // UpdateIP sets the "ip" field to the value that was provided on create.
 func (u *SessionUpsert) UpdateIP() *SessionUpsert {
 	u.SetExcluded(session.FieldIP)
+	return u
+}
+
+// SetPasskeyID sets the "passkeyID" field.
+func (u *SessionUpsert) SetPasskeyID(v uuid.UUID) *SessionUpsert {
+	u.Set(session.FieldPasskeyID, v)
+	return u
+}
+
+// UpdatePasskeyID sets the "passkeyID" field to the value that was provided on create.
+func (u *SessionUpsert) UpdatePasskeyID() *SessionUpsert {
+	u.SetExcluded(session.FieldPasskeyID)
 	return u
 }
 
@@ -524,6 +571,20 @@ func (u *SessionUpsertOne) SetIP(v string) *SessionUpsertOne {
 func (u *SessionUpsertOne) UpdateIP() *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateIP()
+	})
+}
+
+// SetPasskeyID sets the "passkeyID" field.
+func (u *SessionUpsertOne) SetPasskeyID(v uuid.UUID) *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.SetPasskeyID(v)
+	})
+}
+
+// UpdatePasskeyID sets the "passkeyID" field to the value that was provided on create.
+func (u *SessionUpsertOne) UpdatePasskeyID() *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.UpdatePasskeyID()
 	})
 }
 
@@ -837,6 +898,20 @@ func (u *SessionUpsertBulk) SetIP(v string) *SessionUpsertBulk {
 func (u *SessionUpsertBulk) UpdateIP() *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateIP()
+	})
+}
+
+// SetPasskeyID sets the "passkeyID" field.
+func (u *SessionUpsertBulk) SetPasskeyID(v uuid.UUID) *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.SetPasskeyID(v)
+	})
+}
+
+// UpdatePasskeyID sets the "passkeyID" field to the value that was provided on create.
+func (u *SessionUpsertBulk) UpdatePasskeyID() *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.UpdatePasskeyID()
 	})
 }
 

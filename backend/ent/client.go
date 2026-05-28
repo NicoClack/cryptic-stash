@@ -1324,6 +1324,22 @@ func (c *PasskeyClient) QueryUser(_m *Passkey) *UserQuery {
 	return query
 }
 
+// QuerySessions queries the sessions edge of a Passkey.
+func (c *PasskeyClient) QuerySessions(_m *Passkey) *SessionQuery {
+	query := (&SessionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(passkey.Table, passkey.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, passkey.SessionsTable, passkey.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PasskeyClient) Hooks() []Hook {
 	return c.hooks.Passkey
@@ -1599,6 +1615,22 @@ func (c *SessionClient) QueryUser(_m *Session) *UserQuery {
 			sqlgraph.From(session.Table, session.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPasskey queries the passkey edge of a Session.
+func (c *SessionClient) QueryPasskey(_m *Session) *PasskeyQuery {
+	query := (&PasskeyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(passkey.Table, passkey.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.PasskeyTable, session.PasskeyColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

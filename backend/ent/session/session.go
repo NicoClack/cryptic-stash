@@ -27,10 +27,14 @@ const (
 	FieldUserAgent = "user_agent"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
+	// FieldPasskeyID holds the string denoting the passkeyid field in the database.
+	FieldPasskeyID = "passkey_id"
 	// FieldUserID holds the string denoting the userid field in the database.
 	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgePasskey holds the string denoting the passkey edge name in mutations.
+	EdgePasskey = "passkey"
 	// Table holds the table name of the session in the database.
 	Table = "sessions"
 	// UserTable is the table that holds the user relation/edge.
@@ -40,6 +44,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
+	// PasskeyTable is the table that holds the passkey relation/edge.
+	PasskeyTable = "sessions"
+	// PasskeyInverseTable is the table name for the Passkey entity.
+	// It exists in this package in order to avoid circular dependency with the "passkey" package.
+	PasskeyInverseTable = "passkeys"
+	// PasskeyColumn is the table column denoting the passkey relation/edge.
+	PasskeyColumn = "passkey_id"
 )
 
 // Columns holds all SQL columns for session fields.
@@ -51,6 +62,7 @@ var Columns = []string{
 	FieldExpiresAt,
 	FieldUserAgent,
 	FieldIP,
+	FieldPasskeyID,
 	FieldUserID,
 }
 
@@ -110,6 +122,11 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIP, opts...).ToFunc()
 }
 
+// ByPasskeyID orders the results by the passkeyID field.
+func ByPasskeyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPasskeyID, opts...).ToFunc()
+}
+
 // ByUserID orders the results by the userID field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
@@ -121,10 +138,24 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByPasskeyField orders the results by passkey field.
+func ByPasskeyField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPasskeyStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newPasskeyStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PasskeyInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, PasskeyTable, PasskeyColumn),
 	)
 }

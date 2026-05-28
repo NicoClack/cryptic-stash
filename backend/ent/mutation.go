@@ -5361,24 +5361,27 @@ func (m *LoginAlertMutation) ResetEdge(name string) error {
 // PasskeyMutation represents an operation that mutates the Passkey nodes in the graph.
 type PasskeyMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	createdAt      *time.Time
-	updatedAt      *time.Time
-	name           *string
-	credentialID   *[]byte
-	publicKey      *[]byte
-	aaguid         *[]byte
-	signCount      *uint32
-	addsignCount   *int32
-	isSecondFactor *bool
-	clearedFields  map[string]struct{}
-	user           *uuid.UUID
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*Passkey, error)
-	predicates     []predicate.Passkey
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	createdAt       *time.Time
+	updatedAt       *time.Time
+	name            *string
+	credentialID    *[]byte
+	publicKey       *[]byte
+	aaguid          *uuid.UUID
+	signCount       *uint32
+	addsignCount    *int32
+	isSecondGroup   *bool
+	clearedFields   map[string]struct{}
+	user            *uuid.UUID
+	cleareduser     bool
+	sessions        map[uuid.UUID]struct{}
+	removedsessions map[uuid.UUID]struct{}
+	clearedsessions bool
+	done            bool
+	oldValue        func(context.Context) (*Passkey, error)
+	predicates      []predicate.Passkey
 }
 
 var _ ent.Mutation = (*PasskeyMutation)(nil)
@@ -5666,12 +5669,12 @@ func (m *PasskeyMutation) ResetPublicKey() {
 }
 
 // SetAaguid sets the "aaguid" field.
-func (m *PasskeyMutation) SetAaguid(b []byte) {
-	m.aaguid = &b
+func (m *PasskeyMutation) SetAaguid(u uuid.UUID) {
+	m.aaguid = &u
 }
 
 // Aaguid returns the value of the "aaguid" field in the mutation.
-func (m *PasskeyMutation) Aaguid() (r []byte, exists bool) {
+func (m *PasskeyMutation) Aaguid() (r uuid.UUID, exists bool) {
 	v := m.aaguid
 	if v == nil {
 		return
@@ -5682,7 +5685,7 @@ func (m *PasskeyMutation) Aaguid() (r []byte, exists bool) {
 // OldAaguid returns the old "aaguid" field's value of the Passkey entity.
 // If the Passkey object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PasskeyMutation) OldAaguid(ctx context.Context) (v []byte, err error) {
+func (m *PasskeyMutation) OldAaguid(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAaguid is only allowed on UpdateOne operations")
 	}
@@ -5696,9 +5699,22 @@ func (m *PasskeyMutation) OldAaguid(ctx context.Context) (v []byte, err error) {
 	return oldValue.Aaguid, nil
 }
 
+// ClearAaguid clears the value of the "aaguid" field.
+func (m *PasskeyMutation) ClearAaguid() {
+	m.aaguid = nil
+	m.clearedFields[passkey.FieldAaguid] = struct{}{}
+}
+
+// AaguidCleared returns if the "aaguid" field was cleared in this mutation.
+func (m *PasskeyMutation) AaguidCleared() bool {
+	_, ok := m.clearedFields[passkey.FieldAaguid]
+	return ok
+}
+
 // ResetAaguid resets all changes to the "aaguid" field.
 func (m *PasskeyMutation) ResetAaguid() {
 	m.aaguid = nil
+	delete(m.clearedFields, passkey.FieldAaguid)
 }
 
 // SetSignCount sets the "signCount" field.
@@ -5757,40 +5773,40 @@ func (m *PasskeyMutation) ResetSignCount() {
 	m.addsignCount = nil
 }
 
-// SetIsSecondFactor sets the "isSecondFactor" field.
-func (m *PasskeyMutation) SetIsSecondFactor(b bool) {
-	m.isSecondFactor = &b
+// SetIsSecondGroup sets the "isSecondGroup" field.
+func (m *PasskeyMutation) SetIsSecondGroup(b bool) {
+	m.isSecondGroup = &b
 }
 
-// IsSecondFactor returns the value of the "isSecondFactor" field in the mutation.
-func (m *PasskeyMutation) IsSecondFactor() (r bool, exists bool) {
-	v := m.isSecondFactor
+// IsSecondGroup returns the value of the "isSecondGroup" field in the mutation.
+func (m *PasskeyMutation) IsSecondGroup() (r bool, exists bool) {
+	v := m.isSecondGroup
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIsSecondFactor returns the old "isSecondFactor" field's value of the Passkey entity.
+// OldIsSecondGroup returns the old "isSecondGroup" field's value of the Passkey entity.
 // If the Passkey object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PasskeyMutation) OldIsSecondFactor(ctx context.Context) (v bool, err error) {
+func (m *PasskeyMutation) OldIsSecondGroup(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsSecondFactor is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsSecondGroup is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsSecondFactor requires an ID field in the mutation")
+		return v, errors.New("OldIsSecondGroup requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsSecondFactor: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsSecondGroup: %w", err)
 	}
-	return oldValue.IsSecondFactor, nil
+	return oldValue.IsSecondGroup, nil
 }
 
-// ResetIsSecondFactor resets all changes to the "isSecondFactor" field.
-func (m *PasskeyMutation) ResetIsSecondFactor() {
-	m.isSecondFactor = nil
+// ResetIsSecondGroup resets all changes to the "isSecondGroup" field.
+func (m *PasskeyMutation) ResetIsSecondGroup() {
+	m.isSecondGroup = nil
 }
 
 // SetUserID sets the "userID" field.
@@ -5856,6 +5872,60 @@ func (m *PasskeyMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// AddSessionIDs adds the "sessions" edge to the Session entity by ids.
+func (m *PasskeyMutation) AddSessionIDs(ids ...uuid.UUID) {
+	if m.sessions == nil {
+		m.sessions = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.sessions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSessions clears the "sessions" edge to the Session entity.
+func (m *PasskeyMutation) ClearSessions() {
+	m.clearedsessions = true
+}
+
+// SessionsCleared reports if the "sessions" edge to the Session entity was cleared.
+func (m *PasskeyMutation) SessionsCleared() bool {
+	return m.clearedsessions
+}
+
+// RemoveSessionIDs removes the "sessions" edge to the Session entity by IDs.
+func (m *PasskeyMutation) RemoveSessionIDs(ids ...uuid.UUID) {
+	if m.removedsessions == nil {
+		m.removedsessions = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.sessions, ids[i])
+		m.removedsessions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSessions returns the removed IDs of the "sessions" edge to the Session entity.
+func (m *PasskeyMutation) RemovedSessionsIDs() (ids []uuid.UUID) {
+	for id := range m.removedsessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SessionsIDs returns the "sessions" edge IDs in the mutation.
+func (m *PasskeyMutation) SessionsIDs() (ids []uuid.UUID) {
+	for id := range m.sessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSessions resets all changes to the "sessions" edge.
+func (m *PasskeyMutation) ResetSessions() {
+	m.sessions = nil
+	m.clearedsessions = false
+	m.removedsessions = nil
+}
+
 // Where appends a list predicates to the PasskeyMutation builder.
 func (m *PasskeyMutation) Where(ps ...predicate.Passkey) {
 	m.predicates = append(m.predicates, ps...)
@@ -5912,8 +5982,8 @@ func (m *PasskeyMutation) Fields() []string {
 	if m.signCount != nil {
 		fields = append(fields, passkey.FieldSignCount)
 	}
-	if m.isSecondFactor != nil {
-		fields = append(fields, passkey.FieldIsSecondFactor)
+	if m.isSecondGroup != nil {
+		fields = append(fields, passkey.FieldIsSecondGroup)
 	}
 	if m.user != nil {
 		fields = append(fields, passkey.FieldUserID)
@@ -5940,8 +6010,8 @@ func (m *PasskeyMutation) Field(name string) (ent.Value, bool) {
 		return m.Aaguid()
 	case passkey.FieldSignCount:
 		return m.SignCount()
-	case passkey.FieldIsSecondFactor:
-		return m.IsSecondFactor()
+	case passkey.FieldIsSecondGroup:
+		return m.IsSecondGroup()
 	case passkey.FieldUserID:
 		return m.UserID()
 	}
@@ -5967,8 +6037,8 @@ func (m *PasskeyMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldAaguid(ctx)
 	case passkey.FieldSignCount:
 		return m.OldSignCount(ctx)
-	case passkey.FieldIsSecondFactor:
-		return m.OldIsSecondFactor(ctx)
+	case passkey.FieldIsSecondGroup:
+		return m.OldIsSecondGroup(ctx)
 	case passkey.FieldUserID:
 		return m.OldUserID(ctx)
 	}
@@ -6016,7 +6086,7 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 		m.SetPublicKey(v)
 		return nil
 	case passkey.FieldAaguid:
-		v, ok := value.([]byte)
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6029,12 +6099,12 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSignCount(v)
 		return nil
-	case passkey.FieldIsSecondFactor:
+	case passkey.FieldIsSecondGroup:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIsSecondFactor(v)
+		m.SetIsSecondGroup(v)
 		return nil
 	case passkey.FieldUserID:
 		v, ok := value.(uuid.UUID)
@@ -6087,7 +6157,11 @@ func (m *PasskeyMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PasskeyMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(passkey.FieldAaguid) {
+		fields = append(fields, passkey.FieldAaguid)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -6100,6 +6174,11 @@ func (m *PasskeyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PasskeyMutation) ClearField(name string) error {
+	switch name {
+	case passkey.FieldAaguid:
+		m.ClearAaguid()
+		return nil
+	}
 	return fmt.Errorf("unknown Passkey nullable field %s", name)
 }
 
@@ -6128,8 +6207,8 @@ func (m *PasskeyMutation) ResetField(name string) error {
 	case passkey.FieldSignCount:
 		m.ResetSignCount()
 		return nil
-	case passkey.FieldIsSecondFactor:
-		m.ResetIsSecondFactor()
+	case passkey.FieldIsSecondGroup:
+		m.ResetIsSecondGroup()
 		return nil
 	case passkey.FieldUserID:
 		m.ResetUserID()
@@ -6140,9 +6219,12 @@ func (m *PasskeyMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PasskeyMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.user != nil {
 		edges = append(edges, passkey.EdgeUser)
+	}
+	if m.sessions != nil {
+		edges = append(edges, passkey.EdgeSessions)
 	}
 	return edges
 }
@@ -6155,27 +6237,47 @@ func (m *PasskeyMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case passkey.EdgeSessions:
+		ids := make([]ent.Value, 0, len(m.sessions))
+		for id := range m.sessions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PasskeyMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedsessions != nil {
+		edges = append(edges, passkey.EdgeSessions)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PasskeyMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case passkey.EdgeSessions:
+		ids := make([]ent.Value, 0, len(m.removedsessions))
+		for id := range m.removedsessions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PasskeyMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareduser {
 		edges = append(edges, passkey.EdgeUser)
+	}
+	if m.clearedsessions {
+		edges = append(edges, passkey.EdgeSessions)
 	}
 	return edges
 }
@@ -6186,6 +6288,8 @@ func (m *PasskeyMutation) EdgeCleared(name string) bool {
 	switch name {
 	case passkey.EdgeUser:
 		return m.cleareduser
+	case passkey.EdgeSessions:
+		return m.clearedsessions
 	}
 	return false
 }
@@ -6207,6 +6311,9 @@ func (m *PasskeyMutation) ResetEdge(name string) error {
 	switch name {
 	case passkey.EdgeUser:
 		m.ResetUser()
+		return nil
+	case passkey.EdgeSessions:
+		m.ResetSessions()
 		return nil
 	}
 	return fmt.Errorf("unknown Passkey edge %s", name)
@@ -6731,21 +6838,23 @@ func (m *PeriodicTaskMutation) ResetEdge(name string) error {
 // SessionMutation represents an operation that mutates the Session nodes in the graph.
 type SessionMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	createdAt     *time.Time
-	updatedAt     *time.Time
-	hashedToken   *[]byte
-	expiresAt     *time.Time
-	userAgent     *string
-	ip            *string
-	clearedFields map[string]struct{}
-	user          *uuid.UUID
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*Session, error)
-	predicates    []predicate.Session
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	createdAt      *time.Time
+	updatedAt      *time.Time
+	hashedToken    *[]byte
+	expiresAt      *time.Time
+	userAgent      *string
+	ip             *string
+	clearedFields  map[string]struct{}
+	user           *uuid.UUID
+	cleareduser    bool
+	passkey        *uuid.UUID
+	clearedpasskey bool
+	done           bool
+	oldValue       func(context.Context) (*Session, error)
+	predicates     []predicate.Session
 }
 
 var _ ent.Mutation = (*SessionMutation)(nil)
@@ -7068,6 +7177,42 @@ func (m *SessionMutation) ResetIP() {
 	m.ip = nil
 }
 
+// SetPasskeyID sets the "passkeyID" field.
+func (m *SessionMutation) SetPasskeyID(u uuid.UUID) {
+	m.passkey = &u
+}
+
+// PasskeyID returns the value of the "passkeyID" field in the mutation.
+func (m *SessionMutation) PasskeyID() (r uuid.UUID, exists bool) {
+	v := m.passkey
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPasskeyID returns the old "passkeyID" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldPasskeyID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPasskeyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPasskeyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPasskeyID: %w", err)
+	}
+	return oldValue.PasskeyID, nil
+}
+
+// ResetPasskeyID resets all changes to the "passkeyID" field.
+func (m *SessionMutation) ResetPasskeyID() {
+	m.passkey = nil
+}
+
 // SetUserID sets the "userID" field.
 func (m *SessionMutation) SetUserID(u uuid.UUID) {
 	m.user = &u
@@ -7131,6 +7276,33 @@ func (m *SessionMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// ClearPasskey clears the "passkey" edge to the Passkey entity.
+func (m *SessionMutation) ClearPasskey() {
+	m.clearedpasskey = true
+	m.clearedFields[session.FieldPasskeyID] = struct{}{}
+}
+
+// PasskeyCleared reports if the "passkey" edge to the Passkey entity was cleared.
+func (m *SessionMutation) PasskeyCleared() bool {
+	return m.clearedpasskey
+}
+
+// PasskeyIDs returns the "passkey" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PasskeyID instead. It exists only for internal usage by the builders.
+func (m *SessionMutation) PasskeyIDs() (ids []uuid.UUID) {
+	if id := m.passkey; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPasskey resets all changes to the "passkey" edge.
+func (m *SessionMutation) ResetPasskey() {
+	m.passkey = nil
+	m.clearedpasskey = false
+}
+
 // Where appends a list predicates to the SessionMutation builder.
 func (m *SessionMutation) Where(ps ...predicate.Session) {
 	m.predicates = append(m.predicates, ps...)
@@ -7165,7 +7337,7 @@ func (m *SessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.createdAt != nil {
 		fields = append(fields, session.FieldCreatedAt)
 	}
@@ -7183,6 +7355,9 @@ func (m *SessionMutation) Fields() []string {
 	}
 	if m.ip != nil {
 		fields = append(fields, session.FieldIP)
+	}
+	if m.passkey != nil {
+		fields = append(fields, session.FieldPasskeyID)
 	}
 	if m.user != nil {
 		fields = append(fields, session.FieldUserID)
@@ -7207,6 +7382,8 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.UserAgent()
 	case session.FieldIP:
 		return m.IP()
+	case session.FieldPasskeyID:
+		return m.PasskeyID()
 	case session.FieldUserID:
 		return m.UserID()
 	}
@@ -7230,6 +7407,8 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUserAgent(ctx)
 	case session.FieldIP:
 		return m.OldIP(ctx)
+	case session.FieldPasskeyID:
+		return m.OldPasskeyID(ctx)
 	case session.FieldUserID:
 		return m.OldUserID(ctx)
 	}
@@ -7282,6 +7461,13 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIP(v)
+		return nil
+	case session.FieldPasskeyID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPasskeyID(v)
 		return nil
 	case session.FieldUserID:
 		v, ok := value.(uuid.UUID)
@@ -7357,6 +7543,9 @@ func (m *SessionMutation) ResetField(name string) error {
 	case session.FieldIP:
 		m.ResetIP()
 		return nil
+	case session.FieldPasskeyID:
+		m.ResetPasskeyID()
+		return nil
 	case session.FieldUserID:
 		m.ResetUserID()
 		return nil
@@ -7366,9 +7555,12 @@ func (m *SessionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.user != nil {
 		edges = append(edges, session.EdgeUser)
+	}
+	if m.passkey != nil {
+		edges = append(edges, session.EdgePasskey)
 	}
 	return edges
 }
@@ -7381,13 +7573,17 @@ func (m *SessionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case session.EdgePasskey:
+		if id := m.passkey; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -7399,9 +7595,12 @@ func (m *SessionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareduser {
 		edges = append(edges, session.EdgeUser)
+	}
+	if m.clearedpasskey {
+		edges = append(edges, session.EdgePasskey)
 	}
 	return edges
 }
@@ -7412,6 +7611,8 @@ func (m *SessionMutation) EdgeCleared(name string) bool {
 	switch name {
 	case session.EdgeUser:
 		return m.cleareduser
+	case session.EdgePasskey:
+		return m.clearedpasskey
 	}
 	return false
 }
@@ -7423,6 +7624,9 @@ func (m *SessionMutation) ClearEdge(name string) error {
 	case session.EdgeUser:
 		m.ClearUser()
 		return nil
+	case session.EdgePasskey:
+		m.ClearPasskey()
+		return nil
 	}
 	return fmt.Errorf("unknown Session unique edge %s", name)
 }
@@ -7433,6 +7637,9 @@ func (m *SessionMutation) ResetEdge(name string) error {
 	switch name {
 	case session.EdgeUser:
 		m.ResetUser()
+		return nil
+	case session.EdgePasskey:
+		m.ResetPasskey()
 		return nil
 	}
 	return fmt.Errorf("unknown Session edge %s", name)

@@ -220,32 +220,14 @@ func init() {
 			return nil
 		}
 	}()
-	// passkeyDescAaguid is the schema descriptor for aaguid field.
-	passkeyDescAaguid := passkeyFields[6].Descriptor()
-	// passkey.AaguidValidator is a validator for the "aaguid" field. It is called by the builders before save.
-	passkey.AaguidValidator = func() func([]byte) error {
-		validators := passkeyDescAaguid.Validators
-		fns := [...]func([]byte) error{
-			validators[0].(func([]byte) error),
-			validators[1].(func([]byte) error),
-		}
-		return func(aaguid []byte) error {
-			for _, fn := range fns {
-				if err := fn(aaguid); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
 	// passkeyDescSignCount is the schema descriptor for signCount field.
 	passkeyDescSignCount := passkeyFields[7].Descriptor()
 	// passkey.DefaultSignCount holds the default value on creation for the signCount field.
 	passkey.DefaultSignCount = passkeyDescSignCount.Default.(uint32)
-	// passkeyDescIsSecondFactor is the schema descriptor for isSecondFactor field.
-	passkeyDescIsSecondFactor := passkeyFields[8].Descriptor()
-	// passkey.DefaultIsSecondFactor holds the default value on creation for the isSecondFactor field.
-	passkey.DefaultIsSecondFactor = passkeyDescIsSecondFactor.Default.(bool)
+	// passkeyDescIsSecondGroup is the schema descriptor for isSecondGroup field.
+	passkeyDescIsSecondGroup := passkeyFields[8].Descriptor()
+	// passkey.DefaultIsSecondGroup holds the default value on creation for the isSecondGroup field.
+	passkey.DefaultIsSecondGroup = passkeyDescIsSecondGroup.Default.(bool)
 	// passkeyDescID is the schema descriptor for id field.
 	passkeyDescID := passkeyFields[0].Descriptor()
 	// passkey.DefaultID holds the default value on creation for the id field.

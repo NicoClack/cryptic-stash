@@ -86,6 +86,11 @@ func IP(v string) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldIP, v))
 }
 
+// PasskeyID applies equality check predicate on the "passkeyID" field. It's identical to PasskeyIDEQ.
+func PasskeyID(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldPasskeyID, v))
+}
+
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldUserID, v))
@@ -381,6 +386,26 @@ func IPContainsFold(v string) predicate.Session {
 	return predicate.Session(sql.FieldContainsFold(FieldIP, v))
 }
 
+// PasskeyIDEQ applies the EQ predicate on the "passkeyID" field.
+func PasskeyIDEQ(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldPasskeyID, v))
+}
+
+// PasskeyIDNEQ applies the NEQ predicate on the "passkeyID" field.
+func PasskeyIDNEQ(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldNEQ(FieldPasskeyID, v))
+}
+
+// PasskeyIDIn applies the In predicate on the "passkeyID" field.
+func PasskeyIDIn(vs ...uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldIn(FieldPasskeyID, vs...))
+}
+
+// PasskeyIDNotIn applies the NotIn predicate on the "passkeyID" field.
+func PasskeyIDNotIn(vs ...uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldNotIn(FieldPasskeyID, vs...))
+}
+
 // UserIDEQ applies the EQ predicate on the "userID" field.
 func UserIDEQ(v uuid.UUID) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldUserID, v))
@@ -416,6 +441,29 @@ func HasUser() predicate.Session {
 func HasUserWith(preds ...predicate.User) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPasskey applies the HasEdge predicate on the "passkey" edge.
+func HasPasskey() predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, PasskeyTable, PasskeyColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPasskeyWith applies the HasEdge predicate on the "passkey" edge with a given conditions (other predicates).
+func HasPasskeyWith(preds ...predicate.Passkey) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		step := newPasskeyStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

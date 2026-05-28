@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
@@ -77,8 +78,22 @@ func (_u *PasskeyUpdate) SetPublicKey(v []byte) *PasskeyUpdate {
 }
 
 // SetAaguid sets the "aaguid" field.
-func (_u *PasskeyUpdate) SetAaguid(v []byte) *PasskeyUpdate {
+func (_u *PasskeyUpdate) SetAaguid(v uuid.UUID) *PasskeyUpdate {
 	_u.mutation.SetAaguid(v)
+	return _u
+}
+
+// SetNillableAaguid sets the "aaguid" field if the given value is not nil.
+func (_u *PasskeyUpdate) SetNillableAaguid(v *uuid.UUID) *PasskeyUpdate {
+	if v != nil {
+		_u.SetAaguid(*v)
+	}
+	return _u
+}
+
+// ClearAaguid clears the value of the "aaguid" field.
+func (_u *PasskeyUpdate) ClearAaguid() *PasskeyUpdate {
+	_u.mutation.ClearAaguid()
 	return _u
 }
 
@@ -103,16 +118,16 @@ func (_u *PasskeyUpdate) AddSignCount(v int32) *PasskeyUpdate {
 	return _u
 }
 
-// SetIsSecondFactor sets the "isSecondFactor" field.
-func (_u *PasskeyUpdate) SetIsSecondFactor(v bool) *PasskeyUpdate {
-	_u.mutation.SetIsSecondFactor(v)
+// SetIsSecondGroup sets the "isSecondGroup" field.
+func (_u *PasskeyUpdate) SetIsSecondGroup(v bool) *PasskeyUpdate {
+	_u.mutation.SetIsSecondGroup(v)
 	return _u
 }
 
-// SetNillableIsSecondFactor sets the "isSecondFactor" field if the given value is not nil.
-func (_u *PasskeyUpdate) SetNillableIsSecondFactor(v *bool) *PasskeyUpdate {
+// SetNillableIsSecondGroup sets the "isSecondGroup" field if the given value is not nil.
+func (_u *PasskeyUpdate) SetNillableIsSecondGroup(v *bool) *PasskeyUpdate {
 	if v != nil {
-		_u.SetIsSecondFactor(*v)
+		_u.SetIsSecondGroup(*v)
 	}
 	return _u
 }
@@ -136,6 +151,21 @@ func (_u *PasskeyUpdate) SetUser(v *User) *PasskeyUpdate {
 	return _u.SetUserID(v.ID)
 }
 
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (_u *PasskeyUpdate) AddSessionIDs(ids ...uuid.UUID) *PasskeyUpdate {
+	_u.mutation.AddSessionIDs(ids...)
+	return _u
+}
+
+// AddSessions adds the "sessions" edges to the Session entity.
+func (_u *PasskeyUpdate) AddSessions(v ...*Session) *PasskeyUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSessionIDs(ids...)
+}
+
 // Mutation returns the PasskeyMutation object of the builder.
 func (_u *PasskeyUpdate) Mutation() *PasskeyMutation {
 	return _u.mutation
@@ -145,6 +175,27 @@ func (_u *PasskeyUpdate) Mutation() *PasskeyMutation {
 func (_u *PasskeyUpdate) ClearUser() *PasskeyUpdate {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearSessions clears all "sessions" edges to the Session entity.
+func (_u *PasskeyUpdate) ClearSessions() *PasskeyUpdate {
+	_u.mutation.ClearSessions()
+	return _u
+}
+
+// RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
+func (_u *PasskeyUpdate) RemoveSessionIDs(ids ...uuid.UUID) *PasskeyUpdate {
+	_u.mutation.RemoveSessionIDs(ids...)
+	return _u
+}
+
+// RemoveSessions removes "sessions" edges to Session entities.
+func (_u *PasskeyUpdate) RemoveSessions(v ...*Session) *PasskeyUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSessionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -190,11 +241,6 @@ func (_u *PasskeyUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Passkey.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Aaguid(); ok {
-		if err := passkey.AaguidValidator(v); err != nil {
-			return &ValidationError{Name: "aaguid", err: fmt.Errorf(`ent: validator failed for field "Passkey.aaguid": %w`, err)}
-		}
-	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Passkey.user"`)
 	}
@@ -229,7 +275,10 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(passkey.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.Aaguid(); ok {
-		_spec.SetField(passkey.FieldAaguid, field.TypeBytes, value)
+		_spec.SetField(passkey.FieldAaguid, field.TypeUUID, value)
+	}
+	if _u.mutation.AaguidCleared() {
+		_spec.ClearField(passkey.FieldAaguid, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.SignCount(); ok {
 		_spec.SetField(passkey.FieldSignCount, field.TypeUint32, value)
@@ -237,8 +286,8 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedSignCount(); ok {
 		_spec.AddField(passkey.FieldSignCount, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.IsSecondFactor(); ok {
-		_spec.SetField(passkey.FieldIsSecondFactor, field.TypeBool, value)
+	if value, ok := _u.mutation.IsSecondGroup(); ok {
+		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -262,6 +311,51 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.SessionsTable,
+			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.SessionsTable,
+			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.SessionsTable,
+			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -336,8 +430,22 @@ func (_u *PasskeyUpdateOne) SetPublicKey(v []byte) *PasskeyUpdateOne {
 }
 
 // SetAaguid sets the "aaguid" field.
-func (_u *PasskeyUpdateOne) SetAaguid(v []byte) *PasskeyUpdateOne {
+func (_u *PasskeyUpdateOne) SetAaguid(v uuid.UUID) *PasskeyUpdateOne {
 	_u.mutation.SetAaguid(v)
+	return _u
+}
+
+// SetNillableAaguid sets the "aaguid" field if the given value is not nil.
+func (_u *PasskeyUpdateOne) SetNillableAaguid(v *uuid.UUID) *PasskeyUpdateOne {
+	if v != nil {
+		_u.SetAaguid(*v)
+	}
+	return _u
+}
+
+// ClearAaguid clears the value of the "aaguid" field.
+func (_u *PasskeyUpdateOne) ClearAaguid() *PasskeyUpdateOne {
+	_u.mutation.ClearAaguid()
 	return _u
 }
 
@@ -362,16 +470,16 @@ func (_u *PasskeyUpdateOne) AddSignCount(v int32) *PasskeyUpdateOne {
 	return _u
 }
 
-// SetIsSecondFactor sets the "isSecondFactor" field.
-func (_u *PasskeyUpdateOne) SetIsSecondFactor(v bool) *PasskeyUpdateOne {
-	_u.mutation.SetIsSecondFactor(v)
+// SetIsSecondGroup sets the "isSecondGroup" field.
+func (_u *PasskeyUpdateOne) SetIsSecondGroup(v bool) *PasskeyUpdateOne {
+	_u.mutation.SetIsSecondGroup(v)
 	return _u
 }
 
-// SetNillableIsSecondFactor sets the "isSecondFactor" field if the given value is not nil.
-func (_u *PasskeyUpdateOne) SetNillableIsSecondFactor(v *bool) *PasskeyUpdateOne {
+// SetNillableIsSecondGroup sets the "isSecondGroup" field if the given value is not nil.
+func (_u *PasskeyUpdateOne) SetNillableIsSecondGroup(v *bool) *PasskeyUpdateOne {
 	if v != nil {
-		_u.SetIsSecondFactor(*v)
+		_u.SetIsSecondGroup(*v)
 	}
 	return _u
 }
@@ -395,6 +503,21 @@ func (_u *PasskeyUpdateOne) SetUser(v *User) *PasskeyUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (_u *PasskeyUpdateOne) AddSessionIDs(ids ...uuid.UUID) *PasskeyUpdateOne {
+	_u.mutation.AddSessionIDs(ids...)
+	return _u
+}
+
+// AddSessions adds the "sessions" edges to the Session entity.
+func (_u *PasskeyUpdateOne) AddSessions(v ...*Session) *PasskeyUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSessionIDs(ids...)
+}
+
 // Mutation returns the PasskeyMutation object of the builder.
 func (_u *PasskeyUpdateOne) Mutation() *PasskeyMutation {
 	return _u.mutation
@@ -404,6 +527,27 @@ func (_u *PasskeyUpdateOne) Mutation() *PasskeyMutation {
 func (_u *PasskeyUpdateOne) ClearUser() *PasskeyUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearSessions clears all "sessions" edges to the Session entity.
+func (_u *PasskeyUpdateOne) ClearSessions() *PasskeyUpdateOne {
+	_u.mutation.ClearSessions()
+	return _u
+}
+
+// RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
+func (_u *PasskeyUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *PasskeyUpdateOne {
+	_u.mutation.RemoveSessionIDs(ids...)
+	return _u
+}
+
+// RemoveSessions removes "sessions" edges to Session entities.
+func (_u *PasskeyUpdateOne) RemoveSessions(v ...*Session) *PasskeyUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSessionIDs(ids...)
 }
 
 // Where appends a list predicates to the PasskeyUpdate builder.
@@ -462,11 +606,6 @@ func (_u *PasskeyUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Passkey.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Aaguid(); ok {
-		if err := passkey.AaguidValidator(v); err != nil {
-			return &ValidationError{Name: "aaguid", err: fmt.Errorf(`ent: validator failed for field "Passkey.aaguid": %w`, err)}
-		}
-	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Passkey.user"`)
 	}
@@ -518,7 +657,10 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 		_spec.SetField(passkey.FieldPublicKey, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.Aaguid(); ok {
-		_spec.SetField(passkey.FieldAaguid, field.TypeBytes, value)
+		_spec.SetField(passkey.FieldAaguid, field.TypeUUID, value)
+	}
+	if _u.mutation.AaguidCleared() {
+		_spec.ClearField(passkey.FieldAaguid, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.SignCount(); ok {
 		_spec.SetField(passkey.FieldSignCount, field.TypeUint32, value)
@@ -526,8 +668,8 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 	if value, ok := _u.mutation.AddedSignCount(); ok {
 		_spec.AddField(passkey.FieldSignCount, field.TypeUint32, value)
 	}
-	if value, ok := _u.mutation.IsSecondFactor(); ok {
-		_spec.SetField(passkey.FieldIsSecondFactor, field.TypeBool, value)
+	if value, ok := _u.mutation.IsSecondGroup(); ok {
+		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -551,6 +693,51 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.SessionsTable,
+			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.SessionsTable,
+			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.SessionsTable,
+			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

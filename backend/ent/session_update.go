@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -98,6 +99,20 @@ func (_u *SessionUpdate) SetNillableIP(v *string) *SessionUpdate {
 	return _u
 }
 
+// SetPasskeyID sets the "passkeyID" field.
+func (_u *SessionUpdate) SetPasskeyID(v uuid.UUID) *SessionUpdate {
+	_u.mutation.SetPasskeyID(v)
+	return _u
+}
+
+// SetNillablePasskeyID sets the "passkeyID" field if the given value is not nil.
+func (_u *SessionUpdate) SetNillablePasskeyID(v *uuid.UUID) *SessionUpdate {
+	if v != nil {
+		_u.SetPasskeyID(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "userID" field.
 func (_u *SessionUpdate) SetUserID(v uuid.UUID) *SessionUpdate {
 	_u.mutation.SetUserID(v)
@@ -117,6 +132,11 @@ func (_u *SessionUpdate) SetUser(v *User) *SessionUpdate {
 	return _u.SetUserID(v.ID)
 }
 
+// SetPasskey sets the "passkey" edge to the Passkey entity.
+func (_u *SessionUpdate) SetPasskey(v *Passkey) *SessionUpdate {
+	return _u.SetPasskeyID(v.ID)
+}
+
 // Mutation returns the SessionMutation object of the builder.
 func (_u *SessionUpdate) Mutation() *SessionMutation {
 	return _u.mutation
@@ -125,6 +145,12 @@ func (_u *SessionUpdate) Mutation() *SessionMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (_u *SessionUpdate) ClearUser() *SessionUpdate {
 	_u.mutation.ClearUser()
+	return _u
+}
+
+// ClearPasskey clears the "passkey" edge to the Passkey entity.
+func (_u *SessionUpdate) ClearPasskey() *SessionUpdate {
+	_u.mutation.ClearPasskey()
 	return _u
 }
 
@@ -173,6 +199,9 @@ func (_u *SessionUpdate) check() error {
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+	}
+	if _u.mutation.PasskeyCleared() && len(_u.mutation.PasskeyIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Session.passkey"`)
 	}
 	return nil
 }
@@ -229,6 +258,35 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PasskeyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.PasskeyTable,
+			Columns: []string{session.PasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PasskeyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.PasskeyTable,
+			Columns: []string{session.PasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -324,6 +382,20 @@ func (_u *SessionUpdateOne) SetNillableIP(v *string) *SessionUpdateOne {
 	return _u
 }
 
+// SetPasskeyID sets the "passkeyID" field.
+func (_u *SessionUpdateOne) SetPasskeyID(v uuid.UUID) *SessionUpdateOne {
+	_u.mutation.SetPasskeyID(v)
+	return _u
+}
+
+// SetNillablePasskeyID sets the "passkeyID" field if the given value is not nil.
+func (_u *SessionUpdateOne) SetNillablePasskeyID(v *uuid.UUID) *SessionUpdateOne {
+	if v != nil {
+		_u.SetPasskeyID(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "userID" field.
 func (_u *SessionUpdateOne) SetUserID(v uuid.UUID) *SessionUpdateOne {
 	_u.mutation.SetUserID(v)
@@ -343,6 +415,11 @@ func (_u *SessionUpdateOne) SetUser(v *User) *SessionUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
+// SetPasskey sets the "passkey" edge to the Passkey entity.
+func (_u *SessionUpdateOne) SetPasskey(v *Passkey) *SessionUpdateOne {
+	return _u.SetPasskeyID(v.ID)
+}
+
 // Mutation returns the SessionMutation object of the builder.
 func (_u *SessionUpdateOne) Mutation() *SessionMutation {
 	return _u.mutation
@@ -351,6 +428,12 @@ func (_u *SessionUpdateOne) Mutation() *SessionMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (_u *SessionUpdateOne) ClearUser() *SessionUpdateOne {
 	_u.mutation.ClearUser()
+	return _u
+}
+
+// ClearPasskey clears the "passkey" edge to the Passkey entity.
+func (_u *SessionUpdateOne) ClearPasskey() *SessionUpdateOne {
+	_u.mutation.ClearPasskey()
 	return _u
 }
 
@@ -412,6 +495,9 @@ func (_u *SessionUpdateOne) check() error {
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+	}
+	if _u.mutation.PasskeyCleared() && len(_u.mutation.PasskeyIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Session.passkey"`)
 	}
 	return nil
 }
@@ -485,6 +571,35 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PasskeyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.PasskeyTable,
+			Columns: []string{session.PasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PasskeyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.PasskeyTable,
+			Columns: []string{session.PasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

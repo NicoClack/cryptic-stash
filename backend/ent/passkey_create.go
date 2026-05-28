@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
@@ -56,8 +57,16 @@ func (_c *PasskeyCreate) SetPublicKey(v []byte) *PasskeyCreate {
 }
 
 // SetAaguid sets the "aaguid" field.
-func (_c *PasskeyCreate) SetAaguid(v []byte) *PasskeyCreate {
+func (_c *PasskeyCreate) SetAaguid(v uuid.UUID) *PasskeyCreate {
 	_c.mutation.SetAaguid(v)
+	return _c
+}
+
+// SetNillableAaguid sets the "aaguid" field if the given value is not nil.
+func (_c *PasskeyCreate) SetNillableAaguid(v *uuid.UUID) *PasskeyCreate {
+	if v != nil {
+		_c.SetAaguid(*v)
+	}
 	return _c
 }
 
@@ -75,16 +84,16 @@ func (_c *PasskeyCreate) SetNillableSignCount(v *uint32) *PasskeyCreate {
 	return _c
 }
 
-// SetIsSecondFactor sets the "isSecondFactor" field.
-func (_c *PasskeyCreate) SetIsSecondFactor(v bool) *PasskeyCreate {
-	_c.mutation.SetIsSecondFactor(v)
+// SetIsSecondGroup sets the "isSecondGroup" field.
+func (_c *PasskeyCreate) SetIsSecondGroup(v bool) *PasskeyCreate {
+	_c.mutation.SetIsSecondGroup(v)
 	return _c
 }
 
-// SetNillableIsSecondFactor sets the "isSecondFactor" field if the given value is not nil.
-func (_c *PasskeyCreate) SetNillableIsSecondFactor(v *bool) *PasskeyCreate {
+// SetNillableIsSecondGroup sets the "isSecondGroup" field if the given value is not nil.
+func (_c *PasskeyCreate) SetNillableIsSecondGroup(v *bool) *PasskeyCreate {
 	if v != nil {
-		_c.SetIsSecondFactor(*v)
+		_c.SetIsSecondGroup(*v)
 	}
 	return _c
 }
@@ -112,6 +121,21 @@ func (_c *PasskeyCreate) SetNillableID(v *uuid.UUID) *PasskeyCreate {
 // SetUser sets the "user" edge to the User entity.
 func (_c *PasskeyCreate) SetUser(v *User) *PasskeyCreate {
 	return _c.SetUserID(v.ID)
+}
+
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (_c *PasskeyCreate) AddSessionIDs(ids ...uuid.UUID) *PasskeyCreate {
+	_c.mutation.AddSessionIDs(ids...)
+	return _c
+}
+
+// AddSessions adds the "sessions" edges to the Session entity.
+func (_c *PasskeyCreate) AddSessions(v ...*Session) *PasskeyCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSessionIDs(ids...)
 }
 
 // Mutation returns the PasskeyMutation object of the builder.
@@ -153,9 +177,9 @@ func (_c *PasskeyCreate) defaults() {
 		v := passkey.DefaultSignCount
 		_c.mutation.SetSignCount(v)
 	}
-	if _, ok := _c.mutation.IsSecondFactor(); !ok {
-		v := passkey.DefaultIsSecondFactor
-		_c.mutation.SetIsSecondFactor(v)
+	if _, ok := _c.mutation.IsSecondGroup(); !ok {
+		v := passkey.DefaultIsSecondGroup
+		_c.mutation.SetIsSecondGroup(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := passkey.DefaultID()
@@ -185,19 +209,11 @@ func (_c *PasskeyCreate) check() error {
 	if _, ok := _c.mutation.PublicKey(); !ok {
 		return &ValidationError{Name: "publicKey", err: errors.New(`ent: missing required field "Passkey.publicKey"`)}
 	}
-	if _, ok := _c.mutation.Aaguid(); !ok {
-		return &ValidationError{Name: "aaguid", err: errors.New(`ent: missing required field "Passkey.aaguid"`)}
-	}
-	if v, ok := _c.mutation.Aaguid(); ok {
-		if err := passkey.AaguidValidator(v); err != nil {
-			return &ValidationError{Name: "aaguid", err: fmt.Errorf(`ent: validator failed for field "Passkey.aaguid": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.SignCount(); !ok {
 		return &ValidationError{Name: "signCount", err: errors.New(`ent: missing required field "Passkey.signCount"`)}
 	}
-	if _, ok := _c.mutation.IsSecondFactor(); !ok {
-		return &ValidationError{Name: "isSecondFactor", err: errors.New(`ent: missing required field "Passkey.isSecondFactor"`)}
+	if _, ok := _c.mutation.IsSecondGroup(); !ok {
+		return &ValidationError{Name: "isSecondGroup", err: errors.New(`ent: missing required field "Passkey.isSecondGroup"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "Passkey.userID"`)}
@@ -262,16 +278,16 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec) {
 		_node.PublicKey = value
 	}
 	if value, ok := _c.mutation.Aaguid(); ok {
-		_spec.SetField(passkey.FieldAaguid, field.TypeBytes, value)
+		_spec.SetField(passkey.FieldAaguid, field.TypeUUID, value)
 		_node.Aaguid = value
 	}
 	if value, ok := _c.mutation.SignCount(); ok {
 		_spec.SetField(passkey.FieldSignCount, field.TypeUint32, value)
 		_node.SignCount = value
 	}
-	if value, ok := _c.mutation.IsSecondFactor(); ok {
-		_spec.SetField(passkey.FieldIsSecondFactor, field.TypeBool, value)
-		_node.IsSecondFactor = value
+	if value, ok := _c.mutation.IsSecondGroup(); ok {
+		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
+		_node.IsSecondGroup = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -288,6 +304,22 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.SessionsTable,
+			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -403,7 +435,7 @@ func (u *PasskeyUpsert) UpdatePublicKey() *PasskeyUpsert {
 }
 
 // SetAaguid sets the "aaguid" field.
-func (u *PasskeyUpsert) SetAaguid(v []byte) *PasskeyUpsert {
+func (u *PasskeyUpsert) SetAaguid(v uuid.UUID) *PasskeyUpsert {
 	u.Set(passkey.FieldAaguid, v)
 	return u
 }
@@ -411,6 +443,12 @@ func (u *PasskeyUpsert) SetAaguid(v []byte) *PasskeyUpsert {
 // UpdateAaguid sets the "aaguid" field to the value that was provided on create.
 func (u *PasskeyUpsert) UpdateAaguid() *PasskeyUpsert {
 	u.SetExcluded(passkey.FieldAaguid)
+	return u
+}
+
+// ClearAaguid clears the value of the "aaguid" field.
+func (u *PasskeyUpsert) ClearAaguid() *PasskeyUpsert {
+	u.SetNull(passkey.FieldAaguid)
 	return u
 }
 
@@ -432,15 +470,15 @@ func (u *PasskeyUpsert) AddSignCount(v uint32) *PasskeyUpsert {
 	return u
 }
 
-// SetIsSecondFactor sets the "isSecondFactor" field.
-func (u *PasskeyUpsert) SetIsSecondFactor(v bool) *PasskeyUpsert {
-	u.Set(passkey.FieldIsSecondFactor, v)
+// SetIsSecondGroup sets the "isSecondGroup" field.
+func (u *PasskeyUpsert) SetIsSecondGroup(v bool) *PasskeyUpsert {
+	u.Set(passkey.FieldIsSecondGroup, v)
 	return u
 }
 
-// UpdateIsSecondFactor sets the "isSecondFactor" field to the value that was provided on create.
-func (u *PasskeyUpsert) UpdateIsSecondFactor() *PasskeyUpsert {
-	u.SetExcluded(passkey.FieldIsSecondFactor)
+// UpdateIsSecondGroup sets the "isSecondGroup" field to the value that was provided on create.
+func (u *PasskeyUpsert) UpdateIsSecondGroup() *PasskeyUpsert {
+	u.SetExcluded(passkey.FieldIsSecondGroup)
 	return u
 }
 
@@ -575,7 +613,7 @@ func (u *PasskeyUpsertOne) UpdatePublicKey() *PasskeyUpsertOne {
 }
 
 // SetAaguid sets the "aaguid" field.
-func (u *PasskeyUpsertOne) SetAaguid(v []byte) *PasskeyUpsertOne {
+func (u *PasskeyUpsertOne) SetAaguid(v uuid.UUID) *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.SetAaguid(v)
 	})
@@ -585,6 +623,13 @@ func (u *PasskeyUpsertOne) SetAaguid(v []byte) *PasskeyUpsertOne {
 func (u *PasskeyUpsertOne) UpdateAaguid() *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.UpdateAaguid()
+	})
+}
+
+// ClearAaguid clears the value of the "aaguid" field.
+func (u *PasskeyUpsertOne) ClearAaguid() *PasskeyUpsertOne {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.ClearAaguid()
 	})
 }
 
@@ -609,17 +654,17 @@ func (u *PasskeyUpsertOne) UpdateSignCount() *PasskeyUpsertOne {
 	})
 }
 
-// SetIsSecondFactor sets the "isSecondFactor" field.
-func (u *PasskeyUpsertOne) SetIsSecondFactor(v bool) *PasskeyUpsertOne {
+// SetIsSecondGroup sets the "isSecondGroup" field.
+func (u *PasskeyUpsertOne) SetIsSecondGroup(v bool) *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.SetIsSecondFactor(v)
+		s.SetIsSecondGroup(v)
 	})
 }
 
-// UpdateIsSecondFactor sets the "isSecondFactor" field to the value that was provided on create.
-func (u *PasskeyUpsertOne) UpdateIsSecondFactor() *PasskeyUpsertOne {
+// UpdateIsSecondGroup sets the "isSecondGroup" field to the value that was provided on create.
+func (u *PasskeyUpsertOne) UpdateIsSecondGroup() *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateIsSecondFactor()
+		s.UpdateIsSecondGroup()
 	})
 }
 
@@ -923,7 +968,7 @@ func (u *PasskeyUpsertBulk) UpdatePublicKey() *PasskeyUpsertBulk {
 }
 
 // SetAaguid sets the "aaguid" field.
-func (u *PasskeyUpsertBulk) SetAaguid(v []byte) *PasskeyUpsertBulk {
+func (u *PasskeyUpsertBulk) SetAaguid(v uuid.UUID) *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.SetAaguid(v)
 	})
@@ -933,6 +978,13 @@ func (u *PasskeyUpsertBulk) SetAaguid(v []byte) *PasskeyUpsertBulk {
 func (u *PasskeyUpsertBulk) UpdateAaguid() *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.UpdateAaguid()
+	})
+}
+
+// ClearAaguid clears the value of the "aaguid" field.
+func (u *PasskeyUpsertBulk) ClearAaguid() *PasskeyUpsertBulk {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.ClearAaguid()
 	})
 }
 
@@ -957,17 +1009,17 @@ func (u *PasskeyUpsertBulk) UpdateSignCount() *PasskeyUpsertBulk {
 	})
 }
 
-// SetIsSecondFactor sets the "isSecondFactor" field.
-func (u *PasskeyUpsertBulk) SetIsSecondFactor(v bool) *PasskeyUpsertBulk {
+// SetIsSecondGroup sets the "isSecondGroup" field.
+func (u *PasskeyUpsertBulk) SetIsSecondGroup(v bool) *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.SetIsSecondFactor(v)
+		s.SetIsSecondGroup(v)
 	})
 }
 
-// UpdateIsSecondFactor sets the "isSecondFactor" field to the value that was provided on create.
-func (u *PasskeyUpsertBulk) UpdateIsSecondFactor() *PasskeyUpsertBulk {
+// UpdateIsSecondGroup sets the "isSecondGroup" field to the value that was provided on create.
+func (u *PasskeyUpsertBulk) UpdateIsSecondGroup() *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateIsSecondFactor()
+		s.UpdateIsSecondGroup()
 	})
 }
 
