@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"net/url"
 	"time"
 )
 
@@ -35,4 +36,8 @@ func AddContextToConnection(connection net.Conn, ctx context.Context) WrappedErr
 	}
 
 	return nil
+}
+
+func GetOrigin(url *url.URL) string {
+	return url.Scheme + "://" + url.Host
 }

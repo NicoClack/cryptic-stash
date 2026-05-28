@@ -1,7 +1,6 @@
 package users_test
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"net/http"
@@ -19,16 +18,15 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	client := app.TestDatabase.Client()
 
-	userOb, stdErr := client.User.Create().
+	userOb := client.User.Create().
 		SetUsername("alice").
 		SetCreatedAt(app.Clock.Now()).
 		SetUpdatedAt(app.Clock.Now()).
-		Save(context.Background())
-	require.NoError(t, stdErr)
+		SaveX(t.Context())
 
 	sessionToken := "session-token-for-tests"
 	hashedToken := sha256.Sum256([]byte(sessionToken))
-	sessionOb, stdErr := client.Session.Create().
+	sessionOb := client.Session.Create().
 		SetCreatedAt(app.Clock.Now()).
 		SetUpdatedAt(app.Clock.Now()).
 		SetUser(userOb).
@@ -36,18 +34,17 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SetExpiresAt(app.Clock.Now().Add(app.Env.SESSION_DURATION)).
 		SetUserAgent("test-agent").
 		SetIP("127.0.0.1").
-		Save(context.Background())
-	require.NoError(t, stdErr)
+		SaveX(t.Context())
 
 	request := httptest.NewRequest(http.MethodGet, "/auth-test/", nil)
 	request.Header.Set("Authorization", "Session "+sessionToken)
-	responseRecorder := httptest.NewRecorder()
-	app.Server.ServeHTTP(responseRecorder, request)
+	respRecorder := httptest.NewRecorder()
+	app.Server.ServeHTTP(respRecorder, request)
 
-	require.Equal(t, http.StatusOK, responseRecorder.Code)
+	require.Equal(t, http.StatusOK, respRecorder.Code)
 
 	var responseBody users.AuthTestResponse
-	stdErr = json.Unmarshal(responseRecorder.Body.Bytes(), &responseBody)
+	stdErr := json.Unmarshal(respRecorder.Body.Bytes(), &responseBody)
 	require.NoError(t, stdErr)
 	require.Equal(t, sessionOb.ID, responseBody.SessionID)
 	require.Equal(t, userOb.ID, responseBody.UserID)

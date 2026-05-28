@@ -7,7 +7,7 @@ import (
 
 func Register(group *tempkeyvalue.RegistryGroup) {
 	group.Register(&tempkeyvalue.Definition{
-		Name: "loginWebAuthnSession",
+		Name: "WEBAUTHN_SESSIONS", // TODO: update to an import once packages are better split up?
 		Type: &webauthn.SessionData{},
 	})
 }

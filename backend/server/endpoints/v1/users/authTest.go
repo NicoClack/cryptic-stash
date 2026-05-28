@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"encoding/base64"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
@@ -20,15 +21,25 @@ type AuthTestResponse struct {
 
 func AuthTest(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		sessionToken, serverErr := servercommon.RequireAuthorizationScheme("Session", ginCtx)
+		givenTokenStr, serverErr := servercommon.RequireAuthorizationScheme("Session", ginCtx)
 		if serverErr != nil {
 			return serverErr
+		}
+		givenTokenBytes, stdErr := base64.RawURLEncoding.DecodeString(givenTokenStr)
+		if stdErr != nil {
+			return servercommon.NewError(stdErr).
+				SetStatus(http.StatusBadRequest).
+				AddDetail(servercommon.ErrorDetail{
+					Message: "session token is not valid raw URL base64",
+					Code:    "MALFORMED_SESSION_TOKEN",
+				}).
+				DisableLogging()
 		}
 
 		resp, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*AuthTestResponse, error) {
-				sessionOb, wrappedErr := app.Auth.ValidateSession(sessionToken, tx, ctx)
+				sessionOb, wrappedErr := app.Auth.ValidateSession(givenTokenBytes, tx, ctx)
 				if wrappedErr != nil {
 					return nil, servercommon.NewUnauthorizedError()
 				}

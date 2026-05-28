@@ -3,7 +3,6 @@ package invites
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
@@ -55,91 +54,65 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, ErrUsernameTaken.Clone()
 				}
 
-				webAuthnSession := inviteOb.WebAuthnSession
-				if webAuthnSession == nil {
+				if inviteOb.WebAuthnSession == nil {
 					return nil, servercommon.NewBadRequestError(
 						"credential",
 						"no active WebAuthn session, please refresh the page",
 						"NO_WEBAUTHN_SESSION",
 					)
 				}
-				if !webAuthnSession.Expires.IsZero() && clock.Now().After(webAuthnSession.Expires) {
-					return nil, servercommon.NewBadRequestError(
-						"credential",
-						"WebAuthn session expired, please refresh the page",
-						"WEBAUTHN_SESSION_EXPIRED",
-					)
-				}
 
-				webAuthnCredential, wrappedErr := app.Auth.FinishRegisterPasskey(
-					&auth.TempWebAuthnUser{
-						ID:          webAuthnSession.UserID,
-						Name:        inviteOb.Email,
-						DisplayName: inviteOb.Email,
-					},
-					*webAuthnSession, // TODO: standardise pointers vs values
+				_, wrappedErr := app.Auth.FinishRegisterPasskey(
+					inviteOb.WebAuthnSession,
+					inviteOb.Email,
 					body.Credential,
+					body.CredentialName,
+					tx,
 					ctx,
+					func(pendingUserID uuid.UUID, tx *ent.Tx) (*ent.User, error) {
+						now := clock.Now()
+						createdUserOb, stdErr := tx.User.Create().
+							SetID(pendingUserID).
+							SetUsername(inviteOb.Email).
+							SetCreatedAt(now).
+							SetUpdatedAt(now).
+							SetInviteID(inviteOb.ID).
+							Save(ctx)
+						if stdErr != nil {
+							return nil, stdErr
+						}
+						_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
+							SetUser(createdUserOb).
+							ClearWebAuthnSession().
+							SetUserAgent(ginCtx.Request.UserAgent()).
+							SetIP(ginCtx.ClientIP()).
+							Save(ctx)
+						if stdErr != nil {
+							return nil, stdErr
+						}
+						return createdUserOb, nil
+					},
 				)
 				if wrappedErr != nil {
-					if errors.Is(wrappedErr, auth.ErrInvalidCredential) {
-						return nil, servercommon.NewBadRequestError(
-							"credential",
-							"invalid WebAuthn credential",
-							"INVALID_CREDENTIAL",
-						)
-					}
-					return nil, wrappedErr
-				}
-
-				aaguid := webAuthnCredential.Authenticator.AAGUID
-				if len(aaguid) == 0 {
-					aaguid = make([]byte, 16)
-				} else if len(aaguid) != 16 {
-					return nil, servercommon.NewBadRequestError(
-						"credential",
-						"AAGUID must be 16 bytes",
-						"INVALID_AAGUID_LENGTH",
+					return nil, servercommon.ExpectError(
+						wrappedErr, auth.ErrWebAuthnSessionExpired, http.StatusBadRequest,
+						&servercommon.ErrorDetail{
+							Message: "WebAuthn session expired, please refresh the page",
+							Code:    "WEBAUTHN_SESSION_EXPIRED",
+						},
+					).Expect(
+						auth.ErrInvalidCredential, http.StatusBadRequest,
+						&servercommon.ErrorDetail{
+							Message: "invalid WebAuthn credential",
+							Code:    "INVALID_CREDENTIAL",
+						},
+					).Expect(
+						auth.ErrInvalidAAGUIDLength, http.StatusBadRequest,
+						&servercommon.ErrorDetail{
+							Message: "AAGUID must be 16 bytes",
+							Code:    "INVALID_AAGUID_LENGTH",
+						},
 					)
-				}
-				pendingUserID, stdErr := uuid.FromBytes(webAuthnSession.UserID)
-				if stdErr != nil {
-					return nil, stdErr
-				}
-				now := clock.Now()
-
-				createdUserOb, stdErr := tx.User.Create().
-					SetID(pendingUserID).
-					SetUsername(inviteOb.Email).
-					SetCreatedAt(now).
-					SetUpdatedAt(now).
-					SetInviteID(inviteOb.ID).
-					Save(ctx)
-				if stdErr != nil {
-					return nil, stdErr
-				}
-				_, stdErr = tx.Passkey.Create().
-					SetUserID(createdUserOb.ID).
-					SetName(body.CredentialName).
-					SetCredentialID(webAuthnCredential.ID).
-					SetPublicKey(webAuthnCredential.PublicKey).
-					SetAaguid(aaguid).
-					SetSignCount(webAuthnCredential.Authenticator.SignCount).
-					SetCreatedAt(now).
-					SetUpdatedAt(now).
-					Save(ctx)
-				if stdErr != nil {
-					return nil, stdErr
-				}
-
-				_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
-					SetUser(createdUserOb).
-					ClearWebAuthnSession().
-					SetUserAgent(ginCtx.Request.UserAgent()).
-					SetIP(ginCtx.ClientIP()).
-					Save(ctx)
-				if stdErr != nil {
-					return nil, stdErr
 				}
 
 				return &CreateUserResponse{

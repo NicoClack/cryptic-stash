@@ -66,12 +66,25 @@ func (service *Auth) StartRegisterPasskey(
 }
 
 func (service *Auth) FinishRegisterPasskey(
-	user webauthn.User,
-	sessionData webauthn.SessionData,
+	session *webauthn.SessionData,
+	username string,
 	credentialJSON []byte,
+	credentialName string,
+	tx *ent.Tx,
 	ctx context.Context,
-) (*webauthn.Credential, common.WrappedError) {
-	return auth.FinishRegisterPasskey(user, sessionData, credentialJSON, service.webAuthnApp)
+	getUser func(uuid.UUID, *ent.Tx) (*ent.User, error),
+) (*ent.Passkey, common.WrappedError) {
+	return auth.FinishRegisterPasskey(
+		session,
+		username,
+		credentialJSON,
+		credentialName,
+		service.webAuthnApp,
+		tx,
+		service.app.Clock,
+		ctx,
+		getUser,
+	)
 }
 
 func (service *Auth) CreateSession(
@@ -85,7 +98,7 @@ func (service *Auth) CreateSession(
 }
 
 func (service *Auth) ValidateSession(
-	token string,
+	token []byte,
 	tx *ent.Tx,
 	ctx context.Context,
 ) (*ent.Session, common.WrappedError) {

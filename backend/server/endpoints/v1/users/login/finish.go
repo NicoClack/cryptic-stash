@@ -3,25 +3,26 @@ package login
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"net/http"
 
-	authpkg "github.com/NicoClack/cryptic-stash/backend/auth"
-	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/go-webauthn/webauthn/protocol"
 )
 
 type LoginFinishPayload struct {
-	SessionID string `binding:"required,min=1,max=64" json:"sessionId"`
+	protocol.CredentialAssertionResponse
+
+	WebAuthnSessionID string `binding:"required,min=1,max=64" json:"webAuthnSessionID"`
 }
 
 type LoginFinishResponse struct {
-	Errors       []servercommon.ErrorDetail `json:"errors"`
-	Session      *ent.Session               `json:"session"`
-	SessionToken string                     `json:"sessionToken"`
+	Errors []servercommon.ErrorDetail `json:"errors"`
+	UserID string                     `json:"userID"`
+	Token  string                     `json:"token"`
 }
 
 func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -31,41 +32,36 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 			return serverErr
 		}
 
-		type result struct {
-			session *ent.Session
-			token   []byte
-		}
-		res, txErr := dbcommon.WithReadWriteTx(
+		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(),
 			app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*result, error) {
-				sessionOb, token, wrappedErr := app.Auth.FinishLogin(body.SessionID, ginCtx, tx)
+			func(tx *ent.Tx, ctx context.Context) (*LoginFinishResponse, error) {
+				sessionOb, token, wrappedErr := app.Auth.FinishLogin(body.WebAuthnSessionID, ginCtx, tx)
 				if wrappedErr != nil {
 					return nil, wrappedErr
 				}
-				return &result{session: sessionOb, token: token}, nil
+
+				return &LoginFinishResponse{
+					Errors: []servercommon.ErrorDetail{},
+					UserID: sessionOb.UserID.String(),
+					Token:  base64.RawURLEncoding.EncodeToString(token),
+				}, nil
 			},
 		)
-		if txErr != nil {
-			// Map common auth errors to specific HTTP responses
-			if errors.Is(txErr, authpkg.ErrInvalidCeremonyID) {
-				return servercommon.NewBadRequestError(
-					"sessionId", "login session is missing or expired", "INVALID_LOGIN_SESSION",
-				)
-			}
-			if errors.Is(txErr, authpkg.ErrInvalidCredential) {
-				return servercommon.NewUnauthorizedError()
-			}
-			return servercommon.NewError(txErr.(common.WrappedError))
+		if stdErr != nil {
+			return servercommon.ExpectError(
+				stdErr, auth.ErrInvalidWebAuthnSessionID, http.StatusBadRequest,
+				&servercommon.ErrorDetail{
+					Message: "WebAuthn session missing or expired",
+					Code:    "INVALID_WEBAUTHN_SESSION",
+				},
+			).Expect(
+				auth.ErrInvalidCredential, http.StatusUnauthorized,
+				nil,
+			)
 		}
-		sessionOb := res.session
-		sessionToken := base64.StdEncoding.EncodeToString(res.token)
 
-		ginCtx.JSON(http.StatusOK, &LoginFinishResponse{
-			Errors:       []servercommon.ErrorDetail{},
-			Session:      sessionOb,
-			SessionToken: sessionToken,
-		})
+		ginCtx.JSON(http.StatusOK, resp)
 		return nil
 	})
 }

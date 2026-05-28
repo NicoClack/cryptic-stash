@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	CeremonyTimeout    = 5 * time.Minute
-	CeremonyStoreName  = "LOGIN_CEREMONIES"
-	SessionTokenLength = 32 // 256 bits
+	WebAuthnSessionTimeout   = 5 * time.Minute
+	WebAuthnSessionStoreName = "WEBAUTHN_SESSIONS"
+	SessionTokenLength       = 32 // 256 bits
 )
 
 func NewWebAuthnApp(env *common.Env) *webauthn.WebAuthn {
-	origin := env.FRONTEND_BASE_URL.Scheme + "://" + env.FRONTEND_BASE_URL.Host
+	origin := common.GetOrigin(env.FRONTEND_BASE_URL)
 	relyingPartyID := env.FRONTEND_BASE_URL.Hostname()
 
 	webAuthnApp, stdErr := webauthn.New(&webauthn.Config{
@@ -31,13 +31,13 @@ func NewWebAuthnApp(env *common.Env) *webauthn.WebAuthn {
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
 				Enforce:    true,
-				Timeout:    CeremonyTimeout,
-				TimeoutUVD: CeremonyTimeout,
+				Timeout:    WebAuthnSessionTimeout,
+				TimeoutUVD: WebAuthnSessionTimeout,
 			},
 			Registration: webauthn.TimeoutConfig{
 				Enforce:    true,
-				Timeout:    CeremonyTimeout,
-				TimeoutUVD: CeremonyTimeout,
+				Timeout:    WebAuthnSessionTimeout,
+				TimeoutUVD: WebAuthnSessionTimeout,
 			},
 		},
 	})

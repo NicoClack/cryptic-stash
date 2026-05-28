@@ -22,7 +22,7 @@ func CreateSession(
 	ctx context.Context,
 ) (*ent.Session, []byte, common.WrappedError) {
 	sessionToken := common.CryptoRandomBytes(SessionTokenLength)
-	hashedToken := sha256.Sum256([]byte(sessionToken))
+	hashedToken := sha256.Sum256(sessionToken)
 	now := clock.Now()
 	expiresAt := now.Add(sessionDuration)
 
@@ -43,12 +43,12 @@ func CreateSession(
 }
 
 func ValidateSession(
-	token string,
+	token []byte,
 	tx *ent.Tx,
 	clock clockwork.Clock,
 	ctx context.Context,
 ) (*ent.Session, common.WrappedError) {
-	hashedToken := sha256.Sum256([]byte(token))
+	hashedToken := sha256.Sum256(token)
 
 	sessionOb, stdErr := tx.Session.Query().
 		Where(

@@ -23,9 +23,9 @@ func (Passkey) Fields() []ent.Field {
 		field.String("name").MinLen(1).MaxLen(64),
 		field.Bytes("credentialID").Unique(),
 		field.Bytes("publicKey"),
-		field.Bytes("aaguid").MinLen(16).MaxLen(16),
+		field.UUID("aaguid", uuid.Nil).Optional(),
 		field.Uint32("signCount").Default(0),
-		field.Bool("isSecondFactor").Default(false),
+		field.Bool("isSecondGroup").Default(false),
 		field.UUID("userID", uuid.Nil),
 	}
 }

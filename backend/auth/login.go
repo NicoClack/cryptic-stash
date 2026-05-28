@@ -24,15 +24,15 @@ func StartLogin(
 		return "", protocol.PublicKeyCredentialRequestOptions{}, ErrWrapperStartLogin.Wrap(stdErr)
 	}
 
-	ceremonyID := uuid.NewString()
+	webAuthnSessionID := uuid.NewString()
 	// TODO: what happens if parent transaction fails?
-	tempKV.Set(CeremonyStoreName, ceremonyID, *sessionData, sessionData.Expires)
+	tempKV.Set(WebAuthnSessionStoreName, webAuthnSessionID, *sessionData, sessionData.Expires)
 
-	return ceremonyID, creation.Response, nil
+	return webAuthnSessionID, creation.Response, nil
 }
 
 func FinishLogin(
-	ceremonyID string,
+	webAuthnSessionID string,
 	ginCtx *gin.Context,
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
@@ -41,12 +41,12 @@ func FinishLogin(
 	sessionDuration time.Duration,
 ) (*ent.Session, []byte, common.WrappedError) {
 	var sessionData webauthn.SessionData
-	if !tempKV.Get(CeremonyStoreName, ceremonyID, &sessionData) {
-		return nil, nil, ErrWrapperFinishLogin.Wrap(ErrInvalidCeremonyID)
+	if !tempKV.Get(WebAuthnSessionStoreName, webAuthnSessionID, &sessionData) {
+		return nil, nil, ErrWrapperFinishLogin.Wrap(ErrInvalidWebAuthnSessionID)
 	}
 	tx.OnCommit(func(c ent.Committer) ent.Committer {
 		return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
-			tempKV.Delete(CeremonyStoreName, ceremonyID)
+			tempKV.Delete(WebAuthnSessionStoreName, webAuthnSessionID)
 			return nil
 		})
 	})
@@ -74,7 +74,7 @@ func FinishLogin(
 		ginCtx.Request,
 	)
 	if stdErr != nil {
-		// TODO: how should these errors be sent to the client?
+		// TODO: send these errors to the client by checking for ErrTypeClient
 		return nil, nil, ErrWrapperFinishLogin.Wrap(stdErr)
 	}
 	userOb := passkeyOb.Edges.User

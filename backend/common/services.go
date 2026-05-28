@@ -137,11 +137,14 @@ type AuthService interface {
 		wrappedErr WrappedError,
 	)
 	FinishRegisterPasskey(
-		user webauthn.User,
-		sessionData webauthn.SessionData,
+		session *webauthn.SessionData,
+		username string,
 		credentialJSON []byte,
+		credentialName string,
+		tx *ent.Tx,
 		ctx context.Context,
-	) (*webauthn.Credential, WrappedError)
+		getUser func(uuid.UUID, *ent.Tx) (*ent.User, error),
+	) (*ent.Passkey, WrappedError)
 
 	CreateSession(
 		userID uuid.UUID,
@@ -151,7 +154,7 @@ type AuthService interface {
 		ctx context.Context,
 	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
 	// Note: must load user edge
-	ValidateSession(token string, tx *ent.Tx, ctx context.Context) (*ent.Session, WrappedError)
+	ValidateSession(token []byte, tx *ent.Tx, ctx context.Context) (*ent.Session, WrappedError)
 }
 
 // If reason is "", the server will exit with a 0 exit code

@@ -73,7 +73,7 @@ func ConfigureEndpoints(group *servercommon.Group) {
 
 ### Naming Conventions
 
-**Go variable names — use full words, not abbreviations, except:**
+**Go variable names — generally use full words, not abbreviations, except:**
 
 | Short form | Type |
 |---|---|
@@ -90,9 +90,12 @@ func ConfigureEndpoints(group *servercommon.Group) {
 - Do NOT apply this suffix to plain JSON response structs or service instances.
 
 **HTTP external responses:**
-- `resp` — `*http.Response`
+- `resp` — `*http.Response` / responses returned by endpoints (e.g. `*LoginOptionsResponse`)
 - `respBytes` — raw `[]byte` from response body
 - `respBody` — decoded struct from response body
+- `req` — `*http.Request`
+- `respRecorder` — `*httptest.ResponseRecorder`
+
 
 **File names:** `camelCase.go` (e.g. `getAuthorizationCode.go`, `premadeErrors.go`).
 

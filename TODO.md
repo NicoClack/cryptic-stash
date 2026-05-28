@@ -82,6 +82,8 @@
 -   CC admin (or all users?) when a user receives a login alert
 -   Review contexts. Possibly want to give them all a timeout, partly to make shutdowns more predictable
 -   Does log.Fatalf stop the shutdown logic running if the server crashes on startup?
+- Send a message when messengers are changed, including the previous messengers. Include details about what login method was used to authorise it so if it was unauthorised, the user might know what went wrong when talking to the admin
+- Cancel other download sessions when a download is completed
 -   Require both admin and users to click a link every 4 weeks (unless already locked) to confirm their contacts are working. If they don't click it, users will automatically lock and have to be unlocked by an admin. If the admin doesn't, all users will automatically lock
 - Standardise frontend styling and headers
 -   Admin endpoints for troubleshooting:
@@ -123,6 +125,7 @@
 - Use panic instead of Fatalf for startup errors?
 - Restructure services so that implementations wrap errors defined in a more common package, e.g defined in twofactoractions/service.go. Messenger based implementation defined in twofactoractions/messengers/
 
+- Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks
 - Move from gin, its maintenance isn't great
 - When messengers are changed, send a message to all of the previous messengers
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?

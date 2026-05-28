@@ -11,8 +11,8 @@ const (
 	ErrTypeValidateSession       = "validate session"
 )
 
-var ErrInvalidCeremonyID = common.NewErrorWithCategories(
-	"invalid ceremony ID",
+var ErrInvalidWebAuthnSessionID = common.NewErrorWithCategories(
+	"invalid WebAuthn session ID",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
 var ErrInvalidCredential = common.NewErrorWithCategories(
@@ -21,6 +21,14 @@ var ErrInvalidCredential = common.NewErrorWithCategories(
 )
 var ErrInvalidSession = common.NewErrorWithCategories(
 	"invalid session",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
+var ErrWebAuthnSessionExpired = common.NewErrorWithCategories(
+	"WebAuthn session expired",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
+var ErrInvalidAAGUIDLength = common.NewErrorWithCategories(
+	"AAGUID must be 16 bytes",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
 
