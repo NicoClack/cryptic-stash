@@ -1,19 +1,24 @@
 package login_test
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"testing"
 
+	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
+	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users/login"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/descope/virtualwebauthn"
 	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,22 +27,57 @@ func TestLoginFlow(t *testing.T) {
 
 	app := testhelpers.NewApp(t, nil)
 	origin := common.GetOrigin(app.Env.FRONTEND_BASE_URL)
+	relyingPartyID := app.Env.FRONTEND_BASE_URL.Hostname()
+	relyingParty := virtualwebauthn.RelyingParty{
+		ID:     relyingPartyID,
+		Name:   "Cryptic Stash",
+		Origin: origin,
+	}
+
 	userOb := testcommon.NewDummyUser(1, app.TestDatabase.Client(), t.Context(), app.Clock)
 	dbClient := app.Database.Client()
 
 	vAuthenticator := virtualwebauthn.NewAuthenticator()
+	vAuthenticator.Options.UserHandle = userOb.ID[:]
 	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
-
-	dbClient.Passkey.Create().
-		SetCreatedAt(app.Clock.Now()).
-		SetUpdatedAt(app.Clock.Now()).
-		SetUserID(userOb.ID).
-		SetName("Test Passkey").
-		SetCredentialID(credential.ID).
-		SetPublicKey(credential.Key.Data).
-		SaveX(t.Context())
-
 	vAuthenticator.AddCredential(credential)
+
+	stdErr := dbcommon.WithWriteTx(
+		t.Context(), app.Database,
+		func(tx *ent.Tx, ctx context.Context) error {
+			options, sessionData, wrappedErr := app.Auth.StartRegisterPasskey(&auth.RealWebAuthnUser{
+				User: userOb,
+			}, t.Context())
+			if wrappedErr != nil {
+				return wrappedErr
+			}
+
+			credentialJSON := virtualwebauthn.CreateAttestationResponse(
+				relyingParty,
+				vAuthenticator,
+				credential,
+				virtualwebauthn.AttestationOptions{
+					Challenge: options.Challenge,
+				},
+			)
+			_, wrappedErr = app.Auth.FinishRegisterPasskey(
+				sessionData,
+				userOb.Username,
+				[]byte(credentialJSON),
+				"Test Passkey",
+				tx,
+				ctx,
+				func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error) {
+					return userOb, nil
+				},
+			)
+			if wrappedErr != nil {
+				return wrappedErr
+			}
+			return nil
+		},
+	)
+	require.NoError(t, stdErr)
 
 	optionsRecorder := testcommon.Post(
 		t, app.Server,
@@ -49,26 +89,26 @@ func TestLoginFlow(t *testing.T) {
 	assertionOptions, stdErr := virtualwebauthn.ParseAssertionOptions(optionsRecorder.Body.String())
 	require.NoError(t, stdErr)
 	require.NotNil(t, assertionOptions)
-	// The ceremony ID isn't part of the WebAuthn spec,
+	require.Equal(t, relyingPartyID, assertionOptions.RelyingPartyID)
+	// The ceremony ID isn't part of the WebAuthn spec so virtualwebauthn doesn't parse it,
 	// but the frontend needs to include it in its login/finish request later
-	var optionsResp login.LoginOptionsResponse
-	stdErr = json.Unmarshal(optionsRecorder.Body.Bytes(), &optionsResp)
-	require.NoError(t, stdErr)
+	var sessionID string
+	{
+		var optionsResp login.LoginOptionsResponse
+		stdErr = json.Unmarshal(optionsRecorder.Body.Bytes(), &optionsResp)
+		require.NoError(t, stdErr)
+		sessionID = optionsResp.SessionID
+	}
 
-	foundCredential := vAuthenticator.FindAllowedCredential(*assertionOptions)
-	require.NotNil(t, foundCredential)
-	require.Equal(t, credential, *foundCredential)
-
-	require.Equal(t, origin, assertionOptions.RelyingPartyID)
+	// vAuthenticator.FindAllowedCredential doesn't work for discoverable credentials
+	require.Len(t, vAuthenticator.Credentials, 1)
+	foundCredential := vAuthenticator.Credentials[0]
+	require.Equal(t, credential, foundCredential)
 
 	assertionResponse := virtualwebauthn.CreateAssertionResponse(
-		virtualwebauthn.RelyingParty{
-			ID:     app.Env.FRONTEND_BASE_URL.Hostname(),
-			Name:   "Cryptic Stash",
-			Origin: origin,
-		},
+		relyingParty,
 		vAuthenticator,
-		credential,
+		foundCredential,
 		virtualwebauthn.AssertionOptions{
 			Challenge: assertionOptions.Challenge,
 		},
@@ -83,10 +123,9 @@ func TestLoginFlow(t *testing.T) {
 		"/api/v1/users/login/finish/",
 		login.LoginFinishPayload{
 			CredentialAssertionResponse: parsedAssertion,
-			WebAuthnSessionID:           optionsResp.SessionID,
+			WebAuthnSessionID:           sessionID,
 		},
 	)
-
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 
 	var finishResp login.LoginFinishResponse
@@ -99,6 +138,10 @@ func TestLoginFlow(t *testing.T) {
 	require.NoError(t, stdErr)
 	require.Len(t, decodedToken, 32)
 	hashedToken := sha256.Sum256(decodedToken)
+
+	sessionCount, stdErr := dbClient.Session.Query().Count(t.Context())
+	require.NoError(t, stdErr)
+	require.Equal(t, 1, sessionCount)
 	sessionOb, stdErr := dbClient.Session.Query().
 		Where(
 			session.HashedToken(hashedToken[:]),

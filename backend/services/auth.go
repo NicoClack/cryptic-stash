@@ -40,16 +40,19 @@ func (service *Auth) StartLogin(
 
 func (service *Auth) FinishLogin(
 	sessionID string,
+	parsedResponse *protocol.ParsedCredentialAssertionData,
 	ginCtx *gin.Context,
 	tx *ent.Tx,
 ) (*ent.Session, []byte, common.WrappedError) {
 	return auth.FinishLogin(
 		sessionID,
+		parsedResponse,
 		ginCtx,
 		service.webAuthnApp,
 		tx,
 		service.app.TempKeyValue,
 		service.app.Clock,
+		service.app.Logger,
 		service.app.Env.SESSION_DURATION,
 	)
 }
@@ -89,12 +92,22 @@ func (service *Auth) FinishRegisterPasskey(
 
 func (service *Auth) CreateSession(
 	userID uuid.UUID,
+	passkeyID uuid.UUID,
 	userAgent string,
 	ip string,
 	tx *ent.Tx,
 	ctx context.Context,
 ) (*ent.Session, []byte, common.WrappedError) {
-	return auth.CreateSession(userID, userAgent, ip, tx, service.app.Clock, service.app.Env.SESSION_DURATION, ctx)
+	return auth.CreateSession(
+		userID,
+		passkeyID,
+		userAgent,
+		ip,
+		tx,
+		service.app.Clock,
+		service.app.Env.SESSION_DURATION,
+		ctx,
+	)
 }
 
 func (service *Auth) ValidateSession(

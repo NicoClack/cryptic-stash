@@ -68,10 +68,10 @@ func FinishRegisterPasskey(
 		return nil, wrappedErr
 	}
 
-	aaguid := credential.Authenticator.AAGUID
-	if len(aaguid) == 0 {
-		aaguid = make([]byte, 16)
-	} else if len(aaguid) != 16 {
+	var aaguid uuid.UUID
+	if len(credential.Authenticator.AAGUID) == 16 {
+		aaguid = [16]byte(credential.Authenticator.AAGUID)
+	} else if len(credential.Authenticator.AAGUID) != 0 {
 		return nil, ErrWrapperFinishRegisterPasskey.Wrap(ErrInvalidAAGUIDLength)
 	}
 

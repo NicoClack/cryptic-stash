@@ -31,12 +31,26 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
 		}
+		parsedResponse, stdErr := body.CredentialAssertionResponse.Parse()
+		if stdErr != nil {
+			return servercommon.NewError(stdErr).
+				SetStatus(http.StatusBadRequest).
+				AddDetail(servercommon.ErrorDetail{
+					Message: "malformed WebAuthn assertion response",
+					Code:    "MALFORMED_CREDENTIAL_ASSERTION_RESPONSE",
+				})
+		}
 
 		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(),
 			app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*LoginFinishResponse, error) {
-				sessionOb, token, wrappedErr := app.Auth.FinishLogin(body.WebAuthnSessionID, ginCtx, tx)
+				sessionOb, token, wrappedErr := app.Auth.FinishLogin(
+					body.WebAuthnSessionID,
+					parsedResponse,
+					ginCtx,
+					tx,
+				)
 				if wrappedErr != nil {
 					return nil, wrappedErr
 				}

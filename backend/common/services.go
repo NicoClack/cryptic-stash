@@ -117,6 +117,7 @@ type App struct {
 type AuthService interface {
 	WebAuthn() *webauthn.WebAuthn
 
+	// TODO: standardise parsing data from gin Context vs passing it in
 	StartLogin(ctx context.Context) (
 		sessionID string,
 		options protocol.PublicKeyCredentialRequestOptions,
@@ -124,6 +125,7 @@ type AuthService interface {
 	)
 	FinishLogin(
 		sessionID string,
+		parsedResponse *protocol.ParsedCredentialAssertionData,
 		ginCtx *gin.Context,
 		tx *ent.Tx,
 	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
@@ -143,11 +145,12 @@ type AuthService interface {
 		credentialName string,
 		tx *ent.Tx,
 		ctx context.Context,
-		getUser func(uuid.UUID, *ent.Tx) (*ent.User, error),
+		getUser func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error),
 	) (*ent.Passkey, WrappedError)
 
 	CreateSession(
 		userID uuid.UUID,
+		passkeyID uuid.UUID,
 		userAgent string,
 		ip string,
 		tx *ent.Tx,

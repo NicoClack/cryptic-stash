@@ -15,6 +15,8 @@ var ErrInvalidWebAuthnSessionID = common.NewErrorWithCategories(
 	"invalid WebAuthn session ID",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
+
+// TODO: currently go-webauthn's error is used instead
 var ErrInvalidCredential = common.NewErrorWithCategories(
 	"invalid credential",
 	common.ErrTypeAuth, common.ErrTypeClient,

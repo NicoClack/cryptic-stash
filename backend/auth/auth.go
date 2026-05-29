@@ -68,7 +68,7 @@ func (webAuthnUser *RealWebAuthnUser) WebAuthnCredentials() []webauthn.Credentia
 			ID:        passkeyOb.CredentialID,
 			PublicKey: passkeyOb.PublicKey,
 			Authenticator: webauthn.Authenticator{
-				AAGUID:    passkeyOb.Aaguid,
+				AAGUID:    passkeyOb.Aaguid[:],
 				SignCount: passkeyOb.SignCount,
 			},
 		})

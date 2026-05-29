@@ -22,7 +22,7 @@ func (Passkey) Fields() []ent.Field {
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.String("name").MinLen(1).MaxLen(64),
-		field.Bytes("credentialID").Unique(),
+		field.Bytes("credentialID").Unique(), // TODO: add max length
 		field.Bytes("publicKey"),
 		field.UUID("aaguid", uuid.Nil).Optional(),
 		field.Uint32("signCount").Default(0),
@@ -39,3 +39,5 @@ func (Passkey) Edges() []ent.Edge {
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
+
+// TODO: add index for userID + credentialID?

@@ -14,6 +14,7 @@ import (
 
 func CreateSession(
 	userID uuid.UUID,
+	passkeyID uuid.UUID,
 	userAgent string,
 	ip string,
 	tx *ent.Tx,
@@ -30,6 +31,7 @@ func CreateSession(
 		SetCreatedAt(now).
 		SetUpdatedAt(now).
 		SetUserID(userID).
+		SetPasskeyID(passkeyID).
 		SetHashedToken(hashedToken[:]).
 		SetExpiresAt(expiresAt).
 		SetUserAgent(userAgent).

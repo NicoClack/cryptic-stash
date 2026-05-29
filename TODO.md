@@ -1,5 +1,6 @@
 # TODO
 
+- Update tx.OnCommit calls, c.Commit needs to be called like a middleware chain? Otherwise the transaction isn't properly committed?
 - Create account system with passkeys
 - Standardise passkey/credential naming
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
@@ -22,8 +23,8 @@
 - - Can fake salts by hashing something deterministic like the email with a static pepper. If the pepper is leaked, I can just rotate it. If the database is leaked, the attacker has the stash records anyway. This approach means I don't need to store the random data I'm sending to ensure consistent results 
 - Create account system for users to manage their stashes
 - - Require FIDO2 passkeys/physical security keys
-- - Allow optional 2FA FIDO2 with "userVerification" set to "discouraged" by default, allowing it to be set to "required". Intended for login via password manager + security key
-- - Locking account permanently or temporarily should only require a single credential, either a first or a second factor. That way you can block attempts with just access to your password manager or a security key with someone else's device
+- - Allow optional 2 group FIDO2 with "userVerification" set to "discouraged" by default, allowing it to be set to "required". Intended for login via password manager + security key, which is usually still 2FA but means 2 systems have to be breached for an unauthorised login. Look into WebAuthn mediated logins for this
+- - Locking account permanently or temporarily should only require a single credential, either a first or a second group. That way you can block attempts with just access to your password manager or a security key with someone else's device
 - - User logins can be reset by the admin generating a link. Maybe it could also require a code sent to their email?
 - - Admin logins can be reset by changing env vars
 - Send message when a stash password is correctly entered while it's locked
@@ -124,6 +125,7 @@
 - - Use npm-check-updates with a cooldown of a few days
 - Use panic instead of Fatalf for startup errors?
 - Restructure services so that implementations wrap errors defined in a more common package, e.g defined in twofactoractions/service.go. Messenger based implementation defined in twofactoractions/messengers/
+- Review SQLite connection pool config
 
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks
 - Move from gin, its maintenance isn't great
@@ -185,3 +187,4 @@ Prevent replay attacks on download endpoint with challenge-response system? Not 
 - Fix tests around messaging admin on error, they were still passing when I forgot to load the UserMessenger edge, which caused the logic to think there were no messengers
 -   Endpoints
 -   -   Do they cancel their work if a request times out? Can encryption/decryption run in the background?
+- Invalid payloads for each endpoint, missing fields etc
