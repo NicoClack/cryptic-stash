@@ -32,7 +32,7 @@ CREATE INDEX `logentry_logged_at` ON `log_entries` (`logged_at`);
 -- create "login_alerts" table
 CREATE TABLE `login_alerts` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `sent_at` datetime NOT NULL, `confirmed` bool NOT NULL, `download_session_id` uuid NOT NULL, `user_messenger_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `login_alerts_download_sessions_loginAlerts` FOREIGN KEY (`download_session_id`) REFERENCES `download_sessions` (`id`) ON DELETE CASCADE, CONSTRAINT `login_alerts_user_messengers_loginAlerts` FOREIGN KEY (`user_messenger_id`) REFERENCES `user_messengers` (`id`) ON DELETE CASCADE);
 -- create "passkeys" table
-CREATE TABLE `passkeys` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `name` text NOT NULL, `credential_id` blob NOT NULL, `public_key` blob NOT NULL, `aaguid` blob NOT NULL, `sign_count` integer NOT NULL DEFAULT (0), `is_second_factor` bool NOT NULL DEFAULT (false), `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `passkeys_users_passkeys` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `passkeys` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `name` text NOT NULL, `credential_id` blob NOT NULL, `public_key` blob NOT NULL, `aaguid` uuid NULL, `sign_count` integer NOT NULL DEFAULT (0), `is_second_group` bool NOT NULL DEFAULT (false), `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `passkeys_users_passkeys` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "passkeys_credential_id_key" to table: "passkeys"
 CREATE UNIQUE INDEX `passkeys_credential_id_key` ON `passkeys` (`credential_id`);
 -- create "periodic_tasks" table
@@ -40,11 +40,9 @@ CREATE TABLE `periodic_tasks` (`id` uuid NOT NULL, `created_at` datetime NOT NUL
 -- create index "periodic_tasks_name_key" to table: "periodic_tasks"
 CREATE UNIQUE INDEX `periodic_tasks_name_key` ON `periodic_tasks` (`name`);
 -- create "sessions" table
-CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_token` blob NOT NULL, `expires_at` datetime NOT NULL, `user_agent` text NOT NULL DEFAULT (''), `ip` text NOT NULL DEFAULT (''), `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_token` blob NOT NULL, `expires_at` datetime NOT NULL, `user_agent` text NOT NULL DEFAULT (''), `ip` text NOT NULL DEFAULT (''), `passkey_id` uuid NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_passkeys_sessions` FOREIGN KEY (`passkey_id`) REFERENCES `passkeys` (`id`) ON DELETE CASCADE, CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "sessions_hashed_token_key" to table: "sessions"
 CREATE UNIQUE INDEX `sessions_hashed_token_key` ON `sessions` (`hashed_token`);
--- create index "session_hashed_token_user_id" to table: "sessions"
-CREATE INDEX `session_hashed_token_user_id` ON `sessions` (`hashed_token`, `user_id`);
 -- create "stashes" table
 CREATE TABLE `stashes` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `last_download_at` datetime NULL, `public_name` text NOT NULL, `content` blob NOT NULL, `file_name` blob NOT NULL, `encryption_data_key` blob NOT NULL, `password_salt` blob NOT NULL, `hash_time` integer NOT NULL, `hash_memory` integer NOT NULL, `hash_threads` integer NOT NULL, `is_self_locked` bool NOT NULL DEFAULT (false), `is_admin_locked` bool NOT NULL DEFAULT (false), `self_locked_until` datetime NULL, `download_sessions_valid_from` datetime NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `stashes_users_stashes` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create "two_factor_actions" table
@@ -79,8 +77,6 @@ DROP INDEX `twofactoraction_code`;
 DROP TABLE `two_factor_actions`;
 -- reverse: create "stashes" table
 DROP TABLE `stashes`;
--- reverse: create index "session_hashed_token_user_id" to table: "sessions"
-DROP INDEX `session_hashed_token_user_id`;
 -- reverse: create index "sessions_hashed_token_key" to table: "sessions"
 DROP INDEX `sessions_hashed_token_key`;
 -- reverse: create "sessions" table
