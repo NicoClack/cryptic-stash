@@ -47,9 +47,10 @@ type Env struct {
 	INVITE_DEFAULT_EXPIRY time.Duration
 	INVITE_MAX_EXPIRY     time.Duration
 
-	SESSION_DURATION    time.Duration
-	UNLOCK_TIME         time.Duration
-	AUTH_CODE_VALID_FOR time.Duration
+	SESSION_DURATION         time.Duration
+	WEBAUTHN_SESSION_TIMEOUT time.Duration
+	UNLOCK_TIME              time.Duration
+	AUTH_CODE_VALID_FOR      time.Duration
 	// Once used, how much longer the auth code remains valid for
 	USED_AUTH_CODE_VALID_FOR                  time.Duration
 	ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL time.Duration
@@ -141,7 +142,7 @@ type AuthService interface {
 	FinishRegisterPasskey(
 		session *webauthn.SessionData,
 		username string,
-		credentialJSON []byte,
+		parsedCredential *protocol.ParsedCredentialCreationData,
 		credentialName string,
 		tx *ent.Tx,
 		ctx context.Context,

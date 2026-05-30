@@ -149,17 +149,6 @@
 			}
 
 			const attestationResponse = credential.response as AuthenticatorAttestationResponse;
-			const credentialJSON = {
-				id: credential.id,
-				type: credential.type,
-				rawId: encodeBase64UrlFormat(credential.rawId),
-				response: {
-					clientDataJSON: encodeBase64UrlFormat(attestationResponse.clientDataJSON),
-					attestationObject: encodeBase64UrlFormat(attestationResponse.attestationObject),
-					transports: attestationResponse.getTransports?.() ?? [],
-				},
-			};
-
 			const createResponse = await fetchJson(
 				fetch,
 				`/api/v1/invites/${encodeURIComponent(inviteId)}/create-user`,
@@ -170,7 +159,14 @@
 						...getAuthHeaders(),
 					},
 					body: JSON.stringify({
-						credential: credentialJSON,
+						id: credential.id,
+						type: credential.type,
+						rawId: encodeBase64UrlFormat(credential.rawId),
+						response: {
+							clientDataJSON: encodeBase64UrlFormat(attestationResponse.clientDataJSON),
+							attestationObject: encodeBase64UrlFormat(attestationResponse.attestationObject),
+							transports: attestationResponse.getTransports?.() ?? [],
+						},
 						credentialName,
 					}),
 				},

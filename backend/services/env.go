@@ -48,6 +48,7 @@ func LoadEnvironmentVariables() *common.Env {
 		INVITE_MAX_EXPIRY:     common.RequireSecondsEnv("INVITE_MAX_EXPIRY"),
 
 		SESSION_DURATION:         common.RequireSecondsEnv("SESSION_DURATION"),
+		WEBAUTHN_SESSION_TIMEOUT: common.RequireSecondsEnv("WEBAUTHN_SESSION_TIMEOUT"),
 		UNLOCK_TIME:              common.RequireSecondsEnv("UNLOCK_TIME"),
 		AUTH_CODE_VALID_FOR:      common.RequireSecondsEnv("AUTH_CODE_VALID_FOR"),
 		USED_AUTH_CODE_VALID_FOR: common.RequireSecondsEnv("USED_AUTH_CODE_VALID_FOR"),

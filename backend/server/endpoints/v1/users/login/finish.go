@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
@@ -16,7 +17,7 @@ import (
 type LoginFinishPayload struct {
 	protocol.CredentialAssertionResponse
 
-	WebAuthnSessionID string `binding:"required,min=1,max=64" json:"webAuthnSessionID"`
+	WebAuthnSessionID string `binding:"required,min=36,max=36" json:"webAuthnSessionID"`
 }
 
 type LoginFinishResponse struct {
@@ -63,15 +64,22 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 			},
 		)
 		if stdErr != nil {
+			var protoErr *protocol.Error
+			if errors.As(stdErr, &protoErr) && protoErr.Type == protocol.ErrBadRequest.Type {
+				return servercommon.NewError(stdErr).SetStatus(http.StatusBadRequest).
+					AddDetail(servercommon.ErrorDetail{
+						Message: "invalid credential",
+						Code:    "INVALID_CREDENTIAL",
+					}).
+					DisableLogging()
+			}
+
 			return servercommon.ExpectError(
 				stdErr, auth.ErrInvalidWebAuthnSessionID, http.StatusBadRequest,
 				&servercommon.ErrorDetail{
 					Message: "WebAuthn session missing or expired",
 					Code:    "INVALID_WEBAUTHN_SESSION",
 				},
-			).Expect(
-				auth.ErrInvalidCredential, http.StatusUnauthorized,
-				nil,
 			)
 		}
 

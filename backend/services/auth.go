@@ -71,7 +71,7 @@ func (service *Auth) StartRegisterPasskey(
 func (service *Auth) FinishRegisterPasskey(
 	session *webauthn.SessionData,
 	username string,
-	credentialJSON []byte,
+	parsedCredential *protocol.ParsedCredentialCreationData,
 	credentialName string,
 	tx *ent.Tx,
 	ctx context.Context,
@@ -80,7 +80,7 @@ func (service *Auth) FinishRegisterPasskey(
 	return auth.FinishRegisterPasskey(
 		session,
 		username,
-		credentialJSON,
+		parsedCredential,
 		credentialName,
 		service.webAuthnApp,
 		tx,

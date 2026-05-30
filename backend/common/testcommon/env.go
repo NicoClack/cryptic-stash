@@ -37,6 +37,7 @@ func DefaultEnv() *common.Env {
 		INVITE_MAX_EXPIRY:     time.Hour * 24 * 7,
 
 		SESSION_DURATION:                          time.Minute * 15,
+		WEBAUTHN_SESSION_TIMEOUT:                  time.Minute * 2,
 		UNLOCK_TIME:                               time.Hour * 24 * 7,
 		AUTH_CODE_VALID_FOR:                       time.Hour * 24 * 3,
 		USED_AUTH_CODE_VALID_FOR:                  time.Hour,

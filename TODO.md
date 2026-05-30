@@ -126,6 +126,7 @@
 - Use panic instead of Fatalf for startup errors?
 - Restructure services so that implementations wrap errors defined in a more common package, e.g defined in twofactoractions/service.go. Messenger based implementation defined in twofactoractions/messengers/
 - Review SQLite connection pool config
+- Tighten how UUIDs are parsed and passed around the program. I think I can just use uuid.UUID and it's marshallable?
 
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks
 - Move from gin, its maintenance isn't great

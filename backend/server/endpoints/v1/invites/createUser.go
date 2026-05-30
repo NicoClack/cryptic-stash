@@ -2,7 +2,6 @@ package invites
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
@@ -11,6 +10,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/google/uuid"
 )
 
@@ -20,8 +20,8 @@ var ErrUsernameTaken = servercommon.NewUnauthorizedError().
 	)
 
 type CreateUserPayload struct {
-	Credential     json.RawMessage `json:"credential"     binding:"required"`
-	CredentialName string          `json:"credentialName" binding:"required,min=1,max=64"`
+	protocol.CredentialCreationResponse
+	CredentialName string `json:"credentialName" binding:"required,min=1,max=64"`
 }
 type CreateUserResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -34,6 +34,16 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		body := CreateUserPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
+		}
+
+		parsedCredential, stdErr := body.CredentialCreationResponse.Parse()
+		if stdErr != nil {
+			return servercommon.NewError(stdErr).
+				SetStatus(http.StatusBadRequest).
+				AddDetail(servercommon.ErrorDetail{
+					Message: "invalid WebAuthn credential",
+					Code:    "INVALID_CREDENTIAL",
+				})
 		}
 
 		resp, stdErr := useInvite(
@@ -65,7 +75,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				_, wrappedErr := app.Auth.FinishRegisterPasskey(
 					inviteOb.WebAuthnSession,
 					inviteOb.Email,
-					body.Credential,
+					parsedCredential,
 					body.CredentialName,
 					tx,
 					ctx,
@@ -99,12 +109,6 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 						&servercommon.ErrorDetail{
 							Message: "WebAuthn session expired, please refresh the page",
 							Code:    "WEBAUTHN_SESSION_EXPIRED",
-						},
-					).Expect(
-						auth.ErrInvalidCredential, http.StatusBadRequest,
-						&servercommon.ErrorDetail{
-							Message: "invalid WebAuthn credential",
-							Code:    "INVALID_CREDENTIAL",
 						},
 					).Expect(
 						auth.ErrInvalidAAGUIDLength, http.StatusBadRequest,

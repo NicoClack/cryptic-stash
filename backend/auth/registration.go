@@ -27,7 +27,7 @@ func StartRegisterPasskey(
 func FinishRegisterPasskey(
 	session *webauthn.SessionData,
 	username string,
-	credentialJSON []byte,
+	parsedCredential *protocol.ParsedCredentialCreationData,
 	credentialName string,
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
@@ -45,27 +45,9 @@ func FinishRegisterPasskey(
 		DisplayName: username,
 	}
 
-	parsedCredential, stdErr := protocol.ParseCredentialCreationResponseBytes(credentialJSON)
-	if stdErr != nil {
-		// TODO: turn ErrInvalidCredential into an error wrapper?
-		wrappedErr := ErrWrapperFinishRegisterPasskey.Wrap(ErrInvalidCredential)
-		wrappedErr.AddDebugValuesMut(common.DebugValue{
-			Name:  "original error",
-			Value: stdErr,
-		})
-		return nil, wrappedErr
-	}
 	credential, stdErr := webAuthnApp.CreateCredential(webAuthnUser, *session, parsedCredential)
 	if stdErr != nil {
-		// TODO: turn ErrInvalidCredential into an error wrapper?
-		wrappedErr := ErrWrapperFinishRegisterPasskey.Wrap(ErrInvalidCredential)
-		wrappedErr.AddDebugValuesMut(
-			common.DebugValue{
-				Name:  "original error",
-				Value: stdErr,
-			},
-		)
-		return nil, wrappedErr
+		return nil, ErrWrapperFinishRegisterPasskey.Wrap(stdErr)
 	}
 
 	var aaguid uuid.UUID

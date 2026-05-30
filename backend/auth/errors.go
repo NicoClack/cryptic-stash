@@ -16,21 +16,17 @@ var ErrInvalidWebAuthnSessionID = common.NewErrorWithCategories(
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
 
-// TODO: currently go-webauthn's error is used instead
-var ErrInvalidCredential = common.NewErrorWithCategories(
-	"invalid credential",
-	common.ErrTypeAuth, common.ErrTypeClient,
-)
-var ErrInvalidSession = common.NewErrorWithCategories(
-	"invalid session",
-	common.ErrTypeAuth, common.ErrTypeClient,
-)
+// TODO: make something like ErrInvalidCredential which isn't WebAuthn specific
 var ErrWebAuthnSessionExpired = common.NewErrorWithCategories(
 	"WebAuthn session expired",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
 var ErrInvalidAAGUIDLength = common.NewErrorWithCategories(
 	"AAGUID must be 16 bytes",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
+var ErrInvalidSession = common.NewErrorWithCategories(
+	"invalid session",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
 

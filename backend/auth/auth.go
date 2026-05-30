@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"time"
-
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -10,7 +8,6 @@ import (
 )
 
 const (
-	WebAuthnSessionTimeout   = 5 * time.Minute
 	WebAuthnSessionStoreName = "WEBAUTHN_SESSIONS"
 	SessionTokenLength       = 32 // 256 bits
 )
@@ -31,13 +28,13 @@ func NewWebAuthnApp(env *common.Env) *webauthn.WebAuthn {
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
 				Enforce:    true,
-				Timeout:    WebAuthnSessionTimeout,
-				TimeoutUVD: WebAuthnSessionTimeout,
+				Timeout:    env.WEBAUTHN_SESSION_TIMEOUT,
+				TimeoutUVD: env.WEBAUTHN_SESSION_TIMEOUT,
 			},
 			Registration: webauthn.TimeoutConfig{
 				Enforce:    true,
-				Timeout:    WebAuthnSessionTimeout,
-				TimeoutUVD: WebAuthnSessionTimeout,
+				Timeout:    env.WEBAUTHN_SESSION_TIMEOUT,
+				TimeoutUVD: env.WEBAUTHN_SESSION_TIMEOUT,
 			},
 		},
 	})

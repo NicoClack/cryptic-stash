@@ -2,6 +2,7 @@ package users_test
 
 import (
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,8 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/stretchr/testify/require"
 )
+
+// TODO: remove this endpoint and replace this with a more realistic test
 
 func TestAuthTest_AllowsValidSession(t *testing.T) {
 	t.Parallel()
@@ -23,6 +26,14 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SetCreatedAt(app.Clock.Now()).
 		SetUpdatedAt(app.Clock.Now()).
 		SaveX(t.Context())
+	passkeyOb := client.Passkey.Create().
+		SetCreatedAt(app.Clock.Now()).
+		SetUpdatedAt(app.Clock.Now()).
+		SetName("test-passkey").
+		SetCredentialID([]byte("credential-id")).
+		SetPublicKey([]byte("public-key")).
+		SetUser(userOb).
+		SaveX(t.Context())
 
 	sessionToken := "session-token-for-tests"
 	hashedToken := sha256.Sum256([]byte(sessionToken))
@@ -30,14 +41,15 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SetCreatedAt(app.Clock.Now()).
 		SetUpdatedAt(app.Clock.Now()).
 		SetUser(userOb).
+		SetPasskey(passkeyOb).
 		SetHashedToken(hashedToken[:]).
 		SetExpiresAt(app.Clock.Now().Add(app.Env.SESSION_DURATION)).
 		SetUserAgent("test-agent").
 		SetIP("127.0.0.1").
 		SaveX(t.Context())
 
-	request := httptest.NewRequest(http.MethodGet, "/auth-test/", nil)
-	request.Header.Set("Authorization", "Session "+sessionToken)
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/users/auth-test/", nil)
+	request.Header.Set("Authorization", "Session "+base64.RawURLEncoding.EncodeToString([]byte(sessionToken)))
 	respRecorder := httptest.NewRecorder()
 	app.Server.ServeHTTP(respRecorder, request)
 

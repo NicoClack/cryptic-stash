@@ -9,9 +9,9 @@ import (
 )
 
 type LoginOptionsResponse struct {
-	Errors    []servercommon.ErrorDetail                 `json:"errors"`
-	SessionID string                                     `json:"sessionId"`
-	PublicKey protocol.PublicKeyCredentialRequestOptions `json:"publicKey"`
+	Errors            []servercommon.ErrorDetail                 `json:"errors"`
+	WebAuthnSessionID string                                     `json:"webAuthnSessionID"`
+	PublicKey         protocol.PublicKeyCredentialRequestOptions `json:"publicKey"`
 }
 
 func LoginOptions(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -22,9 +22,9 @@ func LoginOptions(app *servercommon.ServerApp) gin.HandlerFunc {
 		}
 
 		ginCtx.JSON(http.StatusOK, &LoginOptionsResponse{
-			Errors:    []servercommon.ErrorDetail{},
-			SessionID: sessionID,
-			PublicKey: options,
+			Errors:            []servercommon.ErrorDetail{},
+			WebAuthnSessionID: sessionID,
+			PublicKey:         options,
 		})
 		return nil
 	})
