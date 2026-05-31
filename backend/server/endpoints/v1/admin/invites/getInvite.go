@@ -16,44 +16,34 @@ import (
 // TODO: add properties to say if the link was used?
 type GetInviteResponse struct {
 	Errors    []servercommon.ErrorDetail `binding:"required" json:"errors"`
-	ID        string                     `                   json:"id"`
+	ID        uuid.UUID                  `                   json:"id"`
 	Email     string                     `                   json:"email"`
 	CreatedAt time.Time                  `                   json:"createdAt"`
 	ExpiresAt time.Time                  `                   json:"expiresAt"`
-	UserID    string                     `                   json:"userId,omitempty"`
+	UserID    uuid.UUID                  `                   json:"userId,omitempty"`
 	IP        string                     `                   json:"ip"`
 	UserAgent string                     `                   json:"userAgent"`
 }
 
 func GetInvite(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		inviteID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if serverErr != nil {
-			return serverErr
-		}
-
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		resp, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*GetInviteResponse, error) {
 				inviteOb, stdErr := tx.Invite.Query().
-					Where(invite.ID(inviteID)).
+					Where(invite.ID(id)).
 					Only(ctx)
 				if stdErr != nil {
 					return nil, stdErr
 				}
 
-				userID := ""
-				if inviteOb.UserID != uuid.Nil {
-					userID = inviteOb.UserID.String()
-				}
-
 				return &GetInviteResponse{
 					Errors:    []servercommon.ErrorDetail{},
-					ID:        inviteOb.ID.String(),
+					ID:        inviteOb.ID,
 					Email:     inviteOb.Email,
 					CreatedAt: inviteOb.CreatedAt,
 					ExpiresAt: inviteOb.ExpiresAt,
-					UserID:    userID,
+					UserID:    inviteOb.UserID,
 					IP:        inviteOb.IP,
 					UserAgent: inviteOb.UserAgent,
 				}, nil

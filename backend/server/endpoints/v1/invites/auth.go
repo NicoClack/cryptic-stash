@@ -14,14 +14,10 @@ import (
 )
 
 func useInvite[T any](
+	id uuid.UUID,
 	ginCtx *gin.Context, app *servercommon.ServerApp,
 	respFunc func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*T, error),
 ) (*T, error) {
-	inviteID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-	if serverErr != nil {
-		return nil, serverErr
-	}
-
 	token, serverErr := servercommon.RequireAuthorizationScheme("Bearer", ginCtx)
 	if serverErr != nil {
 		return nil, serverErr
@@ -41,7 +37,7 @@ func useInvite[T any](
 		func(tx *ent.Tx, ctx context.Context) (*T, error) {
 			inviteOb, stdErr := tx.Invite.Query().
 				Where(
-					invite.ID(inviteID),
+					invite.ID(id),
 					invite.HashedCode(hashed[:]),
 				).
 				Only(ctx)

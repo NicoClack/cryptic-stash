@@ -17,6 +17,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type CreatePayload struct {
@@ -26,7 +27,7 @@ type CreatePayload struct {
 }
 type CreateResponse struct {
 	Errors    []servercommon.ErrorDetail `binding:"required" json:"errors"`
-	ID        string                     `                   json:"id"`
+	ID        uuid.UUID                  `                   json:"id"`
 	Code      string                     `                   json:"code"`
 	ExpiresAt time.Time                  `                   json:"expiresAt"`
 }
@@ -102,7 +103,7 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 						User:          inMemoryUser,
 						InviteMessage: inviteMessage,
 						URL: getInviteURL(
-							inviteOb.ID.String(),
+							inviteOb.ID,
 							encodedCode,
 							app.Env.FRONTEND_BASE_URL,
 						),
@@ -115,7 +116,7 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				return &CreateResponse{
 					Errors:    []servercommon.ErrorDetail{},
-					ID:        inviteOb.ID.String(),
+					ID:        inviteOb.ID,
 					Code:      encodedCode,
 					ExpiresAt: expiresAt,
 				}, nil
@@ -162,12 +163,12 @@ func newInMemoryUser(
 }
 
 func getInviteURL(
-	inviteID string,
+	inviteID uuid.UUID,
 	code string,
 	frontendBaseURL *url.URL,
 ) string {
 	rel := &url.URL{
-		Path:     fmt.Sprintf("/invites/%s/", inviteID),
+		Path:     fmt.Sprintf("/invites/%s/", inviteID.String()),
 		RawQuery: "code=" + url.QueryEscape(code),
 	}
 	return frontendBaseURL.ResolveReference(rel).String()

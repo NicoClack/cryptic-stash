@@ -12,17 +12,18 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/google/uuid"
 )
 
 type LoginFinishPayload struct {
 	protocol.CredentialAssertionResponse
 
-	WebAuthnSessionID string `binding:"required,min=36,max=36" json:"webAuthnSessionID"`
+	WebAuthnSessionID uuid.UUID `binding:"required" json:"webAuthnSessionId"`
 }
 
 type LoginFinishResponse struct {
 	Errors []servercommon.ErrorDetail `json:"errors"`
-	UserID string                     `json:"userID"`
+	UserID uuid.UUID                  `json:"userId"`
 	Token  string                     `json:"token"`
 }
 
@@ -58,7 +59,7 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				return &LoginFinishResponse{
 					Errors: []servercommon.ErrorDetail{},
-					UserID: sessionOb.UserID.String(),
+					UserID: sessionOb.UserID,
 					Token:  base64.RawURLEncoding.EncodeToString(token),
 				}, nil
 			},

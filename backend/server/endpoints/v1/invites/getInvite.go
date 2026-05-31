@@ -8,6 +8,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type GetInviteResponse struct {
@@ -17,9 +18,9 @@ type GetInviteResponse struct {
 }
 
 func GetInvite(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		resp, stdErr := useInvite(
-			ginCtx, app,
+			id, ginCtx, app,
 			func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*GetInviteResponse, error) {
 				return &GetInviteResponse{
 					Errors:    []servercommon.ErrorDetail{},

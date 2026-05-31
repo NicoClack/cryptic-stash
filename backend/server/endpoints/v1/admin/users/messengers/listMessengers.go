@@ -13,6 +13,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ListMessengersResponse struct {
@@ -32,16 +33,12 @@ type Messenger struct {
 }
 
 func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		userID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if serverErr != nil {
-			return serverErr
-		}
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		userOb, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*ent.User, error) {
 				return tx.User.Query().
-					Where(user.ID(userID)).
+					Where(user.ID(id)).
 					WithMessengers(func(messengerQuery *ent.UserMessengerQuery) {
 						messengerQuery.Order(
 							ent.Asc(usermessenger.FieldType),

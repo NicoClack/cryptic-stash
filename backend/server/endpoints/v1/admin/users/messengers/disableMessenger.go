@@ -9,6 +9,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type DisableMessengerPayload struct {
@@ -20,13 +21,9 @@ type DisableMessengerResponse struct {
 }
 
 func DisableMessenger(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		body := DisableMessengerPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
-			return serverErr
-		}
-		userID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if serverErr != nil {
 			return serverErr
 		}
 
@@ -34,7 +31,7 @@ func DisableMessenger(app *servercommon.ServerApp) gin.HandlerFunc {
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
 				userOb, stdErr := tx.User.Query().
-					Where(user.ID(userID)).
+					Where(user.ID(id)).
 					Only(ctx)
 				if stdErr != nil {
 					return servercommon.Send404IfNotFound(stdErr)

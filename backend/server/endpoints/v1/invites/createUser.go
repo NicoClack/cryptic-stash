@@ -30,7 +30,7 @@ type CreateUserResponse struct {
 func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 	clock := app.Clock
 
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		body := CreateUserPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
@@ -47,7 +47,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 		}
 
 		resp, stdErr := useInvite(
-			ginCtx, app,
+			id, ginCtx, app,
 			func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*CreateUserResponse, error) {
 				exists, stdErr := tx.User.Query().Where(user.Username(inviteOb.Email)).Exist(ctx)
 				if stdErr != nil {

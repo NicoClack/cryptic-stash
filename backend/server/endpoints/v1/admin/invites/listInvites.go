@@ -18,11 +18,11 @@ type ListInvitesResponse struct {
 	Invites []*Invite                  `binding:"required" json:"invites"`
 }
 type Invite struct {
-	ID        string    `binding:"required" json:"id"`
+	ID        uuid.UUID `binding:"required" json:"id"`
 	Email     string    `                   json:"email"`
 	CreatedAt time.Time `                   json:"createdAt"`
 	ExpiresAt time.Time `                   json:"expiresAt"`
-	UserID    string    `                   json:"userId,omitempty"`
+	UserID    uuid.UUID `                   json:"userId,omitempty"`
 	IP        string    `                   json:"ip"`
 	UserAgent string    `                   json:"userAgent"`
 }
@@ -55,16 +55,12 @@ func ListInvites(app *servercommon.ServerApp) gin.HandlerFunc {
 
 		resp := make([]*Invite, 0, len(inviteObs))
 		for _, inviteOb := range inviteObs {
-			userID := ""
-			if inviteOb.UserID != uuid.Nil {
-				userID = inviteOb.UserID.String()
-			}
 			resp = append(resp, &Invite{
-				ID:        inviteOb.ID.String(),
+				ID:        inviteOb.ID,
 				Email:     inviteOb.Email,
 				CreatedAt: inviteOb.CreatedAt,
 				ExpiresAt: inviteOb.ExpiresAt,
-				UserID:    userID,
+				UserID:    inviteOb.UserID,
 				IP:        inviteOb.IP,
 				UserAgent: inviteOb.UserAgent,
 			})

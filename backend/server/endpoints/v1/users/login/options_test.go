@@ -33,7 +33,7 @@ func TestLoginOptions(t *testing.T) {
 	var response login.LoginOptionsResponse
 	stdErr := json.Unmarshal(respRecorder.Body.Bytes(), &response)
 	require.NoError(t, stdErr)
-	require.Len(t, response.WebAuthnSessionID, len(uuid.NewString()))
+	require.NotEqual(t, response.WebAuthnSessionID, uuid.Nil)
 	require.NotNil(t, response.PublicKey)
 	require.Len(t, response.PublicKey.Challenge, 32)
 	// We don't know who's logging in, so we can't suggest credentials
@@ -46,7 +46,7 @@ func TestLoginOptions(t *testing.T) {
 	require.Equal(t, 0, sessionCount)
 
 	var sessionData *webauthn.SessionData
-	ok := app.TempKeyValue.Get(auth.WebAuthnSessionStoreName, response.WebAuthnSessionID, &sessionData)
+	ok := app.TempKeyValue.Get(auth.WebAuthnSessionStoreName, response.WebAuthnSessionID.String(), &sessionData)
 	require.True(t, ok)
 	require.Equal(t, response.PublicKey.Challenge.String(), sessionData.Challenge)
 	require.Equal(t, response.PublicKey.RelyingPartyID, sessionData.RelyingPartyID)

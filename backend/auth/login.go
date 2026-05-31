@@ -19,21 +19,21 @@ func StartLogin(
 	webAuthnApp *webauthn.WebAuthn,
 	tempKV common.TempKeyValueService,
 	clock clockwork.Clock,
-) (string, protocol.PublicKeyCredentialRequestOptions, common.WrappedError) {
+) (uuid.UUID, protocol.PublicKeyCredentialRequestOptions, common.WrappedError) {
 	creation, sessionData, stdErr := webAuthnApp.BeginDiscoverableLogin()
 	if stdErr != nil {
-		return "", protocol.PublicKeyCredentialRequestOptions{}, ErrWrapperStartLogin.Wrap(stdErr)
+		return uuid.Nil, protocol.PublicKeyCredentialRequestOptions{}, ErrWrapperStartLogin.Wrap(stdErr)
 	}
 
-	webAuthnSessionID := uuid.NewString()
+	webAuthnSessionID := uuid.New()
 	// TODO: what happens if parent transaction fails?
-	tempKV.Set(WebAuthnSessionStoreName, webAuthnSessionID, sessionData, sessionData.Expires)
+	tempKV.Set(WebAuthnSessionStoreName, webAuthnSessionID.String(), sessionData, sessionData.Expires)
 
 	return webAuthnSessionID, creation.Response, nil
 }
 
 func FinishLogin(
-	webAuthnSessionID string,
+	webAuthnSessionID uuid.UUID,
 	parsedResponse *protocol.ParsedCredentialAssertionData,
 	ginCtx *gin.Context,
 	webAuthnApp *webauthn.WebAuthn,
@@ -44,7 +44,7 @@ func FinishLogin(
 	sessionDuration time.Duration,
 ) (*ent.Session, []byte, common.WrappedError) {
 	var sessionData *webauthn.SessionData
-	if !tempKV.Get(WebAuthnSessionStoreName, webAuthnSessionID, &sessionData) {
+	if !tempKV.Get(WebAuthnSessionStoreName, webAuthnSessionID.String(), &sessionData) {
 		return nil, nil, ErrWrapperFinishLogin.Wrap(ErrInvalidWebAuthnSessionID)
 	}
 	tx.OnCommit(func(committer ent.Committer) ent.Committer {
@@ -53,7 +53,7 @@ func FinishLogin(
 			if stdErr != nil {
 				return stdErr
 			}
-			tempKV.Delete(WebAuthnSessionStoreName, webAuthnSessionID)
+			tempKV.Delete(WebAuthnSessionStoreName, webAuthnSessionID.String())
 			return nil
 		})
 	})
@@ -64,7 +64,7 @@ func FinishLogin(
 		func(rawID, userHandle []byte) (webauthn.User, error) {
 			userID, stdErr := uuid.FromBytes(userHandle)
 			if stdErr != nil {
-				return nil, nil // TODO: return more specific error?
+				return nil, nil
 			}
 			userOb, stdErr = tx.User.Query().
 				Where(user.ID(userID)).

@@ -53,8 +53,8 @@ func TestLoginFinish_InvalidSessionID_ReturnsBadRequest(t *testing.T) {
 	finishRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/users/login/finish/",
-		login.LoginFinishPayload{
-			WebAuthnSessionID: strings.Repeat("a", 36), // Right length but not the format of a UUID
+		gin.H{
+			"webAuthnSessionId": strings.Repeat("a", 36), // Right length but not the format of a UUID
 		},
 	)
 
@@ -95,7 +95,7 @@ func TestLoginFinish_MissingSession_ReturnsBadRequest(t *testing.T) {
 		t, app.Server,
 		"/api/v1/users/login/finish/",
 		login.LoginFinishPayload{
-			WebAuthnSessionID:           uuid.NewString(),
+			WebAuthnSessionID:           uuid.New(),
 			CredentialAssertionResponse: parsedAssertion,
 		},
 	)

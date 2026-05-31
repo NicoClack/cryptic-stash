@@ -9,6 +9,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/twofactoractions"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ConfirmPayload struct {
@@ -20,20 +21,16 @@ type ConfirmResponse struct {
 }
 
 func Confirm(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		body := ConfirmPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
-			return serverErr
-		}
-		actionID, serverErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if serverErr != nil {
 			return serverErr
 		}
 
 		return dbcommon.WithWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) error {
-				_, wrappedErr := app.TwoFactorActions.Confirm(actionID, body.Code, ctx)
+				_, wrappedErr := app.TwoFactorActions.Confirm(id, body.Code, ctx)
 				if wrappedErr != nil {
 					return servercommon.ExpectAnyOfErrors(
 						wrappedErr,

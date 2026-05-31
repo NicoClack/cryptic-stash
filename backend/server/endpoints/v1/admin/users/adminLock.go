@@ -8,10 +8,11 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type AdminLockPayload struct {
-	Username string `binding:"required,min=1,max=32" json:"username"`
+	StashID uuid.UUID `binding:"required" json:"stashId"`
 }
 type AdminLockResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -21,9 +22,6 @@ func AdminLock(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := AdminLockPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
-			return serverErr
-		}
-		if serverErr := servercommon.ValidateUserEmail(body.Username); serverErr != nil {
 			return serverErr
 		}
 

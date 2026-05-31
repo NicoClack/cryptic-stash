@@ -120,12 +120,12 @@ type AuthService interface {
 
 	// TODO: standardise parsing data from gin Context vs passing it in
 	StartLogin(ctx context.Context) (
-		sessionID string,
+		sessionID uuid.UUID,
 		options protocol.PublicKeyCredentialRequestOptions,
 		wrappedErr WrappedError,
 	)
 	FinishLogin(
-		sessionID string,
+		sessionID uuid.UUID,
 		parsedResponse *protocol.ParsedCredentialAssertionData,
 		ginCtx *gin.Context,
 		tx *ent.Tx,
@@ -379,7 +379,9 @@ type SchedulerService interface {
 }
 
 type LimiterService interface {
-	RequestSession(eventName string, amount int, user string) (LimiterSession, WrappedError)
+	// identifier is usually an IP but is sometimes a constant if the limit
+	// is used internally
+	RequestSession(eventName string, amount int, identifier string) (LimiterSession, WrappedError)
 	DeleteInactiveUsers()
 }
 type LimiterSession interface {

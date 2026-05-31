@@ -121,7 +121,7 @@ func TestLoginFlow(t *testing.T) {
 	require.Equal(t, relyingParty.ID, assertionOptions.RelyingPartyID)
 	// The ceremony ID isn't part of the WebAuthn spec so virtualwebauthn doesn't parse it,
 	// but the frontend needs to include it in its login/finish request later
-	var webAuthnSessionID string
+	var webAuthnSessionID uuid.UUID
 	{
 		var optionsResp login.LoginOptionsResponse
 		stdErr = json.Unmarshal(optionsRecorder.Body.Bytes(), &optionsResp)
@@ -160,7 +160,7 @@ func TestLoginFlow(t *testing.T) {
 	var finishResp login.LoginFinishResponse
 	stdErr = json.Unmarshal(finishRecorder.Body.Bytes(), &finishResp)
 	require.NoError(t, stdErr)
-	require.Equal(t, userOb.ID.String(), finishResp.UserID)
+	require.Equal(t, userOb.ID, finishResp.UserID)
 	require.Len(t, finishResp.Token, 43) // 32 bytes
 
 	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(finishResp.Token)

@@ -31,7 +31,7 @@ func (service *Auth) WebAuthn() *webauthn.WebAuthn {
 func (service *Auth) StartLogin(
 	ctx context.Context,
 ) (
-	string,
+	uuid.UUID,
 	protocol.PublicKeyCredentialRequestOptions,
 	common.WrappedError,
 ) {
@@ -39,7 +39,7 @@ func (service *Auth) StartLogin(
 }
 
 func (service *Auth) FinishLogin(
-	sessionID string,
+	sessionID uuid.UUID,
 	parsedResponse *protocol.ParsedCredentialAssertionData,
 	ginCtx *gin.Context,
 	tx *ent.Tx,

@@ -5,6 +5,7 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 const MAX_SELF_LOCK_DURATION = 14 * (24 * time.Hour)
@@ -16,7 +17,7 @@ type SelfLockPayload struct {
 }
 type SelfLockResponse struct {
 	Errors            []servercommon.ErrorDetail `binding:"required" json:"errors"`
-	TwoFactorActionID string                     `                   json:"twoFactorActionId"`
+	TwoFactorActionID uuid.UUID                  `                   json:"twoFactorActionId"`
 }
 
 func SelfLock(app *servercommon.ServerApp) gin.HandlerFunc {

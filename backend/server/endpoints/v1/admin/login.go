@@ -21,7 +21,7 @@ type LoginPayload struct {
 type LoginResponse struct {
 	Errors      []servercommon.ErrorDetail `binding:"required" json:"errors"`
 	AdminCode   string                     `                   json:"adminCode"`
-	AdminUserID string                     `                   json:"adminUserId"`
+	AdminUserID uuid.UUID                  `                   json:"adminUserId"`
 }
 
 func Login(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -50,7 +50,7 @@ func Login(app *servercommon.ServerApp) gin.HandlerFunc {
 		ginCtx.JSON(http.StatusOK, LoginResponse{
 			Errors:      []servercommon.ErrorDetail{},
 			AdminCode:   adminCode,
-			AdminUserID: adminUserID.String(),
+			AdminUserID: adminUserID,
 		})
 		return nil
 	})

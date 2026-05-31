@@ -18,9 +18,9 @@ type GenerateOptionsResponse struct {
 }
 
 func GenerateOptions(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		resp, stdErr := useInvite(
-			ginCtx, app,
+			id, ginCtx, app,
 			func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*GenerateOptionsResponse, error) {
 				pendingUserID := uuid.New()
 				options, sessionData, wrappedErr := app.Auth.StartRegisterPasskey(
