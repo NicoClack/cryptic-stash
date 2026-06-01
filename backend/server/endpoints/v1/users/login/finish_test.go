@@ -38,7 +38,7 @@ func TestLoginFinish_MissingSessionID_ReturnsBadRequest(t *testing.T) {
 			"errors": []servercommon.ErrorDetail{
 				{
 					Message: "WebAuthnSessionID: condition failed: required",
-					Code:    "INVALID_BODY_JSON",
+					Code:    "MALFORMED_BODY_JSON",
 				},
 			},
 		},
@@ -63,9 +63,12 @@ func TestLoginFinish_InvalidSessionID_ReturnsBadRequest(t *testing.T) {
 		http.StatusBadRequest,
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
+				// For now, the error from unmarshalling the UUID is just an error string,
+				// so we don't have a good way to know what the field is.
+				// This error is slightly more helpful than UNKNOWN_JSON_BODY_ERROR though
 				{
-					Message: "WebAuthnSessionID: condition failed: uuid",
-					Code:    "INVALID_BODY_JSON",
+					Message: "malformed UUID in JSON body",
+					Code:    "MALFORMED_BODY_JSON_UUID",
 				},
 			},
 		},

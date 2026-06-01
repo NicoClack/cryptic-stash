@@ -1,6 +1,5 @@
 # TODO
 
-- Update tx.OnCommit calls, c.Commit needs to be called like a middleware chain? Otherwise the transaction isn't properly committed?
 - Create account system with passkeys
 - Standardise passkey/credential naming
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
@@ -68,7 +67,6 @@
 - Use Discord API directly instead of discordgo
 - Use final scratch image instead of Apline for running the backend, the build has no dependencies, so I don't even need commands like "ls"
 - https://snyk.io/blog/go-security-cheatsheet-for-go-developers/
-- Remove clockwork and use Go's built-in mock time
 - Pass transactions explicitly
 - Send warning message when a login uses the correct password but the account is locked
 - Implement more messengers:
@@ -98,6 +96,8 @@
 -   -   Occasionally have to click a link in it to verify that messenger is still working
 -   -   -   Should that link only be there when necessary?
 -   Audit use of time.sleep. Prefer time.After in a select so context cancellations can be respected
+- Replace time calls with clock:
+- - Job engine checking which jobs are due
 -   Recover panics in all of the service implementations and trigger a shutdown. They should recover once if it's a service like the database but otherwise remain shut down
 -   Prevent timing attacks from revealing if a user exists or not
 -   -   Create test with real endpoint, users in the test database and real hashing to see if an attacker could tell more than 80% of the time with 1000 samples. I guess disable the rate limiting though?

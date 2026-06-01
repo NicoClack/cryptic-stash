@@ -512,10 +512,13 @@ func TestLogger_RetriesBulkCreateIndividually(t *testing.T) {
 	require.Equal(t, int64(3), successfulCreateCounter.Load())
 }
 
-// TODO: flaky?
 func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 	t.Parallel()
-	const minCrashSignalGap = 24 * time.Hour
+	// Note: most of the logger logic uses real time because slog doesn't support clock overrides and records
+	// include a time, but this is fine as long as the logs are in the right order.
+	// However, the crash signal logic does use the clock, so we can precisely check that.
+	const minCrashSignalGap = 50 * time.Millisecond
+	// ^ Short so it can be simulated by the real time as well for slightly more accuracy
 
 	db := testcommon.CreateDB(t)
 	defer db.Shutdown()
@@ -547,7 +550,6 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		}
 
 		logger.Error("an error occurred!")
-		clock.Advance(time.Millisecond)
 		logger.Shutdown()
 
 		logger.AssertWritten(t, []ExpectedEntry{
@@ -566,6 +568,7 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		} else {
 			shutdownService.AssertNotCalled(t)
 		}
+
 		lastCrashSignal := time.Time{}
 		_, stdErr := dbcommon.WithReadTx(
 			t.Context(), app.Database,
@@ -577,16 +580,16 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		require.Equal(t, expectedLastSignal, lastCrashSignal)
 	}
 	startTime := clock.Now().UTC()
-	runProgram(true, startTime.Add(time.Millisecond))
+	runProgram(true, startTime)
 
-	clock.Advance(
-		time.Second -
-			time.Millisecond, // 1ms was already advanced to space out the logs
+	clock.Advance(minCrashSignalGap - time.Millisecond) // Just before the crash signal can be used again
+	time.Sleep(
+		time.Until(clock.Now()),
+		// ^ This will actually be shorter than minCrashSignalGap because
+		// the clock was frozen during the first run, but this should be accurate enough
 	)
-	runProgram(false, startTime.Add(time.Millisecond))
+	runProgram(false, startTime)
 
-	clock.Advance(
-		minCrashSignalGap - (time.Second) - time.Millisecond,
-	) // The millisecond the next crash signal is allowed
-	runProgram(true, clock.Now().UTC().Add(time.Millisecond))
+	clock.Advance(time.Millisecond)
+	runProgram(true, clock.Now().UTC())
 }

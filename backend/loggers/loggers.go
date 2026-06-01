@@ -73,6 +73,8 @@ type entry struct {
 	disableAdminNotification     bool
 }
 
+// Note: global time is mostly used instead of app.Clock because slog doesn't provide a way to override it
+// Except for more application specific systems like crash signals
 func NewHandler(
 	level slog.Level, saveToDatabase bool, shouldPrint bool,
 	app *common.App,
@@ -114,7 +116,7 @@ func (handler *Handler) Listen() {
 				break listenLoop
 			}
 
-			timeoutChan := handler.App.Clock.After(handler.App.Env.LOG_STORE_INTERVAL)
+			timeoutChan := time.After(handler.App.Env.LOG_STORE_INTERVAL)
 		collectBatchLoop:
 			for {
 				select {
@@ -213,7 +215,7 @@ func (handler *Handler) bulkWrite(entries []*entry, ctx context.Context) error {
 		func(tx *ent.Tx, ctx context.Context) error {
 			return tx.LogEntry.MapCreateBulk(entries, func(logEntryCreate *ent.LogEntryCreate, i int) {
 				entry := entries[i]
-				now := handler.App.Clock.Now()
+				now := time.Now()
 				logEntryCreate.SetLoggedAt(entry.time).SetLoggedAtKnown(entry.timeKnown).
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
@@ -255,7 +257,7 @@ func (handler *Handler) individualWriteFallback(
 		entryID, stdErr := dbcommon.WithReadWriteTx(
 			individualCtx, handler.App.Database,
 			func(tx *ent.Tx, ctx context.Context) (uuid.UUID, error) {
-				now := handler.App.Clock.Now()
+				now := time.Now()
 				ob, stdErr := tx.LogEntry.Create().
 					SetCreatedAt(now).
 					SetUpdatedAt(now).
@@ -281,7 +283,7 @@ func (handler *Handler) individualWriteFallback(
 			if !entry.disableErrorLogging {
 				pc, _, _, _ := runtime.Caller(0)
 				record := slog.NewRecord(
-					handler.App.Clock.Now(),
+					time.Now(),
 					slog.LevelError,
 					"failed to write log entry to database",
 					pc,
@@ -306,7 +308,7 @@ func (handler *Handler) individualWriteFallback(
 			func(tx *ent.Tx, ctx context.Context) error {
 				return tx.LogEntry.UpdateOneID(entryID).
 					// TODO: should this count as an update?
-					SetUpdatedAt(handler.App.Clock.Now()).
+					SetUpdatedAt(time.Now()).
 					SetUserID(entry.userID).Exec(ctx)
 			},
 		)
@@ -315,7 +317,7 @@ func (handler *Handler) individualWriteFallback(
 			if common.IsErrorType[*ent.ConstraintError](stdErr) {
 				pc, _, _, _ := runtime.Caller(0)
 				record := slog.NewRecord(
-					handler.App.Clock.Now(),
+					time.Now(),
 					slog.LevelWarn,
 					"couldn't find user with ID provided in log statement",
 					pc,
@@ -331,7 +333,7 @@ func (handler *Handler) individualWriteFallback(
 			} else {
 				pc, _, _, _ := runtime.Caller(0)
 				record := slog.NewRecord(
-					handler.App.Clock.Now(),
+					time.Now(),
 					slog.LevelError,
 					"couldn't set UserID field on log statement",
 					pc,
@@ -352,7 +354,7 @@ func (handler *Handler) individualWriteFallback(
 	if allSucceeded && !*loggedBulkWarningPtr {
 		pc, _, _, _ := runtime.Caller(0)
 		record := slog.NewRecord(
-			handler.App.Clock.Now(),
+			time.Now(),
 			slog.LevelWarn,
 			"bulk log write failed but the individual fallback writes all succeeded, "+
 				"so the writes took longer than they should have",
@@ -423,7 +425,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 			if stdErr != nil {
 				pc, _, _, _ := runtime.Caller(0)
 				record := slog.NewRecord(
-					handler.App.Clock.Now(),
+					time.Now(),
 					slog.LevelError,
 					"failed to check LAST_CRASH_SIGNAL in key/value storage. in order to be cautious, the server won't crash",
 					pc,
@@ -454,7 +456,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 			}
 			pc, _, _, _ := runtime.Caller(0)
 			record := slog.NewRecord(
-				handler.App.Clock.Now(),
+				time.Now(),
 				slog.LevelError,
 				"failed to check admin-error-message rate limit",
 				pc,
@@ -505,7 +507,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 			session.Cancel()
 			pc, _, _, _ := runtime.Caller(0)
 			record := slog.NewRecord(
-				handler.App.Clock.Now(),
+				time.Now(),
 				slog.LevelError,
 				"failed to message admin about an error",
 				pc,
@@ -536,7 +538,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 
 			pc, _, _, _ := runtime.Caller(0)
 			record := slog.NewRecord(
-				handler.App.Clock.Now(),
+				time.Now(),
 				slog.LevelError,
 				message,
 				pc,
@@ -569,7 +571,7 @@ func (handler *Handler) Shutdown() {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			pc, _, _, _ := runtime.Caller(0)
 			record := slog.NewRecord(
-				handler.App.Clock.Now(),
+				time.Now(),
 				slog.LevelError,
 				"logger shutdown timed out",
 				pc,
@@ -621,7 +623,7 @@ func (handler Handler) Handle(ctx context.Context, record slog.Record) error {
 	if stdErr != nil && !disableErrLogging {
 		pc, _, _, _ := runtime.Caller(0)
 		record := slog.NewRecord(
-			handler.App.Clock.Now(),
+			time.Now(),
 			slog.LevelWarn,
 			"logger Handler.textHandler.Handle returned an error",
 			pc,
@@ -714,7 +716,7 @@ func (handler Handler) appendAttr(
 			} else if logErrors {
 				pc, _, _, _ := runtime.Caller(0)
 				record := slog.NewRecord(
-					handler.App.Clock.Now(),
+					time.Now(),
 					slog.LevelWarn,
 					"userID property in log statement was not a UUID so has been ignored",
 					pc,
