@@ -9,20 +9,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type LoginOptionsResponse struct {
+type LoginStartResponse struct {
 	Errors            []servercommon.ErrorDetail                 `json:"errors"`
 	WebAuthnSessionID uuid.UUID                                  `json:"webAuthnSessionId"`
 	PublicKey         protocol.PublicKeyCredentialRequestOptions `json:"publicKey"`
 }
 
-func LoginOptions(app *servercommon.ServerApp) gin.HandlerFunc {
+func LoginStart(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		sessionID, options, wrappedErr := app.Auth.StartLogin(ginCtx.Request.Context())
 		if wrappedErr != nil {
 			return wrappedErr
 		}
 
-		ginCtx.JSON(http.StatusOK, &LoginOptionsResponse{
+		ginCtx.JSON(http.StatusOK, &LoginStartResponse{
 			Errors:            []servercommon.ErrorDetail{},
 			WebAuthnSessionID: sessionID,
 			PublicKey:         options,

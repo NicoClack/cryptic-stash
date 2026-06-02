@@ -1,5 +1,6 @@
 # TODO
 
+- Rename adminCode
 - Create account system with passkeys
 - Standardise passkey/credential naming
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
@@ -98,6 +99,7 @@
 -   Audit use of time.sleep. Prefer time.After in a select so context cancellations can be respected
 - Replace time calls with clock:
 - - Job engine checking which jobs are due
+- - Check sleep calls
 -   Recover panics in all of the service implementations and trigger a shutdown. They should recover once if it's a service like the database but otherwise remain shut down
 -   Prevent timing attacks from revealing if a user exists or not
 -   -   Create test with real endpoint, users in the test database and real hashing to see if an attacker could tell more than 80% of the time with 1000 samples. I guess disable the rate limiting though?

@@ -2,7 +2,9 @@ import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 import { PUBLIC_API_DOMAIN } from "$env/static/public";
+import { SvelteURL } from "svelte/reactivity";
 import { adminAuth } from "./admin/AdminAuth.svelte";
+import { userAuth } from "./auth/UserAuth.svelte";
 
 class StatusError extends Error {
 	jsonResponse: JsonResponse;
@@ -68,10 +70,15 @@ export async function fetchJson(
 	}
 	if (
 		(resp.status === 401 || resp.status === 403) &&
-		((page.route.id?.startsWith("/admin") && page.route.id !== "/admin/login") ||
-			page.route.id === "/setup/admin-messengers")
+		page.route.id !== "/admin/login" &&
+		page.route.id !== "/login"
 	) {
-		goto(resolve("/admin/login"));
+		const authHeader = new Headers(init?.headers).get("authorization");
+		if (page.route.id?.startsWith("/admin") || page.route.id === "/setup/admin-messengers") {
+			goToAdminLogin();
+		} else if (authHeader?.startsWith("Session ")) {
+			goToLogin();
+		}
 	}
 	if (init?.throwForStatus) {
 		jsonResponse.throwForStatus();
@@ -88,6 +95,25 @@ export async function fetchAdminJson(
 
 	const headers = new Headers(init?.headers);
 	const authHeader = adminAuth.getAuthHeader();
+	if (authHeader) {
+		headers.set("Authorization", authHeader);
+	}
+
+	return await fetchJson(fetch, url, {
+		...init,
+		headers: headers,
+	});
+}
+
+export async function fetchUserJson(
+	fetch: typeof global.fetch,
+	url: string,
+	init?: JsonResponseInit | undefined,
+): Promise<JsonResponse> {
+	userAuth.requireAuth();
+
+	const headers = new Headers(init?.headers);
+	const authHeader = userAuth.getAuthHeader();
 	if (authHeader) {
 		headers.set("Authorization", authHeader);
 	}
@@ -117,4 +143,14 @@ export async function maybeGoToSetup(fetch: typeof global.fetch): Promise<boolea
 		goto(resolve("/setup/admin-messengers/"));
 	}
 	return true;
+}
+export function goToAdminLogin(): void {
+	const urlObj = new SvelteURL(resolve("/admin/login"), location.origin);
+	urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
+	goto(urlObj.toString());
+}
+export function goToLogin(): void {
+	const urlObj = new SvelteURL(resolve("/login"), location.origin);
+	urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
+	goto(urlObj.toString());
 }

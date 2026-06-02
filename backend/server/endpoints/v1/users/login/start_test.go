@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoginOptions(t *testing.T) {
+func TestLoginStart(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -25,12 +25,12 @@ func TestLoginOptions(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/options/",
+		"/api/v1/users/login/start/",
 		nil,
 	)
 	require.Equal(t, http.StatusOK, respRecorder.Code)
 
-	var response login.LoginOptionsResponse
+	var response login.LoginStartResponse
 	stdErr := json.Unmarshal(respRecorder.Body.Bytes(), &response)
 	require.NoError(t, stdErr)
 	require.NotEqual(t, response.WebAuthnSessionID, uuid.Nil)
@@ -54,21 +54,21 @@ func TestLoginOptions(t *testing.T) {
 	require.WithinDuration(t, app.Clock.Now().Add(2*time.Minute), sessionData.Expires, 10*time.Second)
 }
 
-func TestLoginOptions_MultipleRequests_UniqueSessionsAndChallenges(t *testing.T) {
+func TestLoginStart_MultipleRequests_UniqueSessionsAndChallenges(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
 
-	responses := make([]login.LoginOptionsResponse, 0, 3)
+	responses := make([]login.LoginStartResponse, 0, 3)
 	for range 3 {
 		respRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/login/options/",
+			"/api/v1/users/login/start/",
 			nil,
 		)
 		require.Equal(t, http.StatusOK, respRecorder.Code)
 
-		var response login.LoginOptionsResponse
+		var response login.LoginStartResponse
 		stdErr := json.Unmarshal(respRecorder.Body.Bytes(), &response)
 		require.NoError(t, stdErr)
 		responses = append(responses, response)

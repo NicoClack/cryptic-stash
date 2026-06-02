@@ -108,14 +108,14 @@ func TestLoginFlow(t *testing.T) {
 	relyingParty := newRelyingParty(app.Env)
 	userOb, credential, vAuthenticator := createUserWithCredential(t, true, true, app)
 
-	optionsRecorder := testcommon.Post(
+	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/options/",
+		"/api/v1/users/login/start/",
 		nil,
 	)
-	require.Equal(t, http.StatusOK, optionsRecorder.Code)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
 
-	assertionOptions, stdErr := virtualwebauthn.ParseAssertionOptions(optionsRecorder.Body.String())
+	assertionOptions, stdErr := virtualwebauthn.ParseAssertionOptions(startRecorder.Body.String())
 	require.NoError(t, stdErr)
 	require.NotNil(t, assertionOptions)
 	require.Equal(t, relyingParty.ID, assertionOptions.RelyingPartyID)
@@ -123,10 +123,10 @@ func TestLoginFlow(t *testing.T) {
 	// but the frontend needs to include it in its login/finish request later
 	var webAuthnSessionID uuid.UUID
 	{
-		var optionsResp login.LoginOptionsResponse
-		stdErr = json.Unmarshal(optionsRecorder.Body.Bytes(), &optionsResp)
+		var startResp login.LoginStartResponse
+		stdErr = json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 		require.NoError(t, stdErr)
-		webAuthnSessionID = optionsResp.WebAuthnSessionID
+		webAuthnSessionID = startResp.WebAuthnSessionID
 	}
 
 	// vAuthenticator.FindAllowedCredential doesn't work for discoverable credentials
@@ -193,16 +193,16 @@ func TestLoginFlow_InvalidCredential(t *testing.T) {
 			app,
 		)
 
-		optionsRecorder := testcommon.Post(
+		startRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/login/options/",
+			"/api/v1/users/login/start/",
 			nil,
 		)
-		require.Equal(t, http.StatusOK, optionsRecorder.Code)
+		require.Equal(t, http.StatusOK, startRecorder.Code)
 		// virtualwebauthn.ParseAssertionOptions isn't used because we need the WebAuthSessionID
 		// and TestLoginFlow already has coverage to ensure it's parsable by authenticators like that
-		var optionsResp login.LoginOptionsResponse
-		stdErr := json.Unmarshal(optionsRecorder.Body.Bytes(), &optionsResp)
+		var startResp login.LoginStartResponse
+		stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 		require.NoError(t, stdErr)
 
 		// Valid signature but from an unknown credential
@@ -211,7 +211,7 @@ func TestLoginFlow_InvalidCredential(t *testing.T) {
 			vAuthenticator,
 			credential,
 			virtualwebauthn.AssertionOptions{
-				Challenge: optionsResp.PublicKey.Challenge,
+				Challenge: startResp.PublicKey.Challenge,
 			},
 		)
 
@@ -224,7 +224,7 @@ func TestLoginFlow_InvalidCredential(t *testing.T) {
 			"/api/v1/users/login/finish/",
 			login.LoginFinishPayload{
 				CredentialAssertionResponse: parsedAssertion,
-				WebAuthnSessionID:           optionsResp.WebAuthnSessionID,
+				WebAuthnSessionID:           startResp.WebAuthnSessionID,
 			},
 		)
 		testcommon.AssertJSONResponse(
@@ -263,16 +263,16 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 	relyingParty := newRelyingParty(app.Env)
 	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app)
 
-	optionsRecorder := testcommon.Post(
+	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/options/",
+		"/api/v1/users/login/start/",
 		nil,
 	)
-	require.Equal(t, http.StatusOK, optionsRecorder.Code)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
 	// virtualwebauthn.ParseAssertionOptions isn't used because we need the WebAuthSessionID
 	// and TestLoginFlow already has coverage to ensure it's parsable by authenticators like that
-	var optionsResp login.LoginOptionsResponse
-	stdErr := json.Unmarshal(optionsRecorder.Body.Bytes(), &optionsResp)
+	var startResp login.LoginStartResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
 	assertionResponse := virtualwebauthn.CreateAssertionResponse(
@@ -280,7 +280,7 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 		vAuthenticator,
 		credential,
 		virtualwebauthn.AssertionOptions{
-			Challenge: optionsResp.PublicKey.Challenge,
+			Challenge: startResp.PublicKey.Challenge,
 		},
 	)
 
@@ -295,7 +295,7 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 		"/api/v1/users/login/finish/",
 		login.LoginFinishPayload{
 			CredentialAssertionResponse: parsedAssertion,
-			WebAuthnSessionID:           optionsResp.WebAuthnSessionID,
+			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
 	)
 	testcommon.AssertJSONResponse(

@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { resolve } from "$app/paths";
+	import { userAuth } from "$lib/auth/UserAuth.svelte";
 	import { Card, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
+
+	userAuth.requireAuth();
 </script>
 
 <main class="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">

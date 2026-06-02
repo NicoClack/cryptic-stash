@@ -80,7 +80,8 @@
 		}
 	}
 
-	async function handleCreateAccount() {
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
 		if (isCreating) return;
 
 		requestError = null;
@@ -218,28 +219,37 @@
 			{#if isLoadingLink}
 				<p class="text-sm text-muted-foreground">Validating invite...</p>
 			{:else if !successMessage}
-				<div class="space-y-3">
-					<p class="text-sm text-muted-foreground">
-						Creating account for <span class="font-medium text-foreground">{email}</span>
-					</p>
+				<form onsubmit={handleSubmit} class="space-y-3">
 					<p class="text-sm text-muted-foreground">
 						You'll register a passkey to securely access your stash. Your device will prompt you to
 						authenticate.
 					</p>
 					<label class="block space-y-2 text-sm">
+						<span class="text-muted-foreground">Email address</span>
+						<input
+							readonly
+							name="email"
+							value={email}
+							type="email"
+							autocomplete="username"
+							class="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+						/>
+					</label>
+					<label class="block space-y-2 text-sm">
 						<span class="text-muted-foreground">Passkey name</span>
 						<input
 							required
+							name="passkey-name"
 							bind:value={credentialName}
 							type="text"
 							maxlength="64"
 							class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 						/>
 					</label>
-					<Button onclick={handleCreateAccount} disabled={isCreating} class="w-full">
+					<Button type="submit" disabled={isCreating} class="w-full">
 						{isCreating ? "Registering passkey..." : "Create account with passkey"}
 					</Button>
-				</div>
+				</form>
 			{/if}
 		</CardContent>
 	</Card>

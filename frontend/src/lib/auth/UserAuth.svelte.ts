@@ -2,20 +2,20 @@ import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
-import { goToAdminLogin } from "$lib/api";
+import { goToLogin } from "$lib/api";
 import { SvelteURL } from "svelte/reactivity";
 
-const ADMIN_SESSION_TOKEN_STORAGE_KEY = "adminSessionToken";
-const ADMIN_USER_ID_STORAGE_KEY = "adminUserID";
+const USER_SESSION_TOKEN_STORAGE_KEY = "userSessionToken";
+const USER_USER_ID_STORAGE_KEY = "userUserID";
 
-class AdminAuthState {
+class UserAuthState {
 	#sessionToken: string | null = $state(null);
 	#userID: string | null = $state(null);
 
 	constructor() {
 		if (browser) {
-			const sessionToken = sessionStorage.getItem(ADMIN_SESSION_TOKEN_STORAGE_KEY);
-			const userID = sessionStorage.getItem(ADMIN_USER_ID_STORAGE_KEY);
+			const sessionToken = sessionStorage.getItem(USER_SESSION_TOKEN_STORAGE_KEY);
+			const userID = sessionStorage.getItem(USER_USER_ID_STORAGE_KEY);
 			if (sessionToken && userID) {
 				this.#sessionToken = sessionToken;
 				this.#userID = userID;
@@ -31,8 +31,8 @@ class AdminAuthState {
 		return this.#sessionToken !== null && this.#userID !== null;
 	}
 	requireAuth() {
-		if (browser && !this.isAuthenticated() && !page.route.id?.startsWith("/admin/login")) {
-			goToAdminLogin();
+		if (browser && !this.isAuthenticated() && !page.route.id?.startsWith("/login")) {
+			goToLogin();
 		}
 	}
 	getAuthHeader(): string | null {
@@ -40,13 +40,13 @@ class AdminAuthState {
 			return null;
 		}
 
-		return `AdminCode ${this.#sessionToken}`;
+		return `Session ${this.#sessionToken}`;
 	}
 	login(sessionToken: string, userID: string) {
 		this.#sessionToken = sessionToken;
 		this.#userID = userID;
-		sessionStorage.setItem(ADMIN_SESSION_TOKEN_STORAGE_KEY, sessionToken);
-		sessionStorage.setItem(ADMIN_USER_ID_STORAGE_KEY, userID);
+		sessionStorage.setItem(USER_SESSION_TOKEN_STORAGE_KEY, sessionToken);
+		sessionStorage.setItem(USER_USER_ID_STORAGE_KEY, userID);
 
 		const redirectTo = page.url.searchParams.get("redirectTo");
 		if (redirectTo) {
@@ -56,8 +56,8 @@ class AdminAuthState {
 				return;
 			}
 		}
-		goto(resolve("/admin"));
+		goto(resolve("/"));
 	}
 }
 
-export const adminAuth = new AdminAuthState();
+export const userAuth = new UserAuthState();
