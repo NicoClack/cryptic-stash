@@ -126,6 +126,7 @@
 					...publicKey.user,
 					id: decodeBase64UrlFormat(publicKey.user.id),
 				},
+				// TODO: are these ever sent?
 				excludeCredentials: publicKey.excludeCredentials?.map((c) => ({
 					...c,
 					id: decodeBase64UrlFormat(c.id),

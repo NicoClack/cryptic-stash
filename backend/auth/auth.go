@@ -23,7 +23,9 @@ func NewWebAuthnApp(env *common.Env) *webauthn.WebAuthn {
 		RPTopOriginVerificationMode: protocol.TopOriginImplicitVerificationMode,
 		AttestationPreference:       protocol.PreferNoAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
-			UserVerification: protocol.VerificationRequired,
+			UserVerification:   protocol.VerificationRequired,
+			ResidentKey:        protocol.ResidentKeyRequirementRequired,
+			RequireResidentKey: common.Pointer(true), // Fallback for older authenticators
 		},
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
