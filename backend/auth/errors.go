@@ -9,6 +9,8 @@ const (
 	ErrTypeFinishLogin           = "finish login"
 	ErrTypeCreateSession         = "create session"
 	ErrTypeValidateSession       = "validate session"
+
+	ErrTypeGetUserCallback = "get user callback"
 )
 
 var ErrInvalidWebAuthnSessionID = common.NewErrorWithCategories(
@@ -38,5 +40,7 @@ var ErrWrapperFinishLogin = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeFi
 
 var ErrWrapperCreateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeCreateSession)
 var ErrWrapperValidateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeValidateSession)
+
+var ErrWrapperGetUserCallback = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeGetUserCallback)
 
 var ErrWrapperDatabase = common.NewErrorWrapper(common.ErrTypeAuth).SetChild(common.ErrWrapperDatabase)

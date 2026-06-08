@@ -11,7 +11,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Post(t *testing.T, server common.ServerService, url string, body any) *httptest.ResponseRecorder {
+func Get(t *testing.T, server common.ServerService, url string, options ...RequestOption) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req, stdErr := http.NewRequestWithContext(t.Context(), http.MethodGet, url, nil)
+	require.NoError(t, stdErr)
+
+	for _, option := range options {
+		option(req)
+	}
+
+	respRecorder := httptest.NewRecorder()
+	server.ServeHTTP(respRecorder, req)
+	return respRecorder
+}
+
+func Post(
+	t *testing.T,
+	server common.ServerService,
+	url string,
+	body any,
+	options ...RequestOption,
+) *httptest.ResponseRecorder {
 	t.Helper()
 
 	var encodedBody []byte
@@ -25,7 +46,19 @@ func Post(t *testing.T, server common.ServerService, url string, body any) *http
 	require.NoError(t, stdErr)
 	req.Header.Set("Content-Type", "application/json")
 
+	for _, option := range options {
+		option(req)
+	}
+
 	respRecorder := httptest.NewRecorder()
 	server.ServeHTTP(respRecorder, req)
 	return respRecorder
+}
+
+type RequestOption func(*http.Request)
+
+func WithBearerToken(token string) RequestOption {
+	return func(req *http.Request) {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/descope/virtualwebauthn"
 )
 
 func DefaultEnv() *common.Env {
@@ -76,4 +77,12 @@ func mustParseURL(raw string) *url.URL {
 		panic("failed to parse URL: " + stdErr.Error())
 	}
 	return parsed
+}
+
+func NewWebAuthnRelyingParty(env *common.Env) virtualwebauthn.RelyingParty {
+	return virtualwebauthn.RelyingParty{
+		ID:     env.FRONTEND_BASE_URL.Hostname(),
+		Name:   "Cryptic Stash",
+		Origin: common.GetOrigin(env.FRONTEND_BASE_URL),
+	}
 }

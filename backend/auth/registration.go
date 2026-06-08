@@ -65,7 +65,9 @@ func FinishRegisterPasskey(
 	userOb, stdErr := getUser(userID, tx)
 	if stdErr != nil {
 		return nil, ErrWrapperFinishRegisterPasskey.Wrap(
-			common.AutoWrapError(stdErr),
+			ErrWrapperGetUserCallback.Wrap(
+				common.AutoWrapError(stdErr),
+			),
 		)
 	}
 

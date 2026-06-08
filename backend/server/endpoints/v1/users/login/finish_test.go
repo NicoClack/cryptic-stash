@@ -85,7 +85,7 @@ func TestLoginFinish_MissingSession_ReturnsBadRequest(t *testing.T) {
 		vAuthenticator := virtualwebauthn.NewAuthenticator()
 		credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
 		assertionJSON := virtualwebauthn.CreateAssertionResponse(
-			newRelyingParty(app.Env),
+			testcommon.NewWebAuthnRelyingParty(app.Env),
 			vAuthenticator,
 			credential,
 			virtualwebauthn.AssertionOptions{Challenge: common.CryptoRandomBytes(32)},
