@@ -21,14 +21,12 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldAllowSuperUser holds the string denoting the allowsuperuser field in the database.
+	FieldAllowSuperUser = "allow_super_user"
 	// FieldCredentialID holds the string denoting the credentialid field in the database.
 	FieldCredentialID = "credential_id"
-	// FieldPublicKey holds the string denoting the publickey field in the database.
-	FieldPublicKey = "public_key"
-	// FieldAaguid holds the string denoting the aaguid field in the database.
-	FieldAaguid = "aaguid"
-	// FieldSignCount holds the string denoting the signcount field in the database.
-	FieldSignCount = "sign_count"
+	// FieldCredential holds the string denoting the credential field in the database.
+	FieldCredential = "credential"
 	// FieldIsSecondGroup holds the string denoting the issecondgroup field in the database.
 	FieldIsSecondGroup = "is_second_group"
 	// FieldUserID holds the string denoting the userid field in the database.
@@ -61,10 +59,9 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
+	FieldAllowSuperUser,
 	FieldCredentialID,
-	FieldPublicKey,
-	FieldAaguid,
-	FieldSignCount,
+	FieldCredential,
 	FieldIsSecondGroup,
 	FieldUserID,
 }
@@ -84,8 +81,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultSignCount holds the default value on creation for the "signCount" field.
-	DefaultSignCount uint32
+	// CredentialIDValidator is a validator for the "credentialID" field. It is called by the builders before save.
+	CredentialIDValidator func([]byte) error
 	// DefaultIsSecondGroup holds the default value on creation for the "isSecondGroup" field.
 	DefaultIsSecondGroup bool
 	// DefaultID holds the default value on creation for the "id" field.
@@ -115,14 +112,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByAaguid orders the results by the aaguid field.
-func ByAaguid(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAaguid, opts...).ToFunc()
-}
-
-// BySignCount orders the results by the signCount field.
-func BySignCount(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSignCount, opts...).ToFunc()
+// ByAllowSuperUser orders the results by the allowSuperUser field.
+func ByAllowSuperUser(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAllowSuperUser, opts...).ToFunc()
 }
 
 // ByIsSecondGroup orders the results by the isSecondGroup field.

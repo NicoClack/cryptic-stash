@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -82,12 +83,12 @@ func ValidUntil(v time.Time) predicate.DownloadSession {
 }
 
 // UserAgent applies equality check predicate on the "userAgent" field. It's identical to UserAgentEQ.
-func UserAgent(v string) predicate.DownloadSession {
+func UserAgent(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldEQ(FieldUserAgent, v))
 }
 
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
-func IP(v string) predicate.DownloadSession {
+func IP(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldEQ(FieldIP, v))
 }
 
@@ -297,133 +298,103 @@ func ValidUntilLTE(v time.Time) predicate.DownloadSession {
 }
 
 // UserAgentEQ applies the EQ predicate on the "userAgent" field.
-func UserAgentEQ(v string) predicate.DownloadSession {
+func UserAgentEQ(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldEQ(FieldUserAgent, v))
 }
 
 // UserAgentNEQ applies the NEQ predicate on the "userAgent" field.
-func UserAgentNEQ(v string) predicate.DownloadSession {
+func UserAgentNEQ(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldNEQ(FieldUserAgent, v))
 }
 
 // UserAgentIn applies the In predicate on the "userAgent" field.
-func UserAgentIn(vs ...string) predicate.DownloadSession {
+func UserAgentIn(vs ...schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldIn(FieldUserAgent, vs...))
 }
 
 // UserAgentNotIn applies the NotIn predicate on the "userAgent" field.
-func UserAgentNotIn(vs ...string) predicate.DownloadSession {
+func UserAgentNotIn(vs ...schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldNotIn(FieldUserAgent, vs...))
 }
 
 // UserAgentGT applies the GT predicate on the "userAgent" field.
-func UserAgentGT(v string) predicate.DownloadSession {
+func UserAgentGT(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldGT(FieldUserAgent, v))
 }
 
 // UserAgentGTE applies the GTE predicate on the "userAgent" field.
-func UserAgentGTE(v string) predicate.DownloadSession {
+func UserAgentGTE(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldGTE(FieldUserAgent, v))
 }
 
 // UserAgentLT applies the LT predicate on the "userAgent" field.
-func UserAgentLT(v string) predicate.DownloadSession {
+func UserAgentLT(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldLT(FieldUserAgent, v))
 }
 
 // UserAgentLTE applies the LTE predicate on the "userAgent" field.
-func UserAgentLTE(v string) predicate.DownloadSession {
+func UserAgentLTE(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldLTE(FieldUserAgent, v))
 }
 
-// UserAgentContains applies the Contains predicate on the "userAgent" field.
-func UserAgentContains(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldContains(FieldUserAgent, v))
+// UserAgentIsNil applies the IsNil predicate on the "userAgent" field.
+func UserAgentIsNil() predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldIsNull(FieldUserAgent))
 }
 
-// UserAgentHasPrefix applies the HasPrefix predicate on the "userAgent" field.
-func UserAgentHasPrefix(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldHasPrefix(FieldUserAgent, v))
-}
-
-// UserAgentHasSuffix applies the HasSuffix predicate on the "userAgent" field.
-func UserAgentHasSuffix(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldHasSuffix(FieldUserAgent, v))
-}
-
-// UserAgentEqualFold applies the EqualFold predicate on the "userAgent" field.
-func UserAgentEqualFold(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldEqualFold(FieldUserAgent, v))
-}
-
-// UserAgentContainsFold applies the ContainsFold predicate on the "userAgent" field.
-func UserAgentContainsFold(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldContainsFold(FieldUserAgent, v))
+// UserAgentNotNil applies the NotNil predicate on the "userAgent" field.
+func UserAgentNotNil() predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldNotNull(FieldUserAgent))
 }
 
 // IPEQ applies the EQ predicate on the "ip" field.
-func IPEQ(v string) predicate.DownloadSession {
+func IPEQ(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldEQ(FieldIP, v))
 }
 
 // IPNEQ applies the NEQ predicate on the "ip" field.
-func IPNEQ(v string) predicate.DownloadSession {
+func IPNEQ(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldNEQ(FieldIP, v))
 }
 
 // IPIn applies the In predicate on the "ip" field.
-func IPIn(vs ...string) predicate.DownloadSession {
+func IPIn(vs ...schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldIn(FieldIP, vs...))
 }
 
 // IPNotIn applies the NotIn predicate on the "ip" field.
-func IPNotIn(vs ...string) predicate.DownloadSession {
+func IPNotIn(vs ...schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldNotIn(FieldIP, vs...))
 }
 
 // IPGT applies the GT predicate on the "ip" field.
-func IPGT(v string) predicate.DownloadSession {
+func IPGT(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldGT(FieldIP, v))
 }
 
 // IPGTE applies the GTE predicate on the "ip" field.
-func IPGTE(v string) predicate.DownloadSession {
+func IPGTE(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldGTE(FieldIP, v))
 }
 
 // IPLT applies the LT predicate on the "ip" field.
-func IPLT(v string) predicate.DownloadSession {
+func IPLT(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldLT(FieldIP, v))
 }
 
 // IPLTE applies the LTE predicate on the "ip" field.
-func IPLTE(v string) predicate.DownloadSession {
+func IPLTE(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldLTE(FieldIP, v))
 }
 
-// IPContains applies the Contains predicate on the "ip" field.
-func IPContains(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldContains(FieldIP, v))
+// IPIsNil applies the IsNil predicate on the "ip" field.
+func IPIsNil() predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldIsNull(FieldIP))
 }
 
-// IPHasPrefix applies the HasPrefix predicate on the "ip" field.
-func IPHasPrefix(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldHasPrefix(FieldIP, v))
-}
-
-// IPHasSuffix applies the HasSuffix predicate on the "ip" field.
-func IPHasSuffix(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldHasSuffix(FieldIP, v))
-}
-
-// IPEqualFold applies the EqualFold predicate on the "ip" field.
-func IPEqualFold(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldEqualFold(FieldIP, v))
-}
-
-// IPContainsFold applies the ContainsFold predicate on the "ip" field.
-func IPContainsFold(v string) predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldContainsFold(FieldIP, v))
+// IPNotNil applies the NotNil predicate on the "ip" field.
+func IPNotNil() predicate.DownloadSession {
+	return predicate.DownloadSession(sql.FieldNotNull(FieldIP))
 }
 
 // StashIDEQ applies the EQ predicate on the "stashID" field.

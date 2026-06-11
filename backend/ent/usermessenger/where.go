@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -79,6 +80,11 @@ func Version(v int) predicate.UserMessenger {
 // Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
 func Enabled(v bool) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldEQ(FieldEnabled, v))
+}
+
+// Options applies equality check predicate on the "options" field. It's identical to OptionsEQ.
+func Options(v schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldOptions, v))
 }
 
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
@@ -279,6 +285,46 @@ func EnabledEQ(v bool) predicate.UserMessenger {
 // EnabledNEQ applies the NEQ predicate on the "enabled" field.
 func EnabledNEQ(v bool) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldNEQ(FieldEnabled, v))
+}
+
+// OptionsEQ applies the EQ predicate on the "options" field.
+func OptionsEQ(v schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldOptions, v))
+}
+
+// OptionsNEQ applies the NEQ predicate on the "options" field.
+func OptionsNEQ(v schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNEQ(FieldOptions, v))
+}
+
+// OptionsIn applies the In predicate on the "options" field.
+func OptionsIn(vs ...schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldIn(FieldOptions, vs...))
+}
+
+// OptionsNotIn applies the NotIn predicate on the "options" field.
+func OptionsNotIn(vs ...schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNotIn(FieldOptions, vs...))
+}
+
+// OptionsGT applies the GT predicate on the "options" field.
+func OptionsGT(v schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldGT(FieldOptions, v))
+}
+
+// OptionsGTE applies the GTE predicate on the "options" field.
+func OptionsGTE(v schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldGTE(FieldOptions, v))
+}
+
+// OptionsLT applies the LT predicate on the "options" field.
+func OptionsLT(v schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldLT(FieldOptions, v))
+}
+
+// OptionsLTE applies the LTE predicate on the "options" field.
+func OptionsLTE(v schema.EncryptedRawJSON) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldLTE(FieldOptions, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "userID" field.

@@ -81,10 +81,6 @@ var (
 	EmailValidator func(string) error
 	// HashedCodeValidator is a validator for the "hashedCode" field. It is called by the builders before save.
 	HashedCodeValidator func([]byte) error
-	// DefaultUserAgent holds the default value on creation for the "userAgent" field.
-	DefaultUserAgent string
-	// DefaultIP holds the default value on creation for the "ip" field.
-	DefaultIP string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -143,16 +139,6 @@ func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiredReason orders the results by the expiredReason field.
 func ByExpiredReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiredReason, opts...).ToFunc()
-}
-
-// ByUserAgent orders the results by the userAgent field.
-func ByUserAgent(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserAgent, opts...).ToFunc()
-}
-
-// ByIP orders the results by the ip field.
-func ByIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIP, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the userID field.

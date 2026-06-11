@@ -21,12 +21,12 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/periodictask"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
-	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -65,8 +65,8 @@ type DownloadSessionMutation struct {
 	hashedAuthCode     *[]byte
 	validFrom          *time.Time
 	validUntil         *time.Time
-	userAgent          *string
-	ip                 *string
+	userAgent          *schema.EncryptedField[*string]
+	ip                 *schema.EncryptedField[*string]
 	clearedFields      map[string]struct{}
 	stash              *uuid.UUID
 	clearedstash       bool
@@ -363,12 +363,12 @@ func (m *DownloadSessionMutation) ResetValidUntil() {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (m *DownloadSessionMutation) SetUserAgent(s string) {
-	m.userAgent = &s
+func (m *DownloadSessionMutation) SetUserAgent(sf schema.EncryptedField[*string]) {
+	m.userAgent = &sf
 }
 
 // UserAgent returns the value of the "userAgent" field in the mutation.
-func (m *DownloadSessionMutation) UserAgent() (r string, exists bool) {
+func (m *DownloadSessionMutation) UserAgent() (r schema.EncryptedField[*string], exists bool) {
 	v := m.userAgent
 	if v == nil {
 		return
@@ -379,7 +379,7 @@ func (m *DownloadSessionMutation) UserAgent() (r string, exists bool) {
 // OldUserAgent returns the old "userAgent" field's value of the DownloadSession entity.
 // If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DownloadSessionMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+func (m *DownloadSessionMutation) OldUserAgent(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
 	}
@@ -393,18 +393,31 @@ func (m *DownloadSessionMutation) OldUserAgent(ctx context.Context) (v string, e
 	return oldValue.UserAgent, nil
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (m *DownloadSessionMutation) ClearUserAgent() {
+	m.userAgent = nil
+	m.clearedFields[downloadsession.FieldUserAgent] = struct{}{}
+}
+
+// UserAgentCleared returns if the "userAgent" field was cleared in this mutation.
+func (m *DownloadSessionMutation) UserAgentCleared() bool {
+	_, ok := m.clearedFields[downloadsession.FieldUserAgent]
+	return ok
+}
+
 // ResetUserAgent resets all changes to the "userAgent" field.
 func (m *DownloadSessionMutation) ResetUserAgent() {
 	m.userAgent = nil
+	delete(m.clearedFields, downloadsession.FieldUserAgent)
 }
 
 // SetIP sets the "ip" field.
-func (m *DownloadSessionMutation) SetIP(s string) {
-	m.ip = &s
+func (m *DownloadSessionMutation) SetIP(sf schema.EncryptedField[*string]) {
+	m.ip = &sf
 }
 
 // IP returns the value of the "ip" field in the mutation.
-func (m *DownloadSessionMutation) IP() (r string, exists bool) {
+func (m *DownloadSessionMutation) IP() (r schema.EncryptedField[*string], exists bool) {
 	v := m.ip
 	if v == nil {
 		return
@@ -415,7 +428,7 @@ func (m *DownloadSessionMutation) IP() (r string, exists bool) {
 // OldIP returns the old "ip" field's value of the DownloadSession entity.
 // If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DownloadSessionMutation) OldIP(ctx context.Context) (v string, err error) {
+func (m *DownloadSessionMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIP is only allowed on UpdateOne operations")
 	}
@@ -429,9 +442,22 @@ func (m *DownloadSessionMutation) OldIP(ctx context.Context) (v string, err erro
 	return oldValue.IP, nil
 }
 
+// ClearIP clears the value of the "ip" field.
+func (m *DownloadSessionMutation) ClearIP() {
+	m.ip = nil
+	m.clearedFields[downloadsession.FieldIP] = struct{}{}
+}
+
+// IPCleared returns if the "ip" field was cleared in this mutation.
+func (m *DownloadSessionMutation) IPCleared() bool {
+	_, ok := m.clearedFields[downloadsession.FieldIP]
+	return ok
+}
+
 // ResetIP resets all changes to the "ip" field.
 func (m *DownloadSessionMutation) ResetIP() {
 	m.ip = nil
+	delete(m.clearedFields, downloadsession.FieldIP)
 }
 
 // SetStashID sets the "stashID" field.
@@ -704,14 +730,14 @@ func (m *DownloadSessionMutation) SetField(name string, value ent.Value) error {
 		m.SetValidUntil(v)
 		return nil
 	case downloadsession.FieldUserAgent:
-		v, ok := value.(string)
+		v, ok := value.(schema.EncryptedField[*string])
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserAgent(v)
 		return nil
 	case downloadsession.FieldIP:
-		v, ok := value.(string)
+		v, ok := value.(schema.EncryptedField[*string])
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -753,7 +779,14 @@ func (m *DownloadSessionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DownloadSessionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(downloadsession.FieldUserAgent) {
+		fields = append(fields, downloadsession.FieldUserAgent)
+	}
+	if m.FieldCleared(downloadsession.FieldIP) {
+		fields = append(fields, downloadsession.FieldIP)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -766,6 +799,14 @@ func (m *DownloadSessionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DownloadSessionMutation) ClearField(name string) error {
+	switch name {
+	case downloadsession.FieldUserAgent:
+		m.ClearUserAgent()
+		return nil
+	case downloadsession.FieldIP:
+		m.ClearIP()
+		return nil
+	}
 	return fmt.Errorf("unknown DownloadSession nullable field %s", name)
 }
 
@@ -915,9 +956,9 @@ type InviteMutation struct {
 	hashedCode      *[]byte
 	expiresAt       *time.Time
 	expiredReason   *invite.ExpiredReason
-	webAuthnSession **webauthn.SessionData
-	userAgent       *string
-	ip              *string
+	webAuthnSession *schema.EncryptedSessionData
+	userAgent       *schema.EncryptedField[*string]
+	ip              *schema.EncryptedField[*string]
 	clearedFields   map[string]struct{}
 	user            *uuid.UUID
 	cleareduser     bool
@@ -1260,12 +1301,12 @@ func (m *InviteMutation) ResetExpiredReason() {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (m *InviteMutation) SetWebAuthnSession(wd *webauthn.SessionData) {
-	m.webAuthnSession = &wd
+func (m *InviteMutation) SetWebAuthnSession(ssd schema.EncryptedSessionData) {
+	m.webAuthnSession = &ssd
 }
 
 // WebAuthnSession returns the value of the "webAuthnSession" field in the mutation.
-func (m *InviteMutation) WebAuthnSession() (r *webauthn.SessionData, exists bool) {
+func (m *InviteMutation) WebAuthnSession() (r schema.EncryptedSessionData, exists bool) {
 	v := m.webAuthnSession
 	if v == nil {
 		return
@@ -1276,7 +1317,7 @@ func (m *InviteMutation) WebAuthnSession() (r *webauthn.SessionData, exists bool
 // OldWebAuthnSession returns the old "webAuthnSession" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldWebAuthnSession(ctx context.Context) (v *webauthn.SessionData, err error) {
+func (m *InviteMutation) OldWebAuthnSession(ctx context.Context) (v schema.EncryptedSessionData, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWebAuthnSession is only allowed on UpdateOne operations")
 	}
@@ -1309,12 +1350,12 @@ func (m *InviteMutation) ResetWebAuthnSession() {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (m *InviteMutation) SetUserAgent(s string) {
-	m.userAgent = &s
+func (m *InviteMutation) SetUserAgent(sf schema.EncryptedField[*string]) {
+	m.userAgent = &sf
 }
 
 // UserAgent returns the value of the "userAgent" field in the mutation.
-func (m *InviteMutation) UserAgent() (r string, exists bool) {
+func (m *InviteMutation) UserAgent() (r schema.EncryptedField[*string], exists bool) {
 	v := m.userAgent
 	if v == nil {
 		return
@@ -1325,7 +1366,7 @@ func (m *InviteMutation) UserAgent() (r string, exists bool) {
 // OldUserAgent returns the old "userAgent" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+func (m *InviteMutation) OldUserAgent(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
 	}
@@ -1339,18 +1380,31 @@ func (m *InviteMutation) OldUserAgent(ctx context.Context) (v string, err error)
 	return oldValue.UserAgent, nil
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (m *InviteMutation) ClearUserAgent() {
+	m.userAgent = nil
+	m.clearedFields[invite.FieldUserAgent] = struct{}{}
+}
+
+// UserAgentCleared returns if the "userAgent" field was cleared in this mutation.
+func (m *InviteMutation) UserAgentCleared() bool {
+	_, ok := m.clearedFields[invite.FieldUserAgent]
+	return ok
+}
+
 // ResetUserAgent resets all changes to the "userAgent" field.
 func (m *InviteMutation) ResetUserAgent() {
 	m.userAgent = nil
+	delete(m.clearedFields, invite.FieldUserAgent)
 }
 
 // SetIP sets the "ip" field.
-func (m *InviteMutation) SetIP(s string) {
-	m.ip = &s
+func (m *InviteMutation) SetIP(sf schema.EncryptedField[*string]) {
+	m.ip = &sf
 }
 
 // IP returns the value of the "ip" field in the mutation.
-func (m *InviteMutation) IP() (r string, exists bool) {
+func (m *InviteMutation) IP() (r schema.EncryptedField[*string], exists bool) {
 	v := m.ip
 	if v == nil {
 		return
@@ -1361,7 +1415,7 @@ func (m *InviteMutation) IP() (r string, exists bool) {
 // OldIP returns the old "ip" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldIP(ctx context.Context) (v string, err error) {
+func (m *InviteMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIP is only allowed on UpdateOne operations")
 	}
@@ -1375,9 +1429,22 @@ func (m *InviteMutation) OldIP(ctx context.Context) (v string, err error) {
 	return oldValue.IP, nil
 }
 
+// ClearIP clears the value of the "ip" field.
+func (m *InviteMutation) ClearIP() {
+	m.ip = nil
+	m.clearedFields[invite.FieldIP] = struct{}{}
+}
+
+// IPCleared returns if the "ip" field was cleared in this mutation.
+func (m *InviteMutation) IPCleared() bool {
+	_, ok := m.clearedFields[invite.FieldIP]
+	return ok
+}
+
 // ResetIP resets all changes to the "ip" field.
 func (m *InviteMutation) ResetIP() {
 	m.ip = nil
+	delete(m.clearedFields, invite.FieldIP)
 }
 
 // SetUserID sets the "userID" field.
@@ -1630,21 +1697,21 @@ func (m *InviteMutation) SetField(name string, value ent.Value) error {
 		m.SetExpiredReason(v)
 		return nil
 	case invite.FieldWebAuthnSession:
-		v, ok := value.(*webauthn.SessionData)
+		v, ok := value.(schema.EncryptedSessionData)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetWebAuthnSession(v)
 		return nil
 	case invite.FieldUserAgent:
-		v, ok := value.(string)
+		v, ok := value.(schema.EncryptedField[*string])
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserAgent(v)
 		return nil
 	case invite.FieldIP:
-		v, ok := value.(string)
+		v, ok := value.(schema.EncryptedField[*string])
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1693,6 +1760,12 @@ func (m *InviteMutation) ClearedFields() []string {
 	if m.FieldCleared(invite.FieldWebAuthnSession) {
 		fields = append(fields, invite.FieldWebAuthnSession)
 	}
+	if m.FieldCleared(invite.FieldUserAgent) {
+		fields = append(fields, invite.FieldUserAgent)
+	}
+	if m.FieldCleared(invite.FieldIP) {
+		fields = append(fields, invite.FieldIP)
+	}
 	if m.FieldCleared(invite.FieldUserID) {
 		fields = append(fields, invite.FieldUserID)
 	}
@@ -1715,6 +1788,12 @@ func (m *InviteMutation) ClearField(name string) error {
 		return nil
 	case invite.FieldWebAuthnSession:
 		m.ClearWebAuthnSession()
+		return nil
+	case invite.FieldUserAgent:
+		m.ClearUserAgent()
+		return nil
+	case invite.FieldIP:
+		m.ClearIP()
 		return nil
 	case invite.FieldUserID:
 		m.ClearUserID()
@@ -1853,8 +1932,7 @@ type JobMutation struct {
 	addpriority        *int8
 	weight             *int
 	addweight          *int
-	body               *json.RawMessage
-	appendbody         json.RawMessage
+	body               *schema.EncryptedRawJSON
 	status             *job.Status
 	retries            *int
 	addretries         *int
@@ -2369,13 +2447,12 @@ func (m *JobMutation) ResetWeight() {
 }
 
 // SetBody sets the "body" field.
-func (m *JobMutation) SetBody(jm json.RawMessage) {
-	m.body = &jm
-	m.appendbody = nil
+func (m *JobMutation) SetBody(srj schema.EncryptedRawJSON) {
+	m.body = &srj
 }
 
 // Body returns the value of the "body" field in the mutation.
-func (m *JobMutation) Body() (r json.RawMessage, exists bool) {
+func (m *JobMutation) Body() (r schema.EncryptedRawJSON, exists bool) {
 	v := m.body
 	if v == nil {
 		return
@@ -2386,7 +2463,7 @@ func (m *JobMutation) Body() (r json.RawMessage, exists bool) {
 // OldBody returns the old "body" field's value of the Job entity.
 // If the Job object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *JobMutation) OldBody(ctx context.Context) (v json.RawMessage, err error) {
+func (m *JobMutation) OldBody(ctx context.Context) (v schema.EncryptedRawJSON, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBody is only allowed on UpdateOne operations")
 	}
@@ -2400,23 +2477,9 @@ func (m *JobMutation) OldBody(ctx context.Context) (v json.RawMessage, err error
 	return oldValue.Body, nil
 }
 
-// AppendBody adds jm to the "body" field.
-func (m *JobMutation) AppendBody(jm json.RawMessage) {
-	m.appendbody = append(m.appendbody, jm...)
-}
-
-// AppendedBody returns the list of values that were appended to the "body" field in this mutation.
-func (m *JobMutation) AppendedBody() (json.RawMessage, bool) {
-	if len(m.appendbody) == 0 {
-		return nil, false
-	}
-	return m.appendbody, true
-}
-
 // ResetBody resets all changes to the "body" field.
 func (m *JobMutation) ResetBody() {
 	m.body = nil
-	m.appendbody = nil
 }
 
 // SetStatus sets the "status" field.
@@ -2826,7 +2889,7 @@ func (m *JobMutation) SetField(name string, value ent.Value) error {
 		m.SetWeight(v)
 		return nil
 	case job.FieldBody:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(schema.EncryptedRawJSON)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5367,11 +5430,9 @@ type PasskeyMutation struct {
 	createdAt       *time.Time
 	updatedAt       *time.Time
 	name            *string
+	allowSuperUser  *bool
 	credentialID    *[]byte
-	publicKey       *[]byte
-	aaguid          *uuid.UUID
-	signCount       *uint32
-	addsignCount    *int32
+	credential      *schema.EncryptedCredential
 	isSecondGroup   *bool
 	clearedFields   map[string]struct{}
 	user            *uuid.UUID
@@ -5596,6 +5657,42 @@ func (m *PasskeyMutation) ResetName() {
 	m.name = nil
 }
 
+// SetAllowSuperUser sets the "allowSuperUser" field.
+func (m *PasskeyMutation) SetAllowSuperUser(b bool) {
+	m.allowSuperUser = &b
+}
+
+// AllowSuperUser returns the value of the "allowSuperUser" field in the mutation.
+func (m *PasskeyMutation) AllowSuperUser() (r bool, exists bool) {
+	v := m.allowSuperUser
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAllowSuperUser returns the old "allowSuperUser" field's value of the Passkey entity.
+// If the Passkey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PasskeyMutation) OldAllowSuperUser(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAllowSuperUser is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAllowSuperUser requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAllowSuperUser: %w", err)
+	}
+	return oldValue.AllowSuperUser, nil
+}
+
+// ResetAllowSuperUser resets all changes to the "allowSuperUser" field.
+func (m *PasskeyMutation) ResetAllowSuperUser() {
+	m.allowSuperUser = nil
+}
+
 // SetCredentialID sets the "credentialID" field.
 func (m *PasskeyMutation) SetCredentialID(b []byte) {
 	m.credentialID = &b
@@ -5632,145 +5729,40 @@ func (m *PasskeyMutation) ResetCredentialID() {
 	m.credentialID = nil
 }
 
-// SetPublicKey sets the "publicKey" field.
-func (m *PasskeyMutation) SetPublicKey(b []byte) {
-	m.publicKey = &b
+// SetCredential sets the "credential" field.
+func (m *PasskeyMutation) SetCredential(sc schema.EncryptedCredential) {
+	m.credential = &sc
 }
 
-// PublicKey returns the value of the "publicKey" field in the mutation.
-func (m *PasskeyMutation) PublicKey() (r []byte, exists bool) {
-	v := m.publicKey
+// Credential returns the value of the "credential" field in the mutation.
+func (m *PasskeyMutation) Credential() (r schema.EncryptedCredential, exists bool) {
+	v := m.credential
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPublicKey returns the old "publicKey" field's value of the Passkey entity.
+// OldCredential returns the old "credential" field's value of the Passkey entity.
 // If the Passkey object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PasskeyMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
+func (m *PasskeyMutation) OldCredential(ctx context.Context) (v schema.EncryptedCredential, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
+		return v, errors.New("OldCredential is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublicKey requires an ID field in the mutation")
+		return v, errors.New("OldCredential requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublicKey: %w", err)
+		return v, fmt.Errorf("querying old value for OldCredential: %w", err)
 	}
-	return oldValue.PublicKey, nil
+	return oldValue.Credential, nil
 }
 
-// ResetPublicKey resets all changes to the "publicKey" field.
-func (m *PasskeyMutation) ResetPublicKey() {
-	m.publicKey = nil
-}
-
-// SetAaguid sets the "aaguid" field.
-func (m *PasskeyMutation) SetAaguid(u uuid.UUID) {
-	m.aaguid = &u
-}
-
-// Aaguid returns the value of the "aaguid" field in the mutation.
-func (m *PasskeyMutation) Aaguid() (r uuid.UUID, exists bool) {
-	v := m.aaguid
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAaguid returns the old "aaguid" field's value of the Passkey entity.
-// If the Passkey object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PasskeyMutation) OldAaguid(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAaguid is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAaguid requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAaguid: %w", err)
-	}
-	return oldValue.Aaguid, nil
-}
-
-// ClearAaguid clears the value of the "aaguid" field.
-func (m *PasskeyMutation) ClearAaguid() {
-	m.aaguid = nil
-	m.clearedFields[passkey.FieldAaguid] = struct{}{}
-}
-
-// AaguidCleared returns if the "aaguid" field was cleared in this mutation.
-func (m *PasskeyMutation) AaguidCleared() bool {
-	_, ok := m.clearedFields[passkey.FieldAaguid]
-	return ok
-}
-
-// ResetAaguid resets all changes to the "aaguid" field.
-func (m *PasskeyMutation) ResetAaguid() {
-	m.aaguid = nil
-	delete(m.clearedFields, passkey.FieldAaguid)
-}
-
-// SetSignCount sets the "signCount" field.
-func (m *PasskeyMutation) SetSignCount(u uint32) {
-	m.signCount = &u
-	m.addsignCount = nil
-}
-
-// SignCount returns the value of the "signCount" field in the mutation.
-func (m *PasskeyMutation) SignCount() (r uint32, exists bool) {
-	v := m.signCount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSignCount returns the old "signCount" field's value of the Passkey entity.
-// If the Passkey object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PasskeyMutation) OldSignCount(ctx context.Context) (v uint32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSignCount is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSignCount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSignCount: %w", err)
-	}
-	return oldValue.SignCount, nil
-}
-
-// AddSignCount adds u to the "signCount" field.
-func (m *PasskeyMutation) AddSignCount(u int32) {
-	if m.addsignCount != nil {
-		*m.addsignCount += u
-	} else {
-		m.addsignCount = &u
-	}
-}
-
-// AddedSignCount returns the value that was added to the "signCount" field in this mutation.
-func (m *PasskeyMutation) AddedSignCount() (r int32, exists bool) {
-	v := m.addsignCount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSignCount resets all changes to the "signCount" field.
-func (m *PasskeyMutation) ResetSignCount() {
-	m.signCount = nil
-	m.addsignCount = nil
+// ResetCredential resets all changes to the "credential" field.
+func (m *PasskeyMutation) ResetCredential() {
+	m.credential = nil
 }
 
 // SetIsSecondGroup sets the "isSecondGroup" field.
@@ -5960,7 +5952,7 @@ func (m *PasskeyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PasskeyMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 8)
 	if m.createdAt != nil {
 		fields = append(fields, passkey.FieldCreatedAt)
 	}
@@ -5970,17 +5962,14 @@ func (m *PasskeyMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, passkey.FieldName)
 	}
+	if m.allowSuperUser != nil {
+		fields = append(fields, passkey.FieldAllowSuperUser)
+	}
 	if m.credentialID != nil {
 		fields = append(fields, passkey.FieldCredentialID)
 	}
-	if m.publicKey != nil {
-		fields = append(fields, passkey.FieldPublicKey)
-	}
-	if m.aaguid != nil {
-		fields = append(fields, passkey.FieldAaguid)
-	}
-	if m.signCount != nil {
-		fields = append(fields, passkey.FieldSignCount)
+	if m.credential != nil {
+		fields = append(fields, passkey.FieldCredential)
 	}
 	if m.isSecondGroup != nil {
 		fields = append(fields, passkey.FieldIsSecondGroup)
@@ -6002,14 +5991,12 @@ func (m *PasskeyMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case passkey.FieldName:
 		return m.Name()
+	case passkey.FieldAllowSuperUser:
+		return m.AllowSuperUser()
 	case passkey.FieldCredentialID:
 		return m.CredentialID()
-	case passkey.FieldPublicKey:
-		return m.PublicKey()
-	case passkey.FieldAaguid:
-		return m.Aaguid()
-	case passkey.FieldSignCount:
-		return m.SignCount()
+	case passkey.FieldCredential:
+		return m.Credential()
 	case passkey.FieldIsSecondGroup:
 		return m.IsSecondGroup()
 	case passkey.FieldUserID:
@@ -6029,14 +6016,12 @@ func (m *PasskeyMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case passkey.FieldName:
 		return m.OldName(ctx)
+	case passkey.FieldAllowSuperUser:
+		return m.OldAllowSuperUser(ctx)
 	case passkey.FieldCredentialID:
 		return m.OldCredentialID(ctx)
-	case passkey.FieldPublicKey:
-		return m.OldPublicKey(ctx)
-	case passkey.FieldAaguid:
-		return m.OldAaguid(ctx)
-	case passkey.FieldSignCount:
-		return m.OldSignCount(ctx)
+	case passkey.FieldCredential:
+		return m.OldCredential(ctx)
 	case passkey.FieldIsSecondGroup:
 		return m.OldIsSecondGroup(ctx)
 	case passkey.FieldUserID:
@@ -6071,6 +6056,13 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case passkey.FieldAllowSuperUser:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAllowSuperUser(v)
+		return nil
 	case passkey.FieldCredentialID:
 		v, ok := value.([]byte)
 		if !ok {
@@ -6078,26 +6070,12 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCredentialID(v)
 		return nil
-	case passkey.FieldPublicKey:
-		v, ok := value.([]byte)
+	case passkey.FieldCredential:
+		v, ok := value.(schema.EncryptedCredential)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPublicKey(v)
-		return nil
-	case passkey.FieldAaguid:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAaguid(v)
-		return nil
-	case passkey.FieldSignCount:
-		v, ok := value.(uint32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSignCount(v)
+		m.SetCredential(v)
 		return nil
 	case passkey.FieldIsSecondGroup:
 		v, ok := value.(bool)
@@ -6120,21 +6098,13 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PasskeyMutation) AddedFields() []string {
-	var fields []string
-	if m.addsignCount != nil {
-		fields = append(fields, passkey.FieldSignCount)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PasskeyMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case passkey.FieldSignCount:
-		return m.AddedSignCount()
-	}
 	return nil, false
 }
 
@@ -6143,13 +6113,6 @@ func (m *PasskeyMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *PasskeyMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case passkey.FieldSignCount:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSignCount(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Passkey numeric field %s", name)
 }
@@ -6157,11 +6120,7 @@ func (m *PasskeyMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PasskeyMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(passkey.FieldAaguid) {
-		fields = append(fields, passkey.FieldAaguid)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -6174,11 +6133,6 @@ func (m *PasskeyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PasskeyMutation) ClearField(name string) error {
-	switch name {
-	case passkey.FieldAaguid:
-		m.ClearAaguid()
-		return nil
-	}
 	return fmt.Errorf("unknown Passkey nullable field %s", name)
 }
 
@@ -6195,17 +6149,14 @@ func (m *PasskeyMutation) ResetField(name string) error {
 	case passkey.FieldName:
 		m.ResetName()
 		return nil
+	case passkey.FieldAllowSuperUser:
+		m.ResetAllowSuperUser()
+		return nil
 	case passkey.FieldCredentialID:
 		m.ResetCredentialID()
 		return nil
-	case passkey.FieldPublicKey:
-		m.ResetPublicKey()
-		return nil
-	case passkey.FieldAaguid:
-		m.ResetAaguid()
-		return nil
-	case passkey.FieldSignCount:
-		m.ResetSignCount()
+	case passkey.FieldCredential:
+		m.ResetCredential()
 		return nil
 	case passkey.FieldIsSecondGroup:
 		m.ResetIsSecondGroup()
@@ -6845,8 +6796,8 @@ type SessionMutation struct {
 	updatedAt      *time.Time
 	hashedToken    *[]byte
 	expiresAt      *time.Time
-	userAgent      *string
-	ip             *string
+	userAgent      *schema.EncryptedField[*string]
+	ip             *schema.EncryptedField[*string]
 	clearedFields  map[string]struct{}
 	user           *uuid.UUID
 	cleareduser    bool
@@ -7106,12 +7057,12 @@ func (m *SessionMutation) ResetExpiresAt() {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (m *SessionMutation) SetUserAgent(s string) {
-	m.userAgent = &s
+func (m *SessionMutation) SetUserAgent(sf schema.EncryptedField[*string]) {
+	m.userAgent = &sf
 }
 
 // UserAgent returns the value of the "userAgent" field in the mutation.
-func (m *SessionMutation) UserAgent() (r string, exists bool) {
+func (m *SessionMutation) UserAgent() (r schema.EncryptedField[*string], exists bool) {
 	v := m.userAgent
 	if v == nil {
 		return
@@ -7122,7 +7073,7 @@ func (m *SessionMutation) UserAgent() (r string, exists bool) {
 // OldUserAgent returns the old "userAgent" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+func (m *SessionMutation) OldUserAgent(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
 	}
@@ -7136,18 +7087,31 @@ func (m *SessionMutation) OldUserAgent(ctx context.Context) (v string, err error
 	return oldValue.UserAgent, nil
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (m *SessionMutation) ClearUserAgent() {
+	m.userAgent = nil
+	m.clearedFields[session.FieldUserAgent] = struct{}{}
+}
+
+// UserAgentCleared returns if the "userAgent" field was cleared in this mutation.
+func (m *SessionMutation) UserAgentCleared() bool {
+	_, ok := m.clearedFields[session.FieldUserAgent]
+	return ok
+}
+
 // ResetUserAgent resets all changes to the "userAgent" field.
 func (m *SessionMutation) ResetUserAgent() {
 	m.userAgent = nil
+	delete(m.clearedFields, session.FieldUserAgent)
 }
 
 // SetIP sets the "ip" field.
-func (m *SessionMutation) SetIP(s string) {
-	m.ip = &s
+func (m *SessionMutation) SetIP(sf schema.EncryptedField[*string]) {
+	m.ip = &sf
 }
 
 // IP returns the value of the "ip" field in the mutation.
-func (m *SessionMutation) IP() (r string, exists bool) {
+func (m *SessionMutation) IP() (r schema.EncryptedField[*string], exists bool) {
 	v := m.ip
 	if v == nil {
 		return
@@ -7158,7 +7122,7 @@ func (m *SessionMutation) IP() (r string, exists bool) {
 // OldIP returns the old "ip" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldIP(ctx context.Context) (v string, err error) {
+func (m *SessionMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIP is only allowed on UpdateOne operations")
 	}
@@ -7172,9 +7136,22 @@ func (m *SessionMutation) OldIP(ctx context.Context) (v string, err error) {
 	return oldValue.IP, nil
 }
 
+// ClearIP clears the value of the "ip" field.
+func (m *SessionMutation) ClearIP() {
+	m.ip = nil
+	m.clearedFields[session.FieldIP] = struct{}{}
+}
+
+// IPCleared returns if the "ip" field was cleared in this mutation.
+func (m *SessionMutation) IPCleared() bool {
+	_, ok := m.clearedFields[session.FieldIP]
+	return ok
+}
+
 // ResetIP resets all changes to the "ip" field.
 func (m *SessionMutation) ResetIP() {
 	m.ip = nil
+	delete(m.clearedFields, session.FieldIP)
 }
 
 // SetPasskeyID sets the "passkeyID" field.
@@ -7449,14 +7426,14 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 		m.SetExpiresAt(v)
 		return nil
 	case session.FieldUserAgent:
-		v, ok := value.(string)
+		v, ok := value.(schema.EncryptedField[*string])
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserAgent(v)
 		return nil
 	case session.FieldIP:
-		v, ok := value.(string)
+		v, ok := value.(schema.EncryptedField[*string])
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -7505,7 +7482,14 @@ func (m *SessionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SessionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(session.FieldUserAgent) {
+		fields = append(fields, session.FieldUserAgent)
+	}
+	if m.FieldCleared(session.FieldIP) {
+		fields = append(fields, session.FieldIP)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -7518,6 +7502,14 @@ func (m *SessionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SessionMutation) ClearField(name string) error {
+	switch name {
+	case session.FieldUserAgent:
+		m.ClearUserAgent()
+		return nil
+	case session.FieldIP:
+		m.ClearIP()
+		return nil
+	}
 	return fmt.Errorf("unknown Session nullable field %s", name)
 }
 
@@ -7657,7 +7649,7 @@ type StashMutation struct {
 	publicName                *string
 	content                   *[]byte
 	fileName                  *[]byte
-	encryptionDataKey         *[]byte
+	encryptionDataKey         *schema.EncryptedField[[]uint8]
 	passwordSalt              *[]byte
 	hashTime                  *uint32
 	addhashTime               *int32
@@ -8014,12 +8006,12 @@ func (m *StashMutation) ResetFileName() {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (m *StashMutation) SetEncryptionDataKey(b []byte) {
-	m.encryptionDataKey = &b
+func (m *StashMutation) SetEncryptionDataKey(sf schema.EncryptedField[[]uint8]) {
+	m.encryptionDataKey = &sf
 }
 
 // EncryptionDataKey returns the value of the "encryptionDataKey" field in the mutation.
-func (m *StashMutation) EncryptionDataKey() (r []byte, exists bool) {
+func (m *StashMutation) EncryptionDataKey() (r schema.EncryptedField[[]uint8], exists bool) {
 	v := m.encryptionDataKey
 	if v == nil {
 		return
@@ -8030,7 +8022,7 @@ func (m *StashMutation) EncryptionDataKey() (r []byte, exists bool) {
 // OldEncryptionDataKey returns the old "encryptionDataKey" field's value of the Stash entity.
 // If the Stash object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StashMutation) OldEncryptionDataKey(ctx context.Context) (v []byte, err error) {
+func (m *StashMutation) OldEncryptionDataKey(ctx context.Context) (v schema.EncryptedField[[]uint8], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldEncryptionDataKey is only allowed on UpdateOne operations")
 	}
@@ -8743,7 +8735,7 @@ func (m *StashMutation) SetField(name string, value ent.Value) error {
 		m.SetFileName(v)
 		return nil
 	case stash.FieldEncryptionDataKey:
-		v, ok := value.([]byte)
+		v, ok := value.(schema.EncryptedField[[]uint8])
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -10713,8 +10705,7 @@ type UserMessengerMutation struct {
 	version            *int
 	addversion         *int
 	enabled            *bool
-	options            *json.RawMessage
-	appendoptions      json.RawMessage
+	options            *schema.EncryptedRawJSON
 	clearedFields      map[string]struct{}
 	user               *uuid.UUID
 	cleareduser        bool
@@ -11031,13 +11022,12 @@ func (m *UserMessengerMutation) ResetEnabled() {
 }
 
 // SetOptions sets the "options" field.
-func (m *UserMessengerMutation) SetOptions(jm json.RawMessage) {
-	m.options = &jm
-	m.appendoptions = nil
+func (m *UserMessengerMutation) SetOptions(srj schema.EncryptedRawJSON) {
+	m.options = &srj
 }
 
 // Options returns the value of the "options" field in the mutation.
-func (m *UserMessengerMutation) Options() (r json.RawMessage, exists bool) {
+func (m *UserMessengerMutation) Options() (r schema.EncryptedRawJSON, exists bool) {
 	v := m.options
 	if v == nil {
 		return
@@ -11048,7 +11038,7 @@ func (m *UserMessengerMutation) Options() (r json.RawMessage, exists bool) {
 // OldOptions returns the old "options" field's value of the UserMessenger entity.
 // If the UserMessenger object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v json.RawMessage, err error) {
+func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v schema.EncryptedRawJSON, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOptions is only allowed on UpdateOne operations")
 	}
@@ -11062,23 +11052,9 @@ func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v json.RawMessa
 	return oldValue.Options, nil
 }
 
-// AppendOptions adds jm to the "options" field.
-func (m *UserMessengerMutation) AppendOptions(jm json.RawMessage) {
-	m.appendoptions = append(m.appendoptions, jm...)
-}
-
-// AppendedOptions returns the list of values that were appended to the "options" field in this mutation.
-func (m *UserMessengerMutation) AppendedOptions() (json.RawMessage, bool) {
-	if len(m.appendoptions) == 0 {
-		return nil, false
-	}
-	return m.appendoptions, true
-}
-
 // ResetOptions resets all changes to the "options" field.
 func (m *UserMessengerMutation) ResetOptions() {
 	m.options = nil
-	m.appendoptions = nil
 }
 
 // SetUserID sets the "userID" field.
@@ -11344,7 +11320,7 @@ func (m *UserMessengerMutation) SetField(name string, value ent.Value) error {
 		m.SetEnabled(v)
 		return nil
 	case usermessenger.FieldOptions:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(schema.EncryptedRawJSON)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

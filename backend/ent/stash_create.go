@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -71,7 +72,7 @@ func (_c *StashCreate) SetFileName(v []byte) *StashCreate {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (_c *StashCreate) SetEncryptionDataKey(v []byte) *StashCreate {
+func (_c *StashCreate) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashCreate {
 	_c.mutation.SetEncryptionDataKey(v)
 	return _c
 }
@@ -271,11 +272,6 @@ func (_c *StashCreate) check() error {
 	}
 	if _, ok := _c.mutation.EncryptionDataKey(); !ok {
 		return &ValidationError{Name: "encryptionDataKey", err: errors.New(`ent: missing required field "Stash.encryptionDataKey"`)}
-	}
-	if v, ok := _c.mutation.EncryptionDataKey(); ok {
-		if err := stash.EncryptionDataKeyValidator(v); err != nil {
-			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
-		}
 	}
 	if _, ok := _c.mutation.PasswordSalt(); !ok {
 		return &ValidationError{Name: "passwordSalt", err: errors.New(`ent: missing required field "Stash.passwordSalt"`)}
@@ -569,7 +565,7 @@ func (u *StashUpsert) UpdateFileName() *StashUpsert {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (u *StashUpsert) SetEncryptionDataKey(v []byte) *StashUpsert {
+func (u *StashUpsert) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpsert {
 	u.Set(stash.FieldEncryptionDataKey, v)
 	return u
 }
@@ -852,7 +848,7 @@ func (u *StashUpsertOne) UpdateFileName() *StashUpsertOne {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (u *StashUpsertOne) SetEncryptionDataKey(v []byte) *StashUpsertOne {
+func (u *StashUpsertOne) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
 		s.SetEncryptionDataKey(v)
 	})
@@ -1326,7 +1322,7 @@ func (u *StashUpsertBulk) UpdateFileName() *StashUpsertBulk {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (u *StashUpsertBulk) SetEncryptionDataKey(v []byte) *StashUpsertBulk {
+func (u *StashUpsertBulk) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
 		s.SetEncryptionDataKey(v)
 	})

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 )
@@ -30,9 +31,9 @@ type DownloadSession struct {
 	// ValidUntil holds the value of the "validUntil" field.
 	ValidUntil time.Time `json:"validUntil,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent string `json:"userAgent,omitempty"`
+	UserAgent *schema.EncryptedField[*string] `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
+	IP *schema.EncryptedField[*string] `json:"ip,omitempty"`
 	// StashID holds the value of the "stashID" field.
 	StashID uuid.UUID `json:"stashID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -77,10 +78,10 @@ func (*DownloadSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case downloadsession.FieldUserAgent, downloadsession.FieldIP:
+			values[i] = &sql.NullScanner{S: new(schema.EncryptedField[*string])}
 		case downloadsession.FieldHashedAuthCode:
 			values[i] = new([]byte)
-		case downloadsession.FieldUserAgent, downloadsession.FieldIP:
-			values[i] = new(sql.NullString)
 		case downloadsession.FieldCreatedAt, downloadsession.FieldUpdatedAt, downloadsession.FieldValidFrom, downloadsession.FieldValidUntil:
 			values[i] = new(sql.NullTime)
 		case downloadsession.FieldID, downloadsession.FieldStashID:
@@ -137,16 +138,18 @@ func (_m *DownloadSession) assignValues(columns []string, values []any) error {
 				_m.ValidUntil = value.Time
 			}
 		case downloadsession.FieldUserAgent:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value.Valid {
-				_m.UserAgent = value.String
+				_m.UserAgent = new(schema.EncryptedField[*string])
+				*_m.UserAgent = *value.S.(*schema.EncryptedField[*string])
 			}
 		case downloadsession.FieldIP:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value.Valid {
-				_m.IP = value.String
+				_m.IP = new(schema.EncryptedField[*string])
+				*_m.IP = *value.S.(*schema.EncryptedField[*string])
 			}
 		case downloadsession.FieldStashID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -215,11 +218,15 @@ func (_m *DownloadSession) String() string {
 	builder.WriteString("validUntil=")
 	builder.WriteString(_m.ValidUntil.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("userAgent=")
-	builder.WriteString(_m.UserAgent)
+	if v := _m.UserAgent; v != nil {
+		builder.WriteString("userAgent=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(_m.IP)
+	if v := _m.IP; v != nil {
+		builder.WriteString("ip=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("stashID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.StashID))

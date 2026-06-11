@@ -109,8 +109,6 @@ var (
 	ContentValidator func([]byte) error
 	// FileNameValidator is a validator for the "fileName" field. It is called by the builders before save.
 	FileNameValidator func([]byte) error
-	// EncryptionDataKeyValidator is a validator for the "encryptionDataKey" field. It is called by the builders before save.
-	EncryptionDataKeyValidator func([]byte) error
 	// PasswordSaltValidator is a validator for the "passwordSalt" field. It is called by the builders before save.
 	PasswordSaltValidator func([]byte) error
 	// DefaultIsSelfLocked holds the default value on creation for the "isSelfLocked" field.

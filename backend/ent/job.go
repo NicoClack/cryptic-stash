@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +38,7 @@ type Job struct {
 	// Weight holds the value of the "weight" field.
 	Weight int `json:"weight,omitempty"`
 	// Body holds the value of the "body" field.
-	Body json.RawMessage `json:"body,omitempty"`
+	Body schema.EncryptedRawJSON `json:"body,omitempty"`
 	// Status holds the value of the "status" field.
 	Status job.Status `json:"status,omitempty"`
 	// Retries holds the value of the "retries" field.
@@ -56,7 +56,7 @@ func (*Job) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case job.FieldBody:
-			values[i] = new([]byte)
+			values[i] = new(schema.EncryptedRawJSON)
 		case job.FieldLoggedStallWarning:
 			values[i] = new(sql.NullBool)
 		case job.FieldRetriedFraction:
@@ -145,12 +145,10 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 				_m.Weight = int(value.Int64)
 			}
 		case job.FieldBody:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*schema.EncryptedRawJSON); !ok {
 				return fmt.Errorf("unexpected type %T for field body", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Body); err != nil {
-					return fmt.Errorf("unmarshal field body: %w", err)
-				}
+			} else if value != nil {
+				_m.Body = *value
 			}
 		case job.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {

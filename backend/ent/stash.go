@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -32,7 +33,7 @@ type Stash struct {
 	// FileName holds the value of the "fileName" field.
 	FileName []byte `json:"fileName,omitempty"`
 	// EncryptionDataKey holds the value of the "encryptionDataKey" field.
-	EncryptionDataKey []byte `json:"encryptionDataKey,omitempty"`
+	EncryptionDataKey schema.EncryptedField[[]uint8] `json:"encryptionDataKey,omitempty"`
 	// PasswordSalt holds the value of the "passwordSalt" field.
 	PasswordSalt []byte `json:"passwordSalt,omitempty"`
 	// HashTime holds the value of the "hashTime" field.
@@ -93,8 +94,10 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case stash.FieldContent, stash.FieldFileName, stash.FieldEncryptionDataKey, stash.FieldPasswordSalt:
+		case stash.FieldContent, stash.FieldFileName, stash.FieldPasswordSalt:
 			values[i] = new([]byte)
+		case stash.FieldEncryptionDataKey:
+			values[i] = new(schema.EncryptedField[[]uint8])
 		case stash.FieldIsSelfLocked, stash.FieldIsAdminLocked:
 			values[i] = new(sql.NullBool)
 		case stash.FieldHashTime, stash.FieldHashMemory, stash.FieldHashThreads:
@@ -163,7 +166,7 @@ func (_m *Stash) assignValues(columns []string, values []any) error {
 				_m.FileName = *value
 			}
 		case stash.FieldEncryptionDataKey:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*schema.EncryptedField[[]uint8]); !ok {
 				return fmt.Errorf("unexpected type %T for field encryptionDataKey", values[i])
 			} else if value != nil {
 				_m.EncryptionDataKey = *value

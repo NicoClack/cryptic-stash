@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -87,7 +88,7 @@ func FileName(v []byte) predicate.Stash {
 }
 
 // EncryptionDataKey applies equality check predicate on the "encryptionDataKey" field. It's identical to EncryptionDataKeyEQ.
-func EncryptionDataKey(v []byte) predicate.Stash {
+func EncryptionDataKey(v schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldEncryptionDataKey, v))
 }
 
@@ -412,42 +413,42 @@ func FileNameLTE(v []byte) predicate.Stash {
 }
 
 // EncryptionDataKeyEQ applies the EQ predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyEQ(v []byte) predicate.Stash {
+func EncryptionDataKeyEQ(v schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldEncryptionDataKey, v))
 }
 
 // EncryptionDataKeyNEQ applies the NEQ predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyNEQ(v []byte) predicate.Stash {
+func EncryptionDataKeyNEQ(v schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldNEQ(FieldEncryptionDataKey, v))
 }
 
 // EncryptionDataKeyIn applies the In predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyIn(vs ...[]byte) predicate.Stash {
+func EncryptionDataKeyIn(vs ...schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldIn(FieldEncryptionDataKey, vs...))
 }
 
 // EncryptionDataKeyNotIn applies the NotIn predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyNotIn(vs ...[]byte) predicate.Stash {
+func EncryptionDataKeyNotIn(vs ...schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldNotIn(FieldEncryptionDataKey, vs...))
 }
 
 // EncryptionDataKeyGT applies the GT predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyGT(v []byte) predicate.Stash {
+func EncryptionDataKeyGT(v schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldGT(FieldEncryptionDataKey, v))
 }
 
 // EncryptionDataKeyGTE applies the GTE predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyGTE(v []byte) predicate.Stash {
+func EncryptionDataKeyGTE(v schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldGTE(FieldEncryptionDataKey, v))
 }
 
 // EncryptionDataKeyLT applies the LT predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyLT(v []byte) predicate.Stash {
+func EncryptionDataKeyLT(v schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldLT(FieldEncryptionDataKey, v))
 }
 
 // EncryptionDataKeyLTE applies the LTE predicate on the "encryptionDataKey" field.
-func EncryptionDataKeyLTE(v []byte) predicate.Stash {
+func EncryptionDataKeyLTE(v schema.EncryptedField[[]uint8]) predicate.Stash {
 	return predicate.Stash(sql.FieldLTE(FieldEncryptionDataKey, v))
 }
 

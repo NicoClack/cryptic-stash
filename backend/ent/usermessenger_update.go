@@ -4,17 +4,16 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
@@ -103,14 +102,16 @@ func (_u *UserMessengerUpdate) SetNillableEnabled(v *bool) *UserMessengerUpdate 
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdate) SetOptions(v json.RawMessage) *UserMessengerUpdate {
+func (_u *UserMessengerUpdate) SetOptions(v schema.EncryptedRawJSON) *UserMessengerUpdate {
 	_u.mutation.SetOptions(v)
 	return _u
 }
 
-// AppendOptions appends value to the "options" field.
-func (_u *UserMessengerUpdate) AppendOptions(v json.RawMessage) *UserMessengerUpdate {
-	_u.mutation.AppendOptions(v)
+// SetNillableOptions sets the "options" field if the given value is not nil.
+func (_u *UserMessengerUpdate) SetNillableOptions(v *schema.EncryptedRawJSON) *UserMessengerUpdate {
+	if v != nil {
+		_u.SetOptions(*v)
+	}
 	return _u
 }
 
@@ -260,12 +261,7 @@ func (_u *UserMessengerUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedOptions(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, usermessenger.FieldOptions, value)
-		})
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -431,14 +427,16 @@ func (_u *UserMessengerUpdateOne) SetNillableEnabled(v *bool) *UserMessengerUpda
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdateOne) SetOptions(v json.RawMessage) *UserMessengerUpdateOne {
+func (_u *UserMessengerUpdateOne) SetOptions(v schema.EncryptedRawJSON) *UserMessengerUpdateOne {
 	_u.mutation.SetOptions(v)
 	return _u
 }
 
-// AppendOptions appends value to the "options" field.
-func (_u *UserMessengerUpdateOne) AppendOptions(v json.RawMessage) *UserMessengerUpdateOne {
-	_u.mutation.AppendOptions(v)
+// SetNillableOptions sets the "options" field if the given value is not nil.
+func (_u *UserMessengerUpdateOne) SetNillableOptions(v *schema.EncryptedRawJSON) *UserMessengerUpdateOne {
+	if v != nil {
+		_u.SetOptions(*v)
+	}
 	return _u
 }
 
@@ -618,12 +616,7 @@ func (_u *UserMessengerUpdateOne) sqlSave(ctx context.Context) (_node *UserMesse
 		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedOptions(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, usermessenger.FieldOptions, value)
-		})
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

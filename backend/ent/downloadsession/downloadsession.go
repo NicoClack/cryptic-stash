@@ -113,16 +113,6 @@ func ByValidUntil(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValidUntil, opts...).ToFunc()
 }
 
-// ByUserAgent orders the results by the userAgent field.
-func ByUserAgent(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserAgent, opts...).ToFunc()
-}
-
-// ByIP orders the results by the ip field.
-func ByIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIP, opts...).ToFunc()
-}
-
 // ByStashID orders the results by the stashID field.
 func ByStashID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStashID, opts...).ToFunc()

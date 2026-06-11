@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -98,6 +99,11 @@ func Priority(v int8) predicate.Job {
 // Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
 func Weight(v int) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldWeight, v))
+}
+
+// Body applies equality check predicate on the "body" field. It's identical to BodyEQ.
+func Body(v schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldBody, v))
 }
 
 // Retries applies equality check predicate on the "retries" field. It's identical to RetriesEQ.
@@ -508,6 +514,46 @@ func WeightLT(v int) predicate.Job {
 // WeightLTE applies the LTE predicate on the "weight" field.
 func WeightLTE(v int) predicate.Job {
 	return predicate.Job(sql.FieldLTE(FieldWeight, v))
+}
+
+// BodyEQ applies the EQ predicate on the "body" field.
+func BodyEQ(v schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldBody, v))
+}
+
+// BodyNEQ applies the NEQ predicate on the "body" field.
+func BodyNEQ(v schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldNEQ(FieldBody, v))
+}
+
+// BodyIn applies the In predicate on the "body" field.
+func BodyIn(vs ...schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldIn(FieldBody, vs...))
+}
+
+// BodyNotIn applies the NotIn predicate on the "body" field.
+func BodyNotIn(vs ...schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldNotIn(FieldBody, vs...))
+}
+
+// BodyGT applies the GT predicate on the "body" field.
+func BodyGT(v schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldGT(FieldBody, v))
+}
+
+// BodyGTE applies the GTE predicate on the "body" field.
+func BodyGTE(v schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldGTE(FieldBody, v))
+}
+
+// BodyLT applies the LT predicate on the "body" field.
+func BodyLT(v schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldLT(FieldBody, v))
+}
+
+// BodyLTE applies the LTE predicate on the "body" field.
+func BodyLTE(v schema.EncryptedRawJSON) predicate.Job {
+	return predicate.Job(sql.FieldLTE(FieldBody, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

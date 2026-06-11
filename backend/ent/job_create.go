@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -14,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -88,7 +88,7 @@ func (_c *JobCreate) SetWeight(v int) *JobCreate {
 }
 
 // SetBody sets the "body" field.
-func (_c *JobCreate) SetBody(v json.RawMessage) *JobCreate {
+func (_c *JobCreate) SetBody(v schema.EncryptedRawJSON) *JobCreate {
 	_c.mutation.SetBody(v)
 	return _c
 }
@@ -344,7 +344,7 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 		_node.Weight = value
 	}
 	if value, ok := _c.mutation.Body(); ok {
-		_spec.SetField(job.FieldBody, field.TypeJSON, value)
+		_spec.SetField(job.FieldBody, field.TypeBytes, value)
 		_node.Body = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
@@ -548,7 +548,7 @@ func (u *JobUpsert) AddWeight(v int) *JobUpsert {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsert) SetBody(v json.RawMessage) *JobUpsert {
+func (u *JobUpsert) SetBody(v schema.EncryptedRawJSON) *JobUpsert {
 	u.Set(job.FieldBody, v)
 	return u
 }
@@ -822,7 +822,7 @@ func (u *JobUpsertOne) UpdateWeight() *JobUpsertOne {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsertOne) SetBody(v json.RawMessage) *JobUpsertOne {
+func (u *JobUpsertOne) SetBody(v schema.EncryptedRawJSON) *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
 		s.SetBody(v)
 	})
@@ -1275,7 +1275,7 @@ func (u *JobUpsertBulk) UpdateWeight() *JobUpsertBulk {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsertBulk) SetBody(v json.RawMessage) *JobUpsertBulk {
+func (u *JobUpsertBulk) SetBody(v schema.EncryptedRawJSON) *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
 		s.SetBody(v)
 	})

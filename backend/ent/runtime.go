@@ -96,14 +96,6 @@ func init() {
 			return nil
 		}
 	}()
-	// inviteDescUserAgent is the schema descriptor for userAgent field.
-	inviteDescUserAgent := inviteFields[8].Descriptor()
-	// invite.DefaultUserAgent holds the default value on creation for the userAgent field.
-	invite.DefaultUserAgent = inviteDescUserAgent.Default.(string)
-	// inviteDescIP is the schema descriptor for ip field.
-	inviteDescIP := inviteFields[9].Descriptor()
-	// invite.DefaultIP holds the default value on creation for the ip field.
-	invite.DefaultIP = inviteDescIP.Default.(string)
 	// inviteDescID is the schema descriptor for id field.
 	inviteDescID := inviteFields[0].Descriptor()
 	// invite.DefaultID holds the default value on creation for the id field.
@@ -220,12 +212,26 @@ func init() {
 			return nil
 		}
 	}()
-	// passkeyDescSignCount is the schema descriptor for signCount field.
-	passkeyDescSignCount := passkeyFields[7].Descriptor()
-	// passkey.DefaultSignCount holds the default value on creation for the signCount field.
-	passkey.DefaultSignCount = passkeyDescSignCount.Default.(uint32)
+	// passkeyDescCredentialID is the schema descriptor for credentialID field.
+	passkeyDescCredentialID := passkeyFields[5].Descriptor()
+	// passkey.CredentialIDValidator is a validator for the "credentialID" field. It is called by the builders before save.
+	passkey.CredentialIDValidator = func() func([]byte) error {
+		validators := passkeyDescCredentialID.Validators
+		fns := [...]func([]byte) error{
+			validators[0].(func([]byte) error),
+			validators[1].(func([]byte) error),
+		}
+		return func(credentialID []byte) error {
+			for _, fn := range fns {
+				if err := fn(credentialID); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// passkeyDescIsSecondGroup is the schema descriptor for isSecondGroup field.
-	passkeyDescIsSecondGroup := passkeyFields[8].Descriptor()
+	passkeyDescIsSecondGroup := passkeyFields[7].Descriptor()
 	// passkey.DefaultIsSecondGroup holds the default value on creation for the isSecondGroup field.
 	passkey.DefaultIsSecondGroup = passkeyDescIsSecondGroup.Default.(bool)
 	// passkeyDescID is the schema descriptor for id field.
@@ -284,14 +290,6 @@ func init() {
 			return nil
 		}
 	}()
-	// sessionDescUserAgent is the schema descriptor for userAgent field.
-	sessionDescUserAgent := sessionFields[5].Descriptor()
-	// session.DefaultUserAgent holds the default value on creation for the userAgent field.
-	session.DefaultUserAgent = sessionDescUserAgent.Default.(string)
-	// sessionDescIP is the schema descriptor for ip field.
-	sessionDescIP := sessionFields[6].Descriptor()
-	// session.DefaultIP holds the default value on creation for the ip field.
-	session.DefaultIP = sessionDescIP.Default.(string)
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionFields[0].Descriptor()
 	// session.DefaultID holds the default value on creation for the id field.
@@ -350,24 +348,6 @@ func init() {
 		return func(fileName []byte) error {
 			for _, fn := range fns {
 				if err := fn(fileName); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// stashDescEncryptionDataKey is the schema descriptor for encryptionDataKey field.
-	stashDescEncryptionDataKey := stashFields[7].Descriptor()
-	// stash.EncryptionDataKeyValidator is a validator for the "encryptionDataKey" field. It is called by the builders before save.
-	stash.EncryptionDataKeyValidator = func() func([]byte) error {
-		validators := stashDescEncryptionDataKey.Validators
-		fns := [...]func([]byte) error{
-			validators[0].(func([]byte) error),
-			validators[1].(func([]byte) error),
-		}
-		return func(encryptionDataKey []byte) error {
-			for _, fn := range fns {
-				if err := fn(encryptionDataKey); err != nil {
 					return err
 				}
 			}

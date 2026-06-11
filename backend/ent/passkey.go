@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 )
@@ -25,14 +26,12 @@ type Passkey struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// AllowSuperUser holds the value of the "allowSuperUser" field.
+	AllowSuperUser bool `json:"allowSuperUser,omitempty"`
 	// CredentialID holds the value of the "credentialID" field.
 	CredentialID []byte `json:"credentialID,omitempty"`
-	// PublicKey holds the value of the "publicKey" field.
-	PublicKey []byte `json:"publicKey,omitempty"`
-	// Aaguid holds the value of the "aaguid" field.
-	Aaguid uuid.UUID `json:"aaguid,omitempty"`
-	// SignCount holds the value of the "signCount" field.
-	SignCount uint32 `json:"signCount,omitempty"`
+	// Credential holds the value of the "credential" field.
+	Credential schema.EncryptedCredential `json:"credential,omitempty"`
 	// IsSecondGroup holds the value of the "isSecondGroup" field.
 	IsSecondGroup bool `json:"isSecondGroup,omitempty"`
 	// UserID holds the value of the "userID" field.
@@ -79,17 +78,17 @@ func (*Passkey) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case passkey.FieldCredentialID, passkey.FieldPublicKey:
+		case passkey.FieldCredentialID:
 			values[i] = new([]byte)
-		case passkey.FieldIsSecondGroup:
+		case passkey.FieldCredential:
+			values[i] = new(schema.EncryptedCredential)
+		case passkey.FieldAllowSuperUser, passkey.FieldIsSecondGroup:
 			values[i] = new(sql.NullBool)
-		case passkey.FieldSignCount:
-			values[i] = new(sql.NullInt64)
 		case passkey.FieldName:
 			values[i] = new(sql.NullString)
 		case passkey.FieldCreatedAt, passkey.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case passkey.FieldID, passkey.FieldAaguid, passkey.FieldUserID:
+		case passkey.FieldID, passkey.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -130,29 +129,23 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
+		case passkey.FieldAllowSuperUser:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field allowSuperUser", values[i])
+			} else if value.Valid {
+				_m.AllowSuperUser = value.Bool
+			}
 		case passkey.FieldCredentialID:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field credentialID", values[i])
 			} else if value != nil {
 				_m.CredentialID = *value
 			}
-		case passkey.FieldPublicKey:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field publicKey", values[i])
+		case passkey.FieldCredential:
+			if value, ok := values[i].(*schema.EncryptedCredential); !ok {
+				return fmt.Errorf("unexpected type %T for field credential", values[i])
 			} else if value != nil {
-				_m.PublicKey = *value
-			}
-		case passkey.FieldAaguid:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field aaguid", values[i])
-			} else if value != nil {
-				_m.Aaguid = *value
-			}
-		case passkey.FieldSignCount:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field signCount", values[i])
-			} else if value.Valid {
-				_m.SignCount = uint32(value.Int64)
+				_m.Credential = *value
 			}
 		case passkey.FieldIsSecondGroup:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -221,17 +214,14 @@ func (_m *Passkey) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
+	builder.WriteString("allowSuperUser=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AllowSuperUser))
+	builder.WriteString(", ")
 	builder.WriteString("credentialID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CredentialID))
 	builder.WriteString(", ")
-	builder.WriteString("publicKey=")
-	builder.WriteString(fmt.Sprintf("%v", _m.PublicKey))
-	builder.WriteString(", ")
-	builder.WriteString("aaguid=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Aaguid))
-	builder.WriteString(", ")
-	builder.WriteString("signCount=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SignCount))
+	builder.WriteString("credential=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Credential))
 	builder.WriteString(", ")
 	builder.WriteString("isSecondGroup=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsSecondGroup))

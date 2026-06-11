@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -11,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
-	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -34,11 +33,11 @@ type Invite struct {
 	// ExpiredReason holds the value of the "expiredReason" field.
 	ExpiredReason *invite.ExpiredReason `json:"expiredReason,omitempty"`
 	// WebAuthnSession holds the value of the "webAuthnSession" field.
-	WebAuthnSession *webauthn.SessionData `json:"webAuthnSession,omitempty"`
+	WebAuthnSession schema.EncryptedSessionData `json:"webAuthnSession,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent string `json:"userAgent,omitempty"`
+	UserAgent *schema.EncryptedField[*string] `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
+	IP *schema.EncryptedField[*string] `json:"ip,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -72,9 +71,13 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case invite.FieldHashedCode, invite.FieldWebAuthnSession:
+		case invite.FieldUserAgent, invite.FieldIP:
+			values[i] = &sql.NullScanner{S: new(schema.EncryptedField[*string])}
+		case invite.FieldHashedCode:
 			values[i] = new([]byte)
-		case invite.FieldEmail, invite.FieldExpiredReason, invite.FieldUserAgent, invite.FieldIP:
+		case invite.FieldWebAuthnSession:
+			values[i] = new(schema.EncryptedSessionData)
+		case invite.FieldEmail, invite.FieldExpiredReason:
 			values[i] = new(sql.NullString)
 		case invite.FieldCreatedAt, invite.FieldUpdatedAt, invite.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -139,24 +142,24 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 				*_m.ExpiredReason = invite.ExpiredReason(value.String)
 			}
 		case invite.FieldWebAuthnSession:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*schema.EncryptedSessionData); !ok {
 				return fmt.Errorf("unexpected type %T for field webAuthnSession", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.WebAuthnSession); err != nil {
-					return fmt.Errorf("unmarshal field webAuthnSession: %w", err)
-				}
+			} else if value != nil {
+				_m.WebAuthnSession = *value
 			}
 		case invite.FieldUserAgent:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value.Valid {
-				_m.UserAgent = value.String
+				_m.UserAgent = new(schema.EncryptedField[*string])
+				*_m.UserAgent = *value.S.(*schema.EncryptedField[*string])
 			}
 		case invite.FieldIP:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value.Valid {
-				_m.IP = value.String
+				_m.IP = new(schema.EncryptedField[*string])
+				*_m.IP = *value.S.(*schema.EncryptedField[*string])
 			}
 		case invite.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -228,11 +231,15 @@ func (_m *Invite) String() string {
 	builder.WriteString("webAuthnSession=")
 	builder.WriteString(fmt.Sprintf("%v", _m.WebAuthnSession))
 	builder.WriteString(", ")
-	builder.WriteString("userAgent=")
-	builder.WriteString(_m.UserAgent)
+	if v := _m.UserAgent; v != nil {
+		builder.WriteString("userAgent=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(_m.IP)
+	if v := _m.IP; v != nil {
+		builder.WriteString("ip=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -65,56 +66,37 @@ func (_u *PasskeyUpdate) SetNillableName(v *string) *PasskeyUpdate {
 	return _u
 }
 
+// SetAllowSuperUser sets the "allowSuperUser" field.
+func (_u *PasskeyUpdate) SetAllowSuperUser(v bool) *PasskeyUpdate {
+	_u.mutation.SetAllowSuperUser(v)
+	return _u
+}
+
+// SetNillableAllowSuperUser sets the "allowSuperUser" field if the given value is not nil.
+func (_u *PasskeyUpdate) SetNillableAllowSuperUser(v *bool) *PasskeyUpdate {
+	if v != nil {
+		_u.SetAllowSuperUser(*v)
+	}
+	return _u
+}
+
 // SetCredentialID sets the "credentialID" field.
 func (_u *PasskeyUpdate) SetCredentialID(v []byte) *PasskeyUpdate {
 	_u.mutation.SetCredentialID(v)
 	return _u
 }
 
-// SetPublicKey sets the "publicKey" field.
-func (_u *PasskeyUpdate) SetPublicKey(v []byte) *PasskeyUpdate {
-	_u.mutation.SetPublicKey(v)
+// SetCredential sets the "credential" field.
+func (_u *PasskeyUpdate) SetCredential(v schema.EncryptedCredential) *PasskeyUpdate {
+	_u.mutation.SetCredential(v)
 	return _u
 }
 
-// SetAaguid sets the "aaguid" field.
-func (_u *PasskeyUpdate) SetAaguid(v uuid.UUID) *PasskeyUpdate {
-	_u.mutation.SetAaguid(v)
-	return _u
-}
-
-// SetNillableAaguid sets the "aaguid" field if the given value is not nil.
-func (_u *PasskeyUpdate) SetNillableAaguid(v *uuid.UUID) *PasskeyUpdate {
+// SetNillableCredential sets the "credential" field if the given value is not nil.
+func (_u *PasskeyUpdate) SetNillableCredential(v *schema.EncryptedCredential) *PasskeyUpdate {
 	if v != nil {
-		_u.SetAaguid(*v)
+		_u.SetCredential(*v)
 	}
-	return _u
-}
-
-// ClearAaguid clears the value of the "aaguid" field.
-func (_u *PasskeyUpdate) ClearAaguid() *PasskeyUpdate {
-	_u.mutation.ClearAaguid()
-	return _u
-}
-
-// SetSignCount sets the "signCount" field.
-func (_u *PasskeyUpdate) SetSignCount(v uint32) *PasskeyUpdate {
-	_u.mutation.ResetSignCount()
-	_u.mutation.SetSignCount(v)
-	return _u
-}
-
-// SetNillableSignCount sets the "signCount" field if the given value is not nil.
-func (_u *PasskeyUpdate) SetNillableSignCount(v *uint32) *PasskeyUpdate {
-	if v != nil {
-		_u.SetSignCount(*v)
-	}
-	return _u
-}
-
-// AddSignCount adds value to the "signCount" field.
-func (_u *PasskeyUpdate) AddSignCount(v int32) *PasskeyUpdate {
-	_u.mutation.AddSignCount(v)
 	return _u
 }
 
@@ -241,6 +223,11 @@ func (_u *PasskeyUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Passkey.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CredentialID(); ok {
+		if err := passkey.CredentialIDValidator(v); err != nil {
+			return &ValidationError{Name: "credentialID", err: fmt.Errorf(`ent: validator failed for field "Passkey.credentialID": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Passkey.user"`)
 	}
@@ -268,23 +255,14 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.AllowSuperUser(); ok {
+		_spec.SetField(passkey.FieldAllowSuperUser, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.CredentialID(); ok {
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.PublicKey(); ok {
-		_spec.SetField(passkey.FieldPublicKey, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.Aaguid(); ok {
-		_spec.SetField(passkey.FieldAaguid, field.TypeUUID, value)
-	}
-	if _u.mutation.AaguidCleared() {
-		_spec.ClearField(passkey.FieldAaguid, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.SignCount(); ok {
-		_spec.SetField(passkey.FieldSignCount, field.TypeUint32, value)
-	}
-	if value, ok := _u.mutation.AddedSignCount(); ok {
-		_spec.AddField(passkey.FieldSignCount, field.TypeUint32, value)
+	if value, ok := _u.mutation.Credential(); ok {
+		_spec.SetField(passkey.FieldCredential, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
@@ -417,56 +395,37 @@ func (_u *PasskeyUpdateOne) SetNillableName(v *string) *PasskeyUpdateOne {
 	return _u
 }
 
+// SetAllowSuperUser sets the "allowSuperUser" field.
+func (_u *PasskeyUpdateOne) SetAllowSuperUser(v bool) *PasskeyUpdateOne {
+	_u.mutation.SetAllowSuperUser(v)
+	return _u
+}
+
+// SetNillableAllowSuperUser sets the "allowSuperUser" field if the given value is not nil.
+func (_u *PasskeyUpdateOne) SetNillableAllowSuperUser(v *bool) *PasskeyUpdateOne {
+	if v != nil {
+		_u.SetAllowSuperUser(*v)
+	}
+	return _u
+}
+
 // SetCredentialID sets the "credentialID" field.
 func (_u *PasskeyUpdateOne) SetCredentialID(v []byte) *PasskeyUpdateOne {
 	_u.mutation.SetCredentialID(v)
 	return _u
 }
 
-// SetPublicKey sets the "publicKey" field.
-func (_u *PasskeyUpdateOne) SetPublicKey(v []byte) *PasskeyUpdateOne {
-	_u.mutation.SetPublicKey(v)
+// SetCredential sets the "credential" field.
+func (_u *PasskeyUpdateOne) SetCredential(v schema.EncryptedCredential) *PasskeyUpdateOne {
+	_u.mutation.SetCredential(v)
 	return _u
 }
 
-// SetAaguid sets the "aaguid" field.
-func (_u *PasskeyUpdateOne) SetAaguid(v uuid.UUID) *PasskeyUpdateOne {
-	_u.mutation.SetAaguid(v)
-	return _u
-}
-
-// SetNillableAaguid sets the "aaguid" field if the given value is not nil.
-func (_u *PasskeyUpdateOne) SetNillableAaguid(v *uuid.UUID) *PasskeyUpdateOne {
+// SetNillableCredential sets the "credential" field if the given value is not nil.
+func (_u *PasskeyUpdateOne) SetNillableCredential(v *schema.EncryptedCredential) *PasskeyUpdateOne {
 	if v != nil {
-		_u.SetAaguid(*v)
+		_u.SetCredential(*v)
 	}
-	return _u
-}
-
-// ClearAaguid clears the value of the "aaguid" field.
-func (_u *PasskeyUpdateOne) ClearAaguid() *PasskeyUpdateOne {
-	_u.mutation.ClearAaguid()
-	return _u
-}
-
-// SetSignCount sets the "signCount" field.
-func (_u *PasskeyUpdateOne) SetSignCount(v uint32) *PasskeyUpdateOne {
-	_u.mutation.ResetSignCount()
-	_u.mutation.SetSignCount(v)
-	return _u
-}
-
-// SetNillableSignCount sets the "signCount" field if the given value is not nil.
-func (_u *PasskeyUpdateOne) SetNillableSignCount(v *uint32) *PasskeyUpdateOne {
-	if v != nil {
-		_u.SetSignCount(*v)
-	}
-	return _u
-}
-
-// AddSignCount adds value to the "signCount" field.
-func (_u *PasskeyUpdateOne) AddSignCount(v int32) *PasskeyUpdateOne {
-	_u.mutation.AddSignCount(v)
 	return _u
 }
 
@@ -606,6 +565,11 @@ func (_u *PasskeyUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Passkey.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CredentialID(); ok {
+		if err := passkey.CredentialIDValidator(v); err != nil {
+			return &ValidationError{Name: "credentialID", err: fmt.Errorf(`ent: validator failed for field "Passkey.credentialID": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Passkey.user"`)
 	}
@@ -650,23 +614,14 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.AllowSuperUser(); ok {
+		_spec.SetField(passkey.FieldAllowSuperUser, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.CredentialID(); ok {
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.PublicKey(); ok {
-		_spec.SetField(passkey.FieldPublicKey, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.Aaguid(); ok {
-		_spec.SetField(passkey.FieldAaguid, field.TypeUUID, value)
-	}
-	if _u.mutation.AaguidCleared() {
-		_spec.ClearField(passkey.FieldAaguid, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.SignCount(); ok {
-		_spec.SetField(passkey.FieldSignCount, field.TypeUint32, value)
-	}
-	if value, ok := _u.mutation.AddedSignCount(); ok {
-		_spec.AddField(passkey.FieldSignCount, field.TypeUint32, value)
+	if value, ok := _u.mutation.Credential(); ok {
+		_spec.SetField(passkey.FieldCredential, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)

@@ -81,10 +81,6 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// HashedTokenValidator is a validator for the "hashedToken" field. It is called by the builders before save.
 	HashedTokenValidator func([]byte) error
-	// DefaultUserAgent holds the default value on creation for the "userAgent" field.
-	DefaultUserAgent string
-	// DefaultIP holds the default value on creation for the "ip" field.
-	DefaultIP string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -110,16 +106,6 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiresAt orders the results by the expiresAt field.
 func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
-}
-
-// ByUserAgent orders the results by the userAgent field.
-func ByUserAgent(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserAgent, opts...).ToFunc()
-}
-
-// ByIP orders the results by the ip field.
-func ByIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIP, opts...).ToFunc()
 }
 
 // ByPasskeyID orders the results by the passkeyID field.

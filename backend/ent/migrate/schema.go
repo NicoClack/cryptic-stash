@@ -16,8 +16,8 @@ var (
 		{Name: "hashed_auth_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "valid_from", Type: field.TypeTime},
 		{Name: "valid_until", Type: field.TypeTime},
-		{Name: "user_agent", Type: field.TypeString},
-		{Name: "ip", Type: field.TypeString},
+		{Name: "user_agent", Type: field.TypeBytes, Nullable: true},
+		{Name: "ip", Type: field.TypeBytes, Nullable: true},
 		{Name: "stash_id", Type: field.TypeUUID},
 	}
 	// DownloadSessionsTable holds the schema information for the "download_sessions" table.
@@ -50,9 +50,9 @@ var (
 		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "expired_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"revoked", "username_taken"}},
-		{Name: "web_authn_session", Type: field.TypeJSON, Nullable: true},
-		{Name: "user_agent", Type: field.TypeString, Default: ""},
-		{Name: "ip", Type: field.TypeString, Default: ""},
+		{Name: "web_authn_session", Type: field.TypeBytes, Nullable: true},
+		{Name: "user_agent", Type: field.TypeBytes, Nullable: true},
+		{Name: "ip", Type: field.TypeBytes, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// InvitesTable holds the schema information for the "invites" table.
@@ -93,7 +93,7 @@ var (
 		{Name: "version", Type: field.TypeInt},
 		{Name: "priority", Type: field.TypeInt8},
 		{Name: "weight", Type: field.TypeInt},
-		{Name: "body", Type: field.TypeJSON},
+		{Name: "body", Type: field.TypeBytes},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "running", "completed", "failed"}, Default: "pending"},
 		{Name: "retries", Type: field.TypeInt, Default: 0},
 		{Name: "retried_fraction", Type: field.TypeFloat64, Default: 0},
@@ -211,10 +211,9 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 64},
-		{Name: "credential_id", Type: field.TypeBytes, Unique: true},
-		{Name: "public_key", Type: field.TypeBytes},
-		{Name: "aaguid", Type: field.TypeUUID, Nullable: true},
-		{Name: "sign_count", Type: field.TypeUint32, Default: 0},
+		{Name: "allow_super_user", Type: field.TypeBool},
+		{Name: "credential_id", Type: field.TypeBytes, Unique: true, Size: 1023},
+		{Name: "credential", Type: field.TypeBytes},
 		{Name: "is_second_group", Type: field.TypeBool, Default: false},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
@@ -226,9 +225,21 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "passkeys_users_passkeys",
-				Columns:    []*schema.Column{PasskeysColumns[9]},
+				Columns:    []*schema.Column{PasskeysColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "passkey_user_id_credential_id",
+				Unique:  false,
+				Columns: []*schema.Column{PasskeysColumns[8], PasskeysColumns[5]},
+			},
+			{
+				Name:    "passkey_user_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{PasskeysColumns[8], PasskeysColumns[3]},
 			},
 		},
 	}
@@ -253,8 +264,8 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "hashed_token", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "user_agent", Type: field.TypeString, Default: ""},
-		{Name: "ip", Type: field.TypeString, Default: ""},
+		{Name: "user_agent", Type: field.TypeBytes, Nullable: true},
+		{Name: "ip", Type: field.TypeBytes, Nullable: true},
 		{Name: "passkey_id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
@@ -287,7 +298,7 @@ var (
 		{Name: "public_name", Type: field.TypeString, Size: 256},
 		{Name: "content", Type: field.TypeBytes, Size: 10000000},
 		{Name: "file_name", Type: field.TypeBytes, Size: 256},
-		{Name: "encryption_data_key", Type: field.TypeBytes, Size: 128},
+		{Name: "encryption_data_key", Type: field.TypeBytes},
 		{Name: "password_salt", Type: field.TypeBytes},
 		{Name: "hash_time", Type: field.TypeUint32},
 		{Name: "hash_memory", Type: field.TypeUint32},
@@ -364,7 +375,7 @@ var (
 		{Name: "type", Type: field.TypeString, Size: 128},
 		{Name: "version", Type: field.TypeInt},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
-		{Name: "options", Type: field.TypeJSON},
+		{Name: "options", Type: field.TypeBytes},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// UserMessengersTable holds the schema information for the "user_messengers" table.

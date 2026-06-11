@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -98,8 +99,16 @@ func (_u *StashUpdate) SetFileName(v []byte) *StashUpdate {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (_u *StashUpdate) SetEncryptionDataKey(v []byte) *StashUpdate {
+func (_u *StashUpdate) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpdate {
 	_u.mutation.SetEncryptionDataKey(v)
+	return _u
+}
+
+// SetNillableEncryptionDataKey sets the "encryptionDataKey" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableEncryptionDataKey(v *schema.EncryptedField[[]uint8]) *StashUpdate {
+	if v != nil {
+		_u.SetEncryptionDataKey(*v)
+	}
 	return _u
 }
 
@@ -353,11 +362,6 @@ func (_u *StashUpdate) check() error {
 			return &ValidationError{Name: "fileName", err: fmt.Errorf(`ent: validator failed for field "Stash.fileName": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.EncryptionDataKey(); ok {
-		if err := stash.EncryptionDataKeyValidator(v); err != nil {
-			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.PasswordSalt(); ok {
 		if err := stash.PasswordSaltValidator(v); err != nil {
 			return &ValidationError{Name: "passwordSalt", err: fmt.Errorf(`ent: validator failed for field "Stash.passwordSalt": %w`, err)}
@@ -602,8 +606,16 @@ func (_u *StashUpdateOne) SetFileName(v []byte) *StashUpdateOne {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (_u *StashUpdateOne) SetEncryptionDataKey(v []byte) *StashUpdateOne {
+func (_u *StashUpdateOne) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpdateOne {
 	_u.mutation.SetEncryptionDataKey(v)
+	return _u
+}
+
+// SetNillableEncryptionDataKey sets the "encryptionDataKey" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableEncryptionDataKey(v *schema.EncryptedField[[]uint8]) *StashUpdateOne {
+	if v != nil {
+		_u.SetEncryptionDataKey(*v)
+	}
 	return _u
 }
 
@@ -868,11 +880,6 @@ func (_u *StashUpdateOne) check() error {
 	if v, ok := _u.mutation.FileName(); ok {
 		if err := stash.FileNameValidator(v); err != nil {
 			return &ValidationError{Name: "fileName", err: fmt.Errorf(`ent: validator failed for field "Stash.fileName": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.EncryptionDataKey(); ok {
-		if err := stash.EncryptionDataKeyValidator(v); err != nil {
-			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.PasswordSalt(); ok {

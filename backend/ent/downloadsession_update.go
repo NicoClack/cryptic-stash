@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 )
@@ -86,30 +87,42 @@ func (_u *DownloadSessionUpdate) SetNillableValidUntil(v *time.Time) *DownloadSe
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *DownloadSessionUpdate) SetUserAgent(v string) *DownloadSessionUpdate {
+func (_u *DownloadSessionUpdate) SetUserAgent(v schema.EncryptedField[*string]) *DownloadSessionUpdate {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *DownloadSessionUpdate) SetNillableUserAgent(v *string) *DownloadSessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableUserAgent(v *schema.EncryptedField[*string]) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
 	return _u
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (_u *DownloadSessionUpdate) ClearUserAgent() *DownloadSessionUpdate {
+	_u.mutation.ClearUserAgent()
+	return _u
+}
+
 // SetIP sets the "ip" field.
-func (_u *DownloadSessionUpdate) SetIP(v string) *DownloadSessionUpdate {
+func (_u *DownloadSessionUpdate) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpdate {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *DownloadSessionUpdate) SetNillableIP(v *string) *DownloadSessionUpdate {
+func (_u *DownloadSessionUpdate) SetNillableIP(v *schema.EncryptedField[*string]) *DownloadSessionUpdate {
 	if v != nil {
 		_u.SetIP(*v)
 	}
+	return _u
+}
+
+// ClearIP clears the value of the "ip" field.
+func (_u *DownloadSessionUpdate) ClearIP() *DownloadSessionUpdate {
+	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -256,10 +269,16 @@ func (_u *DownloadSessionUpdate) sqlSave(ctx context.Context) (_node int, err er
 		_spec.SetField(downloadsession.FieldValidUntil, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(downloadsession.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldUserAgent, field.TypeBytes, value)
+	}
+	if _u.mutation.UserAgentCleared() {
+		_spec.ClearField(downloadsession.FieldUserAgent, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldIP, field.TypeBytes, value)
+	}
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(downloadsession.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.StashCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -410,30 +429,42 @@ func (_u *DownloadSessionUpdateOne) SetNillableValidUntil(v *time.Time) *Downloa
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *DownloadSessionUpdateOne) SetUserAgent(v string) *DownloadSessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetUserAgent(v schema.EncryptedField[*string]) *DownloadSessionUpdateOne {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *DownloadSessionUpdateOne) SetNillableUserAgent(v *string) *DownloadSessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[*string]) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
 	return _u
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (_u *DownloadSessionUpdateOne) ClearUserAgent() *DownloadSessionUpdateOne {
+	_u.mutation.ClearUserAgent()
+	return _u
+}
+
 // SetIP sets the "ip" field.
-func (_u *DownloadSessionUpdateOne) SetIP(v string) *DownloadSessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpdateOne {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *DownloadSessionUpdateOne) SetNillableIP(v *string) *DownloadSessionUpdateOne {
+func (_u *DownloadSessionUpdateOne) SetNillableIP(v *schema.EncryptedField[*string]) *DownloadSessionUpdateOne {
 	if v != nil {
 		_u.SetIP(*v)
 	}
+	return _u
+}
+
+// ClearIP clears the value of the "ip" field.
+func (_u *DownloadSessionUpdateOne) ClearIP() *DownloadSessionUpdateOne {
+	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -610,10 +641,16 @@ func (_u *DownloadSessionUpdateOne) sqlSave(ctx context.Context) (_node *Downloa
 		_spec.SetField(downloadsession.FieldValidUntil, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(downloadsession.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldUserAgent, field.TypeBytes, value)
+	}
+	if _u.mutation.UserAgentCleared() {
+		_spec.ClearField(downloadsession.FieldUserAgent, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(downloadsession.FieldIP, field.TypeString, value)
+		_spec.SetField(downloadsession.FieldIP, field.TypeBytes, value)
+	}
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(downloadsession.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.StashCleared() {
 		edge := &sqlgraph.EdgeSpec{

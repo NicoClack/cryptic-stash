@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -44,43 +45,21 @@ func (_c *PasskeyCreate) SetName(v string) *PasskeyCreate {
 	return _c
 }
 
+// SetAllowSuperUser sets the "allowSuperUser" field.
+func (_c *PasskeyCreate) SetAllowSuperUser(v bool) *PasskeyCreate {
+	_c.mutation.SetAllowSuperUser(v)
+	return _c
+}
+
 // SetCredentialID sets the "credentialID" field.
 func (_c *PasskeyCreate) SetCredentialID(v []byte) *PasskeyCreate {
 	_c.mutation.SetCredentialID(v)
 	return _c
 }
 
-// SetPublicKey sets the "publicKey" field.
-func (_c *PasskeyCreate) SetPublicKey(v []byte) *PasskeyCreate {
-	_c.mutation.SetPublicKey(v)
-	return _c
-}
-
-// SetAaguid sets the "aaguid" field.
-func (_c *PasskeyCreate) SetAaguid(v uuid.UUID) *PasskeyCreate {
-	_c.mutation.SetAaguid(v)
-	return _c
-}
-
-// SetNillableAaguid sets the "aaguid" field if the given value is not nil.
-func (_c *PasskeyCreate) SetNillableAaguid(v *uuid.UUID) *PasskeyCreate {
-	if v != nil {
-		_c.SetAaguid(*v)
-	}
-	return _c
-}
-
-// SetSignCount sets the "signCount" field.
-func (_c *PasskeyCreate) SetSignCount(v uint32) *PasskeyCreate {
-	_c.mutation.SetSignCount(v)
-	return _c
-}
-
-// SetNillableSignCount sets the "signCount" field if the given value is not nil.
-func (_c *PasskeyCreate) SetNillableSignCount(v *uint32) *PasskeyCreate {
-	if v != nil {
-		_c.SetSignCount(*v)
-	}
+// SetCredential sets the "credential" field.
+func (_c *PasskeyCreate) SetCredential(v schema.EncryptedCredential) *PasskeyCreate {
+	_c.mutation.SetCredential(v)
 	return _c
 }
 
@@ -173,10 +152,6 @@ func (_c *PasskeyCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PasskeyCreate) defaults() {
-	if _, ok := _c.mutation.SignCount(); !ok {
-		v := passkey.DefaultSignCount
-		_c.mutation.SetSignCount(v)
-	}
 	if _, ok := _c.mutation.IsSecondGroup(); !ok {
 		v := passkey.DefaultIsSecondGroup
 		_c.mutation.SetIsSecondGroup(v)
@@ -203,14 +178,19 @@ func (_c *PasskeyCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Passkey.name": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.AllowSuperUser(); !ok {
+		return &ValidationError{Name: "allowSuperUser", err: errors.New(`ent: missing required field "Passkey.allowSuperUser"`)}
+	}
 	if _, ok := _c.mutation.CredentialID(); !ok {
 		return &ValidationError{Name: "credentialID", err: errors.New(`ent: missing required field "Passkey.credentialID"`)}
 	}
-	if _, ok := _c.mutation.PublicKey(); !ok {
-		return &ValidationError{Name: "publicKey", err: errors.New(`ent: missing required field "Passkey.publicKey"`)}
+	if v, ok := _c.mutation.CredentialID(); ok {
+		if err := passkey.CredentialIDValidator(v); err != nil {
+			return &ValidationError{Name: "credentialID", err: fmt.Errorf(`ent: validator failed for field "Passkey.credentialID": %w`, err)}
+		}
 	}
-	if _, ok := _c.mutation.SignCount(); !ok {
-		return &ValidationError{Name: "signCount", err: errors.New(`ent: missing required field "Passkey.signCount"`)}
+	if _, ok := _c.mutation.Credential(); !ok {
+		return &ValidationError{Name: "credential", err: errors.New(`ent: missing required field "Passkey.credential"`)}
 	}
 	if _, ok := _c.mutation.IsSecondGroup(); !ok {
 		return &ValidationError{Name: "isSecondGroup", err: errors.New(`ent: missing required field "Passkey.isSecondGroup"`)}
@@ -269,21 +249,17 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec) {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := _c.mutation.AllowSuperUser(); ok {
+		_spec.SetField(passkey.FieldAllowSuperUser, field.TypeBool, value)
+		_node.AllowSuperUser = value
+	}
 	if value, ok := _c.mutation.CredentialID(); ok {
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
 		_node.CredentialID = value
 	}
-	if value, ok := _c.mutation.PublicKey(); ok {
-		_spec.SetField(passkey.FieldPublicKey, field.TypeBytes, value)
-		_node.PublicKey = value
-	}
-	if value, ok := _c.mutation.Aaguid(); ok {
-		_spec.SetField(passkey.FieldAaguid, field.TypeUUID, value)
-		_node.Aaguid = value
-	}
-	if value, ok := _c.mutation.SignCount(); ok {
-		_spec.SetField(passkey.FieldSignCount, field.TypeUint32, value)
-		_node.SignCount = value
+	if value, ok := _c.mutation.Credential(); ok {
+		_spec.SetField(passkey.FieldCredential, field.TypeBytes, value)
+		_node.Credential = value
 	}
 	if value, ok := _c.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
@@ -410,6 +386,18 @@ func (u *PasskeyUpsert) UpdateName() *PasskeyUpsert {
 	return u
 }
 
+// SetAllowSuperUser sets the "allowSuperUser" field.
+func (u *PasskeyUpsert) SetAllowSuperUser(v bool) *PasskeyUpsert {
+	u.Set(passkey.FieldAllowSuperUser, v)
+	return u
+}
+
+// UpdateAllowSuperUser sets the "allowSuperUser" field to the value that was provided on create.
+func (u *PasskeyUpsert) UpdateAllowSuperUser() *PasskeyUpsert {
+	u.SetExcluded(passkey.FieldAllowSuperUser)
+	return u
+}
+
 // SetCredentialID sets the "credentialID" field.
 func (u *PasskeyUpsert) SetCredentialID(v []byte) *PasskeyUpsert {
 	u.Set(passkey.FieldCredentialID, v)
@@ -422,51 +410,15 @@ func (u *PasskeyUpsert) UpdateCredentialID() *PasskeyUpsert {
 	return u
 }
 
-// SetPublicKey sets the "publicKey" field.
-func (u *PasskeyUpsert) SetPublicKey(v []byte) *PasskeyUpsert {
-	u.Set(passkey.FieldPublicKey, v)
+// SetCredential sets the "credential" field.
+func (u *PasskeyUpsert) SetCredential(v schema.EncryptedCredential) *PasskeyUpsert {
+	u.Set(passkey.FieldCredential, v)
 	return u
 }
 
-// UpdatePublicKey sets the "publicKey" field to the value that was provided on create.
-func (u *PasskeyUpsert) UpdatePublicKey() *PasskeyUpsert {
-	u.SetExcluded(passkey.FieldPublicKey)
-	return u
-}
-
-// SetAaguid sets the "aaguid" field.
-func (u *PasskeyUpsert) SetAaguid(v uuid.UUID) *PasskeyUpsert {
-	u.Set(passkey.FieldAaguid, v)
-	return u
-}
-
-// UpdateAaguid sets the "aaguid" field to the value that was provided on create.
-func (u *PasskeyUpsert) UpdateAaguid() *PasskeyUpsert {
-	u.SetExcluded(passkey.FieldAaguid)
-	return u
-}
-
-// ClearAaguid clears the value of the "aaguid" field.
-func (u *PasskeyUpsert) ClearAaguid() *PasskeyUpsert {
-	u.SetNull(passkey.FieldAaguid)
-	return u
-}
-
-// SetSignCount sets the "signCount" field.
-func (u *PasskeyUpsert) SetSignCount(v uint32) *PasskeyUpsert {
-	u.Set(passkey.FieldSignCount, v)
-	return u
-}
-
-// UpdateSignCount sets the "signCount" field to the value that was provided on create.
-func (u *PasskeyUpsert) UpdateSignCount() *PasskeyUpsert {
-	u.SetExcluded(passkey.FieldSignCount)
-	return u
-}
-
-// AddSignCount adds v to the "signCount" field.
-func (u *PasskeyUpsert) AddSignCount(v uint32) *PasskeyUpsert {
-	u.Add(passkey.FieldSignCount, v)
+// UpdateCredential sets the "credential" field to the value that was provided on create.
+func (u *PasskeyUpsert) UpdateCredential() *PasskeyUpsert {
+	u.SetExcluded(passkey.FieldCredential)
 	return u
 }
 
@@ -584,6 +536,20 @@ func (u *PasskeyUpsertOne) UpdateName() *PasskeyUpsertOne {
 	})
 }
 
+// SetAllowSuperUser sets the "allowSuperUser" field.
+func (u *PasskeyUpsertOne) SetAllowSuperUser(v bool) *PasskeyUpsertOne {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.SetAllowSuperUser(v)
+	})
+}
+
+// UpdateAllowSuperUser sets the "allowSuperUser" field to the value that was provided on create.
+func (u *PasskeyUpsertOne) UpdateAllowSuperUser() *PasskeyUpsertOne {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.UpdateAllowSuperUser()
+	})
+}
+
 // SetCredentialID sets the "credentialID" field.
 func (u *PasskeyUpsertOne) SetCredentialID(v []byte) *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
@@ -598,59 +564,17 @@ func (u *PasskeyUpsertOne) UpdateCredentialID() *PasskeyUpsertOne {
 	})
 }
 
-// SetPublicKey sets the "publicKey" field.
-func (u *PasskeyUpsertOne) SetPublicKey(v []byte) *PasskeyUpsertOne {
+// SetCredential sets the "credential" field.
+func (u *PasskeyUpsertOne) SetCredential(v schema.EncryptedCredential) *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.SetPublicKey(v)
+		s.SetCredential(v)
 	})
 }
 
-// UpdatePublicKey sets the "publicKey" field to the value that was provided on create.
-func (u *PasskeyUpsertOne) UpdatePublicKey() *PasskeyUpsertOne {
+// UpdateCredential sets the "credential" field to the value that was provided on create.
+func (u *PasskeyUpsertOne) UpdateCredential() *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdatePublicKey()
-	})
-}
-
-// SetAaguid sets the "aaguid" field.
-func (u *PasskeyUpsertOne) SetAaguid(v uuid.UUID) *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.SetAaguid(v)
-	})
-}
-
-// UpdateAaguid sets the "aaguid" field to the value that was provided on create.
-func (u *PasskeyUpsertOne) UpdateAaguid() *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateAaguid()
-	})
-}
-
-// ClearAaguid clears the value of the "aaguid" field.
-func (u *PasskeyUpsertOne) ClearAaguid() *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.ClearAaguid()
-	})
-}
-
-// SetSignCount sets the "signCount" field.
-func (u *PasskeyUpsertOne) SetSignCount(v uint32) *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.SetSignCount(v)
-	})
-}
-
-// AddSignCount adds v to the "signCount" field.
-func (u *PasskeyUpsertOne) AddSignCount(v uint32) *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.AddSignCount(v)
-	})
-}
-
-// UpdateSignCount sets the "signCount" field to the value that was provided on create.
-func (u *PasskeyUpsertOne) UpdateSignCount() *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateSignCount()
+		s.UpdateCredential()
 	})
 }
 
@@ -939,6 +863,20 @@ func (u *PasskeyUpsertBulk) UpdateName() *PasskeyUpsertBulk {
 	})
 }
 
+// SetAllowSuperUser sets the "allowSuperUser" field.
+func (u *PasskeyUpsertBulk) SetAllowSuperUser(v bool) *PasskeyUpsertBulk {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.SetAllowSuperUser(v)
+	})
+}
+
+// UpdateAllowSuperUser sets the "allowSuperUser" field to the value that was provided on create.
+func (u *PasskeyUpsertBulk) UpdateAllowSuperUser() *PasskeyUpsertBulk {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.UpdateAllowSuperUser()
+	})
+}
+
 // SetCredentialID sets the "credentialID" field.
 func (u *PasskeyUpsertBulk) SetCredentialID(v []byte) *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
@@ -953,59 +891,17 @@ func (u *PasskeyUpsertBulk) UpdateCredentialID() *PasskeyUpsertBulk {
 	})
 }
 
-// SetPublicKey sets the "publicKey" field.
-func (u *PasskeyUpsertBulk) SetPublicKey(v []byte) *PasskeyUpsertBulk {
+// SetCredential sets the "credential" field.
+func (u *PasskeyUpsertBulk) SetCredential(v schema.EncryptedCredential) *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.SetPublicKey(v)
+		s.SetCredential(v)
 	})
 }
 
-// UpdatePublicKey sets the "publicKey" field to the value that was provided on create.
-func (u *PasskeyUpsertBulk) UpdatePublicKey() *PasskeyUpsertBulk {
+// UpdateCredential sets the "credential" field to the value that was provided on create.
+func (u *PasskeyUpsertBulk) UpdateCredential() *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdatePublicKey()
-	})
-}
-
-// SetAaguid sets the "aaguid" field.
-func (u *PasskeyUpsertBulk) SetAaguid(v uuid.UUID) *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.SetAaguid(v)
-	})
-}
-
-// UpdateAaguid sets the "aaguid" field to the value that was provided on create.
-func (u *PasskeyUpsertBulk) UpdateAaguid() *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateAaguid()
-	})
-}
-
-// ClearAaguid clears the value of the "aaguid" field.
-func (u *PasskeyUpsertBulk) ClearAaguid() *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.ClearAaguid()
-	})
-}
-
-// SetSignCount sets the "signCount" field.
-func (u *PasskeyUpsertBulk) SetSignCount(v uint32) *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.SetSignCount(v)
-	})
-}
-
-// AddSignCount adds v to the "signCount" field.
-func (u *PasskeyUpsertBulk) AddSignCount(v uint32) *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.AddSignCount(v)
-	})
-}
-
-// UpdateSignCount sets the "signCount" field to the value that was provided on create.
-func (u *PasskeyUpsertBulk) UpdateSignCount() *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateSignCount()
+		s.UpdateCredential()
 	})
 }
 

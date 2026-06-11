@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -51,13 +52,13 @@ func (_c *SessionCreate) SetExpiresAt(v time.Time) *SessionCreate {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *SessionCreate) SetUserAgent(v string) *SessionCreate {
+func (_c *SessionCreate) SetUserAgent(v schema.EncryptedField[*string]) *SessionCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableUserAgent(v *string) *SessionCreate {
+func (_c *SessionCreate) SetNillableUserAgent(v *schema.EncryptedField[*string]) *SessionCreate {
 	if v != nil {
 		_c.SetUserAgent(*v)
 	}
@@ -65,13 +66,13 @@ func (_c *SessionCreate) SetNillableUserAgent(v *string) *SessionCreate {
 }
 
 // SetIP sets the "ip" field.
-func (_c *SessionCreate) SetIP(v string) *SessionCreate {
+func (_c *SessionCreate) SetIP(v schema.EncryptedField[*string]) *SessionCreate {
 	_c.mutation.SetIP(v)
 	return _c
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableIP(v *string) *SessionCreate {
+func (_c *SessionCreate) SetNillableIP(v *schema.EncryptedField[*string]) *SessionCreate {
 	if v != nil {
 		_c.SetIP(*v)
 	}
@@ -149,14 +150,6 @@ func (_c *SessionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SessionCreate) defaults() {
-	if _, ok := _c.mutation.UserAgent(); !ok {
-		v := session.DefaultUserAgent
-		_c.mutation.SetUserAgent(v)
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		v := session.DefaultIP
-		_c.mutation.SetIP(v)
-	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := session.DefaultID()
 		_c.mutation.SetID(v)
@@ -181,12 +174,6 @@ func (_c *SessionCreate) check() error {
 	}
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expiresAt", err: errors.New(`ent: missing required field "Session.expiresAt"`)}
-	}
-	if _, ok := _c.mutation.UserAgent(); !ok {
-		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Session.userAgent"`)}
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "Session.ip"`)}
 	}
 	if _, ok := _c.mutation.PasskeyID(); !ok {
 		return &ValidationError{Name: "passkeyID", err: errors.New(`ent: missing required field "Session.passkeyID"`)}
@@ -253,12 +240,12 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_node.ExpiresAt = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
-		_node.UserAgent = value
+		_spec.SetField(session.FieldUserAgent, field.TypeBytes, value)
+		_node.UserAgent = &value
 	}
 	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeString, value)
-		_node.IP = value
+		_spec.SetField(session.FieldIP, field.TypeBytes, value)
+		_node.IP = &value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -395,7 +382,7 @@ func (u *SessionUpsert) UpdateExpiresAt() *SessionUpsert {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsert) SetUserAgent(v string) *SessionUpsert {
+func (u *SessionUpsert) SetUserAgent(v schema.EncryptedField[*string]) *SessionUpsert {
 	u.Set(session.FieldUserAgent, v)
 	return u
 }
@@ -406,8 +393,14 @@ func (u *SessionUpsert) UpdateUserAgent() *SessionUpsert {
 	return u
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (u *SessionUpsert) ClearUserAgent() *SessionUpsert {
+	u.SetNull(session.FieldUserAgent)
+	return u
+}
+
 // SetIP sets the "ip" field.
-func (u *SessionUpsert) SetIP(v string) *SessionUpsert {
+func (u *SessionUpsert) SetIP(v schema.EncryptedField[*string]) *SessionUpsert {
 	u.Set(session.FieldIP, v)
 	return u
 }
@@ -415,6 +408,12 @@ func (u *SessionUpsert) SetIP(v string) *SessionUpsert {
 // UpdateIP sets the "ip" field to the value that was provided on create.
 func (u *SessionUpsert) UpdateIP() *SessionUpsert {
 	u.SetExcluded(session.FieldIP)
+	return u
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *SessionUpsert) ClearIP() *SessionUpsert {
+	u.SetNull(session.FieldIP)
 	return u
 }
 
@@ -547,7 +546,7 @@ func (u *SessionUpsertOne) UpdateExpiresAt() *SessionUpsertOne {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsertOne) SetUserAgent(v string) *SessionUpsertOne {
+func (u *SessionUpsertOne) SetUserAgent(v schema.EncryptedField[*string]) *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -560,8 +559,15 @@ func (u *SessionUpsertOne) UpdateUserAgent() *SessionUpsertOne {
 	})
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (u *SessionUpsertOne) ClearUserAgent() *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.ClearUserAgent()
+	})
+}
+
 // SetIP sets the "ip" field.
-func (u *SessionUpsertOne) SetIP(v string) *SessionUpsertOne {
+func (u *SessionUpsertOne) SetIP(v schema.EncryptedField[*string]) *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetIP(v)
 	})
@@ -571,6 +577,13 @@ func (u *SessionUpsertOne) SetIP(v string) *SessionUpsertOne {
 func (u *SessionUpsertOne) UpdateIP() *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateIP()
+	})
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *SessionUpsertOne) ClearIP() *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.ClearIP()
 	})
 }
 
@@ -874,7 +887,7 @@ func (u *SessionUpsertBulk) UpdateExpiresAt() *SessionUpsertBulk {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsertBulk) SetUserAgent(v string) *SessionUpsertBulk {
+func (u *SessionUpsertBulk) SetUserAgent(v schema.EncryptedField[*string]) *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -887,8 +900,15 @@ func (u *SessionUpsertBulk) UpdateUserAgent() *SessionUpsertBulk {
 	})
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (u *SessionUpsertBulk) ClearUserAgent() *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.ClearUserAgent()
+	})
+}
+
 // SetIP sets the "ip" field.
-func (u *SessionUpsertBulk) SetIP(v string) *SessionUpsertBulk {
+func (u *SessionUpsertBulk) SetIP(v schema.EncryptedField[*string]) *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetIP(v)
 	})
@@ -898,6 +918,13 @@ func (u *SessionUpsertBulk) SetIP(v string) *SessionUpsertBulk {
 func (u *SessionUpsertBulk) UpdateIP() *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateIP()
+	})
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *SessionUpsertBulk) ClearIP() *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.ClearIP()
 	})
 }
 

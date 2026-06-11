@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -29,9 +30,9 @@ type Session struct {
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent string `json:"userAgent,omitempty"`
+	UserAgent *schema.EncryptedField[*string] `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
+	IP *schema.EncryptedField[*string] `json:"ip,omitempty"`
 	// PasskeyID holds the value of the "passkeyID" field.
 	PasskeyID uuid.UUID `json:"passkeyID,omitempty"`
 	// UserID holds the value of the "userID" field.
@@ -80,10 +81,10 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case session.FieldUserAgent, session.FieldIP:
+			values[i] = &sql.NullScanner{S: new(schema.EncryptedField[*string])}
 		case session.FieldHashedToken:
 			values[i] = new([]byte)
-		case session.FieldUserAgent, session.FieldIP:
-			values[i] = new(sql.NullString)
 		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case session.FieldID, session.FieldPasskeyID, session.FieldUserID:
@@ -134,16 +135,18 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 				_m.ExpiresAt = value.Time
 			}
 		case session.FieldUserAgent:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value.Valid {
-				_m.UserAgent = value.String
+				_m.UserAgent = new(schema.EncryptedField[*string])
+				*_m.UserAgent = *value.S.(*schema.EncryptedField[*string])
 			}
 		case session.FieldIP:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value.Valid {
-				_m.IP = value.String
+				_m.IP = new(schema.EncryptedField[*string])
+				*_m.IP = *value.S.(*schema.EncryptedField[*string])
 			}
 		case session.FieldPasskeyID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -215,11 +218,15 @@ func (_m *Session) String() string {
 	builder.WriteString("expiresAt=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("userAgent=")
-	builder.WriteString(_m.UserAgent)
+	if v := _m.UserAgent; v != nil {
+		builder.WriteString("userAgent=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(_m.IP)
+	if v := _m.IP; v != nil {
+		builder.WriteString("ip=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("passkeyID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PasskeyID))

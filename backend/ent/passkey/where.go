@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -71,24 +72,19 @@ func Name(v string) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldName, v))
 }
 
+// AllowSuperUser applies equality check predicate on the "allowSuperUser" field. It's identical to AllowSuperUserEQ.
+func AllowSuperUser(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldAllowSuperUser, v))
+}
+
 // CredentialID applies equality check predicate on the "credentialID" field. It's identical to CredentialIDEQ.
 func CredentialID(v []byte) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldCredentialID, v))
 }
 
-// PublicKey applies equality check predicate on the "publicKey" field. It's identical to PublicKeyEQ.
-func PublicKey(v []byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldPublicKey, v))
-}
-
-// Aaguid applies equality check predicate on the "aaguid" field. It's identical to AaguidEQ.
-func Aaguid(v uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldAaguid, v))
-}
-
-// SignCount applies equality check predicate on the "signCount" field. It's identical to SignCountEQ.
-func SignCount(v uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldSignCount, v))
+// Credential applies equality check predicate on the "credential" field. It's identical to CredentialEQ.
+func Credential(v schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldCredential, v))
 }
 
 // IsSecondGroup applies equality check predicate on the "isSecondGroup" field. It's identical to IsSecondGroupEQ.
@@ -246,6 +242,16 @@ func NameContainsFold(v string) predicate.Passkey {
 	return predicate.Passkey(sql.FieldContainsFold(FieldName, v))
 }
 
+// AllowSuperUserEQ applies the EQ predicate on the "allowSuperUser" field.
+func AllowSuperUserEQ(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldAllowSuperUser, v))
+}
+
+// AllowSuperUserNEQ applies the NEQ predicate on the "allowSuperUser" field.
+func AllowSuperUserNEQ(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldNEQ(FieldAllowSuperUser, v))
+}
+
 // CredentialIDEQ applies the EQ predicate on the "credentialID" field.
 func CredentialIDEQ(v []byte) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldCredentialID, v))
@@ -286,134 +292,44 @@ func CredentialIDLTE(v []byte) predicate.Passkey {
 	return predicate.Passkey(sql.FieldLTE(FieldCredentialID, v))
 }
 
-// PublicKeyEQ applies the EQ predicate on the "publicKey" field.
-func PublicKeyEQ(v []byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldPublicKey, v))
+// CredentialEQ applies the EQ predicate on the "credential" field.
+func CredentialEQ(v schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldCredential, v))
 }
 
-// PublicKeyNEQ applies the NEQ predicate on the "publicKey" field.
-func PublicKeyNEQ(v []byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNEQ(FieldPublicKey, v))
+// CredentialNEQ applies the NEQ predicate on the "credential" field.
+func CredentialNEQ(v schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldNEQ(FieldCredential, v))
 }
 
-// PublicKeyIn applies the In predicate on the "publicKey" field.
-func PublicKeyIn(vs ...[]byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldIn(FieldPublicKey, vs...))
+// CredentialIn applies the In predicate on the "credential" field.
+func CredentialIn(vs ...schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldIn(FieldCredential, vs...))
 }
 
-// PublicKeyNotIn applies the NotIn predicate on the "publicKey" field.
-func PublicKeyNotIn(vs ...[]byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNotIn(FieldPublicKey, vs...))
+// CredentialNotIn applies the NotIn predicate on the "credential" field.
+func CredentialNotIn(vs ...schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldNotIn(FieldCredential, vs...))
 }
 
-// PublicKeyGT applies the GT predicate on the "publicKey" field.
-func PublicKeyGT(v []byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGT(FieldPublicKey, v))
+// CredentialGT applies the GT predicate on the "credential" field.
+func CredentialGT(v schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldGT(FieldCredential, v))
 }
 
-// PublicKeyGTE applies the GTE predicate on the "publicKey" field.
-func PublicKeyGTE(v []byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGTE(FieldPublicKey, v))
+// CredentialGTE applies the GTE predicate on the "credential" field.
+func CredentialGTE(v schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldGTE(FieldCredential, v))
 }
 
-// PublicKeyLT applies the LT predicate on the "publicKey" field.
-func PublicKeyLT(v []byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLT(FieldPublicKey, v))
+// CredentialLT applies the LT predicate on the "credential" field.
+func CredentialLT(v schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldLT(FieldCredential, v))
 }
 
-// PublicKeyLTE applies the LTE predicate on the "publicKey" field.
-func PublicKeyLTE(v []byte) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLTE(FieldPublicKey, v))
-}
-
-// AaguidEQ applies the EQ predicate on the "aaguid" field.
-func AaguidEQ(v uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldAaguid, v))
-}
-
-// AaguidNEQ applies the NEQ predicate on the "aaguid" field.
-func AaguidNEQ(v uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNEQ(FieldAaguid, v))
-}
-
-// AaguidIn applies the In predicate on the "aaguid" field.
-func AaguidIn(vs ...uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldIn(FieldAaguid, vs...))
-}
-
-// AaguidNotIn applies the NotIn predicate on the "aaguid" field.
-func AaguidNotIn(vs ...uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNotIn(FieldAaguid, vs...))
-}
-
-// AaguidGT applies the GT predicate on the "aaguid" field.
-func AaguidGT(v uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGT(FieldAaguid, v))
-}
-
-// AaguidGTE applies the GTE predicate on the "aaguid" field.
-func AaguidGTE(v uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGTE(FieldAaguid, v))
-}
-
-// AaguidLT applies the LT predicate on the "aaguid" field.
-func AaguidLT(v uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLT(FieldAaguid, v))
-}
-
-// AaguidLTE applies the LTE predicate on the "aaguid" field.
-func AaguidLTE(v uuid.UUID) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLTE(FieldAaguid, v))
-}
-
-// AaguidIsNil applies the IsNil predicate on the "aaguid" field.
-func AaguidIsNil() predicate.Passkey {
-	return predicate.Passkey(sql.FieldIsNull(FieldAaguid))
-}
-
-// AaguidNotNil applies the NotNil predicate on the "aaguid" field.
-func AaguidNotNil() predicate.Passkey {
-	return predicate.Passkey(sql.FieldNotNull(FieldAaguid))
-}
-
-// SignCountEQ applies the EQ predicate on the "signCount" field.
-func SignCountEQ(v uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldSignCount, v))
-}
-
-// SignCountNEQ applies the NEQ predicate on the "signCount" field.
-func SignCountNEQ(v uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNEQ(FieldSignCount, v))
-}
-
-// SignCountIn applies the In predicate on the "signCount" field.
-func SignCountIn(vs ...uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldIn(FieldSignCount, vs...))
-}
-
-// SignCountNotIn applies the NotIn predicate on the "signCount" field.
-func SignCountNotIn(vs ...uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNotIn(FieldSignCount, vs...))
-}
-
-// SignCountGT applies the GT predicate on the "signCount" field.
-func SignCountGT(v uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGT(FieldSignCount, v))
-}
-
-// SignCountGTE applies the GTE predicate on the "signCount" field.
-func SignCountGTE(v uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGTE(FieldSignCount, v))
-}
-
-// SignCountLT applies the LT predicate on the "signCount" field.
-func SignCountLT(v uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLT(FieldSignCount, v))
-}
-
-// SignCountLTE applies the LTE predicate on the "signCount" field.
-func SignCountLTE(v uint32) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLTE(FieldSignCount, v))
+// CredentialLTE applies the LTE predicate on the "credential" field.
+func CredentialLTE(v schema.EncryptedCredential) predicate.Passkey {
+	return predicate.Passkey(sql.FieldLTE(FieldCredential, v))
 }
 
 // IsSecondGroupEQ applies the EQ predicate on the "isSecondGroup" field.
