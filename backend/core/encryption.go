@@ -14,13 +14,13 @@ const (
 
 // Adapted from: https://tutorialedge.net/golang/go-encrypt-decrypt-aes-tutorial/
 func Encrypt(data []byte, encryptionKey []byte) ([]byte, common.WrappedError) {
-	passwordCipher, err := aes.NewCipher(encryptionKey)
-	if err != nil {
-		return nil, ErrWrapperEncrypt.Wrap(err)
+	keyCipher, stdErr := aes.NewCipher(encryptionKey)
+	if stdErr != nil {
+		return nil, ErrWrapperEncrypt.Wrap(stdErr)
 	}
-	gcm, err := cipher.NewGCM(passwordCipher)
-	if err != nil {
-		return nil, ErrWrapperEncrypt.Wrap(err)
+	gcm, stdErr := cipher.NewGCM(keyCipher)
+	if stdErr != nil {
+		return nil, ErrWrapperEncrypt.Wrap(stdErr)
 	}
 	nonce := common.CryptoRandomBytes(GCMNonceSize)
 
@@ -29,19 +29,19 @@ func Encrypt(data []byte, encryptionKey []byte) ([]byte, common.WrappedError) {
 }
 
 func Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, common.WrappedError) {
-	passwordCipher, err := aes.NewCipher(encryptionKey)
-	if err != nil {
-		return nil, ErrWrapperDecrypt.Wrap(err)
+	keyCipher, stdErr := aes.NewCipher(encryptionKey)
+	if stdErr != nil {
+		return nil, ErrWrapperDecrypt.Wrap(stdErr)
 	}
 
-	gcm, err := cipher.NewGCM(passwordCipher)
-	if err != nil {
-		return nil, ErrWrapperDecrypt.Wrap(err)
+	gcm, stdErr := cipher.NewGCM(keyCipher)
+	if stdErr != nil {
+		return nil, ErrWrapperDecrypt.Wrap(stdErr)
 	}
 
-	decrypted, err := gcm.Open(nil, encrypted[:GCMNonceSize], encrypted[GCMNonceSize:], nil)
-	if err != nil {
-		return nil, ErrWrapperDecrypt.Wrap(err)
+	decrypted, stdErr := gcm.Open(nil, encrypted[:GCMNonceSize], encrypted[GCMNonceSize:], nil)
+	if stdErr != nil {
+		return nil, ErrWrapperDecrypt.Wrap(stdErr)
 	}
 	return decrypted, nil
 }

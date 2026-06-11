@@ -84,7 +84,6 @@ func FinishLogin(
 		parsedResponse,
 	)
 	if stdErr != nil {
-		// TODO: send these errors to the client by checking for ErrTypeClient
 		return nil, nil, ErrWrapperFinishLogin.Wrap(stdErr)
 	}
 

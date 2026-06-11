@@ -30,8 +30,11 @@ func (Job) Fields() []ent.Field {
 		field.Int8(
 			"priority",
 		), // Currently duplicates the definition but needed for sorting and might want to make it dynamic in the future
-		field.Int("weight"), // Currently duplicates the definition but might make it dynamic in the future
-		field.JSON("body", json.RawMessage{}),
+		field.Int(
+			"weight",
+		), // Currently duplicates the definition but might make it dynamic in the future
+		field.Bytes("body").
+			GoType(EncryptedField[json.RawMessage]{KeyName: "job_1"}),
 		field.Enum("status").
 			// TODO: update completed jobs to "completed" and store for a few days
 			Values("pending", "running", "completed", "failed").

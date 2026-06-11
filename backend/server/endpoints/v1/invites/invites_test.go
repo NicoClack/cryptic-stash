@@ -97,7 +97,7 @@ func TestInviteFlow(t *testing.T) {
 
 	require.Equal(t, userID, userOb.Edges.Invite.UserID)
 	require.Empty(t, userOb.Edges.Invite.ExpiredReason)
-	require.Nil(t, userOb.Edges.Invite.WebAuthnSession)
+	require.Nil(t, userOb.Edges.Invite.WebAuthnSession) // TODO: why is this passing?
 
 	// Invite should now be unusable
 	respRecorder = testcommon.Get(

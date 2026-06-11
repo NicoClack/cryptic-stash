@@ -26,7 +26,7 @@ func (UserMessenger) Fields() []ent.Field {
 		field.String("type").MinLen(1).MaxLen(128),
 		field.Int("version"),
 		field.Bool("enabled").Default(true),
-		field.JSON("options", json.RawMessage{}),
+		field.Bytes("options").GoType(EncryptedField[json.RawMessage]{KeyName: "user_messenger_1"}),
 		field.UUID("userID", uuid.Nil),
 	}
 }

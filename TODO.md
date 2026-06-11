@@ -1,6 +1,8 @@
 # TODO
 
 - Rename adminCode
+- Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
+- Remove service level encryption for stashes
 - Replace non-standard Authorization headers with Bearer scheme
 - Upgrade to Go 1.26 and replace common.Pointer with new()
 - Create account system with passkeys
@@ -130,19 +132,18 @@
 - Use panic instead of Fatalf for startup errors?
 - Restructure services so that implementations wrap errors defined in a more common package, e.g defined in twofactoractions/service.go. Messenger based implementation defined in twofactoractions/messengers/
 - Review SQLite connection pool config
+- Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks
 - Move from gin, its maintenance isn't great
 - When messengers are changed, send a message to all of the previous messengers
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
-- Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
--   Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints
--   Create servicescommon so things can be split up better?
--   Job engine should support rate limiting for each API by each definition having an optional function to modify the database object.
-    There could be a function to increase the due time based on the internal rate limit for the API. Probably not needed though
--   Refactor the logger
--   -   Mostly to improve the self logging
--   Is the benchmark properly thread-safe? Can guessChan be received in multiple places like that? Maybe should send a done signal down nextPasswordChan to the workers?
+- Research github.com/awnumar/memguard
+- Rework endpoint system, maybe the endpoint functions could return an Endpoint struct with an array of handlers and some other things? Middleware should be defined there instead of in RegisterEndpoints
+- Job engine should support rate limiting for each API by each definition having an optional function to modify the database object. There could be a function to increase the due time based on the internal rate limit for the API. Probably not needed though
+- Refactor the logger
+- -   Mostly to improve the self logging
+- Is the benchmark properly thread-safe? Can guessChan be received in multiple places like that? Maybe should send a done signal down nextPasswordChan to the workers?
 - Add new LAST_STASH_ENCRYPTION_KEY env var to allow STASH_ENCRYPTION_KEY to be rotated
 -   Bump priority of jobs as they get older
 - Change tests to use the test logger

@@ -29,8 +29,11 @@ func (DownloadSession) Fields() []ent.Field {
 						MaxLen(32),
 		field.Time("validFrom"), // After createdAt
 		field.Time("validUntil"),
-		field.String("userAgent"),
-		field.String("ip"),
+		field.Bytes("userAgent").
+			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
+			Nillable().
+			Optional(),
+		field.Bytes("ip").GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).Nillable().Optional(),
 		field.UUID("stashID", uuid.Nil),
 	}
 }

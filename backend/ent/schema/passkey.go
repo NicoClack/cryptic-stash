@@ -7,6 +7,8 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -16,16 +18,14 @@ type Passkey struct {
 }
 
 func (Passkey) Fields() []ent.Field {
-	// TODO: encrypt some of this with server key, as webauthn.Credential suggests
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.String("name").MinLen(1).MaxLen(64),
-		field.Bytes("credentialID").Unique(), // TODO: add max length
-		field.Bytes("publicKey"),
-		field.UUID("aaguid", uuid.Nil).Optional(),
-		field.Uint32("signCount").Default(0),
+		field.Bool("allowSuperUser"),
+		field.Bytes("credentialID").Unique().MinLen(16).MaxLen(1023),
+		field.Bytes("credential").GoType(EncryptedField[webauthn.Credential]{KeyName: "auth_1"}),
 		field.Bool("isSecondGroup").Default(false),
 		field.UUID("userID", uuid.Nil),
 	}
@@ -40,4 +40,9 @@ func (Passkey) Edges() []ent.Edge {
 	}
 }
 
-// TODO: add index for userID + credentialID?
+func (Passkey) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("userID", "credentialID"),
+		index.Fields("userID", "name").Unique(),
+	}
+}

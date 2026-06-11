@@ -32,10 +32,13 @@ func (Invite) Fields() []ent.Field {
 		field.Enum("expiredReason").
 			Values("revoked", "username_taken").
 			Optional().Nillable(),
-		field.JSON("webAuthnSession", &webauthn.SessionData{}).
+		field.Bytes("webAuthnSession").Optional().
+			GoType(EncryptedField[*webauthn.SessionData]{KeyName: "auth_1"}),
+		field.Bytes("userAgent").
+			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
+			Nillable().
 			Optional(),
-		field.String("userAgent").Default(""),
-		field.String("ip").Default(""),
+		field.Bytes("ip").GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).Nillable().Optional(),
 		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any
 	}
 }

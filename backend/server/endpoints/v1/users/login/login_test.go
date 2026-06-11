@@ -96,6 +96,7 @@ func createUserWithCredential(
 	return userOb, credential, vAuthenticator
 }
 
+// TODO: create user enumeration integration and unit tests
 func TestLoginFlow(t *testing.T) {
 	t.Parallel()
 
