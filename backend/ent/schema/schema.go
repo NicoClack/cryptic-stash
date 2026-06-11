@@ -16,6 +16,11 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
+// Ent codegen has trouble without this alias
+type EncryptedRawJSON struct {
+	EncryptedField[json.RawMessage]
+}
+
 const (
 	GCMNonceSize = 12
 )

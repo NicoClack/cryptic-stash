@@ -17,6 +17,11 @@ type Passkey struct {
 	ent.Schema
 }
 
+// Ent codegen has trouble without this alias
+type EncryptedCredential struct {
+	EncryptedField[webauthn.Credential]
+}
+
 func (Passkey) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.Nil).Default(uuid.New),
@@ -25,7 +30,11 @@ func (Passkey) Fields() []ent.Field {
 		field.String("name").MinLen(1).MaxLen(64),
 		field.Bool("allowSuperUser"),
 		field.Bytes("credentialID").Unique().MinLen(16).MaxLen(1023),
-		field.Bytes("credential").GoType(EncryptedField[webauthn.Credential]{KeyName: "auth_1"}),
+		field.Bytes("credential").GoType(EncryptedCredential{
+			EncryptedField: EncryptedField[webauthn.Credential]{
+				KeyName: "auth_1",
+			},
+		}),
 		field.Bool("isSecondGroup").Default(false),
 		field.UUID("userID", uuid.Nil),
 	}
