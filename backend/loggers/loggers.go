@@ -698,7 +698,7 @@ func (handler Handler) appendAttr(
 		} else {
 			groupAttr := map[string]any{}
 			for _, attr := range groupAttrs {
-				handler.appendAttr(attr, groupAttr, false, logErrors, common.Pointer(""), common.Pointer(uuid.Nil))
+				handler.appendAttr(attr, groupAttr, false, logErrors, new(string), new(uuid.UUID))
 			}
 			outputAttrs[attr.Key] = groupAttr
 		}

@@ -25,7 +25,7 @@ func NewWebAuthnApp(env *common.Env) *webauthn.WebAuthn {
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
 			UserVerification:   protocol.VerificationRequired,
 			ResidentKey:        protocol.ResidentKeyRequirementRequired,
-			RequireResidentKey: common.Pointer(true), // Fallback for older authenticators
+			RequireResidentKey: new(true), // Fallback for older authenticators
 		},
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{

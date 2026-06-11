@@ -19,7 +19,7 @@ type Core struct {
 func NewCore(app *common.App) *Core {
 	return &Core{
 		App:       app,
-		adminCode: common.Pointer(core.NewAdminCode(app.Clock)),
+		adminCode: new(core.NewAdminCode(app.Clock)),
 	}
 }
 

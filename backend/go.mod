@@ -1,10 +1,11 @@
 module github.com/NicoClack/cryptic-stash/backend
 
-go 1.25.0
+go 1.26.4
 
 require (
-	entgo.io/ent v0.14.5
+	entgo.io/ent v0.14.6
 	github.com/bwmarrin/discordgo v0.29.0
+	github.com/descope/virtualwebauthn v1.0.5
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-webauthn/webauthn v0.16.5
@@ -22,7 +23,6 @@ require (
 )
 
 require (
-	github.com/descope/virtualwebauthn v1.0.5 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/go-webauthn/x v0.2.3 // indirect

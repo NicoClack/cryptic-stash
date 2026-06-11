@@ -29,7 +29,7 @@ func (Stash) Fields() []ent.Field {
 
 		// Encrypted with a key derived from the user's password, then env.STASH_ENCRYPTION_KEY.
 		// GCM and nonce prefixes on both layers so the 32 unencrypted length becomes closer to 128 bytes
-		field.Bytes("encryptionDataKey").MinLen(32).MaxLen(128).
+		field.Bytes("encryptionDataKey").
 			GoType(EncryptedField[[]byte]{KeyName: "stash_1"}),
 		field.Bytes("passwordSalt").NotEmpty(),
 

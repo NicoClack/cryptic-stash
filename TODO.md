@@ -4,7 +4,6 @@
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Remove service level encryption for stashes
 - Replace non-standard Authorization headers with Bearer scheme
-- Upgrade to Go 1.26 and replace common.Pointer with new()
 - Create account system with passkeys
 - Standardise passkey/credential naming
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
