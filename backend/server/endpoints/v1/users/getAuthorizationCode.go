@@ -95,12 +95,12 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 					SetHashedAuthCode(hashedAuthCode[:]).
 					SetValidFrom(validFrom).
 					SetValidUntil(validUntil).
-					SetUserAgent(schema.EncryptedField[*string]{
-						Decrypted: new(ginCtx.Request.UserAgent()),
+					SetUserAgent(schema.EncryptedField[string]{
+						Decrypted: ginCtx.Request.UserAgent(),
 						KeyName:   "security_pii_logging_1",
 					}).
-					SetIP(schema.EncryptedField[*string]{
-						Decrypted: new(ginCtx.ClientIP()),
+					SetIP(schema.EncryptedField[string]{
+						Decrypted: ginCtx.ClientIP(),
 						KeyName:   "security_pii_logging_1",
 					}).
 					Save(ctx)

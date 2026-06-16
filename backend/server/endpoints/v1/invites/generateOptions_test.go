@@ -42,8 +42,8 @@ func TestGenerateOptions(t *testing.T) {
 	require.Len(t, resp.PublicKey.Challenge, 32)
 
 	updatedInvite := app.Database.Client().Invite.GetX(t.Context(), inviteOb.ID)
-	require.NotNil(t, updatedInvite.WebAuthnSession)
-	require.Equal(t, resp.PublicKey.Challenge.String(), updatedInvite.WebAuthnSession.Challenge)
+	require.NotNil(t, updatedInvite.WebAuthnSession.Decrypted)
+	require.Equal(t, resp.PublicKey.Challenge.String(), updatedInvite.WebAuthnSession.Decrypted.Challenge)
 	require.Nil(t, updatedInvite.UserID)
 }
 

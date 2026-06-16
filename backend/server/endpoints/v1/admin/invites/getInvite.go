@@ -44,8 +44,8 @@ func GetInvite(app *servercommon.ServerApp) gin.HandlerFunc {
 					CreatedAt: inviteOb.CreatedAt,
 					ExpiresAt: inviteOb.ExpiresAt,
 					UserID:    inviteOb.UserID,
-					IP:        inviteOb.IP,
-					UserAgent: inviteOb.UserAgent,
+					IP:        inviteOb.IP.Decrypted,
+					UserAgent: inviteOb.UserAgent.Decrypted,
 				}, nil
 			},
 		)

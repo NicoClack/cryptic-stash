@@ -35,12 +35,12 @@ func CreateSession(
 		SetPasskeyID(passkeyID).
 		SetHashedToken(hashedToken[:]).
 		SetExpiresAt(expiresAt).
-		SetUserAgent(schema.EncryptedField[*string]{
-			Decrypted: new(userAgent),
+		SetUserAgent(schema.EncryptedField[string]{
+			Decrypted: userAgent,
 			KeyName:   "security_pii_logging_1",
 		}).
-		SetIP(schema.EncryptedField[*string]{
-			Decrypted: new(ip),
+		SetIP(schema.EncryptedField[string]{
+			Decrypted: ip,
 			KeyName:   "security_pii_logging_1",
 		}).
 		Save(ctx)

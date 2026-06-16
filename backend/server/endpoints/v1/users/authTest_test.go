@@ -8,8 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,7 +33,15 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SetUpdatedAt(app.Clock.Now()).
 		SetName("test-passkey").
 		SetCredentialID([]byte("credential-id")).
-		SetPublicKey([]byte("public-key")).
+		SetCredential(schema.EncryptedCredential{
+			EncryptedField: schema.EncryptedField[webauthn.Credential]{
+				Decrypted: webauthn.Credential{
+					ID:        []byte("credential-id"),
+					PublicKey: []byte("public-key"),
+				},
+				KeyName: "auth_1",
+			},
+		}).
 		SetUser(userOb).
 		SaveX(t.Context())
 
@@ -44,8 +54,14 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SetPasskey(passkeyOb).
 		SetHashedToken(hashedToken[:]).
 		SetExpiresAt(app.Clock.Now().Add(app.Env.SESSION_DURATION)).
-		SetUserAgent("test-agent").
-		SetIP("127.0.0.1").
+		SetUserAgent(schema.EncryptedField[string]{
+			Decrypted: "test-agent",
+			KeyName:   "security_pii_logging_1",
+		}).
+		SetIP(schema.EncryptedField[string]{
+			Decrypted: "127.0.0.1",
+			KeyName:   "security_pii_logging_1",
+		}).
 		SaveX(t.Context())
 
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/users/auth-test/", nil)

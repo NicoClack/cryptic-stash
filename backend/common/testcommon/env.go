@@ -45,6 +45,7 @@ func DefaultEnv() *common.Env {
 		ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL: time.Hour * 24,
 		MIN_SUCCESSFUL_MESSAGE_COUNT:              1,
 		STASH_ENCRYPTION_KEY:                      []byte{},
+		BASE_ENCRYPTION_KEY:                       common.CryptoRandomBytes(32),
 
 		PASSWORD_HASH_SETTINGS: &common.PasswordHashSettings{
 			Time:    1,

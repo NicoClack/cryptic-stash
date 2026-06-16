@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
@@ -69,7 +71,11 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
-				SetOptions(nil).
+				SetOptions(schema.EncryptedRawJSON{
+					EncryptedField: schema.EncryptedField[json.RawMessage]{
+						KeyName: "user_messenger_1",
+					},
+				}).
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
@@ -81,7 +87,10 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
-				SetEncryptionDataKey(encryptedDataKey).
+				SetEncryptionDataKey(schema.EncryptedField[[]byte]{
+					Decrypted: encryptedDataKey,
+					KeyName:   "stash_1",
+				}).
 				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
@@ -103,8 +112,14 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
-				SetUserAgent("test-agent").
-				SetIP("127.0.0.1").
+				SetUserAgent(schema.EncryptedField[string]{
+					Decrypted: "test-agent",
+					KeyName:   "security_pii_logging_1",
+				}).
+				SetIP(schema.EncryptedField[string]{
+					Decrypted: "127.0.0.1",
+					KeyName:   "security_pii_logging_1",
+				}).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -193,7 +208,11 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
-				SetOptions(nil).
+				SetOptions(schema.EncryptedRawJSON{
+					EncryptedField: schema.EncryptedField[json.RawMessage]{
+						KeyName: "user_messenger_1",
+					},
+				}).
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
@@ -205,7 +224,10 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
-				SetEncryptionDataKey(encryptedDataKey).
+				SetEncryptionDataKey(schema.EncryptedField[[]byte]{
+					Decrypted: encryptedDataKey,
+					KeyName:   "stash_1",
+				}).
 				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
@@ -227,8 +249,14 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
-				SetUserAgent("test-agent").
-				SetIP("127.0.0.1").
+				SetUserAgent(schema.EncryptedField[string]{
+					Decrypted: "test-agent",
+					KeyName:   "security_pii_logging_1",
+				}).
+				SetIP(schema.EncryptedField[string]{
+					Decrypted: "127.0.0.1",
+					KeyName:   "security_pii_logging_1",
+				}).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -311,7 +339,11 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
-				SetOptions(nil).
+				SetOptions(schema.EncryptedRawJSON{
+					EncryptedField: schema.EncryptedField[json.RawMessage]{
+						KeyName: "user_messenger_1",
+					},
+				}).
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
@@ -323,7 +355,10 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
-				SetEncryptionDataKey(encryptedDataKey).
+				SetEncryptionDataKey(schema.EncryptedField[[]byte]{
+					Decrypted: encryptedDataKey,
+					KeyName:   "stash_1",
+				}).
 				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
@@ -349,8 +384,14 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
-				SetUserAgent("test-agent").
-				SetIP("127.0.0.1").
+				SetUserAgent(schema.EncryptedField[string]{
+					Decrypted: "test-agent",
+					KeyName:   "security_pii_logging_1",
+				}).
+				SetIP(schema.EncryptedField[string]{
+					Decrypted: "127.0.0.1",
+					KeyName:   "security_pii_logging_1",
+				}).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -475,7 +516,11 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetType(app.MockMessenger.Name).
 				SetVersion(1).
 				SetUserID(userOb.ID).
-				SetOptions(nil).
+				SetOptions(schema.EncryptedRawJSON{
+					EncryptedField: schema.EncryptedField[json.RawMessage]{
+						KeyName: "user_messenger_1",
+					},
+				}).
 				SetEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
@@ -487,7 +532,10 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetPublicName("main").
 				SetContent(encryptedContent).
 				SetFileName(encryptedFileName).
-				SetEncryptionDataKey(encryptedDataKey).
+				SetEncryptionDataKey(schema.EncryptedField[[]byte]{
+					Decrypted: encryptedDataKey,
+					KeyName:   "stash_1",
+				}).
 				SetPasswordSalt(passwordSalt).
 				SetHashTime(app.Env.PASSWORD_HASH_SETTINGS.Time).
 				SetHashMemory(app.Env.PASSWORD_HASH_SETTINGS.Memory).
@@ -514,8 +562,14 @@ func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 				SetHashedAuthCode(hashedAuthCode[:]).
 				SetValidFrom(now).
 				SetValidUntil(validUntil).
-				SetUserAgent("test-agent").
-				SetIP("127.0.0.1").
+				SetUserAgent(schema.EncryptedField[string]{
+					Decrypted: "test-agent",
+					KeyName:   "security_pii_logging_1",
+				}).
+				SetIP(schema.EncryptedField[string]{
+					Decrypted: "127.0.0.1",
+					KeyName:   "security_pii_logging_1",
+				}).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr

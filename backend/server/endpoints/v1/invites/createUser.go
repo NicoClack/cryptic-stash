@@ -12,6 +12,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -94,13 +95,17 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 						}
 						_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
 							SetUser(createdUserOb).
-							ClearWebAuthnSession().
-							SetUserAgent(schema.EncryptedField[*string]{
-								Decrypted: new(ginCtx.Request.UserAgent()),
+							SetWebAuthnSession(schema.OptionalEncryptedSessionData{
+								EncryptedField: schema.EncryptedField[*webauthn.SessionData]{
+									KeyName: "auth_1",
+								},
+							}).
+							SetUserAgent(schema.EncryptedField[string]{
+								Decrypted: ginCtx.Request.UserAgent(),
 								KeyName:   "security_pii_logging_1",
 							}).
-							SetIP(schema.EncryptedField[*string]{
-								Decrypted: new(ginCtx.ClientIP()),
+							SetIP(schema.EncryptedField[string]{
+								Decrypted: ginCtx.ClientIP(),
 								KeyName:   "security_pii_logging_1",
 							}).
 							Save(ctx)
