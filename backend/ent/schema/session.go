@@ -25,15 +25,9 @@ func (Session) Fields() []ent.Field {
 						MaxLen(32),
 		field.Time("expiresAt"),
 		field.Bytes("userAgent").
-			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
-			DefaultFunc(func() EncryptedField[*string] {
-				return EncryptedField[*string]{KeyName: "security_pii_logging_1"}
-			}),
+			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
 		field.Bytes("ip").
-			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
-			DefaultFunc(func() EncryptedField[*string] {
-				return EncryptedField[*string]{KeyName: "security_pii_logging_1"}
-			}),
+			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
 
 		field.UUID("passkeyID", uuid.Nil), // For now, all sessions are created through a passkey
 		field.UUID("userID", uuid.Nil),

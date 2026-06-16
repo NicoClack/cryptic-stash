@@ -51,15 +51,9 @@ func (Invite) Fields() []ent.Field {
 				}
 			}),
 		field.Bytes("userAgent").
-			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
-			DefaultFunc(func() EncryptedField[*string] {
-				return EncryptedField[*string]{KeyName: "security_pii_logging_1"}
-			}),
+			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
 		field.Bytes("ip").
-			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
-			DefaultFunc(func() EncryptedField[*string] {
-				return EncryptedField[*string]{KeyName: "security_pii_logging_1"}
-			}),
+			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
 		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any
 	}
 }
