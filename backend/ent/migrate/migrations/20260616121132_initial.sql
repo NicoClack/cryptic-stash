@@ -1,12 +1,12 @@
 -- +goose Up
 -- create "download_sessions" table
-CREATE TABLE `download_sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_auth_code` blob NOT NULL, `valid_from` datetime NOT NULL, `valid_until` datetime NOT NULL, `user_agent` blob NULL, `ip` blob NULL, `stash_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `download_sessions_stashes_downloadSessions` FOREIGN KEY (`stash_id`) REFERENCES `stashes` (`id`) ON DELETE CASCADE);
+CREATE TABLE `download_sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_auth_code` blob NOT NULL, `valid_from` datetime NOT NULL, `valid_until` datetime NOT NULL, `user_agent` blob NOT NULL, `ip` blob NOT NULL, `stash_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `download_sessions_stashes_downloadSessions` FOREIGN KEY (`stash_id`) REFERENCES `stashes` (`id`) ON DELETE CASCADE);
 -- create index "download_sessions_hashed_auth_code_key" to table: "download_sessions"
 CREATE UNIQUE INDEX `download_sessions_hashed_auth_code_key` ON `download_sessions` (`hashed_auth_code`);
 -- create index "downloadsession_hashed_auth_code_stash_id" to table: "download_sessions"
 CREATE INDEX `downloadsession_hashed_auth_code_stash_id` ON `download_sessions` (`hashed_auth_code`, `stash_id`);
 -- create "invites" table
-CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `web_authn_session` blob NULL, `user_agent` blob NULL, `ip` blob NULL, `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `web_authn_session` blob NOT NULL, `user_agent` blob NOT NULL, `ip` blob NOT NULL, `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "invites_hashed_code_key" to table: "invites"
 CREATE UNIQUE INDEX `invites_hashed_code_key` ON `invites` (`hashed_code`);
 -- create index "invites_user_id_key" to table: "invites"
@@ -44,7 +44,7 @@ CREATE TABLE `periodic_tasks` (`id` uuid NOT NULL, `created_at` datetime NOT NUL
 -- create index "periodic_tasks_name_key" to table: "periodic_tasks"
 CREATE UNIQUE INDEX `periodic_tasks_name_key` ON `periodic_tasks` (`name`);
 -- create "sessions" table
-CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_token` blob NOT NULL, `expires_at` datetime NOT NULL, `user_agent` blob NULL, `ip` blob NULL, `passkey_id` uuid NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_passkeys_sessions` FOREIGN KEY (`passkey_id`) REFERENCES `passkeys` (`id`) ON DELETE CASCADE, CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_token` blob NOT NULL, `expires_at` datetime NOT NULL, `user_agent` blob NOT NULL, `ip` blob NOT NULL, `passkey_id` uuid NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_passkeys_sessions` FOREIGN KEY (`passkey_id`) REFERENCES `passkeys` (`id`) ON DELETE CASCADE, CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "sessions_hashed_token_key" to table: "sessions"
 CREATE UNIQUE INDEX `sessions_hashed_token_key` ON `sessions` (`hashed_token`);
 -- create "stashes" table
