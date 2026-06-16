@@ -30,10 +30,15 @@ func (DownloadSession) Fields() []ent.Field {
 		field.Time("validFrom"), // After createdAt
 		field.Time("validUntil"),
 		field.Bytes("userAgent").
-			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}).
-			Nillable().
-			Optional(),
-		field.Bytes("ip").GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}).Nillable().Optional(),
+			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
+			DefaultFunc(func() EncryptedField[*string] {
+				return EncryptedField[*string]{KeyName: "security_pii_logging_1"}
+			}),
+		field.Bytes("ip").
+			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
+			DefaultFunc(func() EncryptedField[*string] {
+				return EncryptedField[*string]{KeyName: "security_pii_logging_1"}
+			}),
 		field.UUID("stashID", uuid.Nil),
 	}
 }

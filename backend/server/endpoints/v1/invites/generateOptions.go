@@ -38,7 +38,7 @@ func GenerateOptions(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				_, stdErr := tx.Invite.UpdateOneID(inviteOb.ID).
-					SetWebAuthnSession(schema.EncryptedSessionData{
+					SetWebAuthnSession(schema.OptionalEncryptedSessionData{
 						EncryptedField: schema.EncryptedField[*webauthn.SessionData]{
 							Decrypted: sessionData,
 							KeyName:   "auth_1",
