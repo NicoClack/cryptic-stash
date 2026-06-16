@@ -71,13 +71,13 @@ func (_c *InviteCreate) SetNillableExpiredReason(v *invite.ExpiredReason) *Invit
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (_c *InviteCreate) SetWebAuthnSession(v schema.EncryptedSessionData) *InviteCreate {
+func (_c *InviteCreate) SetWebAuthnSession(v schema.OptionalEncryptedSessionData) *InviteCreate {
 	_c.mutation.SetWebAuthnSession(v)
 	return _c
 }
 
 // SetNillableWebAuthnSession sets the "webAuthnSession" field if the given value is not nil.
-func (_c *InviteCreate) SetNillableWebAuthnSession(v *schema.EncryptedSessionData) *InviteCreate {
+func (_c *InviteCreate) SetNillableWebAuthnSession(v *schema.OptionalEncryptedSessionData) *InviteCreate {
 	if v != nil {
 		_c.SetWebAuthnSession(*v)
 	}
@@ -180,6 +180,18 @@ func (_c *InviteCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *InviteCreate) defaults() {
+	if _, ok := _c.mutation.WebAuthnSession(); !ok {
+		v := invite.DefaultWebAuthnSession()
+		_c.mutation.SetWebAuthnSession(v)
+	}
+	if _, ok := _c.mutation.UserAgent(); !ok {
+		v := invite.DefaultUserAgent()
+		_c.mutation.SetUserAgent(v)
+	}
+	if _, ok := _c.mutation.IP(); !ok {
+		v := invite.DefaultIP()
+		_c.mutation.SetIP(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := invite.DefaultID()
 		_c.mutation.SetID(v)
@@ -217,6 +229,15 @@ func (_c *InviteCreate) check() error {
 		if err := invite.ExpiredReasonValidator(v); err != nil {
 			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.WebAuthnSession(); !ok {
+		return &ValidationError{Name: "webAuthnSession", err: errors.New(`ent: missing required field "Invite.webAuthnSession"`)}
+	}
+	if _, ok := _c.mutation.UserAgent(); !ok {
+		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Invite.userAgent"`)}
+	}
+	if _, ok := _c.mutation.IP(); !ok {
+		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "Invite.ip"`)}
 	}
 	return nil
 }
@@ -284,11 +305,11 @@ func (_c *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeBytes, value)
-		_node.UserAgent = &value
+		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
 		_spec.SetField(invite.FieldIP, field.TypeBytes, value)
-		_node.IP = &value
+		_node.IP = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -438,7 +459,7 @@ func (u *InviteUpsert) ClearExpiredReason() *InviteUpsert {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (u *InviteUpsert) SetWebAuthnSession(v schema.EncryptedSessionData) *InviteUpsert {
+func (u *InviteUpsert) SetWebAuthnSession(v schema.OptionalEncryptedSessionData) *InviteUpsert {
 	u.Set(invite.FieldWebAuthnSession, v)
 	return u
 }
@@ -446,12 +467,6 @@ func (u *InviteUpsert) SetWebAuthnSession(v schema.EncryptedSessionData) *Invite
 // UpdateWebAuthnSession sets the "webAuthnSession" field to the value that was provided on create.
 func (u *InviteUpsert) UpdateWebAuthnSession() *InviteUpsert {
 	u.SetExcluded(invite.FieldWebAuthnSession)
-	return u
-}
-
-// ClearWebAuthnSession clears the value of the "webAuthnSession" field.
-func (u *InviteUpsert) ClearWebAuthnSession() *InviteUpsert {
-	u.SetNull(invite.FieldWebAuthnSession)
 	return u
 }
 
@@ -467,12 +482,6 @@ func (u *InviteUpsert) UpdateUserAgent() *InviteUpsert {
 	return u
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *InviteUpsert) ClearUserAgent() *InviteUpsert {
-	u.SetNull(invite.FieldUserAgent)
-	return u
-}
-
 // SetIP sets the "ip" field.
 func (u *InviteUpsert) SetIP(v schema.EncryptedField[*string]) *InviteUpsert {
 	u.Set(invite.FieldIP, v)
@@ -482,12 +491,6 @@ func (u *InviteUpsert) SetIP(v schema.EncryptedField[*string]) *InviteUpsert {
 // UpdateIP sets the "ip" field to the value that was provided on create.
 func (u *InviteUpsert) UpdateIP() *InviteUpsert {
 	u.SetExcluded(invite.FieldIP)
-	return u
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *InviteUpsert) ClearIP() *InviteUpsert {
-	u.SetNull(invite.FieldIP)
 	return u
 }
 
@@ -649,7 +652,7 @@ func (u *InviteUpsertOne) ClearExpiredReason() *InviteUpsertOne {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (u *InviteUpsertOne) SetWebAuthnSession(v schema.EncryptedSessionData) *InviteUpsertOne {
+func (u *InviteUpsertOne) SetWebAuthnSession(v schema.OptionalEncryptedSessionData) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetWebAuthnSession(v)
 	})
@@ -659,13 +662,6 @@ func (u *InviteUpsertOne) SetWebAuthnSession(v schema.EncryptedSessionData) *Inv
 func (u *InviteUpsertOne) UpdateWebAuthnSession() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateWebAuthnSession()
-	})
-}
-
-// ClearWebAuthnSession clears the value of the "webAuthnSession" field.
-func (u *InviteUpsertOne) ClearWebAuthnSession() *InviteUpsertOne {
-	return u.Update(func(s *InviteUpsert) {
-		s.ClearWebAuthnSession()
 	})
 }
 
@@ -683,13 +679,6 @@ func (u *InviteUpsertOne) UpdateUserAgent() *InviteUpsertOne {
 	})
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *InviteUpsertOne) ClearUserAgent() *InviteUpsertOne {
-	return u.Update(func(s *InviteUpsert) {
-		s.ClearUserAgent()
-	})
-}
-
 // SetIP sets the "ip" field.
 func (u *InviteUpsertOne) SetIP(v schema.EncryptedField[*string]) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
@@ -701,13 +690,6 @@ func (u *InviteUpsertOne) SetIP(v schema.EncryptedField[*string]) *InviteUpsertO
 func (u *InviteUpsertOne) UpdateIP() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateIP()
-	})
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *InviteUpsertOne) ClearIP() *InviteUpsertOne {
-	return u.Update(func(s *InviteUpsert) {
-		s.ClearIP()
 	})
 }
 
@@ -1039,7 +1021,7 @@ func (u *InviteUpsertBulk) ClearExpiredReason() *InviteUpsertBulk {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (u *InviteUpsertBulk) SetWebAuthnSession(v schema.EncryptedSessionData) *InviteUpsertBulk {
+func (u *InviteUpsertBulk) SetWebAuthnSession(v schema.OptionalEncryptedSessionData) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetWebAuthnSession(v)
 	})
@@ -1049,13 +1031,6 @@ func (u *InviteUpsertBulk) SetWebAuthnSession(v schema.EncryptedSessionData) *In
 func (u *InviteUpsertBulk) UpdateWebAuthnSession() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateWebAuthnSession()
-	})
-}
-
-// ClearWebAuthnSession clears the value of the "webAuthnSession" field.
-func (u *InviteUpsertBulk) ClearWebAuthnSession() *InviteUpsertBulk {
-	return u.Update(func(s *InviteUpsert) {
-		s.ClearWebAuthnSession()
 	})
 }
 
@@ -1073,13 +1048,6 @@ func (u *InviteUpsertBulk) UpdateUserAgent() *InviteUpsertBulk {
 	})
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *InviteUpsertBulk) ClearUserAgent() *InviteUpsertBulk {
-	return u.Update(func(s *InviteUpsert) {
-		s.ClearUserAgent()
-	})
-}
-
 // SetIP sets the "ip" field.
 func (u *InviteUpsertBulk) SetIP(v schema.EncryptedField[*string]) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
@@ -1091,13 +1059,6 @@ func (u *InviteUpsertBulk) SetIP(v schema.EncryptedField[*string]) *InviteUpsert
 func (u *InviteUpsertBulk) UpdateIP() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateIP()
-	})
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *InviteUpsertBulk) ClearIP() *InviteUpsertBulk {
-	return u.Update(func(s *InviteUpsert) {
-		s.ClearIP()
 	})
 }
 

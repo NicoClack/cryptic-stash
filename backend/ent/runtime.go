@@ -50,6 +50,14 @@ func init() {
 			return nil
 		}
 	}()
+	// downloadsessionDescUserAgent is the schema descriptor for userAgent field.
+	downloadsessionDescUserAgent := downloadsessionFields[6].Descriptor()
+	// downloadsession.DefaultUserAgent holds the default value on creation for the userAgent field.
+	downloadsession.DefaultUserAgent = downloadsessionDescUserAgent.Default.(func() schema.EncryptedField[*string])
+	// downloadsessionDescIP is the schema descriptor for ip field.
+	downloadsessionDescIP := downloadsessionFields[7].Descriptor()
+	// downloadsession.DefaultIP holds the default value on creation for the ip field.
+	downloadsession.DefaultIP = downloadsessionDescIP.Default.(func() schema.EncryptedField[*string])
 	// downloadsessionDescID is the schema descriptor for id field.
 	downloadsessionDescID := downloadsessionFields[0].Descriptor()
 	// downloadsession.DefaultID holds the default value on creation for the id field.
@@ -96,6 +104,18 @@ func init() {
 			return nil
 		}
 	}()
+	// inviteDescWebAuthnSession is the schema descriptor for webAuthnSession field.
+	inviteDescWebAuthnSession := inviteFields[7].Descriptor()
+	// invite.DefaultWebAuthnSession holds the default value on creation for the webAuthnSession field.
+	invite.DefaultWebAuthnSession = inviteDescWebAuthnSession.Default.(func() schema.OptionalEncryptedSessionData)
+	// inviteDescUserAgent is the schema descriptor for userAgent field.
+	inviteDescUserAgent := inviteFields[8].Descriptor()
+	// invite.DefaultUserAgent holds the default value on creation for the userAgent field.
+	invite.DefaultUserAgent = inviteDescUserAgent.Default.(func() schema.EncryptedField[*string])
+	// inviteDescIP is the schema descriptor for ip field.
+	inviteDescIP := inviteFields[9].Descriptor()
+	// invite.DefaultIP holds the default value on creation for the ip field.
+	invite.DefaultIP = inviteDescIP.Default.(func() schema.EncryptedField[*string])
 	// inviteDescID is the schema descriptor for id field.
 	inviteDescID := inviteFields[0].Descriptor()
 	// invite.DefaultID holds the default value on creation for the id field.
@@ -290,6 +310,14 @@ func init() {
 			return nil
 		}
 	}()
+	// sessionDescUserAgent is the schema descriptor for userAgent field.
+	sessionDescUserAgent := sessionFields[5].Descriptor()
+	// session.DefaultUserAgent holds the default value on creation for the userAgent field.
+	session.DefaultUserAgent = sessionDescUserAgent.Default.(func() schema.EncryptedField[*string])
+	// sessionDescIP is the schema descriptor for ip field.
+	sessionDescIP := sessionFields[6].Descriptor()
+	// session.DefaultIP holds the default value on creation for the ip field.
+	session.DefaultIP = sessionDescIP.Default.(func() schema.EncryptedField[*string])
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionFields[0].Descriptor()
 	// session.DefaultID holds the default value on creation for the id field.

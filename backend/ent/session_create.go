@@ -150,6 +150,14 @@ func (_c *SessionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SessionCreate) defaults() {
+	if _, ok := _c.mutation.UserAgent(); !ok {
+		v := session.DefaultUserAgent()
+		_c.mutation.SetUserAgent(v)
+	}
+	if _, ok := _c.mutation.IP(); !ok {
+		v := session.DefaultIP()
+		_c.mutation.SetIP(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := session.DefaultID()
 		_c.mutation.SetID(v)
@@ -174,6 +182,12 @@ func (_c *SessionCreate) check() error {
 	}
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expiresAt", err: errors.New(`ent: missing required field "Session.expiresAt"`)}
+	}
+	if _, ok := _c.mutation.UserAgent(); !ok {
+		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Session.userAgent"`)}
+	}
+	if _, ok := _c.mutation.IP(); !ok {
+		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "Session.ip"`)}
 	}
 	if _, ok := _c.mutation.PasskeyID(); !ok {
 		return &ValidationError{Name: "passkeyID", err: errors.New(`ent: missing required field "Session.passkeyID"`)}
@@ -241,11 +255,11 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(session.FieldUserAgent, field.TypeBytes, value)
-		_node.UserAgent = &value
+		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
 		_spec.SetField(session.FieldIP, field.TypeBytes, value)
-		_node.IP = &value
+		_node.IP = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -393,12 +407,6 @@ func (u *SessionUpsert) UpdateUserAgent() *SessionUpsert {
 	return u
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *SessionUpsert) ClearUserAgent() *SessionUpsert {
-	u.SetNull(session.FieldUserAgent)
-	return u
-}
-
 // SetIP sets the "ip" field.
 func (u *SessionUpsert) SetIP(v schema.EncryptedField[*string]) *SessionUpsert {
 	u.Set(session.FieldIP, v)
@@ -408,12 +416,6 @@ func (u *SessionUpsert) SetIP(v schema.EncryptedField[*string]) *SessionUpsert {
 // UpdateIP sets the "ip" field to the value that was provided on create.
 func (u *SessionUpsert) UpdateIP() *SessionUpsert {
 	u.SetExcluded(session.FieldIP)
-	return u
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *SessionUpsert) ClearIP() *SessionUpsert {
-	u.SetNull(session.FieldIP)
 	return u
 }
 
@@ -559,13 +561,6 @@ func (u *SessionUpsertOne) UpdateUserAgent() *SessionUpsertOne {
 	})
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *SessionUpsertOne) ClearUserAgent() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
-		s.ClearUserAgent()
-	})
-}
-
 // SetIP sets the "ip" field.
 func (u *SessionUpsertOne) SetIP(v schema.EncryptedField[*string]) *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
@@ -577,13 +572,6 @@ func (u *SessionUpsertOne) SetIP(v schema.EncryptedField[*string]) *SessionUpser
 func (u *SessionUpsertOne) UpdateIP() *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateIP()
-	})
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *SessionUpsertOne) ClearIP() *SessionUpsertOne {
-	return u.Update(func(s *SessionUpsert) {
-		s.ClearIP()
 	})
 }
 
@@ -900,13 +888,6 @@ func (u *SessionUpsertBulk) UpdateUserAgent() *SessionUpsertBulk {
 	})
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *SessionUpsertBulk) ClearUserAgent() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
-		s.ClearUserAgent()
-	})
-}
-
 // SetIP sets the "ip" field.
 func (u *SessionUpsertBulk) SetIP(v schema.EncryptedField[*string]) *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
@@ -918,13 +899,6 @@ func (u *SessionUpsertBulk) SetIP(v schema.EncryptedField[*string]) *SessionUpse
 func (u *SessionUpsertBulk) UpdateIP() *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateIP()
-	})
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *SessionUpsertBulk) ClearIP() *SessionUpsertBulk {
-	return u.Update(func(s *SessionUpsert) {
-		s.ClearIP()
 	})
 }
 

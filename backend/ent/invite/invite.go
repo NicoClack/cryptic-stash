@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -81,6 +82,12 @@ var (
 	EmailValidator func(string) error
 	// HashedCodeValidator is a validator for the "hashedCode" field. It is called by the builders before save.
 	HashedCodeValidator func([]byte) error
+	// DefaultWebAuthnSession holds the default value on creation for the "webAuthnSession" field.
+	DefaultWebAuthnSession func() schema.OptionalEncryptedSessionData
+	// DefaultUserAgent holds the default value on creation for the "userAgent" field.
+	DefaultUserAgent func() schema.EncryptedField[*string]
+	// DefaultIP holds the default value on creation for the "ip" field.
+	DefaultIP func() schema.EncryptedField[*string]
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

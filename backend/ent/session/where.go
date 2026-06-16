@@ -297,16 +297,6 @@ func UserAgentLTE(v schema.EncryptedField[*string]) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldUserAgent, v))
 }
 
-// UserAgentIsNil applies the IsNil predicate on the "userAgent" field.
-func UserAgentIsNil() predicate.Session {
-	return predicate.Session(sql.FieldIsNull(FieldUserAgent))
-}
-
-// UserAgentNotNil applies the NotNil predicate on the "userAgent" field.
-func UserAgentNotNil() predicate.Session {
-	return predicate.Session(sql.FieldNotNull(FieldUserAgent))
-}
-
 // IPEQ applies the EQ predicate on the "ip" field.
 func IPEQ(v schema.EncryptedField[*string]) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldIP, v))
@@ -345,16 +335,6 @@ func IPLT(v schema.EncryptedField[*string]) predicate.Session {
 // IPLTE applies the LTE predicate on the "ip" field.
 func IPLTE(v schema.EncryptedField[*string]) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldIP, v))
-}
-
-// IPIsNil applies the IsNil predicate on the "ip" field.
-func IPIsNil() predicate.Session {
-	return predicate.Session(sql.FieldIsNull(FieldIP))
-}
-
-// IPNotNil applies the NotNil predicate on the "ip" field.
-func IPNotNil() predicate.Session {
-	return predicate.Session(sql.FieldNotNull(FieldIP))
 }
 
 // PasskeyIDEQ applies the EQ predicate on the "passkeyID" field.

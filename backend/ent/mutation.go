@@ -379,7 +379,7 @@ func (m *DownloadSessionMutation) UserAgent() (r schema.EncryptedField[*string],
 // OldUserAgent returns the old "userAgent" field's value of the DownloadSession entity.
 // If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DownloadSessionMutation) OldUserAgent(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
+func (m *DownloadSessionMutation) OldUserAgent(ctx context.Context) (v schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
 	}
@@ -393,22 +393,9 @@ func (m *DownloadSessionMutation) OldUserAgent(ctx context.Context) (v *schema.E
 	return oldValue.UserAgent, nil
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (m *DownloadSessionMutation) ClearUserAgent() {
-	m.userAgent = nil
-	m.clearedFields[downloadsession.FieldUserAgent] = struct{}{}
-}
-
-// UserAgentCleared returns if the "userAgent" field was cleared in this mutation.
-func (m *DownloadSessionMutation) UserAgentCleared() bool {
-	_, ok := m.clearedFields[downloadsession.FieldUserAgent]
-	return ok
-}
-
 // ResetUserAgent resets all changes to the "userAgent" field.
 func (m *DownloadSessionMutation) ResetUserAgent() {
 	m.userAgent = nil
-	delete(m.clearedFields, downloadsession.FieldUserAgent)
 }
 
 // SetIP sets the "ip" field.
@@ -428,7 +415,7 @@ func (m *DownloadSessionMutation) IP() (r schema.EncryptedField[*string], exists
 // OldIP returns the old "ip" field's value of the DownloadSession entity.
 // If the DownloadSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DownloadSessionMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
+func (m *DownloadSessionMutation) OldIP(ctx context.Context) (v schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIP is only allowed on UpdateOne operations")
 	}
@@ -442,22 +429,9 @@ func (m *DownloadSessionMutation) OldIP(ctx context.Context) (v *schema.Encrypte
 	return oldValue.IP, nil
 }
 
-// ClearIP clears the value of the "ip" field.
-func (m *DownloadSessionMutation) ClearIP() {
-	m.ip = nil
-	m.clearedFields[downloadsession.FieldIP] = struct{}{}
-}
-
-// IPCleared returns if the "ip" field was cleared in this mutation.
-func (m *DownloadSessionMutation) IPCleared() bool {
-	_, ok := m.clearedFields[downloadsession.FieldIP]
-	return ok
-}
-
 // ResetIP resets all changes to the "ip" field.
 func (m *DownloadSessionMutation) ResetIP() {
 	m.ip = nil
-	delete(m.clearedFields, downloadsession.FieldIP)
 }
 
 // SetStashID sets the "stashID" field.
@@ -779,14 +753,7 @@ func (m *DownloadSessionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *DownloadSessionMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(downloadsession.FieldUserAgent) {
-		fields = append(fields, downloadsession.FieldUserAgent)
-	}
-	if m.FieldCleared(downloadsession.FieldIP) {
-		fields = append(fields, downloadsession.FieldIP)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -799,14 +766,6 @@ func (m *DownloadSessionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *DownloadSessionMutation) ClearField(name string) error {
-	switch name {
-	case downloadsession.FieldUserAgent:
-		m.ClearUserAgent()
-		return nil
-	case downloadsession.FieldIP:
-		m.ClearIP()
-		return nil
-	}
 	return fmt.Errorf("unknown DownloadSession nullable field %s", name)
 }
 
@@ -956,7 +915,7 @@ type InviteMutation struct {
 	hashedCode      *[]byte
 	expiresAt       *time.Time
 	expiredReason   *invite.ExpiredReason
-	webAuthnSession *schema.EncryptedSessionData
+	webAuthnSession *schema.OptionalEncryptedSessionData
 	userAgent       *schema.EncryptedField[*string]
 	ip              *schema.EncryptedField[*string]
 	clearedFields   map[string]struct{}
@@ -1301,12 +1260,12 @@ func (m *InviteMutation) ResetExpiredReason() {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (m *InviteMutation) SetWebAuthnSession(ssd schema.EncryptedSessionData) {
-	m.webAuthnSession = &ssd
+func (m *InviteMutation) SetWebAuthnSession(sesd schema.OptionalEncryptedSessionData) {
+	m.webAuthnSession = &sesd
 }
 
 // WebAuthnSession returns the value of the "webAuthnSession" field in the mutation.
-func (m *InviteMutation) WebAuthnSession() (r schema.EncryptedSessionData, exists bool) {
+func (m *InviteMutation) WebAuthnSession() (r schema.OptionalEncryptedSessionData, exists bool) {
 	v := m.webAuthnSession
 	if v == nil {
 		return
@@ -1317,7 +1276,7 @@ func (m *InviteMutation) WebAuthnSession() (r schema.EncryptedSessionData, exist
 // OldWebAuthnSession returns the old "webAuthnSession" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldWebAuthnSession(ctx context.Context) (v schema.EncryptedSessionData, err error) {
+func (m *InviteMutation) OldWebAuthnSession(ctx context.Context) (v schema.OptionalEncryptedSessionData, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWebAuthnSession is only allowed on UpdateOne operations")
 	}
@@ -1331,22 +1290,9 @@ func (m *InviteMutation) OldWebAuthnSession(ctx context.Context) (v schema.Encry
 	return oldValue.WebAuthnSession, nil
 }
 
-// ClearWebAuthnSession clears the value of the "webAuthnSession" field.
-func (m *InviteMutation) ClearWebAuthnSession() {
-	m.webAuthnSession = nil
-	m.clearedFields[invite.FieldWebAuthnSession] = struct{}{}
-}
-
-// WebAuthnSessionCleared returns if the "webAuthnSession" field was cleared in this mutation.
-func (m *InviteMutation) WebAuthnSessionCleared() bool {
-	_, ok := m.clearedFields[invite.FieldWebAuthnSession]
-	return ok
-}
-
 // ResetWebAuthnSession resets all changes to the "webAuthnSession" field.
 func (m *InviteMutation) ResetWebAuthnSession() {
 	m.webAuthnSession = nil
-	delete(m.clearedFields, invite.FieldWebAuthnSession)
 }
 
 // SetUserAgent sets the "userAgent" field.
@@ -1366,7 +1312,7 @@ func (m *InviteMutation) UserAgent() (r schema.EncryptedField[*string], exists b
 // OldUserAgent returns the old "userAgent" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldUserAgent(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
+func (m *InviteMutation) OldUserAgent(ctx context.Context) (v schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
 	}
@@ -1380,22 +1326,9 @@ func (m *InviteMutation) OldUserAgent(ctx context.Context) (v *schema.EncryptedF
 	return oldValue.UserAgent, nil
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (m *InviteMutation) ClearUserAgent() {
-	m.userAgent = nil
-	m.clearedFields[invite.FieldUserAgent] = struct{}{}
-}
-
-// UserAgentCleared returns if the "userAgent" field was cleared in this mutation.
-func (m *InviteMutation) UserAgentCleared() bool {
-	_, ok := m.clearedFields[invite.FieldUserAgent]
-	return ok
-}
-
 // ResetUserAgent resets all changes to the "userAgent" field.
 func (m *InviteMutation) ResetUserAgent() {
 	m.userAgent = nil
-	delete(m.clearedFields, invite.FieldUserAgent)
 }
 
 // SetIP sets the "ip" field.
@@ -1415,7 +1348,7 @@ func (m *InviteMutation) IP() (r schema.EncryptedField[*string], exists bool) {
 // OldIP returns the old "ip" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
+func (m *InviteMutation) OldIP(ctx context.Context) (v schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIP is only allowed on UpdateOne operations")
 	}
@@ -1429,22 +1362,9 @@ func (m *InviteMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*s
 	return oldValue.IP, nil
 }
 
-// ClearIP clears the value of the "ip" field.
-func (m *InviteMutation) ClearIP() {
-	m.ip = nil
-	m.clearedFields[invite.FieldIP] = struct{}{}
-}
-
-// IPCleared returns if the "ip" field was cleared in this mutation.
-func (m *InviteMutation) IPCleared() bool {
-	_, ok := m.clearedFields[invite.FieldIP]
-	return ok
-}
-
 // ResetIP resets all changes to the "ip" field.
 func (m *InviteMutation) ResetIP() {
 	m.ip = nil
-	delete(m.clearedFields, invite.FieldIP)
 }
 
 // SetUserID sets the "userID" field.
@@ -1697,7 +1617,7 @@ func (m *InviteMutation) SetField(name string, value ent.Value) error {
 		m.SetExpiredReason(v)
 		return nil
 	case invite.FieldWebAuthnSession:
-		v, ok := value.(schema.EncryptedSessionData)
+		v, ok := value.(schema.OptionalEncryptedSessionData)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1757,15 +1677,6 @@ func (m *InviteMutation) ClearedFields() []string {
 	if m.FieldCleared(invite.FieldExpiredReason) {
 		fields = append(fields, invite.FieldExpiredReason)
 	}
-	if m.FieldCleared(invite.FieldWebAuthnSession) {
-		fields = append(fields, invite.FieldWebAuthnSession)
-	}
-	if m.FieldCleared(invite.FieldUserAgent) {
-		fields = append(fields, invite.FieldUserAgent)
-	}
-	if m.FieldCleared(invite.FieldIP) {
-		fields = append(fields, invite.FieldIP)
-	}
 	if m.FieldCleared(invite.FieldUserID) {
 		fields = append(fields, invite.FieldUserID)
 	}
@@ -1785,15 +1696,6 @@ func (m *InviteMutation) ClearField(name string) error {
 	switch name {
 	case invite.FieldExpiredReason:
 		m.ClearExpiredReason()
-		return nil
-	case invite.FieldWebAuthnSession:
-		m.ClearWebAuthnSession()
-		return nil
-	case invite.FieldUserAgent:
-		m.ClearUserAgent()
-		return nil
-	case invite.FieldIP:
-		m.ClearIP()
 		return nil
 	case invite.FieldUserID:
 		m.ClearUserID()
@@ -7073,7 +6975,7 @@ func (m *SessionMutation) UserAgent() (r schema.EncryptedField[*string], exists 
 // OldUserAgent returns the old "userAgent" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldUserAgent(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
+func (m *SessionMutation) OldUserAgent(ctx context.Context) (v schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
 	}
@@ -7087,22 +6989,9 @@ func (m *SessionMutation) OldUserAgent(ctx context.Context) (v *schema.Encrypted
 	return oldValue.UserAgent, nil
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (m *SessionMutation) ClearUserAgent() {
-	m.userAgent = nil
-	m.clearedFields[session.FieldUserAgent] = struct{}{}
-}
-
-// UserAgentCleared returns if the "userAgent" field was cleared in this mutation.
-func (m *SessionMutation) UserAgentCleared() bool {
-	_, ok := m.clearedFields[session.FieldUserAgent]
-	return ok
-}
-
 // ResetUserAgent resets all changes to the "userAgent" field.
 func (m *SessionMutation) ResetUserAgent() {
 	m.userAgent = nil
-	delete(m.clearedFields, session.FieldUserAgent)
 }
 
 // SetIP sets the "ip" field.
@@ -7122,7 +7011,7 @@ func (m *SessionMutation) IP() (r schema.EncryptedField[*string], exists bool) {
 // OldIP returns the old "ip" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*string], err error) {
+func (m *SessionMutation) OldIP(ctx context.Context) (v schema.EncryptedField[*string], err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIP is only allowed on UpdateOne operations")
 	}
@@ -7136,22 +7025,9 @@ func (m *SessionMutation) OldIP(ctx context.Context) (v *schema.EncryptedField[*
 	return oldValue.IP, nil
 }
 
-// ClearIP clears the value of the "ip" field.
-func (m *SessionMutation) ClearIP() {
-	m.ip = nil
-	m.clearedFields[session.FieldIP] = struct{}{}
-}
-
-// IPCleared returns if the "ip" field was cleared in this mutation.
-func (m *SessionMutation) IPCleared() bool {
-	_, ok := m.clearedFields[session.FieldIP]
-	return ok
-}
-
 // ResetIP resets all changes to the "ip" field.
 func (m *SessionMutation) ResetIP() {
 	m.ip = nil
-	delete(m.clearedFields, session.FieldIP)
 }
 
 // SetPasskeyID sets the "passkeyID" field.
@@ -7482,14 +7358,7 @@ func (m *SessionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SessionMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(session.FieldUserAgent) {
-		fields = append(fields, session.FieldUserAgent)
-	}
-	if m.FieldCleared(session.FieldIP) {
-		fields = append(fields, session.FieldIP)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -7502,14 +7371,6 @@ func (m *SessionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SessionMutation) ClearField(name string) error {
-	switch name {
-	case session.FieldUserAgent:
-		m.ClearUserAgent()
-		return nil
-	case session.FieldIP:
-		m.ClearIP()
-		return nil
-	}
 	return fmt.Errorf("unknown Session nullable field %s", name)
 }
 

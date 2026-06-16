@@ -106,22 +106,16 @@ func (_u *InviteUpdate) ClearExpiredReason() *InviteUpdate {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (_u *InviteUpdate) SetWebAuthnSession(v schema.EncryptedSessionData) *InviteUpdate {
+func (_u *InviteUpdate) SetWebAuthnSession(v schema.OptionalEncryptedSessionData) *InviteUpdate {
 	_u.mutation.SetWebAuthnSession(v)
 	return _u
 }
 
 // SetNillableWebAuthnSession sets the "webAuthnSession" field if the given value is not nil.
-func (_u *InviteUpdate) SetNillableWebAuthnSession(v *schema.EncryptedSessionData) *InviteUpdate {
+func (_u *InviteUpdate) SetNillableWebAuthnSession(v *schema.OptionalEncryptedSessionData) *InviteUpdate {
 	if v != nil {
 		_u.SetWebAuthnSession(*v)
 	}
-	return _u
-}
-
-// ClearWebAuthnSession clears the value of the "webAuthnSession" field.
-func (_u *InviteUpdate) ClearWebAuthnSession() *InviteUpdate {
-	_u.mutation.ClearWebAuthnSession()
 	return _u
 }
 
@@ -139,12 +133,6 @@ func (_u *InviteUpdate) SetNillableUserAgent(v *schema.EncryptedField[*string]) 
 	return _u
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (_u *InviteUpdate) ClearUserAgent() *InviteUpdate {
-	_u.mutation.ClearUserAgent()
-	return _u
-}
-
 // SetIP sets the "ip" field.
 func (_u *InviteUpdate) SetIP(v schema.EncryptedField[*string]) *InviteUpdate {
 	_u.mutation.SetIP(v)
@@ -156,12 +144,6 @@ func (_u *InviteUpdate) SetNillableIP(v *schema.EncryptedField[*string]) *Invite
 	if v != nil {
 		_u.SetIP(*v)
 	}
-	return _u
-}
-
-// ClearIP clears the value of the "ip" field.
-func (_u *InviteUpdate) ClearIP() *InviteUpdate {
-	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -293,20 +275,11 @@ func (_u *InviteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.WebAuthnSession(); ok {
 		_spec.SetField(invite.FieldWebAuthnSession, field.TypeBytes, value)
 	}
-	if _u.mutation.WebAuthnSessionCleared() {
-		_spec.ClearField(invite.FieldWebAuthnSession, field.TypeBytes)
-	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeBytes, value)
 	}
-	if _u.mutation.UserAgentCleared() {
-		_spec.ClearField(invite.FieldUserAgent, field.TypeBytes)
-	}
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(invite.FieldIP, field.TypeBytes, value)
-	}
-	if _u.mutation.IPCleared() {
-		_spec.ClearField(invite.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -432,22 +405,16 @@ func (_u *InviteUpdateOne) ClearExpiredReason() *InviteUpdateOne {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (_u *InviteUpdateOne) SetWebAuthnSession(v schema.EncryptedSessionData) *InviteUpdateOne {
+func (_u *InviteUpdateOne) SetWebAuthnSession(v schema.OptionalEncryptedSessionData) *InviteUpdateOne {
 	_u.mutation.SetWebAuthnSession(v)
 	return _u
 }
 
 // SetNillableWebAuthnSession sets the "webAuthnSession" field if the given value is not nil.
-func (_u *InviteUpdateOne) SetNillableWebAuthnSession(v *schema.EncryptedSessionData) *InviteUpdateOne {
+func (_u *InviteUpdateOne) SetNillableWebAuthnSession(v *schema.OptionalEncryptedSessionData) *InviteUpdateOne {
 	if v != nil {
 		_u.SetWebAuthnSession(*v)
 	}
-	return _u
-}
-
-// ClearWebAuthnSession clears the value of the "webAuthnSession" field.
-func (_u *InviteUpdateOne) ClearWebAuthnSession() *InviteUpdateOne {
-	_u.mutation.ClearWebAuthnSession()
 	return _u
 }
 
@@ -465,12 +432,6 @@ func (_u *InviteUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[*string
 	return _u
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (_u *InviteUpdateOne) ClearUserAgent() *InviteUpdateOne {
-	_u.mutation.ClearUserAgent()
-	return _u
-}
-
 // SetIP sets the "ip" field.
 func (_u *InviteUpdateOne) SetIP(v schema.EncryptedField[*string]) *InviteUpdateOne {
 	_u.mutation.SetIP(v)
@@ -482,12 +443,6 @@ func (_u *InviteUpdateOne) SetNillableIP(v *schema.EncryptedField[*string]) *Inv
 	if v != nil {
 		_u.SetIP(*v)
 	}
-	return _u
-}
-
-// ClearIP clears the value of the "ip" field.
-func (_u *InviteUpdateOne) ClearIP() *InviteUpdateOne {
-	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -649,20 +604,11 @@ func (_u *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err erro
 	if value, ok := _u.mutation.WebAuthnSession(); ok {
 		_spec.SetField(invite.FieldWebAuthnSession, field.TypeBytes, value)
 	}
-	if _u.mutation.WebAuthnSessionCleared() {
-		_spec.ClearField(invite.FieldWebAuthnSession, field.TypeBytes)
-	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(invite.FieldUserAgent, field.TypeBytes, value)
 	}
-	if _u.mutation.UserAgentCleared() {
-		_spec.ClearField(invite.FieldUserAgent, field.TypeBytes)
-	}
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(invite.FieldIP, field.TypeBytes, value)
-	}
-	if _u.mutation.IPCleared() {
-		_spec.ClearField(invite.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

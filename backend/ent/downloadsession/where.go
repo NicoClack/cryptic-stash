@@ -337,16 +337,6 @@ func UserAgentLTE(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldLTE(FieldUserAgent, v))
 }
 
-// UserAgentIsNil applies the IsNil predicate on the "userAgent" field.
-func UserAgentIsNil() predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldIsNull(FieldUserAgent))
-}
-
-// UserAgentNotNil applies the NotNil predicate on the "userAgent" field.
-func UserAgentNotNil() predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldNotNull(FieldUserAgent))
-}
-
 // IPEQ applies the EQ predicate on the "ip" field.
 func IPEQ(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldEQ(FieldIP, v))
@@ -385,16 +375,6 @@ func IPLT(v schema.EncryptedField[*string]) predicate.DownloadSession {
 // IPLTE applies the LTE predicate on the "ip" field.
 func IPLTE(v schema.EncryptedField[*string]) predicate.DownloadSession {
 	return predicate.DownloadSession(sql.FieldLTE(FieldIP, v))
-}
-
-// IPIsNil applies the IsNil predicate on the "ip" field.
-func IPIsNil() predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldIsNull(FieldIP))
-}
-
-// IPNotNil applies the NotNil predicate on the "ip" field.
-func IPNotNil() predicate.DownloadSession {
-	return predicate.DownloadSession(sql.FieldNotNull(FieldIP))
 }
 
 // StashIDEQ applies the EQ predicate on the "stashID" field.

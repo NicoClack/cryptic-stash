@@ -160,6 +160,14 @@ func (_c *DownloadSessionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *DownloadSessionCreate) defaults() {
+	if _, ok := _c.mutation.UserAgent(); !ok {
+		v := downloadsession.DefaultUserAgent()
+		_c.mutation.SetUserAgent(v)
+	}
+	if _, ok := _c.mutation.IP(); !ok {
+		v := downloadsession.DefaultIP()
+		_c.mutation.SetIP(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := downloadsession.DefaultID()
 		_c.mutation.SetID(v)
@@ -187,6 +195,12 @@ func (_c *DownloadSessionCreate) check() error {
 	}
 	if _, ok := _c.mutation.ValidUntil(); !ok {
 		return &ValidationError{Name: "validUntil", err: errors.New(`ent: missing required field "DownloadSession.validUntil"`)}
+	}
+	if _, ok := _c.mutation.UserAgent(); !ok {
+		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "DownloadSession.userAgent"`)}
+	}
+	if _, ok := _c.mutation.IP(); !ok {
+		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "DownloadSession.ip"`)}
 	}
 	if _, ok := _c.mutation.StashID(); !ok {
 		return &ValidationError{Name: "stashID", err: errors.New(`ent: missing required field "DownloadSession.stashID"`)}
@@ -252,11 +266,11 @@ func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.Creat
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(downloadsession.FieldUserAgent, field.TypeBytes, value)
-		_node.UserAgent = &value
+		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
 		_spec.SetField(downloadsession.FieldIP, field.TypeBytes, value)
-		_node.IP = &value
+		_node.IP = value
 	}
 	if nodes := _c.mutation.StashIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -415,12 +429,6 @@ func (u *DownloadSessionUpsert) UpdateUserAgent() *DownloadSessionUpsert {
 	return u
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *DownloadSessionUpsert) ClearUserAgent() *DownloadSessionUpsert {
-	u.SetNull(downloadsession.FieldUserAgent)
-	return u
-}
-
 // SetIP sets the "ip" field.
 func (u *DownloadSessionUpsert) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpsert {
 	u.Set(downloadsession.FieldIP, v)
@@ -430,12 +438,6 @@ func (u *DownloadSessionUpsert) SetIP(v schema.EncryptedField[*string]) *Downloa
 // UpdateIP sets the "ip" field to the value that was provided on create.
 func (u *DownloadSessionUpsert) UpdateIP() *DownloadSessionUpsert {
 	u.SetExcluded(downloadsession.FieldIP)
-	return u
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *DownloadSessionUpsert) ClearIP() *DownloadSessionUpsert {
-	u.SetNull(downloadsession.FieldIP)
 	return u
 }
 
@@ -583,13 +585,6 @@ func (u *DownloadSessionUpsertOne) UpdateUserAgent() *DownloadSessionUpsertOne {
 	})
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *DownloadSessionUpsertOne) ClearUserAgent() *DownloadSessionUpsertOne {
-	return u.Update(func(s *DownloadSessionUpsert) {
-		s.ClearUserAgent()
-	})
-}
-
 // SetIP sets the "ip" field.
 func (u *DownloadSessionUpsertOne) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
@@ -601,13 +596,6 @@ func (u *DownloadSessionUpsertOne) SetIP(v schema.EncryptedField[*string]) *Down
 func (u *DownloadSessionUpsertOne) UpdateIP() *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateIP()
-	})
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *DownloadSessionUpsertOne) ClearIP() *DownloadSessionUpsertOne {
-	return u.Update(func(s *DownloadSessionUpsert) {
-		s.ClearIP()
 	})
 }
 
@@ -924,13 +912,6 @@ func (u *DownloadSessionUpsertBulk) UpdateUserAgent() *DownloadSessionUpsertBulk
 	})
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (u *DownloadSessionUpsertBulk) ClearUserAgent() *DownloadSessionUpsertBulk {
-	return u.Update(func(s *DownloadSessionUpsert) {
-		s.ClearUserAgent()
-	})
-}
-
 // SetIP sets the "ip" field.
 func (u *DownloadSessionUpsertBulk) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
@@ -942,13 +923,6 @@ func (u *DownloadSessionUpsertBulk) SetIP(v schema.EncryptedField[*string]) *Dow
 func (u *DownloadSessionUpsertBulk) UpdateIP() *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.UpdateIP()
-	})
-}
-
-// ClearIP clears the value of the "ip" field.
-func (u *DownloadSessionUpsertBulk) ClearIP() *DownloadSessionUpsertBulk {
-	return u.Update(func(s *DownloadSessionUpsert) {
-		s.ClearIP()
 	})
 }
 

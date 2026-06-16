@@ -16,8 +16,8 @@ var (
 		{Name: "hashed_auth_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "valid_from", Type: field.TypeTime},
 		{Name: "valid_until", Type: field.TypeTime},
-		{Name: "user_agent", Type: field.TypeBytes, Nullable: true},
-		{Name: "ip", Type: field.TypeBytes, Nullable: true},
+		{Name: "user_agent", Type: field.TypeBytes},
+		{Name: "ip", Type: field.TypeBytes},
 		{Name: "stash_id", Type: field.TypeUUID},
 	}
 	// DownloadSessionsTable holds the schema information for the "download_sessions" table.
@@ -50,9 +50,9 @@ var (
 		{Name: "hashed_code", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "expired_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"revoked", "username_taken"}},
-		{Name: "web_authn_session", Type: field.TypeBytes, Nullable: true},
-		{Name: "user_agent", Type: field.TypeBytes, Nullable: true},
-		{Name: "ip", Type: field.TypeBytes, Nullable: true},
+		{Name: "web_authn_session", Type: field.TypeBytes},
+		{Name: "user_agent", Type: field.TypeBytes},
+		{Name: "ip", Type: field.TypeBytes},
 		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// InvitesTable holds the schema information for the "invites" table.
@@ -264,8 +264,8 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "hashed_token", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "user_agent", Type: field.TypeBytes, Nullable: true},
-		{Name: "ip", Type: field.TypeBytes, Nullable: true},
+		{Name: "user_agent", Type: field.TypeBytes},
+		{Name: "ip", Type: field.TypeBytes},
 		{Name: "passkey_id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID},
 	}

@@ -86,12 +86,6 @@ func (_u *SessionUpdate) SetNillableUserAgent(v *schema.EncryptedField[*string])
 	return _u
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (_u *SessionUpdate) ClearUserAgent() *SessionUpdate {
-	_u.mutation.ClearUserAgent()
-	return _u
-}
-
 // SetIP sets the "ip" field.
 func (_u *SessionUpdate) SetIP(v schema.EncryptedField[*string]) *SessionUpdate {
 	_u.mutation.SetIP(v)
@@ -103,12 +97,6 @@ func (_u *SessionUpdate) SetNillableIP(v *schema.EncryptedField[*string]) *Sessi
 	if v != nil {
 		_u.SetIP(*v)
 	}
-	return _u
-}
-
-// ClearIP clears the value of the "ip" field.
-func (_u *SessionUpdate) ClearIP() *SessionUpdate {
-	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -246,14 +234,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(session.FieldUserAgent, field.TypeBytes, value)
 	}
-	if _u.mutation.UserAgentCleared() {
-		_spec.ClearField(session.FieldUserAgent, field.TypeBytes)
-	}
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(session.FieldIP, field.TypeBytes, value)
-	}
-	if _u.mutation.IPCleared() {
-		_spec.ClearField(session.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -387,12 +369,6 @@ func (_u *SessionUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[*strin
 	return _u
 }
 
-// ClearUserAgent clears the value of the "userAgent" field.
-func (_u *SessionUpdateOne) ClearUserAgent() *SessionUpdateOne {
-	_u.mutation.ClearUserAgent()
-	return _u
-}
-
 // SetIP sets the "ip" field.
 func (_u *SessionUpdateOne) SetIP(v schema.EncryptedField[*string]) *SessionUpdateOne {
 	_u.mutation.SetIP(v)
@@ -404,12 +380,6 @@ func (_u *SessionUpdateOne) SetNillableIP(v *schema.EncryptedField[*string]) *Se
 	if v != nil {
 		_u.SetIP(*v)
 	}
-	return _u
-}
-
-// ClearIP clears the value of the "ip" field.
-func (_u *SessionUpdateOne) ClearIP() *SessionUpdateOne {
-	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -577,14 +547,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 	if value, ok := _u.mutation.UserAgent(); ok {
 		_spec.SetField(session.FieldUserAgent, field.TypeBytes, value)
 	}
-	if _u.mutation.UserAgentCleared() {
-		_spec.ClearField(session.FieldUserAgent, field.TypeBytes)
-	}
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(session.FieldIP, field.TypeBytes, value)
-	}
-	if _u.mutation.IPCleared() {
-		_spec.ClearField(session.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
