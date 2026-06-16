@@ -5,6 +5,7 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -50,13 +51,6 @@ func FinishRegisterPasskey(
 		return nil, ErrWrapperFinishRegisterPasskey.Wrap(stdErr)
 	}
 
-	var aaguid uuid.UUID
-	if len(credential.Authenticator.AAGUID) == 16 {
-		aaguid = [16]byte(credential.Authenticator.AAGUID)
-	} else if len(credential.Authenticator.AAGUID) != 0 {
-		return nil, ErrWrapperFinishRegisterPasskey.Wrap(ErrInvalidAAGUIDLength)
-	}
-
 	userID, stdErr := uuid.FromBytes(session.UserID)
 	if stdErr != nil {
 		return nil, ErrWrapperFinishRegisterPasskey.Wrap(stdErr)
@@ -78,9 +72,12 @@ func FinishRegisterPasskey(
 		SetUserID(userOb.ID).
 		SetName(credentialName).
 		SetCredentialID(credential.ID).
-		SetPublicKey(credential.PublicKey).
-		SetAaguid(aaguid).
-		SetSignCount(credential.Authenticator.SignCount).
+		SetCredential(schema.EncryptedCredential{
+			EncryptedField: schema.EncryptedField[webauthn.Credential]{
+				Decrypted: *credential,
+				KeyName:   "auth_1",
+			},
+		}).
 		Save(ctx)
 	if stdErr != nil {
 		return nil, ErrWrapperFinishRegisterPasskey.Wrap(ErrWrapperDatabase.Wrap(stdErr))

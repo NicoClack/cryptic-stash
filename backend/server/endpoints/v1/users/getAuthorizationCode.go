@@ -10,6 +10,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
@@ -73,7 +74,7 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 				Threads: stashOb.HashThreads,
 			},
 		)
-		_, wrappedErr := app.Core.Decrypt(stashOb.EncryptionDataKey, stashKek)
+		_, wrappedErr := app.Core.Decrypt(stashOb.EncryptionDataKey.Decrypted, stashKek)
 		if wrappedErr != nil {
 			return servercommon.NewUnauthorizedError()
 		}
@@ -94,8 +95,14 @@ func GetAuthorizationCode(app *servercommon.ServerApp) gin.HandlerFunc {
 					SetHashedAuthCode(hashedAuthCode[:]).
 					SetValidFrom(validFrom).
 					SetValidUntil(validUntil).
-					SetUserAgent(ginCtx.Request.UserAgent()).
-					SetIP(ginCtx.ClientIP()).
+					SetUserAgent(schema.EncryptedField[*string]{
+						Decrypted: new(ginCtx.Request.UserAgent()),
+						KeyName:   "security_pii_logging_1",
+					}).
+					SetIP(schema.EncryptedField[*string]{
+						Decrypted: new(ginCtx.ClientIP()),
+						KeyName:   "security_pii_logging_1",
+					}).
 					Save(ctx)
 				if stdErr != nil {
 					return nil, stdErr

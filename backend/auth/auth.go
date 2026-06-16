@@ -63,14 +63,7 @@ func (webAuthnUser *RealWebAuthnUser) WebAuthnDisplayName() string {
 func (webAuthnUser *RealWebAuthnUser) WebAuthnCredentials() []webauthn.Credential {
 	credentials := make([]webauthn.Credential, 0, len(webAuthnUser.Edges.Passkeys))
 	for _, passkeyOb := range webAuthnUser.Edges.Passkeys {
-		credentials = append(credentials, webauthn.Credential{
-			ID:        passkeyOb.CredentialID,
-			PublicKey: passkeyOb.PublicKey,
-			Authenticator: webauthn.Authenticator{
-				AAGUID:    passkeyOb.Aaguid[:],
-				SignCount: passkeyOb.SignCount,
-			},
-		})
+		credentials = append(credentials, passkeyOb.Credential.Decrypted)
 	}
 	return credentials
 }

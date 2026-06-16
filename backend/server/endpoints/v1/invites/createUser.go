@@ -7,6 +7,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
@@ -64,7 +65,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, ErrUsernameTaken.Clone()
 				}
 
-				if inviteOb.WebAuthnSession == nil {
+				if inviteOb.WebAuthnSession.Decrypted == nil {
 					return nil, servercommon.NewBadRequestError(
 						"credential",
 						"no active WebAuthn session, please refresh the page",
@@ -73,7 +74,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				_, wrappedErr := app.Auth.FinishRegisterPasskey(
-					inviteOb.WebAuthnSession,
+					inviteOb.WebAuthnSession.Decrypted,
 					inviteOb.Email,
 					parsedCredential,
 					body.CredentialName,
@@ -94,8 +95,14 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 						_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
 							SetUser(createdUserOb).
 							ClearWebAuthnSession().
-							SetUserAgent(ginCtx.Request.UserAgent()).
-							SetIP(ginCtx.ClientIP()).
+							SetUserAgent(schema.EncryptedField[*string]{
+								Decrypted: new(ginCtx.Request.UserAgent()),
+								KeyName:   "security_pii_logging_1",
+							}).
+							SetIP(schema.EncryptedField[*string]{
+								Decrypted: new(ginCtx.ClientIP()),
+								KeyName:   "security_pii_logging_1",
+							}).
 							Save(ctx)
 						if stdErr != nil {
 							return nil, stdErr

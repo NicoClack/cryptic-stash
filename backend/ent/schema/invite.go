@@ -18,7 +18,7 @@ type Invite struct {
 
 // Ent codegen has trouble without this alias
 type EncryptedSessionData struct {
-	EncryptedField[*webauthn.SessionData]
+	EncryptedField[webauthn.SessionData]
 }
 
 // Fields of the Invite.
@@ -39,15 +39,15 @@ func (Invite) Fields() []ent.Field {
 			Optional().Nillable(),
 		field.Bytes("webAuthnSession").Optional().
 			GoType(EncryptedSessionData{
-				EncryptedField: EncryptedField[*webauthn.SessionData]{
+				EncryptedField: EncryptedField[webauthn.SessionData]{
 					KeyName: "auth_1",
 				},
 			}),
 		field.Bytes("userAgent").
-			GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).
+			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}).
 			Nillable().
 			Optional(),
-		field.Bytes("ip").GoType(EncryptedField[*string]{KeyName: "security_pii_logging_1"}).Nillable().Optional(),
+		field.Bytes("ip").GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}).Nillable().Optional(),
 		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any
 	}
 }

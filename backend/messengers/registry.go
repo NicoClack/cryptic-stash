@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/NicoClack/cryptic-stash/backend/jobs"
 	"github.com/bytedance/gopkg/util/logger"
@@ -304,7 +305,7 @@ func newPrepareContext(
 	}
 	return &PrepareContext{
 		Message: message,
-		Options: userMessengerOb.Options,
+		Options: userMessengerOb.Options.Decrypted,
 	}, nil
 }
 
@@ -450,7 +451,12 @@ func (registry *Registry) EnableMessenger(
 		SetType(definition.ID).
 		SetVersion(definition.Version).
 		SetUserID(userOb.ID).
-		SetOptions(options).
+		SetOptions(schema.EncryptedRawJSON{
+			EncryptedField: schema.EncryptedField[json.RawMessage]{
+				Decrypted: options,
+				KeyName:   "user_messenger_1",
+			},
+		}).
 		SetEnabled(true).
 		SetUpdatedAt(now).
 		OnConflictColumns(usermessenger.FieldType, usermessenger.FieldVersion, usermessenger.FieldUserID).

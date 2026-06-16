@@ -79,7 +79,7 @@ func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
 				Enabled:       messengerOb.Enabled,
 				CreatedAt:     new(messengerOb.CreatedAt),
 				UpdatedAt:     new(messengerOb.UpdatedAt),
-				Options:       messengerOb.Options,
+				Options:       messengerOb.Options.Decrypted,
 				OptionsSchema: definition.OptionsSchema,
 			})
 		}

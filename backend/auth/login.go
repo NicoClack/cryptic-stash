@@ -88,18 +88,18 @@ func FinishLogin(
 	}
 
 	// TODO: this is a bit inefficient
-	passkeyID, stdErr := tx.Passkey.Query().
+	passkeyOb, stdErr := tx.Passkey.Query().
 		Where(
 			passkey.UserID(userOb.ID),
 			passkey.CredentialID(credential.ID),
 		).
-		OnlyID(ctx)
+		Only(ctx)
 	if stdErr != nil {
 		return nil, nil, ErrWrapperFinishLogin.Wrap(ErrWrapperDatabase.Wrap(stdErr))
 	}
 	sessionOb, sessionToken, wrappedErr := CreateSession(
 		userOb.ID,
-		passkeyID,
+		passkeyOb.ID,
 		ginCtx.Request.UserAgent(),
 		ginCtx.ClientIP(),
 		tx,
@@ -126,9 +126,11 @@ func FinishLogin(
 			credential.Flags.BackupState,
 		)
 	}
-	stdErr = tx.Passkey.UpdateOneID(passkeyID).
+	passkeyOb.Credential.Decrypted = *credential
+	// TODO: race condition?
+	stdErr = tx.Passkey.UpdateOne(passkeyOb).
 		SetUpdatedAt(clock.Now()).
-		SetSignCount(credential.Authenticator.SignCount).
+		SetCredential(passkeyOb.Credential).
 		Exec(ctx)
 	if stdErr != nil {
 		return nil, nil, ErrWrapperFinishLogin.Wrap(

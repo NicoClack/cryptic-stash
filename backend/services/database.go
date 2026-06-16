@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/globals"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/migrate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	_ "github.com/NicoClack/cryptic-stash/backend/entps"
 	"github.com/pressly/goose/v3"
 )
@@ -53,6 +54,8 @@ func (service *Database) Start() {
 		db.SetMaxIdleConns(5)
 		db.SetMaxOpenConns(100)
 		db.SetConnMaxLifetime(time.Hour)
+
+		schema.Init(service.app.Env.BASE_ENCRYPTION_KEY)
 		driver := ent.Driver(entsql.OpenDB("sqlite3", db))
 		client := ent.NewClient(driver)
 

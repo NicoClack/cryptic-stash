@@ -13,6 +13,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,7 +34,12 @@ func TestWithReadTx_AllowsConcurrentReads(t *testing.T) {
 		SetVersion(1).
 		SetPriority(1).
 		SetWeight(1).
-		SetBody(json.RawMessage("{}")).
+		SetBody(schema.EncryptedRawJSON{
+			EncryptedField: schema.EncryptedField[json.RawMessage]{
+				Decrypted: json.RawMessage("{}"),
+				KeyName:   "job_1",
+			},
+		}).
 		Save(t.Context())
 	require.NoError(t, stdErr)
 	jobID := jobOb.ID
@@ -98,7 +104,12 @@ func TestWithWriteTx_Supports50ConcurrentWrites(t *testing.T) {
 					SetVersion(1).
 					SetPriority(1).
 					SetWeight(1).
-					SetBody(json.RawMessage("{}")).
+					SetBody(schema.EncryptedRawJSON{
+						EncryptedField: schema.EncryptedField[json.RawMessage]{
+							Decrypted: json.RawMessage("{}"),
+							KeyName:   "job_1",
+						},
+					}).
 					Exec(ctx)
 			},
 		)
@@ -129,7 +140,12 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 		SetVersion(1).
 		SetPriority(1).
 		SetWeight(1).
-		SetBody(json.RawMessage(`{"count":0}`)).
+		SetBody(schema.EncryptedRawJSON{
+			EncryptedField: schema.EncryptedField[json.RawMessage]{
+				Decrypted: json.RawMessage(`{"count":0}`),
+				KeyName:   "job_1",
+			},
+		}).
 		Exec(t.Context())
 	require.NoError(t, stdErr)
 
@@ -151,7 +167,7 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 					var body struct {
 						Count int `json:"count"`
 					}
-					stdErr = json.Unmarshal(job.Body, &body)
+					stdErr = json.Unmarshal(job.Body.Decrypted, &body)
 					if stdErr != nil {
 						errCount.Add(1)
 						return stdErr
@@ -164,7 +180,12 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 					}
 					stdErr = job.Update().
 						SetUpdatedAt(now).
-						SetBody(json.RawMessage(newBody)).
+						SetBody(schema.EncryptedRawJSON{
+							EncryptedField: schema.EncryptedField[json.RawMessage]{
+								Decrypted: json.RawMessage(newBody),
+								KeyName:   "job_1",
+							},
+						}).
 						Exec(ctx)
 					if stdErr != nil {
 						errCount.Add(1)
@@ -183,7 +204,7 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 	var body struct {
 		Count int `json:"count"`
 	}
-	stdErr = json.Unmarshal(jobOb.Body, &body)
+	stdErr = json.Unmarshal(jobOb.Body.Decrypted, &body)
 	require.NoError(t, stdErr)
 	require.Equal(t, INCREMENT_COUNT, body.Count)
 	// Expect at least a few errors to have been retried (it should be way more than this on average)

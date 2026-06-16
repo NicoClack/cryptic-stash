@@ -8,7 +8,8 @@ Monorepo: `backend/` (Go + Gin + Ent ORM + SQLite) and `frontend/` (SvelteKit 5 
 
 ## Agent Behaviour
 
-- Minimise CLI usage, use tools instead, e.g the read file tool over `cat` and the search tool over `grep`/`ripgrep`. You should only use these types of commands for bulk actions that the tools don't support such as piping the result of one into another. However even in this case, if you expect the output of a tool to be short, it may be more efficient for you to read the entire output instead of writing a CLI command to filter it. Each CLI command takes a human around 30 seconds to notice, review and approve. Include a 1 sentence justification before each command if there's a similar tool available.
+- Minimise CLI usage, use tools instead, e.g the read file tool over `cat` and the search tool over `rg`. You should only use these types of commands for bulk actions that the tools don't support such as piping the result of one into another. However even in this case, if you expect the output of a tool to be short, it may be more efficient for you to read the entire output instead of writing a CLI command to filter it. Each CLI command takes a human around 30 seconds to notice, review and approve. Include a 1 sentence justification before each command if there's a similar tool available.
+- Avoid `grep` and force deletes
 - Before completing a request, use the language server to check for syntax and lint errors. Skip this step only if the change is intentionally incomplete and further input is needed.
 - Comments should explain WHY, not WHAT. If you feel the need to explain what code does, extract it into a well-named function instead.
 - Do not run `gofmt` — use `golangci-lint` for formatting. The formatter will be run on save.

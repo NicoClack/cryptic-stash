@@ -1,5 +1,12 @@
 # TODO
 
+- Is there a way to avoid code like this?
+SetBody(schema.EncryptedRawJSON{
+			EncryptedField: schema.EncryptedField[json.RawMessage]{
+				Decrypted: json.RawMessage("{}"),
+				KeyName:   "job_1",
+			},
+		}).
 - Rename adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Remove service level encryption for stashes
