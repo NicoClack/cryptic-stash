@@ -35,9 +35,9 @@ type Invite struct {
 	// WebAuthnSession holds the value of the "webAuthnSession" field.
 	WebAuthnSession schema.OptionalEncryptedSessionData `json:"webAuthnSession,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent schema.EncryptedField[*string] `json:"userAgent,omitempty"`
+	UserAgent schema.EncryptedField[string] `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP schema.EncryptedField[*string] `json:"ip,omitempty"`
+	IP schema.EncryptedField[string] `json:"ip,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -74,7 +74,7 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 		case invite.FieldHashedCode:
 			values[i] = new([]byte)
 		case invite.FieldUserAgent, invite.FieldIP:
-			values[i] = new(schema.EncryptedField[*string])
+			values[i] = new(schema.EncryptedField[string])
 		case invite.FieldWebAuthnSession:
 			values[i] = new(schema.OptionalEncryptedSessionData)
 		case invite.FieldEmail, invite.FieldExpiredReason:
@@ -148,13 +148,13 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 				_m.WebAuthnSession = *value
 			}
 		case invite.FieldUserAgent:
-			if value, ok := values[i].(*schema.EncryptedField[*string]); !ok {
+			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value != nil {
 				_m.UserAgent = *value
 			}
 		case invite.FieldIP:
-			if value, ok := values[i].(*schema.EncryptedField[*string]); !ok {
+			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value != nil {
 				_m.IP = *value

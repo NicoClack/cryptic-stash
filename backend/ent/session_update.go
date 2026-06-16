@@ -73,13 +73,13 @@ func (_u *SessionUpdate) SetNillableExpiresAt(v *time.Time) *SessionUpdate {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SessionUpdate) SetUserAgent(v schema.EncryptedField[*string]) *SessionUpdate {
+func (_u *SessionUpdate) SetUserAgent(v schema.EncryptedField[string]) *SessionUpdate {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableUserAgent(v *schema.EncryptedField[*string]) *SessionUpdate {
+func (_u *SessionUpdate) SetNillableUserAgent(v *schema.EncryptedField[string]) *SessionUpdate {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -87,13 +87,13 @@ func (_u *SessionUpdate) SetNillableUserAgent(v *schema.EncryptedField[*string])
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdate) SetIP(v schema.EncryptedField[*string]) *SessionUpdate {
+func (_u *SessionUpdate) SetIP(v schema.EncryptedField[string]) *SessionUpdate {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableIP(v *schema.EncryptedField[*string]) *SessionUpdate {
+func (_u *SessionUpdate) SetNillableIP(v *schema.EncryptedField[string]) *SessionUpdate {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -356,13 +356,13 @@ func (_u *SessionUpdateOne) SetNillableExpiresAt(v *time.Time) *SessionUpdateOne
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SessionUpdateOne) SetUserAgent(v schema.EncryptedField[*string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetUserAgent(v schema.EncryptedField[string]) *SessionUpdateOne {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[*string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[string]) *SessionUpdateOne {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -370,13 +370,13 @@ func (_u *SessionUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[*strin
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdateOne) SetIP(v schema.EncryptedField[*string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetIP(v schema.EncryptedField[string]) *SessionUpdateOne {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableIP(v *schema.EncryptedField[*string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetNillableIP(v *schema.EncryptedField[string]) *SessionUpdateOne {
 	if v != nil {
 		_u.SetIP(*v)
 	}

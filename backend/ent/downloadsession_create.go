@@ -58,30 +58,14 @@ func (_c *DownloadSessionCreate) SetValidUntil(v time.Time) *DownloadSessionCrea
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *DownloadSessionCreate) SetUserAgent(v schema.EncryptedField[*string]) *DownloadSessionCreate {
+func (_c *DownloadSessionCreate) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
-// SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_c *DownloadSessionCreate) SetNillableUserAgent(v *schema.EncryptedField[*string]) *DownloadSessionCreate {
-	if v != nil {
-		_c.SetUserAgent(*v)
-	}
-	return _c
-}
-
 // SetIP sets the "ip" field.
-func (_c *DownloadSessionCreate) SetIP(v schema.EncryptedField[*string]) *DownloadSessionCreate {
+func (_c *DownloadSessionCreate) SetIP(v schema.EncryptedField[string]) *DownloadSessionCreate {
 	_c.mutation.SetIP(v)
-	return _c
-}
-
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (_c *DownloadSessionCreate) SetNillableIP(v *schema.EncryptedField[*string]) *DownloadSessionCreate {
-	if v != nil {
-		_c.SetIP(*v)
-	}
 	return _c
 }
 
@@ -160,14 +144,6 @@ func (_c *DownloadSessionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *DownloadSessionCreate) defaults() {
-	if _, ok := _c.mutation.UserAgent(); !ok {
-		v := downloadsession.DefaultUserAgent()
-		_c.mutation.SetUserAgent(v)
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		v := downloadsession.DefaultIP()
-		_c.mutation.SetIP(v)
-	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := downloadsession.DefaultID()
 		_c.mutation.SetID(v)
@@ -418,7 +394,7 @@ func (u *DownloadSessionUpsert) UpdateValidUntil() *DownloadSessionUpsert {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *DownloadSessionUpsert) SetUserAgent(v schema.EncryptedField[*string]) *DownloadSessionUpsert {
+func (u *DownloadSessionUpsert) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionUpsert {
 	u.Set(downloadsession.FieldUserAgent, v)
 	return u
 }
@@ -430,7 +406,7 @@ func (u *DownloadSessionUpsert) UpdateUserAgent() *DownloadSessionUpsert {
 }
 
 // SetIP sets the "ip" field.
-func (u *DownloadSessionUpsert) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpsert {
+func (u *DownloadSessionUpsert) SetIP(v schema.EncryptedField[string]) *DownloadSessionUpsert {
 	u.Set(downloadsession.FieldIP, v)
 	return u
 }
@@ -572,7 +548,7 @@ func (u *DownloadSessionUpsertOne) UpdateValidUntil() *DownloadSessionUpsertOne 
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *DownloadSessionUpsertOne) SetUserAgent(v schema.EncryptedField[*string]) *DownloadSessionUpsertOne {
+func (u *DownloadSessionUpsertOne) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -586,7 +562,7 @@ func (u *DownloadSessionUpsertOne) UpdateUserAgent() *DownloadSessionUpsertOne {
 }
 
 // SetIP sets the "ip" field.
-func (u *DownloadSessionUpsertOne) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpsertOne {
+func (u *DownloadSessionUpsertOne) SetIP(v schema.EncryptedField[string]) *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetIP(v)
 	})
@@ -899,7 +875,7 @@ func (u *DownloadSessionUpsertBulk) UpdateValidUntil() *DownloadSessionUpsertBul
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *DownloadSessionUpsertBulk) SetUserAgent(v schema.EncryptedField[*string]) *DownloadSessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -913,7 +889,7 @@ func (u *DownloadSessionUpsertBulk) UpdateUserAgent() *DownloadSessionUpsertBulk
 }
 
 // SetIP sets the "ip" field.
-func (u *DownloadSessionUpsertBulk) SetIP(v schema.EncryptedField[*string]) *DownloadSessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) SetIP(v schema.EncryptedField[string]) *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetIP(v)
 	})

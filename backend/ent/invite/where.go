@@ -88,12 +88,12 @@ func WebAuthnSession(v schema.OptionalEncryptedSessionData) predicate.Invite {
 }
 
 // UserAgent applies equality check predicate on the "userAgent" field. It's identical to UserAgentEQ.
-func UserAgent(v schema.EncryptedField[*string]) predicate.Invite {
+func UserAgent(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldUserAgent, v))
 }
 
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
-func IP(v schema.EncryptedField[*string]) predicate.Invite {
+func IP(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldIP, v))
 }
 
@@ -398,82 +398,82 @@ func WebAuthnSessionLTE(v schema.OptionalEncryptedSessionData) predicate.Invite 
 }
 
 // UserAgentEQ applies the EQ predicate on the "userAgent" field.
-func UserAgentEQ(v schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentEQ(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldUserAgent, v))
 }
 
 // UserAgentNEQ applies the NEQ predicate on the "userAgent" field.
-func UserAgentNEQ(v schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentNEQ(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldNEQ(FieldUserAgent, v))
 }
 
 // UserAgentIn applies the In predicate on the "userAgent" field.
-func UserAgentIn(vs ...schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentIn(vs ...schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldIn(FieldUserAgent, vs...))
 }
 
 // UserAgentNotIn applies the NotIn predicate on the "userAgent" field.
-func UserAgentNotIn(vs ...schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentNotIn(vs ...schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldNotIn(FieldUserAgent, vs...))
 }
 
 // UserAgentGT applies the GT predicate on the "userAgent" field.
-func UserAgentGT(v schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentGT(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldGT(FieldUserAgent, v))
 }
 
 // UserAgentGTE applies the GTE predicate on the "userAgent" field.
-func UserAgentGTE(v schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentGTE(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldGTE(FieldUserAgent, v))
 }
 
 // UserAgentLT applies the LT predicate on the "userAgent" field.
-func UserAgentLT(v schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentLT(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldLT(FieldUserAgent, v))
 }
 
 // UserAgentLTE applies the LTE predicate on the "userAgent" field.
-func UserAgentLTE(v schema.EncryptedField[*string]) predicate.Invite {
+func UserAgentLTE(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldLTE(FieldUserAgent, v))
 }
 
 // IPEQ applies the EQ predicate on the "ip" field.
-func IPEQ(v schema.EncryptedField[*string]) predicate.Invite {
+func IPEQ(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldIP, v))
 }
 
 // IPNEQ applies the NEQ predicate on the "ip" field.
-func IPNEQ(v schema.EncryptedField[*string]) predicate.Invite {
+func IPNEQ(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldNEQ(FieldIP, v))
 }
 
 // IPIn applies the In predicate on the "ip" field.
-func IPIn(vs ...schema.EncryptedField[*string]) predicate.Invite {
+func IPIn(vs ...schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldIn(FieldIP, vs...))
 }
 
 // IPNotIn applies the NotIn predicate on the "ip" field.
-func IPNotIn(vs ...schema.EncryptedField[*string]) predicate.Invite {
+func IPNotIn(vs ...schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldNotIn(FieldIP, vs...))
 }
 
 // IPGT applies the GT predicate on the "ip" field.
-func IPGT(v schema.EncryptedField[*string]) predicate.Invite {
+func IPGT(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldGT(FieldIP, v))
 }
 
 // IPGTE applies the GTE predicate on the "ip" field.
-func IPGTE(v schema.EncryptedField[*string]) predicate.Invite {
+func IPGTE(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldGTE(FieldIP, v))
 }
 
 // IPLT applies the LT predicate on the "ip" field.
-func IPLT(v schema.EncryptedField[*string]) predicate.Invite {
+func IPLT(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldLT(FieldIP, v))
 }
 
 // IPLTE applies the LTE predicate on the "ip" field.
-func IPLTE(v schema.EncryptedField[*string]) predicate.Invite {
+func IPLTE(v schema.EncryptedField[string]) predicate.Invite {
 	return predicate.Invite(sql.FieldLTE(FieldIP, v))
 }
 

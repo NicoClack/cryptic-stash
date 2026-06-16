@@ -84,10 +84,6 @@ var (
 	HashedCodeValidator func([]byte) error
 	// DefaultWebAuthnSession holds the default value on creation for the "webAuthnSession" field.
 	DefaultWebAuthnSession func() schema.OptionalEncryptedSessionData
-	// DefaultUserAgent holds the default value on creation for the "userAgent" field.
-	DefaultUserAgent func() schema.EncryptedField[*string]
-	// DefaultIP holds the default value on creation for the "ip" field.
-	DefaultIP func() schema.EncryptedField[*string]
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

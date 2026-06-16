@@ -30,9 +30,9 @@ type Session struct {
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent schema.EncryptedField[*string] `json:"userAgent,omitempty"`
+	UserAgent schema.EncryptedField[string] `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP schema.EncryptedField[*string] `json:"ip,omitempty"`
+	IP schema.EncryptedField[string] `json:"ip,omitempty"`
 	// PasskeyID holds the value of the "passkeyID" field.
 	PasskeyID uuid.UUID `json:"passkeyID,omitempty"`
 	// UserID holds the value of the "userID" field.
@@ -84,7 +84,7 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 		case session.FieldHashedToken:
 			values[i] = new([]byte)
 		case session.FieldUserAgent, session.FieldIP:
-			values[i] = new(schema.EncryptedField[*string])
+			values[i] = new(schema.EncryptedField[string])
 		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case session.FieldID, session.FieldPasskeyID, session.FieldUserID:
@@ -135,13 +135,13 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 				_m.ExpiresAt = value.Time
 			}
 		case session.FieldUserAgent:
-			if value, ok := values[i].(*schema.EncryptedField[*string]); !ok {
+			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value != nil {
 				_m.UserAgent = *value
 			}
 		case session.FieldIP:
-			if value, ok := values[i].(*schema.EncryptedField[*string]); !ok {
+			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value != nil {
 				_m.IP = *value

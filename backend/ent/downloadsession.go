@@ -31,9 +31,9 @@ type DownloadSession struct {
 	// ValidUntil holds the value of the "validUntil" field.
 	ValidUntil time.Time `json:"validUntil,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent schema.EncryptedField[*string] `json:"userAgent,omitempty"`
+	UserAgent schema.EncryptedField[string] `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP schema.EncryptedField[*string] `json:"ip,omitempty"`
+	IP schema.EncryptedField[string] `json:"ip,omitempty"`
 	// StashID holds the value of the "stashID" field.
 	StashID uuid.UUID `json:"stashID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -81,7 +81,7 @@ func (*DownloadSession) scanValues(columns []string) ([]any, error) {
 		case downloadsession.FieldHashedAuthCode:
 			values[i] = new([]byte)
 		case downloadsession.FieldUserAgent, downloadsession.FieldIP:
-			values[i] = new(schema.EncryptedField[*string])
+			values[i] = new(schema.EncryptedField[string])
 		case downloadsession.FieldCreatedAt, downloadsession.FieldUpdatedAt, downloadsession.FieldValidFrom, downloadsession.FieldValidUntil:
 			values[i] = new(sql.NullTime)
 		case downloadsession.FieldID, downloadsession.FieldStashID:
@@ -138,13 +138,13 @@ func (_m *DownloadSession) assignValues(columns []string, values []any) error {
 				_m.ValidUntil = value.Time
 			}
 		case downloadsession.FieldUserAgent:
-			if value, ok := values[i].(*schema.EncryptedField[*string]); !ok {
+			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
 				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
 			} else if value != nil {
 				_m.UserAgent = *value
 			}
 		case downloadsession.FieldIP:
-			if value, ok := values[i].(*schema.EncryptedField[*string]); !ok {
+			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value != nil {
 				_m.IP = *value

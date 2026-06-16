@@ -85,30 +85,14 @@ func (_c *InviteCreate) SetNillableWebAuthnSession(v *schema.OptionalEncryptedSe
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *InviteCreate) SetUserAgent(v schema.EncryptedField[*string]) *InviteCreate {
+func (_c *InviteCreate) SetUserAgent(v schema.EncryptedField[string]) *InviteCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
-// SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_c *InviteCreate) SetNillableUserAgent(v *schema.EncryptedField[*string]) *InviteCreate {
-	if v != nil {
-		_c.SetUserAgent(*v)
-	}
-	return _c
-}
-
 // SetIP sets the "ip" field.
-func (_c *InviteCreate) SetIP(v schema.EncryptedField[*string]) *InviteCreate {
+func (_c *InviteCreate) SetIP(v schema.EncryptedField[string]) *InviteCreate {
 	_c.mutation.SetIP(v)
-	return _c
-}
-
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (_c *InviteCreate) SetNillableIP(v *schema.EncryptedField[*string]) *InviteCreate {
-	if v != nil {
-		_c.SetIP(*v)
-	}
 	return _c
 }
 
@@ -183,14 +167,6 @@ func (_c *InviteCreate) defaults() {
 	if _, ok := _c.mutation.WebAuthnSession(); !ok {
 		v := invite.DefaultWebAuthnSession()
 		_c.mutation.SetWebAuthnSession(v)
-	}
-	if _, ok := _c.mutation.UserAgent(); !ok {
-		v := invite.DefaultUserAgent()
-		_c.mutation.SetUserAgent(v)
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		v := invite.DefaultIP()
-		_c.mutation.SetIP(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := invite.DefaultID()
@@ -471,7 +447,7 @@ func (u *InviteUpsert) UpdateWebAuthnSession() *InviteUpsert {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *InviteUpsert) SetUserAgent(v schema.EncryptedField[*string]) *InviteUpsert {
+func (u *InviteUpsert) SetUserAgent(v schema.EncryptedField[string]) *InviteUpsert {
 	u.Set(invite.FieldUserAgent, v)
 	return u
 }
@@ -483,7 +459,7 @@ func (u *InviteUpsert) UpdateUserAgent() *InviteUpsert {
 }
 
 // SetIP sets the "ip" field.
-func (u *InviteUpsert) SetIP(v schema.EncryptedField[*string]) *InviteUpsert {
+func (u *InviteUpsert) SetIP(v schema.EncryptedField[string]) *InviteUpsert {
 	u.Set(invite.FieldIP, v)
 	return u
 }
@@ -666,7 +642,7 @@ func (u *InviteUpsertOne) UpdateWebAuthnSession() *InviteUpsertOne {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *InviteUpsertOne) SetUserAgent(v schema.EncryptedField[*string]) *InviteUpsertOne {
+func (u *InviteUpsertOne) SetUserAgent(v schema.EncryptedField[string]) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -680,7 +656,7 @@ func (u *InviteUpsertOne) UpdateUserAgent() *InviteUpsertOne {
 }
 
 // SetIP sets the "ip" field.
-func (u *InviteUpsertOne) SetIP(v schema.EncryptedField[*string]) *InviteUpsertOne {
+func (u *InviteUpsertOne) SetIP(v schema.EncryptedField[string]) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetIP(v)
 	})
@@ -1035,7 +1011,7 @@ func (u *InviteUpsertBulk) UpdateWebAuthnSession() *InviteUpsertBulk {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *InviteUpsertBulk) SetUserAgent(v schema.EncryptedField[*string]) *InviteUpsertBulk {
+func (u *InviteUpsertBulk) SetUserAgent(v schema.EncryptedField[string]) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -1049,7 +1025,7 @@ func (u *InviteUpsertBulk) UpdateUserAgent() *InviteUpsertBulk {
 }
 
 // SetIP sets the "ip" field.
-func (u *InviteUpsertBulk) SetIP(v schema.EncryptedField[*string]) *InviteUpsertBulk {
+func (u *InviteUpsertBulk) SetIP(v schema.EncryptedField[string]) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetIP(v)
 	})
