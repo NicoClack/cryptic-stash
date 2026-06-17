@@ -915,7 +915,7 @@ type InviteMutation struct {
 	hashedCode      *[]byte
 	expiresAt       *time.Time
 	expiredReason   *invite.ExpiredReason
-	webAuthnSession *webauthn.SessionData
+	webAuthnSession **webauthn.SessionData
 	userAgent       *string
 	ip              *string
 	clearedFields   map[string]struct{}
@@ -1260,12 +1260,12 @@ func (m *InviteMutation) ResetExpiredReason() {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (m *InviteMutation) SetWebAuthnSession(wd webauthn.SessionData) {
+func (m *InviteMutation) SetWebAuthnSession(wd *webauthn.SessionData) {
 	m.webAuthnSession = &wd
 }
 
 // WebAuthnSession returns the value of the "webAuthnSession" field in the mutation.
-func (m *InviteMutation) WebAuthnSession() (r webauthn.SessionData, exists bool) {
+func (m *InviteMutation) WebAuthnSession() (r *webauthn.SessionData, exists bool) {
 	v := m.webAuthnSession
 	if v == nil {
 		return
@@ -1630,7 +1630,7 @@ func (m *InviteMutation) SetField(name string, value ent.Value) error {
 		m.SetExpiredReason(v)
 		return nil
 	case invite.FieldWebAuthnSession:
-		v, ok := value.(webauthn.SessionData)
+		v, ok := value.(*webauthn.SessionData)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

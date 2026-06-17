@@ -108,7 +108,7 @@ func init() {
 	}()
 	// inviteDescWebAuthnSession is the schema descriptor for webAuthnSession field.
 	inviteDescWebAuthnSession := inviteFields[7].Descriptor()
-	invite.ValueScanner.WebAuthnSession = inviteDescWebAuthnSession.ValueScanner.(field.TypeValueScanner[webauthn.SessionData])
+	invite.ValueScanner.WebAuthnSession = inviteDescWebAuthnSession.ValueScanner.(field.TypeValueScanner[*webauthn.SessionData])
 	// inviteDescUserAgent is the schema descriptor for userAgent field.
 	inviteDescUserAgent := inviteFields[8].Descriptor()
 	invite.ValueScanner.UserAgent = inviteDescUserAgent.ValueScanner.(field.TypeValueScanner[string])

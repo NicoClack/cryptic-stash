@@ -71,16 +71,8 @@ func (_c *InviteCreate) SetNillableExpiredReason(v *invite.ExpiredReason) *Invit
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (_c *InviteCreate) SetWebAuthnSession(v webauthn.SessionData) *InviteCreate {
+func (_c *InviteCreate) SetWebAuthnSession(v *webauthn.SessionData) *InviteCreate {
 	_c.mutation.SetWebAuthnSession(v)
-	return _c
-}
-
-// SetNillableWebAuthnSession sets the "webAuthnSession" field if the given value is not nil.
-func (_c *InviteCreate) SetNillableWebAuthnSession(v *webauthn.SessionData) *InviteCreate {
-	if v != nil {
-		_c.SetWebAuthnSession(*v)
-	}
 	return _c
 }
 
@@ -277,7 +269,7 @@ func (_c *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec, error) {
 			return nil, nil, err
 		}
 		_spec.SetField(invite.FieldWebAuthnSession, field.TypeBytes, vv)
-		_node.WebAuthnSession = &value
+		_node.WebAuthnSession = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		vv, err := invite.ValueScanner.UserAgent.Value(value)
@@ -443,7 +435,7 @@ func (u *InviteUpsert) ClearExpiredReason() *InviteUpsert {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (u *InviteUpsert) SetWebAuthnSession(v webauthn.SessionData) *InviteUpsert {
+func (u *InviteUpsert) SetWebAuthnSession(v *webauthn.SessionData) *InviteUpsert {
 	u.Set(invite.FieldWebAuthnSession, v)
 	return u
 }
@@ -642,7 +634,7 @@ func (u *InviteUpsertOne) ClearExpiredReason() *InviteUpsertOne {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (u *InviteUpsertOne) SetWebAuthnSession(v webauthn.SessionData) *InviteUpsertOne {
+func (u *InviteUpsertOne) SetWebAuthnSession(v *webauthn.SessionData) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetWebAuthnSession(v)
 	})
@@ -1021,7 +1013,7 @@ func (u *InviteUpsertBulk) ClearExpiredReason() *InviteUpsertBulk {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (u *InviteUpsertBulk) SetWebAuthnSession(v webauthn.SessionData) *InviteUpsertBulk {
+func (u *InviteUpsertBulk) SetWebAuthnSession(v *webauthn.SessionData) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetWebAuthnSession(v)
 	})

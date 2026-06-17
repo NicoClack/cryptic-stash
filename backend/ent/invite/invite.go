@@ -87,7 +87,7 @@ var (
 	DefaultID func() uuid.UUID
 	// ValueScanner of all Invite fields.
 	ValueScanner struct {
-		WebAuthnSession field.TypeValueScanner[webauthn.SessionData]
+		WebAuthnSession field.TypeValueScanner[*webauthn.SessionData]
 		UserAgent       field.TypeValueScanner[string]
 		IP              field.TypeValueScanner[string]
 	}

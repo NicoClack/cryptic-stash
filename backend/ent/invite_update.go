@@ -106,16 +106,8 @@ func (_u *InviteUpdate) ClearExpiredReason() *InviteUpdate {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (_u *InviteUpdate) SetWebAuthnSession(v webauthn.SessionData) *InviteUpdate {
+func (_u *InviteUpdate) SetWebAuthnSession(v *webauthn.SessionData) *InviteUpdate {
 	_u.mutation.SetWebAuthnSession(v)
-	return _u
-}
-
-// SetNillableWebAuthnSession sets the "webAuthnSession" field if the given value is not nil.
-func (_u *InviteUpdate) SetNillableWebAuthnSession(v *webauthn.SessionData) *InviteUpdate {
-	if v != nil {
-		_u.SetWebAuthnSession(*v)
-	}
 	return _u
 }
 
@@ -426,16 +418,8 @@ func (_u *InviteUpdateOne) ClearExpiredReason() *InviteUpdateOne {
 }
 
 // SetWebAuthnSession sets the "webAuthnSession" field.
-func (_u *InviteUpdateOne) SetWebAuthnSession(v webauthn.SessionData) *InviteUpdateOne {
+func (_u *InviteUpdateOne) SetWebAuthnSession(v *webauthn.SessionData) *InviteUpdateOne {
 	_u.mutation.SetWebAuthnSession(v)
-	return _u
-}
-
-// SetNillableWebAuthnSession sets the "webAuthnSession" field if the given value is not nil.
-func (_u *InviteUpdateOne) SetNillableWebAuthnSession(v *webauthn.SessionData) *InviteUpdateOne {
-	if v != nil {
-		_u.SetWebAuthnSession(*v)
-	}
 	return _u
 }
 

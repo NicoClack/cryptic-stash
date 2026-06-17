@@ -33,8 +33,8 @@ func (Invite) Fields() []ent.Field {
 			Values("revoked", "username_taken").
 			Optional().Nillable(),
 		field.Bytes("webAuthnSession").
-			GoType(webauthn.SessionData{}).
-			ValueScanner(EncryptedField[webauthn.SessionData]{KeyName: "auth_1"}).
+			GoType(&webauthn.SessionData{}).
+			ValueScanner(EncryptedField[*webauthn.SessionData]{KeyName: "auth_1"}).
 			Optional().Nillable(),
 		field.Bytes("userAgent").
 			GoType("").
