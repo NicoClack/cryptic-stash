@@ -77,13 +77,13 @@ func (_c *InviteCreate) SetWebAuthnSession(v *webauthn.SessionData) *InviteCreat
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *InviteCreate) SetUserAgent(v string) *InviteCreate {
+func (_c *InviteCreate) SetUserAgent(v *string) *InviteCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetIP sets the "ip" field.
-func (_c *InviteCreate) SetIP(v string) *InviteCreate {
+func (_c *InviteCreate) SetIP(v *string) *InviteCreate {
 	_c.mutation.SetIP(v)
 	return _c
 }
@@ -193,12 +193,6 @@ func (_c *InviteCreate) check() error {
 		if err := invite.ExpiredReasonValidator(v); err != nil {
 			return &ValidationError{Name: "expiredReason", err: fmt.Errorf(`ent: validator failed for field "Invite.expiredReason": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.UserAgent(); !ok {
-		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Invite.userAgent"`)}
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "Invite.ip"`)}
 	}
 	return nil
 }
@@ -453,7 +447,7 @@ func (u *InviteUpsert) ClearWebAuthnSession() *InviteUpsert {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *InviteUpsert) SetUserAgent(v string) *InviteUpsert {
+func (u *InviteUpsert) SetUserAgent(v *string) *InviteUpsert {
 	u.Set(invite.FieldUserAgent, v)
 	return u
 }
@@ -464,8 +458,14 @@ func (u *InviteUpsert) UpdateUserAgent() *InviteUpsert {
 	return u
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (u *InviteUpsert) ClearUserAgent() *InviteUpsert {
+	u.SetNull(invite.FieldUserAgent)
+	return u
+}
+
 // SetIP sets the "ip" field.
-func (u *InviteUpsert) SetIP(v string) *InviteUpsert {
+func (u *InviteUpsert) SetIP(v *string) *InviteUpsert {
 	u.Set(invite.FieldIP, v)
 	return u
 }
@@ -473,6 +473,12 @@ func (u *InviteUpsert) SetIP(v string) *InviteUpsert {
 // UpdateIP sets the "ip" field to the value that was provided on create.
 func (u *InviteUpsert) UpdateIP() *InviteUpsert {
 	u.SetExcluded(invite.FieldIP)
+	return u
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *InviteUpsert) ClearIP() *InviteUpsert {
+	u.SetNull(invite.FieldIP)
 	return u
 }
 
@@ -655,7 +661,7 @@ func (u *InviteUpsertOne) ClearWebAuthnSession() *InviteUpsertOne {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *InviteUpsertOne) SetUserAgent(v string) *InviteUpsertOne {
+func (u *InviteUpsertOne) SetUserAgent(v *string) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -668,8 +674,15 @@ func (u *InviteUpsertOne) UpdateUserAgent() *InviteUpsertOne {
 	})
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (u *InviteUpsertOne) ClearUserAgent() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearUserAgent()
+	})
+}
+
 // SetIP sets the "ip" field.
-func (u *InviteUpsertOne) SetIP(v string) *InviteUpsertOne {
+func (u *InviteUpsertOne) SetIP(v *string) *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetIP(v)
 	})
@@ -679,6 +692,13 @@ func (u *InviteUpsertOne) SetIP(v string) *InviteUpsertOne {
 func (u *InviteUpsertOne) UpdateIP() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateIP()
+	})
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *InviteUpsertOne) ClearIP() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearIP()
 	})
 }
 
@@ -1034,7 +1054,7 @@ func (u *InviteUpsertBulk) ClearWebAuthnSession() *InviteUpsertBulk {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *InviteUpsertBulk) SetUserAgent(v string) *InviteUpsertBulk {
+func (u *InviteUpsertBulk) SetUserAgent(v *string) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -1047,8 +1067,15 @@ func (u *InviteUpsertBulk) UpdateUserAgent() *InviteUpsertBulk {
 	})
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (u *InviteUpsertBulk) ClearUserAgent() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearUserAgent()
+	})
+}
+
 // SetIP sets the "ip" field.
-func (u *InviteUpsertBulk) SetIP(v string) *InviteUpsertBulk {
+func (u *InviteUpsertBulk) SetIP(v *string) *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.SetIP(v)
 	})
@@ -1058,6 +1085,13 @@ func (u *InviteUpsertBulk) SetIP(v string) *InviteUpsertBulk {
 func (u *InviteUpsertBulk) UpdateIP() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateIP()
+	})
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *InviteUpsertBulk) ClearIP() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearIP()
 	})
 }
 

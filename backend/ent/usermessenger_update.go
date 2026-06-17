@@ -102,8 +102,14 @@ func (_u *UserMessengerUpdate) SetNillableEnabled(v *bool) *UserMessengerUpdate 
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdate) SetOptions(v *json.RawMessage) *UserMessengerUpdate {
+func (_u *UserMessengerUpdate) SetOptions(v json.RawMessage) *UserMessengerUpdate {
 	_u.mutation.SetOptions(v)
+	return _u
+}
+
+// ClearOptions clears the value of the "options" field.
+func (_u *UserMessengerUpdate) ClearOptions() *UserMessengerUpdate {
+	_u.mutation.ClearOptions()
 	return _u
 }
 
@@ -258,6 +264,9 @@ func (_u *UserMessengerUpdate) sqlSave(ctx context.Context) (_node int, err erro
 			return 0, err
 		}
 		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
+	}
+	if _u.mutation.OptionsCleared() {
+		_spec.ClearField(usermessenger.FieldOptions, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -423,8 +432,14 @@ func (_u *UserMessengerUpdateOne) SetNillableEnabled(v *bool) *UserMessengerUpda
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdateOne) SetOptions(v *json.RawMessage) *UserMessengerUpdateOne {
+func (_u *UserMessengerUpdateOne) SetOptions(v json.RawMessage) *UserMessengerUpdateOne {
 	_u.mutation.SetOptions(v)
+	return _u
+}
+
+// ClearOptions clears the value of the "options" field.
+func (_u *UserMessengerUpdateOne) ClearOptions() *UserMessengerUpdateOne {
+	_u.mutation.ClearOptions()
 	return _u
 }
 
@@ -609,6 +624,9 @@ func (_u *UserMessengerUpdateOne) sqlSave(ctx context.Context) (_node *UserMesse
 			return nil, err
 		}
 		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
+	}
+	if _u.mutation.OptionsCleared() {
+		_spec.ClearField(usermessenger.FieldOptions, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

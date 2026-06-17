@@ -51,8 +51,8 @@ var (
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "expired_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"revoked", "username_taken"}},
 		{Name: "web_authn_session", Type: field.TypeBytes, Nullable: true},
-		{Name: "user_agent", Type: field.TypeBytes},
-		{Name: "ip", Type: field.TypeBytes},
+		{Name: "user_agent", Type: field.TypeBytes, Nullable: true},
+		{Name: "ip", Type: field.TypeBytes, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// InvitesTable holds the schema information for the "invites" table.
@@ -375,7 +375,7 @@ var (
 		{Name: "type", Type: field.TypeString, Size: 128},
 		{Name: "version", Type: field.TypeInt},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
-		{Name: "options", Type: field.TypeBytes},
+		{Name: "options", Type: field.TypeBytes, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// UserMessengersTable holds the schema information for the "user_messengers" table.

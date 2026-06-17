@@ -111,10 +111,10 @@ func init() {
 	invite.ValueScanner.WebAuthnSession = inviteDescWebAuthnSession.ValueScanner.(field.TypeValueScanner[*webauthn.SessionData])
 	// inviteDescUserAgent is the schema descriptor for userAgent field.
 	inviteDescUserAgent := inviteFields[8].Descriptor()
-	invite.ValueScanner.UserAgent = inviteDescUserAgent.ValueScanner.(field.TypeValueScanner[string])
+	invite.ValueScanner.UserAgent = inviteDescUserAgent.ValueScanner.(field.TypeValueScanner[*string])
 	// inviteDescIP is the schema descriptor for ip field.
 	inviteDescIP := inviteFields[9].Descriptor()
-	invite.ValueScanner.IP = inviteDescIP.ValueScanner.(field.TypeValueScanner[string])
+	invite.ValueScanner.IP = inviteDescIP.ValueScanner.(field.TypeValueScanner[*string])
 	// inviteDescID is the schema descriptor for id field.
 	inviteDescID := inviteFields[0].Descriptor()
 	// invite.DefaultID holds the default value on creation for the id field.
@@ -494,7 +494,7 @@ func init() {
 	usermessenger.DefaultEnabled = usermessengerDescEnabled.Default.(bool)
 	// usermessengerDescOptions is the schema descriptor for options field.
 	usermessengerDescOptions := usermessengerFields[6].Descriptor()
-	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[*json.RawMessage])
+	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[json.RawMessage])
 	// usermessengerDescID is the schema descriptor for id field.
 	usermessengerDescID := usermessengerFields[0].Descriptor()
 	// usermessenger.DefaultID holds the default value on creation for the id field.

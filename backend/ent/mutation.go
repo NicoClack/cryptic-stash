@@ -916,8 +916,8 @@ type InviteMutation struct {
 	expiresAt       *time.Time
 	expiredReason   *invite.ExpiredReason
 	webAuthnSession **webauthn.SessionData
-	userAgent       *string
-	ip              *string
+	userAgent       **string
+	ip              **string
 	clearedFields   map[string]struct{}
 	user            *uuid.UUID
 	cleareduser     bool
@@ -1309,12 +1309,12 @@ func (m *InviteMutation) ResetWebAuthnSession() {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (m *InviteMutation) SetUserAgent(s string) {
+func (m *InviteMutation) SetUserAgent(s *string) {
 	m.userAgent = &s
 }
 
 // UserAgent returns the value of the "userAgent" field in the mutation.
-func (m *InviteMutation) UserAgent() (r string, exists bool) {
+func (m *InviteMutation) UserAgent() (r *string, exists bool) {
 	v := m.userAgent
 	if v == nil {
 		return
@@ -1325,7 +1325,7 @@ func (m *InviteMutation) UserAgent() (r string, exists bool) {
 // OldUserAgent returns the old "userAgent" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+func (m *InviteMutation) OldUserAgent(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
 	}
@@ -1339,18 +1339,31 @@ func (m *InviteMutation) OldUserAgent(ctx context.Context) (v string, err error)
 	return oldValue.UserAgent, nil
 }
 
+// ClearUserAgent clears the value of the "userAgent" field.
+func (m *InviteMutation) ClearUserAgent() {
+	m.userAgent = nil
+	m.clearedFields[invite.FieldUserAgent] = struct{}{}
+}
+
+// UserAgentCleared returns if the "userAgent" field was cleared in this mutation.
+func (m *InviteMutation) UserAgentCleared() bool {
+	_, ok := m.clearedFields[invite.FieldUserAgent]
+	return ok
+}
+
 // ResetUserAgent resets all changes to the "userAgent" field.
 func (m *InviteMutation) ResetUserAgent() {
 	m.userAgent = nil
+	delete(m.clearedFields, invite.FieldUserAgent)
 }
 
 // SetIP sets the "ip" field.
-func (m *InviteMutation) SetIP(s string) {
+func (m *InviteMutation) SetIP(s *string) {
 	m.ip = &s
 }
 
 // IP returns the value of the "ip" field in the mutation.
-func (m *InviteMutation) IP() (r string, exists bool) {
+func (m *InviteMutation) IP() (r *string, exists bool) {
 	v := m.ip
 	if v == nil {
 		return
@@ -1361,7 +1374,7 @@ func (m *InviteMutation) IP() (r string, exists bool) {
 // OldIP returns the old "ip" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldIP(ctx context.Context) (v string, err error) {
+func (m *InviteMutation) OldIP(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIP is only allowed on UpdateOne operations")
 	}
@@ -1375,9 +1388,22 @@ func (m *InviteMutation) OldIP(ctx context.Context) (v string, err error) {
 	return oldValue.IP, nil
 }
 
+// ClearIP clears the value of the "ip" field.
+func (m *InviteMutation) ClearIP() {
+	m.ip = nil
+	m.clearedFields[invite.FieldIP] = struct{}{}
+}
+
+// IPCleared returns if the "ip" field was cleared in this mutation.
+func (m *InviteMutation) IPCleared() bool {
+	_, ok := m.clearedFields[invite.FieldIP]
+	return ok
+}
+
 // ResetIP resets all changes to the "ip" field.
 func (m *InviteMutation) ResetIP() {
 	m.ip = nil
+	delete(m.clearedFields, invite.FieldIP)
 }
 
 // SetUserID sets the "userID" field.
@@ -1637,14 +1663,14 @@ func (m *InviteMutation) SetField(name string, value ent.Value) error {
 		m.SetWebAuthnSession(v)
 		return nil
 	case invite.FieldUserAgent:
-		v, ok := value.(string)
+		v, ok := value.(*string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserAgent(v)
 		return nil
 	case invite.FieldIP:
-		v, ok := value.(string)
+		v, ok := value.(*string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1693,6 +1719,12 @@ func (m *InviteMutation) ClearedFields() []string {
 	if m.FieldCleared(invite.FieldWebAuthnSession) {
 		fields = append(fields, invite.FieldWebAuthnSession)
 	}
+	if m.FieldCleared(invite.FieldUserAgent) {
+		fields = append(fields, invite.FieldUserAgent)
+	}
+	if m.FieldCleared(invite.FieldIP) {
+		fields = append(fields, invite.FieldIP)
+	}
 	if m.FieldCleared(invite.FieldUserID) {
 		fields = append(fields, invite.FieldUserID)
 	}
@@ -1715,6 +1747,12 @@ func (m *InviteMutation) ClearField(name string) error {
 		return nil
 	case invite.FieldWebAuthnSession:
 		m.ClearWebAuthnSession()
+		return nil
+	case invite.FieldUserAgent:
+		m.ClearUserAgent()
+		return nil
+	case invite.FieldIP:
+		m.ClearIP()
 		return nil
 	case invite.FieldUserID:
 		m.ClearUserID()
@@ -10585,7 +10623,7 @@ type UserMessengerMutation struct {
 	version            *int
 	addversion         *int
 	enabled            *bool
-	options            **json.RawMessage
+	options            *json.RawMessage
 	clearedFields      map[string]struct{}
 	user               *uuid.UUID
 	cleareduser        bool
@@ -10902,12 +10940,12 @@ func (m *UserMessengerMutation) ResetEnabled() {
 }
 
 // SetOptions sets the "options" field.
-func (m *UserMessengerMutation) SetOptions(jm *json.RawMessage) {
+func (m *UserMessengerMutation) SetOptions(jm json.RawMessage) {
 	m.options = &jm
 }
 
 // Options returns the value of the "options" field in the mutation.
-func (m *UserMessengerMutation) Options() (r *json.RawMessage, exists bool) {
+func (m *UserMessengerMutation) Options() (r json.RawMessage, exists bool) {
 	v := m.options
 	if v == nil {
 		return
@@ -10918,7 +10956,7 @@ func (m *UserMessengerMutation) Options() (r *json.RawMessage, exists bool) {
 // OldOptions returns the old "options" field's value of the UserMessenger entity.
 // If the UserMessenger object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v *json.RawMessage, err error) {
+func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v json.RawMessage, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOptions is only allowed on UpdateOne operations")
 	}
@@ -10932,9 +10970,22 @@ func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v *json.RawMess
 	return oldValue.Options, nil
 }
 
+// ClearOptions clears the value of the "options" field.
+func (m *UserMessengerMutation) ClearOptions() {
+	m.options = nil
+	m.clearedFields[usermessenger.FieldOptions] = struct{}{}
+}
+
+// OptionsCleared returns if the "options" field was cleared in this mutation.
+func (m *UserMessengerMutation) OptionsCleared() bool {
+	_, ok := m.clearedFields[usermessenger.FieldOptions]
+	return ok
+}
+
 // ResetOptions resets all changes to the "options" field.
 func (m *UserMessengerMutation) ResetOptions() {
 	m.options = nil
+	delete(m.clearedFields, usermessenger.FieldOptions)
 }
 
 // SetUserID sets the "userID" field.
@@ -11200,7 +11251,7 @@ func (m *UserMessengerMutation) SetField(name string, value ent.Value) error {
 		m.SetEnabled(v)
 		return nil
 	case usermessenger.FieldOptions:
-		v, ok := value.(*json.RawMessage)
+		v, ok := value.(json.RawMessage)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -11257,7 +11308,11 @@ func (m *UserMessengerMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMessengerMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(usermessenger.FieldOptions) {
+		fields = append(fields, usermessenger.FieldOptions)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -11270,6 +11325,11 @@ func (m *UserMessengerMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMessengerMutation) ClearField(name string) error {
+	switch name {
+	case usermessenger.FieldOptions:
+		m.ClearOptions()
+		return nil
+	}
 	return fmt.Errorf("unknown UserMessenger nullable field %s", name)
 }
 

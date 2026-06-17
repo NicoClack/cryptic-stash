@@ -31,7 +31,7 @@ type UserMessenger struct {
 	// Enabled holds the value of the "enabled" field.
 	Enabled bool `json:"enabled,omitempty"`
 	// Options holds the value of the "options" field.
-	Options *json.RawMessage `json:"options,omitempty"`
+	Options json.RawMessage `json:"options,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -212,10 +212,8 @@ func (_m *UserMessenger) String() string {
 	builder.WriteString("enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
 	builder.WriteString(", ")
-	if v := _m.Options; v != nil {
-		builder.WriteString("options=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("options=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Options))
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

@@ -66,7 +66,7 @@ func (_c *UserMessengerCreate) SetNillableEnabled(v *bool) *UserMessengerCreate 
 }
 
 // SetOptions sets the "options" field.
-func (_c *UserMessengerCreate) SetOptions(v *json.RawMessage) *UserMessengerCreate {
+func (_c *UserMessengerCreate) SetOptions(v json.RawMessage) *UserMessengerCreate {
 	_c.mutation.SetOptions(v)
 	return _c
 }
@@ -177,9 +177,6 @@ func (_c *UserMessengerCreate) check() error {
 	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		return &ValidationError{Name: "enabled", err: errors.New(`ent: missing required field "UserMessenger.enabled"`)}
-	}
-	if _, ok := _c.mutation.Options(); !ok {
-		return &ValidationError{Name: "options", err: errors.New(`ent: missing required field "UserMessenger.options"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "UserMessenger.userID"`)}
@@ -406,7 +403,7 @@ func (u *UserMessengerUpsert) UpdateEnabled() *UserMessengerUpsert {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsert) SetOptions(v *json.RawMessage) *UserMessengerUpsert {
+func (u *UserMessengerUpsert) SetOptions(v json.RawMessage) *UserMessengerUpsert {
 	u.Set(usermessenger.FieldOptions, v)
 	return u
 }
@@ -414,6 +411,12 @@ func (u *UserMessengerUpsert) SetOptions(v *json.RawMessage) *UserMessengerUpser
 // UpdateOptions sets the "options" field to the value that was provided on create.
 func (u *UserMessengerUpsert) UpdateOptions() *UserMessengerUpsert {
 	u.SetExcluded(usermessenger.FieldOptions)
+	return u
+}
+
+// ClearOptions clears the value of the "options" field.
+func (u *UserMessengerUpsert) ClearOptions() *UserMessengerUpsert {
+	u.SetNull(usermessenger.FieldOptions)
 	return u
 }
 
@@ -555,7 +558,7 @@ func (u *UserMessengerUpsertOne) UpdateEnabled() *UserMessengerUpsertOne {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertOne) SetOptions(v *json.RawMessage) *UserMessengerUpsertOne {
+func (u *UserMessengerUpsertOne) SetOptions(v json.RawMessage) *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})
@@ -565,6 +568,13 @@ func (u *UserMessengerUpsertOne) SetOptions(v *json.RawMessage) *UserMessengerUp
 func (u *UserMessengerUpsertOne) UpdateOptions() *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.UpdateOptions()
+	})
+}
+
+// ClearOptions clears the value of the "options" field.
+func (u *UserMessengerUpsertOne) ClearOptions() *UserMessengerUpsertOne {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.ClearOptions()
 	})
 }
 
@@ -878,7 +888,7 @@ func (u *UserMessengerUpsertBulk) UpdateEnabled() *UserMessengerUpsertBulk {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertBulk) SetOptions(v *json.RawMessage) *UserMessengerUpsertBulk {
+func (u *UserMessengerUpsertBulk) SetOptions(v json.RawMessage) *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})
@@ -888,6 +898,13 @@ func (u *UserMessengerUpsertBulk) SetOptions(v *json.RawMessage) *UserMessengerU
 func (u *UserMessengerUpsertBulk) UpdateOptions() *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.UpdateOptions()
+	})
+}
+
+// ClearOptions clears the value of the "options" field.
+func (u *UserMessengerUpsertBulk) ClearOptions() *UserMessengerUpsertBulk {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.ClearOptions()
 	})
 }
 

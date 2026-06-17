@@ -118,30 +118,26 @@ func (_u *InviteUpdate) ClearWebAuthnSession() *InviteUpdate {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *InviteUpdate) SetUserAgent(v string) *InviteUpdate {
+func (_u *InviteUpdate) SetUserAgent(v *string) *InviteUpdate {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
-// SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *InviteUpdate) SetNillableUserAgent(v *string) *InviteUpdate {
-	if v != nil {
-		_u.SetUserAgent(*v)
-	}
+// ClearUserAgent clears the value of the "userAgent" field.
+func (_u *InviteUpdate) ClearUserAgent() *InviteUpdate {
+	_u.mutation.ClearUserAgent()
 	return _u
 }
 
 // SetIP sets the "ip" field.
-func (_u *InviteUpdate) SetIP(v string) *InviteUpdate {
+func (_u *InviteUpdate) SetIP(v *string) *InviteUpdate {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *InviteUpdate) SetNillableIP(v *string) *InviteUpdate {
-	if v != nil {
-		_u.SetIP(*v)
-	}
+// ClearIP clears the value of the "ip" field.
+func (_u *InviteUpdate) ClearIP() *InviteUpdate {
+	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -287,12 +283,18 @@ func (_u *InviteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.SetField(invite.FieldUserAgent, field.TypeBytes, vv)
 	}
+	if _u.mutation.UserAgentCleared() {
+		_spec.ClearField(invite.FieldUserAgent, field.TypeBytes)
+	}
 	if value, ok := _u.mutation.IP(); ok {
 		vv, err := invite.ValueScanner.IP.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(invite.FieldIP, field.TypeBytes, vv)
+	}
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(invite.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -430,30 +432,26 @@ func (_u *InviteUpdateOne) ClearWebAuthnSession() *InviteUpdateOne {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *InviteUpdateOne) SetUserAgent(v string) *InviteUpdateOne {
+func (_u *InviteUpdateOne) SetUserAgent(v *string) *InviteUpdateOne {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
-// SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *InviteUpdateOne) SetNillableUserAgent(v *string) *InviteUpdateOne {
-	if v != nil {
-		_u.SetUserAgent(*v)
-	}
+// ClearUserAgent clears the value of the "userAgent" field.
+func (_u *InviteUpdateOne) ClearUserAgent() *InviteUpdateOne {
+	_u.mutation.ClearUserAgent()
 	return _u
 }
 
 // SetIP sets the "ip" field.
-func (_u *InviteUpdateOne) SetIP(v string) *InviteUpdateOne {
+func (_u *InviteUpdateOne) SetIP(v *string) *InviteUpdateOne {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
-// SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *InviteUpdateOne) SetNillableIP(v *string) *InviteUpdateOne {
-	if v != nil {
-		_u.SetIP(*v)
-	}
+// ClearIP clears the value of the "ip" field.
+func (_u *InviteUpdateOne) ClearIP() *InviteUpdateOne {
+	_u.mutation.ClearIP()
 	return _u
 }
 
@@ -629,12 +627,18 @@ func (_u *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err erro
 		}
 		_spec.SetField(invite.FieldUserAgent, field.TypeBytes, vv)
 	}
+	if _u.mutation.UserAgentCleared() {
+		_spec.ClearField(invite.FieldUserAgent, field.TypeBytes)
+	}
 	if value, ok := _u.mutation.IP(); ok {
 		vv, err := invite.ValueScanner.IP.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(invite.FieldIP, field.TypeBytes, vv)
+	}
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(invite.FieldIP, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

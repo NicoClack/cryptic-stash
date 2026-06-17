@@ -35,9 +35,9 @@ type Invite struct {
 	// WebAuthnSession holds the value of the "webAuthnSession" field.
 	WebAuthnSession *webauthn.SessionData `json:"webAuthnSession,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent string `json:"userAgent,omitempty"`
+	UserAgent *string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
+	IP *string `json:"ip,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -233,11 +233,15 @@ func (_m *Invite) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("userAgent=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserAgent))
+	if v := _m.UserAgent; v != nil {
+		builder.WriteString("userAgent=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IP))
+	if v := _m.IP; v != nil {
+		builder.WriteString("ip=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

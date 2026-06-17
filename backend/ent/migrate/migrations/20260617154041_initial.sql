@@ -6,7 +6,7 @@ CREATE UNIQUE INDEX `download_sessions_hashed_auth_code_key` ON `download_sessio
 -- create index "downloadsession_hashed_auth_code_stash_id" to table: "download_sessions"
 CREATE INDEX `downloadsession_hashed_auth_code_stash_id` ON `download_sessions` (`hashed_auth_code`, `stash_id`);
 -- create "invites" table
-CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `web_authn_session` blob NOT NULL, `user_agent` blob NOT NULL, `ip` blob NOT NULL, `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `web_authn_session` blob NULL, `user_agent` blob NULL, `ip` blob NULL, `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "invites_hashed_code_key" to table: "invites"
 CREATE UNIQUE INDEX `invites_hashed_code_key` ON `invites` (`hashed_code`);
 -- create index "invites_user_id_key" to table: "invites"
@@ -60,7 +60,7 @@ CREATE UNIQUE INDEX `users_username_key` ON `users` (`username`);
 -- create index "user_created_at" to table: "users"
 CREATE INDEX `user_created_at` ON `users` (`created_at`);
 -- create "user_messengers" table
-CREATE TABLE `user_messengers` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `type` text NOT NULL, `version` integer NOT NULL, `enabled` bool NOT NULL DEFAULT (true), `options` blob NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `user_messengers_users_messengers` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `user_messengers` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `type` text NOT NULL, `version` integer NOT NULL, `enabled` bool NOT NULL DEFAULT (true), `options` blob NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `user_messengers_users_messengers` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "usermessenger_user_id_type_version" to table: "user_messengers"
 CREATE UNIQUE INDEX `usermessenger_user_id_type_version` ON `user_messengers` (`user_id`, `type`, `version`);
 

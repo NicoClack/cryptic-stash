@@ -88,8 +88,8 @@ var (
 	// ValueScanner of all Invite fields.
 	ValueScanner struct {
 		WebAuthnSession field.TypeValueScanner[*webauthn.SessionData]
-		UserAgent       field.TypeValueScanner[string]
-		IP              field.TypeValueScanner[string]
+		UserAgent       field.TypeValueScanner[*string]
+		IP              field.TypeValueScanner[*string]
 	}
 )
 

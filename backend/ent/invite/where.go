@@ -351,6 +351,26 @@ func WebAuthnSessionNotNil() predicate.Invite {
 	return predicate.Invite(sql.FieldNotNull(FieldWebAuthnSession))
 }
 
+// UserAgentIsNil applies the IsNil predicate on the "userAgent" field.
+func UserAgentIsNil() predicate.Invite {
+	return predicate.Invite(sql.FieldIsNull(FieldUserAgent))
+}
+
+// UserAgentNotNil applies the NotNil predicate on the "userAgent" field.
+func UserAgentNotNil() predicate.Invite {
+	return predicate.Invite(sql.FieldNotNull(FieldUserAgent))
+}
+
+// IPIsNil applies the IsNil predicate on the "ip" field.
+func IPIsNil() predicate.Invite {
+	return predicate.Invite(sql.FieldIsNull(FieldIP))
+}
+
+// IPNotNil applies the NotNil predicate on the "ip" field.
+func IPNotNil() predicate.Invite {
+	return predicate.Invite(sql.FieldNotNull(FieldIP))
+}
+
 // UserIDEQ applies the EQ predicate on the "userID" field.
 func UserIDEQ(v uuid.UUID) predicate.Invite {
 	return predicate.Invite(sql.FieldEQ(FieldUserID, v))
