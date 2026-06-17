@@ -13,6 +13,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/globals"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/migrate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	_ "github.com/NicoClack/cryptic-stash/backend/entps"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/require"
@@ -43,6 +44,10 @@ func CreateDB(t *testing.T) *TestDatabase {
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxLifetime(time.Hour)
+
+	// This matches the hardcoded key in testcommon.DefaultEnv(),
+	// it can't be changed per test because it's a global variable
+	schema.Init(make([]byte, 32))
 	driver := ent.Driver(entsql.OpenDB("sqlite3", db))
 	client := ent.NewClient(driver)
 

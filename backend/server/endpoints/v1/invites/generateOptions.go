@@ -6,11 +6,9 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
-	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -38,12 +36,7 @@ func GenerateOptions(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				_, stdErr := tx.Invite.UpdateOneID(inviteOb.ID).
-					SetWebAuthnSession(schema.OptionalEncryptedSessionData{
-						EncryptedField: schema.EncryptedField[*webauthn.SessionData]{
-							Decrypted: sessionData,
-							KeyName:   "auth_1",
-						},
-					}).
+					SetWebAuthnSession(sessionData).
 					Save(ctx)
 				if stdErr != nil {
 					return nil, stdErr

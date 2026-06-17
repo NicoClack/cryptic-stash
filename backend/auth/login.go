@@ -126,7 +126,7 @@ func FinishLogin(
 			credential.Flags.BackupState,
 		)
 	}
-	passkeyOb.Credential.Decrypted = *credential
+	passkeyOb.Credential = *credential
 	// TODO: race condition?
 	stdErr = tx.Passkey.UpdateOne(passkeyOb).
 		SetUpdatedAt(clock.Now()).

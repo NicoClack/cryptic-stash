@@ -5,7 +5,6 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -72,12 +71,7 @@ func FinishRegisterPasskey(
 		SetUserID(userOb.ID).
 		SetName(credentialName).
 		SetCredentialID(credential.ID).
-		SetCredential(schema.EncryptedCredential{
-			EncryptedField: schema.EncryptedField[webauthn.Credential]{
-				Decrypted: *credential,
-				KeyName:   "auth_1",
-			},
-		}).
+		SetCredential(*credential).
 		Save(ctx)
 	if stdErr != nil {
 		return nil, ErrWrapperFinishRegisterPasskey.Wrap(ErrWrapperDatabase.Wrap(stdErr))

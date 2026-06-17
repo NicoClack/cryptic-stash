@@ -116,7 +116,7 @@ func Download(app *servercommon.ServerApp) gin.HandlerFunc {
 				Threads: stashOb.HashThreads,
 			},
 		)
-		stashDataKey, wrappedErr := app.Core.Decrypt(stashOb.EncryptionDataKey.Decrypted, stashKek)
+		stashDataKey, wrappedErr := app.Core.Decrypt(stashOb.EncryptionDataKey, stashKek)
 		if wrappedErr != nil {
 			return servercommon.NewUnauthorizedError().SetChild(wrappedErr)
 		}

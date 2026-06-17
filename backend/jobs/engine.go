@@ -11,7 +11,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 )
 
 const (
@@ -326,7 +325,7 @@ func (engine *Engine) runJob(
 		Definition: jobDefinition,
 		Context:    ctx,
 		Logger:     logger,
-		Body:       job.Body.Decrypted,
+		Body:       job.Body,
 	})
 	completedJobChan <- completedJob{
 		Object:    job,
@@ -431,12 +430,7 @@ func (engine *Engine) EnqueueEncodedWithModifier(
 		SetVersion(version).
 		SetPriority(jobDefinition.Priority).
 		SetWeight(jobDefinition.Weight).
-		SetBody(schema.EncryptedRawJSON{
-			EncryptedField: schema.EncryptedField[json.RawMessage]{
-				Decrypted: encodedBody,
-				KeyName:   "job_1",
-			},
-		})
+		SetBody(encodedBody)
 	if modifier != nil {
 		modifier(jobCreate)
 	}

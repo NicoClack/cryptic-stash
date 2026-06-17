@@ -14,7 +14,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
@@ -156,12 +155,7 @@ func newInMemoryUser(
 					Type:    emailMessengerType,
 					Version: emailMessengerVersion,
 					Enabled: true,
-					Options: schema.EncryptedRawJSON{
-						EncryptedField: schema.EncryptedField[json.RawMessage]{
-							Decrypted: encodedOptions,
-							KeyName:   "user_messenger_1",
-						},
-					},
+					Options: encodedOptions,
 				},
 			},
 		},

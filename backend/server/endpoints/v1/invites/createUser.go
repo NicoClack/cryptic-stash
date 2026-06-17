@@ -7,12 +7,10 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
-	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -66,7 +64,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, ErrUsernameTaken.Clone()
 				}
 
-				if inviteOb.WebAuthnSession.Decrypted == nil {
+				if inviteOb.WebAuthnSession == nil {
 					return nil, servercommon.NewBadRequestError(
 						"credential",
 						"no active WebAuthn session, please refresh the page",
@@ -75,7 +73,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				_, wrappedErr := app.Auth.FinishRegisterPasskey(
-					inviteOb.WebAuthnSession.Decrypted,
+					inviteOb.WebAuthnSession,
 					inviteOb.Email,
 					parsedCredential,
 					body.CredentialName,
@@ -95,19 +93,9 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 						}
 						_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
 							SetUser(createdUserOb).
-							SetWebAuthnSession(schema.OptionalEncryptedSessionData{
-								EncryptedField: schema.EncryptedField[*webauthn.SessionData]{
-									KeyName: "auth_1",
-								},
-							}).
-							SetUserAgent(schema.EncryptedField[string]{
-								Decrypted: ginCtx.Request.UserAgent(),
-								KeyName:   "security_pii_logging_1",
-							}).
-							SetIP(schema.EncryptedField[string]{
-								Decrypted: ginCtx.ClientIP(),
-								KeyName:   "security_pii_logging_1",
-							}).
+							SetWebAuthnSession(nil).
+							SetUserAgent(ginCtx.Request.UserAgent()).
+							SetIP(ginCtx.ClientIP()).
 							Save(ctx)
 						if stdErr != nil {
 							return nil, stdErr

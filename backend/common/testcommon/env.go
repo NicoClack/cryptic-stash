@@ -45,7 +45,9 @@ func DefaultEnv() *common.Env {
 		ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL: time.Hour * 24,
 		MIN_SUCCESSFUL_MESSAGE_COUNT:              1,
 		STASH_ENCRYPTION_KEY:                      []byte{},
-		BASE_ENCRYPTION_KEY:                       common.CryptoRandomBytes(32),
+		// Has to be static because this is injected into Ent using a global variable, so each test has the same value
+		// This will still encrypt the data but obviously it won't be secure because it's just hardcoded
+		BASE_ENCRYPTION_KEY: make([]byte, 32),
 
 		PASSWORD_HASH_SETTINGS: &common.PasswordHashSettings{
 			Time:    1,

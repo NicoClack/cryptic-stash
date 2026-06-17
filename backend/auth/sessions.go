@@ -7,7 +7,6 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/google/uuid"
 	"github.com/jonboulle/clockwork"
@@ -35,14 +34,8 @@ func CreateSession(
 		SetPasskeyID(passkeyID).
 		SetHashedToken(hashedToken[:]).
 		SetExpiresAt(expiresAt).
-		SetUserAgent(schema.EncryptedField[string]{
-			Decrypted: userAgent,
-			KeyName:   "security_pii_logging_1",
-		}).
-		SetIP(schema.EncryptedField[string]{
-			Decrypted: ip,
-			KeyName:   "security_pii_logging_1",
-		}).
+		SetUserAgent(userAgent).
+		SetIP(ip).
 		Save(ctx)
 	if stdErr != nil {
 		return nil, nil, ErrWrapperCreateSession.Wrap(ErrWrapperDatabase.Wrap(stdErr))
