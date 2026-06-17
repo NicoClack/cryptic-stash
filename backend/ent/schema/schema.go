@@ -16,11 +16,6 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
-// Ent codegen has trouble without this alias
-type EncryptedRawJSON struct {
-	EncryptedField[json.RawMessage]
-}
-
 const (
 	GCMNonceSize = 12
 )
@@ -97,52 +92,82 @@ func Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, error) {
 }
 
 type EncryptedField[T any] struct {
-	Decrypted T
-	KeyName   string
+	KeyName string
 }
 
-func (encryptedField *EncryptedField[T]) Value() (driver.Value, error) {
-	initOnce.Do(func() {
-		panic("EncryptedField.Value called before Init")
-	})
+func (encryptedField EncryptedField[T]) Value(v any) (driver.Value, error) {
+	if v == nil {
+		// There isn't much point in encrypting nils because they're easy to guess based on their length.
+		// Plus they're easy to modify by just reusing an encrypted nil with the same key name.
+		return nil, nil
+	}
+
+	val, ok := v.(T)
+	if !ok {
+		var zero T
+		return nil, fmt.Errorf("EncryptedField.Value: unexpected type %T, expected %T", v, zero)
+	}
+
 	encryptionKey, ok := encryptionKeys[encryptedField.KeyName]
 	if !ok {
 		panic("EncryptedField.Value: invalid key name " + encryptedField.KeyName)
 	}
 
-	plaintextBytes, stdErr := json.Marshal(encryptedField.Decrypted)
-	if stdErr != nil {
-		return nil, stdErr
+	var plaintextBytes []byte
+
+	// Special handling for string and []byte to avoid JSON overhead
+	switch any(val).(type) {
+	case string:
+		plaintextBytes = []byte(any(val).(string))
+	case []byte:
+		plaintextBytes = any(val).([]byte)
+	default:
+		var stdErr error
+		plaintextBytes, stdErr = json.Marshal(val)
+		if stdErr != nil {
+			return nil, fmt.Errorf("EncryptedField.Value: failed to marshal JSON data: %w", stdErr)
+		}
 	}
+
 	encryptedBytes, stdErr := Encrypt(plaintextBytes, encryptionKey)
 	if stdErr != nil {
-		return nil, stdErr
+		return nil, fmt.Errorf("EncryptedField.Value: failed to encrypt data: %w", stdErr)
 	}
 
 	return encryptedBytes, nil
 }
-func (encryptedField *EncryptedField[T]) Scan(src any) error {
+
+func (encryptedField EncryptedField[T]) Scan(src any) (any, error) {
 	if src == nil {
-		return nil
+		return nil, nil
 	}
 
 	encryptedBytes, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("EncryptedField.Scan: unexpected type %T", src)
+		return nil, fmt.Errorf("EncryptedField.Scan: unexpected type %T", src)
 	}
+
 	encryptionKey, ok := encryptionKeys[encryptedField.KeyName]
 	if !ok {
 		panic("EncryptedField.Scan: invalid key name " + encryptedField.KeyName)
 	}
+
 	plaintextBytes, stdErr := Decrypt(encryptedBytes, encryptionKey)
 	if stdErr != nil {
-		return fmt.Errorf("failed to decrypt JSON data: %w", stdErr)
+		return nil, fmt.Errorf("EncryptedField.Scan: failed to decrypt data: %w", stdErr)
 	}
 
-	stdErr = json.Unmarshal(plaintextBytes, &encryptedField.Decrypted)
-	if stdErr != nil {
-		return fmt.Errorf("failed to unmarshal JSON data: %w", stdErr)
+	// Special handling for string and []byte to avoid JSON overhead
+	var val T
+	switch any(&val).(type) {
+	case *string:
+		return string(plaintextBytes), nil
+	case *[]byte:
+		return plaintextBytes, nil
+	default:
+		if stdErr := json.Unmarshal(plaintextBytes, &val); stdErr != nil {
+			return nil, fmt.Errorf("EncryptedField.Scan: failed to unmarshal JSON data: %w", stdErr)
+		}
+		return val, nil
 	}
-
-	return nil
 }

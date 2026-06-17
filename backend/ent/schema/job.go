@@ -34,11 +34,8 @@ func (Job) Fields() []ent.Field {
 			"weight",
 		), // Currently duplicates the definition but might make it dynamic in the future
 		field.Bytes("body").
-			GoType(EncryptedRawJSON{
-				EncryptedField: EncryptedField[json.RawMessage]{
-					KeyName: "job_1",
-				},
-			}),
+			GoType(json.RawMessage{}).
+			ValueScanner(EncryptedField[json.RawMessage]{KeyName: "job_1"}),
 		field.Enum("status").
 			// TODO: update completed jobs to "completed" and store for a few days
 			Values("pending", "running", "completed", "failed").

@@ -16,11 +16,6 @@ type Invite struct {
 	ent.Schema
 }
 
-// Ent codegen has trouble without this alias
-type OptionalEncryptedSessionData struct {
-	EncryptedField[*webauthn.SessionData]
-}
-
 // Fields of the Invite.
 func (Invite) Fields() []ent.Field {
 	return []ent.Field{
@@ -38,22 +33,15 @@ func (Invite) Fields() []ent.Field {
 			Values("revoked", "username_taken").
 			Optional().Nillable(),
 		field.Bytes("webAuthnSession").
-			GoType(OptionalEncryptedSessionData{
-				EncryptedField: EncryptedField[*webauthn.SessionData]{
-					KeyName: "auth_1",
-				},
-			}).
-			DefaultFunc(func() OptionalEncryptedSessionData {
-				return OptionalEncryptedSessionData{
-					EncryptedField: EncryptedField[*webauthn.SessionData]{
-						KeyName: "auth_1",
-					},
-				}
-			}),
+			GoType(webauthn.SessionData{}).
+			ValueScanner(EncryptedField[webauthn.SessionData]{KeyName: "auth_1"}).
+			Optional().Nillable(),
 		field.Bytes("userAgent").
-			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			GoType("").
+			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
 		field.Bytes("ip").
-			GoType(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			GoType("").
+			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
 		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any
 	}
 }
