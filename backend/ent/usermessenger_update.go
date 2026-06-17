@@ -102,7 +102,7 @@ func (_u *UserMessengerUpdate) SetNillableEnabled(v *bool) *UserMessengerUpdate 
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdate) SetOptions(v json.RawMessage) *UserMessengerUpdate {
+func (_u *UserMessengerUpdate) SetOptions(v *json.RawMessage) *UserMessengerUpdate {
 	_u.mutation.SetOptions(v)
 	return _u
 }
@@ -423,7 +423,7 @@ func (_u *UserMessengerUpdateOne) SetNillableEnabled(v *bool) *UserMessengerUpda
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdateOne) SetOptions(v json.RawMessage) *UserMessengerUpdateOne {
+func (_u *UserMessengerUpdateOne) SetOptions(v *json.RawMessage) *UserMessengerUpdateOne {
 	_u.mutation.SetOptions(v)
 	return _u
 }

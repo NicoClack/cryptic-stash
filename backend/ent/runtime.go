@@ -494,7 +494,7 @@ func init() {
 	usermessenger.DefaultEnabled = usermessengerDescEnabled.Default.(bool)
 	// usermessengerDescOptions is the schema descriptor for options field.
 	usermessengerDescOptions := usermessengerFields[6].Descriptor()
-	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[json.RawMessage])
+	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[*json.RawMessage])
 	// usermessengerDescID is the schema descriptor for id field.
 	usermessengerDescID := usermessengerFields[0].Descriptor()
 	// usermessenger.DefaultID holds the default value on creation for the id field.

@@ -86,7 +86,7 @@ var (
 	DefaultID func() uuid.UUID
 	// ValueScanner of all UserMessenger fields.
 	ValueScanner struct {
-		Options field.TypeValueScanner[json.RawMessage]
+		Options field.TypeValueScanner[*json.RawMessage]
 	}
 )
 

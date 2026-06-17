@@ -66,7 +66,7 @@ func (_c *UserMessengerCreate) SetNillableEnabled(v *bool) *UserMessengerCreate 
 }
 
 // SetOptions sets the "options" field.
-func (_c *UserMessengerCreate) SetOptions(v json.RawMessage) *UserMessengerCreate {
+func (_c *UserMessengerCreate) SetOptions(v *json.RawMessage) *UserMessengerCreate {
 	_c.mutation.SetOptions(v)
 	return _c
 }
@@ -406,7 +406,7 @@ func (u *UserMessengerUpsert) UpdateEnabled() *UserMessengerUpsert {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsert) SetOptions(v json.RawMessage) *UserMessengerUpsert {
+func (u *UserMessengerUpsert) SetOptions(v *json.RawMessage) *UserMessengerUpsert {
 	u.Set(usermessenger.FieldOptions, v)
 	return u
 }
@@ -555,7 +555,7 @@ func (u *UserMessengerUpsertOne) UpdateEnabled() *UserMessengerUpsertOne {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertOne) SetOptions(v json.RawMessage) *UserMessengerUpsertOne {
+func (u *UserMessengerUpsertOne) SetOptions(v *json.RawMessage) *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})
@@ -878,7 +878,7 @@ func (u *UserMessengerUpsertBulk) UpdateEnabled() *UserMessengerUpsertBulk {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertBulk) SetOptions(v json.RawMessage) *UserMessengerUpsertBulk {
+func (u *UserMessengerUpsertBulk) SetOptions(v *json.RawMessage) *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})

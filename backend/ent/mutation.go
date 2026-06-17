@@ -10585,7 +10585,7 @@ type UserMessengerMutation struct {
 	version            *int
 	addversion         *int
 	enabled            *bool
-	options            *json.RawMessage
+	options            **json.RawMessage
 	clearedFields      map[string]struct{}
 	user               *uuid.UUID
 	cleareduser        bool
@@ -10902,12 +10902,12 @@ func (m *UserMessengerMutation) ResetEnabled() {
 }
 
 // SetOptions sets the "options" field.
-func (m *UserMessengerMutation) SetOptions(jm json.RawMessage) {
+func (m *UserMessengerMutation) SetOptions(jm *json.RawMessage) {
 	m.options = &jm
 }
 
 // Options returns the value of the "options" field in the mutation.
-func (m *UserMessengerMutation) Options() (r json.RawMessage, exists bool) {
+func (m *UserMessengerMutation) Options() (r *json.RawMessage, exists bool) {
 	v := m.options
 	if v == nil {
 		return
@@ -10918,7 +10918,7 @@ func (m *UserMessengerMutation) Options() (r json.RawMessage, exists bool) {
 // OldOptions returns the old "options" field's value of the UserMessenger entity.
 // If the UserMessenger object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v json.RawMessage, err error) {
+func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v *json.RawMessage, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOptions is only allowed on UpdateOne operations")
 	}
@@ -11200,7 +11200,7 @@ func (m *UserMessengerMutation) SetField(name string, value ent.Value) error {
 		m.SetEnabled(v)
 		return nil
 	case usermessenger.FieldOptions:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(*json.RawMessage)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
