@@ -27,8 +27,9 @@ func (UserMessenger) Fields() []ent.Field {
 		field.Int("version"),
 		field.Bool("enabled").Default(true),
 		field.Bytes("options").
-			GoType(json.RawMessage{}).
-			ValueScanner(EncryptedField[json.RawMessage]{KeyName: "user_messenger_1"}),
+			GoType(&json.RawMessage{}).
+			ValueScanner(EncryptedField[*json.RawMessage]{KeyName: "user_messenger_1"}).
+			Nillable(),
 		field.UUID("userID", uuid.Nil),
 	}
 }

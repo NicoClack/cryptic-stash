@@ -5,7 +5,6 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
-	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
@@ -98,8 +97,8 @@ type EncryptedField[T any] struct {
 	KeyName string
 }
 
-func (encryptedField EncryptedField[T]) Value(v T) (driver.Value, error) {
-	reflectedValue := reflect.ValueOf(v)
+func (encryptedField EncryptedField[T]) Value(val T) (driver.Value, error) {
+	reflectedValue := reflect.ValueOf(val)
 	if !reflectedValue.IsValid() {
 		return nil, nil
 	}
@@ -120,14 +119,14 @@ func (encryptedField EncryptedField[T]) Value(v T) (driver.Value, error) {
 	var plaintextBytes []byte
 
 	// Special handling for string and []byte to avoid JSON overhead
-	switch any(v).(type) {
+	switch any(val).(type) {
 	case string:
-		plaintextBytes = []byte(any(v).(string))
+		plaintextBytes = []byte(any(val).(string))
 	case []byte:
-		plaintextBytes = any(v).([]byte)
+		plaintextBytes = any(val).([]byte)
 	default:
 		var stdErr error
-		plaintextBytes, stdErr = json.Marshal(v)
+		plaintextBytes, stdErr = json.Marshal(val)
 		if stdErr != nil {
 			return nil, fmt.Errorf("EncryptedField.Value: failed to marshal JSON data: %w", stdErr)
 		}
@@ -141,21 +140,52 @@ func (encryptedField EncryptedField[T]) Value(v T) (driver.Value, error) {
 	return encryptedBytes, nil
 }
 
-// TODO: when is this used? It's needed for the interface but does this cause any issues?
-func (encryptedField EncryptedField[T]) ScanValue() field.ValueScanner {
-	return &sql.NullString{}
+type binaryScanner struct {
+	val []byte
 }
 
-func (encryptedField EncryptedField[T]) FromValue(v driver.Value) (T, error) {
-	if v == nil {
+func (bScanner *binaryScanner) Scan(src any) error {
+	switch val := src.(type) {
+	case nil:
+		bScanner.val = nil
+	case []byte:
+		bScanner.val = slices.Clone(val)
+	case string:
+		bScanner.val = []byte(val)
+	default:
+		return fmt.Errorf("binaryScanner.Scan: unexpected type %T", src)
+	}
+	return nil
+}
+
+func (bScanner *binaryScanner) Value() (driver.Value, error) {
+	if bScanner.val == nil {
+		return nil, nil
+	}
+	return bScanner.val, nil
+}
+
+func (encryptedField EncryptedField[T]) ScanValue() field.ValueScanner {
+	return &binaryScanner{}
+}
+
+func (encryptedField EncryptedField[T]) FromValue(rawValue driver.Value) (T, error) {
+	if rawValue == nil {
 		var zero T
 		return zero, nil
 	}
 
-	encryptedBytes, ok := v.([]byte)
-	if !ok {
+	var encryptedBytes []byte
+	switch v := rawValue.(type) {
+	case []byte:
+		encryptedBytes = v
+	case *binaryScanner:
+		encryptedBytes = v.val
+	case string:
+		encryptedBytes = []byte(v)
+	default:
 		var zero T
-		return zero, fmt.Errorf("EncryptedField.FromValue: unexpected type %T", v)
+		return zero, fmt.Errorf("EncryptedField.FromValue: unexpected type %T", rawValue)
 	}
 
 	encryptionKey, ok := encryptionKeys[encryptedField.KeyName]
