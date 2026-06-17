@@ -31,14 +31,19 @@ func createUserWithCredential(
 	serverAssociatesWithUser bool,
 	authenticatorAssociatesWithUser bool,
 	app *testhelpers.App,
+	setupAuthenticator func(*virtualwebauthn.Authenticator),
 ) (*ent.User, virtualwebauthn.Credential, virtualwebauthn.Authenticator) {
 	userOb := testcommon.NewDummyUser(1, app.TestDatabase.Client(), t.Context(), app.Clock)
 
 	vAuthenticator := virtualwebauthn.NewAuthenticator()
-	// Simulate a physical security key
-	vAuthenticator.Options.Transports = []virtualwebauthn.Transport{
-		virtualwebauthn.TransportUSB,
-		virtualwebauthn.TransportNFC,
+	if setupAuthenticator != nil {
+		setupAuthenticator(&vAuthenticator)
+	} else {
+		// Simulate a physical security key
+		vAuthenticator.Options.Transports = []virtualwebauthn.Transport{
+			virtualwebauthn.TransportUSB,
+			virtualwebauthn.TransportNFC,
+		}
 	}
 	if authenticatorAssociatesWithUser {
 		vAuthenticator.Options.UserHandle = userOb.ID[:]
@@ -103,7 +108,7 @@ func TestLoginFlow(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	dbClient := app.Database.Client()
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
-	userOb, credential, vAuthenticator := createUserWithCredential(t, true, true, app)
+	userOb, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
@@ -183,10 +188,17 @@ func TestLoginFlow_SyncablePasskey(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 
-	userOb, credential, vAuthenticator := createUserWithCredential(t, true, true, app)
-	vAuthenticator.Options.BackupEligible = true
-	vAuthenticator.Options.BackupState = true
-	vAuthenticator.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
+	userOb, credential, vAuthenticator := createUserWithCredential(
+		t,
+		true,
+		true,
+		app,
+		func(vAuthenticator *virtualwebauthn.Authenticator) {
+			vAuthenticator.Options.BackupEligible = true
+			vAuthenticator.Options.BackupState = true
+			vAuthenticator.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
+		},
+	)
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
@@ -243,6 +255,7 @@ func TestLoginFlow_InvalidCredential(t *testing.T) {
 			serverAssociatesWithUser,
 			authenticatorAssociatesWithUser,
 			app,
+			nil,
 		)
 
 		startRecorder := testcommon.Post(
@@ -313,7 +326,7 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 		Env: env,
 	})
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
-	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
