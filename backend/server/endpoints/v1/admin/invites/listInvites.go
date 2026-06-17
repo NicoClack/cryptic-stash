@@ -23,8 +23,8 @@ type Invite struct {
 	CreatedAt time.Time `                   json:"createdAt"`
 	ExpiresAt time.Time `                   json:"expiresAt"`
 	UserID    uuid.UUID `                   json:"userId,omitempty"`
-	IP        string    `                   json:"ip"`
-	UserAgent string    `                   json:"userAgent"`
+	IP        *string   `                   json:"ip"`
+	UserAgent *string   `                   json:"userAgent"`
 }
 
 func ListInvites(app *servercommon.ServerApp) gin.HandlerFunc {

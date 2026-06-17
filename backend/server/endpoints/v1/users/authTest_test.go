@@ -31,9 +31,10 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SetCreatedAt(app.Clock.Now()).
 		SetUpdatedAt(app.Clock.Now()).
 		SetName("test-passkey").
-		SetCredentialID([]byte("credential-id")).
+		SetAllowSuperUser(false).
+		SetCredentialID([]byte("more-than-16-char-credential-id")).
 		SetCredential(webauthn.Credential{
-			ID:        []byte("credential-id"),
+			ID:        []byte("more-than-16-char-credential-id"),
 			PublicKey: []byte("public-key"),
 		}).
 		SetUser(userOb).

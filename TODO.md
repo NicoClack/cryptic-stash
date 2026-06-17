@@ -1,12 +1,5 @@
 # TODO
 
-- Is there a way to avoid code like this?
-SetBody(schema.EncryptedRawJSON{
-			EncryptedField: schema.EncryptedField[json.RawMessage]{
-				Decrypted: json.RawMessage("{}"),
-				KeyName:   "job_1",
-			},
-		}).
 - Rename adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Remove service level encryption for stashes
@@ -140,6 +133,7 @@ SetBody(schema.EncryptedRawJSON{
 - Review SQLite connection pool config
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 
+- Look up general location using IP address and do some kind of fuzzy match on the user agent before allowing a download
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks
 - Move from gin, its maintenance isn't great
 - When messengers are changed, send a message to all of the previous messengers

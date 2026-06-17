@@ -70,6 +70,7 @@ func FinishRegisterPasskey(
 		SetUpdatedAt(now).
 		SetUserID(userOb.ID).
 		SetName(credentialName).
+		SetAllowSuperUser(false). // TODO: add argument
 		SetCredentialID(credential.ID).
 		SetCredential(*credential).
 		Save(ctx)

@@ -45,6 +45,8 @@ func Post(
 	req, stdErr := http.NewRequestWithContext(t.Context(), http.MethodPost, url, bytes.NewBuffer(encodedBody))
 	require.NoError(t, stdErr)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "test-agent")
+	req.Header.Set("test-proxy-original-ip", "127.0.0.1")
 
 	for _, option := range options {
 		option(req)

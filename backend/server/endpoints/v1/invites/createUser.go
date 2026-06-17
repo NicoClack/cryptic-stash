@@ -94,8 +94,8 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 						_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
 							SetUser(createdUserOb).
 							SetWebAuthnSession(nil).
-							SetUserAgent(ginCtx.Request.UserAgent()).
-							SetIP(ginCtx.ClientIP()).
+							SetUserAgent(new(ginCtx.Request.UserAgent())).
+							SetIP(new(ginCtx.ClientIP())).
 							Save(ctx)
 						if stdErr != nil {
 							return nil, stdErr
