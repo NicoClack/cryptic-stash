@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
@@ -66,7 +66,7 @@ func (_c *UserMessengerCreate) SetNillableEnabled(v *bool) *UserMessengerCreate 
 }
 
 // SetOptions sets the "options" field.
-func (_c *UserMessengerCreate) SetOptions(v schema.EncryptedRawJSON) *UserMessengerCreate {
+func (_c *UserMessengerCreate) SetOptions(v json.RawMessage) *UserMessengerCreate {
 	_c.mutation.SetOptions(v)
 	return _c
 }
@@ -194,7 +194,10 @@ func (_c *UserMessengerCreate) sqlSave(ctx context.Context) (*UserMessenger, err
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -213,7 +216,7 @@ func (_c *UserMessengerCreate) sqlSave(ctx context.Context) (*UserMessenger, err
 	return _node, nil
 }
 
-func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpec) {
+func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &UserMessenger{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(usermessenger.Table, sqlgraph.NewFieldSpec(usermessenger.FieldID, field.TypeUUID))
@@ -244,7 +247,11 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 		_node.Enabled = value
 	}
 	if value, ok := _c.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, value)
+		vv, err := usermessenger.ValueScanner.Options.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
 		_node.Options = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
@@ -280,7 +287,7 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -399,7 +406,7 @@ func (u *UserMessengerUpsert) UpdateEnabled() *UserMessengerUpsert {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsert) SetOptions(v schema.EncryptedRawJSON) *UserMessengerUpsert {
+func (u *UserMessengerUpsert) SetOptions(v json.RawMessage) *UserMessengerUpsert {
 	u.Set(usermessenger.FieldOptions, v)
 	return u
 }
@@ -548,7 +555,7 @@ func (u *UserMessengerUpsertOne) UpdateEnabled() *UserMessengerUpsertOne {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertOne) SetOptions(v schema.EncryptedRawJSON) *UserMessengerUpsertOne {
+func (u *UserMessengerUpsertOne) SetOptions(v json.RawMessage) *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})
@@ -643,7 +650,10 @@ func (_c *UserMessengerCreateBulk) Save(ctx context.Context) ([]*UserMessenger, 
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -868,7 +878,7 @@ func (u *UserMessengerUpsertBulk) UpdateEnabled() *UserMessengerUpsertBulk {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertBulk) SetOptions(v schema.EncryptedRawJSON) *UserMessengerUpsertBulk {
+func (u *UserMessengerUpsertBulk) SetOptions(v json.RawMessage) *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})

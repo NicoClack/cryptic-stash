@@ -7,6 +7,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -87,6 +89,10 @@ var (
 	DefaultIsSecondGroup bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all Passkey fields.
+	ValueScanner struct {
+		Credential field.TypeValueScanner[webauthn.Credential]
+	}
 )
 
 // OrderOption defines the ordering options for the Passkey queries.

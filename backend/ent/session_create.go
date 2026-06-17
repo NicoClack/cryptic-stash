@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -52,13 +51,13 @@ func (_c *SessionCreate) SetExpiresAt(v time.Time) *SessionCreate {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *SessionCreate) SetUserAgent(v schema.EncryptedField[string]) *SessionCreate {
+func (_c *SessionCreate) SetUserAgent(v string) *SessionCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetIP sets the "ip" field.
-func (_c *SessionCreate) SetIP(v schema.EncryptedField[string]) *SessionCreate {
+func (_c *SessionCreate) SetIP(v string) *SessionCreate {
 	_c.mutation.SetIP(v)
 	return _c
 }
@@ -184,7 +183,10 @@ func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -203,7 +205,7 @@ func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 	return _node, nil
 }
 
-func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
+func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &Session{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
@@ -230,11 +232,19 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_node.ExpiresAt = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeBytes, value)
+		vv, err := session.ValueScanner.UserAgent.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(session.FieldUserAgent, field.TypeBytes, vv)
 		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeBytes, value)
+		vv, err := session.ValueScanner.IP.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(session.FieldIP, field.TypeBytes, vv)
 		_node.IP = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
@@ -271,7 +281,7 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_node.PasskeyID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -372,7 +382,7 @@ func (u *SessionUpsert) UpdateExpiresAt() *SessionUpsert {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsert) SetUserAgent(v schema.EncryptedField[string]) *SessionUpsert {
+func (u *SessionUpsert) SetUserAgent(v string) *SessionUpsert {
 	u.Set(session.FieldUserAgent, v)
 	return u
 }
@@ -384,7 +394,7 @@ func (u *SessionUpsert) UpdateUserAgent() *SessionUpsert {
 }
 
 // SetIP sets the "ip" field.
-func (u *SessionUpsert) SetIP(v schema.EncryptedField[string]) *SessionUpsert {
+func (u *SessionUpsert) SetIP(v string) *SessionUpsert {
 	u.Set(session.FieldIP, v)
 	return u
 }
@@ -524,7 +534,7 @@ func (u *SessionUpsertOne) UpdateExpiresAt() *SessionUpsertOne {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsertOne) SetUserAgent(v schema.EncryptedField[string]) *SessionUpsertOne {
+func (u *SessionUpsertOne) SetUserAgent(v string) *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -538,7 +548,7 @@ func (u *SessionUpsertOne) UpdateUserAgent() *SessionUpsertOne {
 }
 
 // SetIP sets the "ip" field.
-func (u *SessionUpsertOne) SetIP(v schema.EncryptedField[string]) *SessionUpsertOne {
+func (u *SessionUpsertOne) SetIP(v string) *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetIP(v)
 	})
@@ -647,7 +657,10 @@ func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -851,7 +864,7 @@ func (u *SessionUpsertBulk) UpdateExpiresAt() *SessionUpsertBulk {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *SessionUpsertBulk) SetUserAgent(v schema.EncryptedField[string]) *SessionUpsertBulk {
+func (u *SessionUpsertBulk) SetUserAgent(v string) *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -865,7 +878,7 @@ func (u *SessionUpsertBulk) UpdateUserAgent() *SessionUpsertBulk {
 }
 
 // SetIP sets the "ip" field.
-func (u *SessionUpsertBulk) SetIP(v schema.EncryptedField[string]) *SessionUpsertBulk {
+func (u *SessionUpsertBulk) SetIP(v string) *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.SetIP(v)
 	})

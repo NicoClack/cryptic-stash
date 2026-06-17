@@ -8,7 +8,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
+	"entgo.io/ent/schema/field"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -82,10 +83,14 @@ var (
 	EmailValidator func(string) error
 	// HashedCodeValidator is a validator for the "hashedCode" field. It is called by the builders before save.
 	HashedCodeValidator func([]byte) error
-	// DefaultWebAuthnSession holds the default value on creation for the "webAuthnSession" field.
-	DefaultWebAuthnSession func() schema.OptionalEncryptedSessionData
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all Invite fields.
+	ValueScanner struct {
+		WebAuthnSession field.TypeValueScanner[webauthn.SessionData]
+		UserAgent       field.TypeValueScanner[string]
+		IP              field.TypeValueScanner[string]
+	}
 )
 
 // ExpiredReason defines the type for the "expiredReason" enum field.

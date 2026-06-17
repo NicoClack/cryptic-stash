@@ -3,13 +3,13 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
@@ -31,7 +31,7 @@ type UserMessenger struct {
 	// Enabled holds the value of the "enabled" field.
 	Enabled bool `json:"enabled,omitempty"`
 	// Options holds the value of the "options" field.
-	Options schema.EncryptedRawJSON `json:"options,omitempty"`
+	Options json.RawMessage `json:"options,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -76,8 +76,6 @@ func (*UserMessenger) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usermessenger.FieldOptions:
-			values[i] = new(schema.EncryptedRawJSON)
 		case usermessenger.FieldEnabled:
 			values[i] = new(sql.NullBool)
 		case usermessenger.FieldVersion:
@@ -88,6 +86,8 @@ func (*UserMessenger) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case usermessenger.FieldID, usermessenger.FieldUserID:
 			values[i] = new(uuid.UUID)
+		case usermessenger.FieldOptions:
+			values[i] = usermessenger.ValueScanner.Options.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -140,10 +140,10 @@ func (_m *UserMessenger) assignValues(columns []string, values []any) error {
 				_m.Enabled = value.Bool
 			}
 		case usermessenger.FieldOptions:
-			if value, ok := values[i].(*schema.EncryptedRawJSON); !ok {
-				return fmt.Errorf("unexpected type %T for field options", values[i])
-			} else if value != nil {
-				_m.Options = *value
+			if value, err := usermessenger.ValueScanner.Options.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.Options = value
 			}
 		case usermessenger.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {

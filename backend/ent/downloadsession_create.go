@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 )
@@ -58,13 +57,13 @@ func (_c *DownloadSessionCreate) SetValidUntil(v time.Time) *DownloadSessionCrea
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_c *DownloadSessionCreate) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionCreate {
+func (_c *DownloadSessionCreate) SetUserAgent(v string) *DownloadSessionCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetIP sets the "ip" field.
-func (_c *DownloadSessionCreate) SetIP(v schema.EncryptedField[string]) *DownloadSessionCreate {
+func (_c *DownloadSessionCreate) SetIP(v string) *DownloadSessionCreate {
 	_c.mutation.SetIP(v)
 	return _c
 }
@@ -191,7 +190,10 @@ func (_c *DownloadSessionCreate) sqlSave(ctx context.Context) (*DownloadSession,
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -210,7 +212,7 @@ func (_c *DownloadSessionCreate) sqlSave(ctx context.Context) (*DownloadSession,
 	return _node, nil
 }
 
-func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.CreateSpec) {
+func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &DownloadSession{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(downloadsession.Table, sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID))
@@ -241,11 +243,19 @@ func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.Creat
 		_node.ValidUntil = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
-		_spec.SetField(downloadsession.FieldUserAgent, field.TypeBytes, value)
+		vv, err := downloadsession.ValueScanner.UserAgent.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(downloadsession.FieldUserAgent, field.TypeBytes, vv)
 		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(downloadsession.FieldIP, field.TypeBytes, value)
+		vv, err := downloadsession.ValueScanner.IP.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(downloadsession.FieldIP, field.TypeBytes, vv)
 		_node.IP = value
 	}
 	if nodes := _c.mutation.StashIDs(); len(nodes) > 0 {
@@ -281,7 +291,7 @@ func (_c *DownloadSessionCreate) createSpec() (*DownloadSession, *sqlgraph.Creat
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -394,7 +404,7 @@ func (u *DownloadSessionUpsert) UpdateValidUntil() *DownloadSessionUpsert {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *DownloadSessionUpsert) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionUpsert {
+func (u *DownloadSessionUpsert) SetUserAgent(v string) *DownloadSessionUpsert {
 	u.Set(downloadsession.FieldUserAgent, v)
 	return u
 }
@@ -406,7 +416,7 @@ func (u *DownloadSessionUpsert) UpdateUserAgent() *DownloadSessionUpsert {
 }
 
 // SetIP sets the "ip" field.
-func (u *DownloadSessionUpsert) SetIP(v schema.EncryptedField[string]) *DownloadSessionUpsert {
+func (u *DownloadSessionUpsert) SetIP(v string) *DownloadSessionUpsert {
 	u.Set(downloadsession.FieldIP, v)
 	return u
 }
@@ -548,7 +558,7 @@ func (u *DownloadSessionUpsertOne) UpdateValidUntil() *DownloadSessionUpsertOne 
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *DownloadSessionUpsertOne) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionUpsertOne {
+func (u *DownloadSessionUpsertOne) SetUserAgent(v string) *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -562,7 +572,7 @@ func (u *DownloadSessionUpsertOne) UpdateUserAgent() *DownloadSessionUpsertOne {
 }
 
 // SetIP sets the "ip" field.
-func (u *DownloadSessionUpsertOne) SetIP(v schema.EncryptedField[string]) *DownloadSessionUpsertOne {
+func (u *DownloadSessionUpsertOne) SetIP(v string) *DownloadSessionUpsertOne {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetIP(v)
 	})
@@ -657,7 +667,10 @@ func (_c *DownloadSessionCreateBulk) Save(ctx context.Context) ([]*DownloadSessi
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -875,7 +888,7 @@ func (u *DownloadSessionUpsertBulk) UpdateValidUntil() *DownloadSessionUpsertBul
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (u *DownloadSessionUpsertBulk) SetUserAgent(v schema.EncryptedField[string]) *DownloadSessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) SetUserAgent(v string) *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetUserAgent(v)
 	})
@@ -889,7 +902,7 @@ func (u *DownloadSessionUpsertBulk) UpdateUserAgent() *DownloadSessionUpsertBulk
 }
 
 // SetIP sets the "ip" field.
-func (u *DownloadSessionUpsertBulk) SetIP(v schema.EncryptedField[string]) *DownloadSessionUpsertBulk {
+func (u *DownloadSessionUpsertBulk) SetIP(v string) *DownloadSessionUpsertBulk {
 	return u.Update(func(s *DownloadSessionUpsert) {
 		s.SetIP(v)
 	})

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/google/uuid"
@@ -102,16 +102,8 @@ func (_u *UserMessengerUpdate) SetNillableEnabled(v *bool) *UserMessengerUpdate 
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdate) SetOptions(v schema.EncryptedRawJSON) *UserMessengerUpdate {
+func (_u *UserMessengerUpdate) SetOptions(v json.RawMessage) *UserMessengerUpdate {
 	_u.mutation.SetOptions(v)
-	return _u
-}
-
-// SetNillableOptions sets the "options" field if the given value is not nil.
-func (_u *UserMessengerUpdate) SetNillableOptions(v *schema.EncryptedRawJSON) *UserMessengerUpdate {
-	if v != nil {
-		_u.SetOptions(*v)
-	}
 	return _u
 }
 
@@ -261,7 +253,11 @@ func (_u *UserMessengerUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, value)
+		vv, err := usermessenger.ValueScanner.Options.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -427,16 +423,8 @@ func (_u *UserMessengerUpdateOne) SetNillableEnabled(v *bool) *UserMessengerUpda
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdateOne) SetOptions(v schema.EncryptedRawJSON) *UserMessengerUpdateOne {
+func (_u *UserMessengerUpdateOne) SetOptions(v json.RawMessage) *UserMessengerUpdateOne {
 	_u.mutation.SetOptions(v)
-	return _u
-}
-
-// SetNillableOptions sets the "options" field if the given value is not nil.
-func (_u *UserMessengerUpdateOne) SetNillableOptions(v *schema.EncryptedRawJSON) *UserMessengerUpdateOne {
-	if v != nil {
-		_u.SetOptions(*v)
-	}
 	return _u
 }
 
@@ -616,7 +604,11 @@ func (_u *UserMessengerUpdateOne) sqlSave(ctx context.Context) (_node *UserMesse
 		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, value)
+		vv, err := usermessenger.ValueScanner.Options.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

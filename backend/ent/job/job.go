@@ -3,10 +3,12 @@
 package job
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -89,6 +91,10 @@ var (
 	DefaultLoggedStallWarning bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all Job fields.
+	ValueScanner struct {
+		Body field.TypeValueScanner[json.RawMessage]
+	}
 )
 
 // Status defines the type for the "status" enum field.

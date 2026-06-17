@@ -8,7 +8,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -80,11 +79,6 @@ func AllowSuperUser(v bool) predicate.Passkey {
 // CredentialID applies equality check predicate on the "credentialID" field. It's identical to CredentialIDEQ.
 func CredentialID(v []byte) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldCredentialID, v))
-}
-
-// Credential applies equality check predicate on the "credential" field. It's identical to CredentialEQ.
-func Credential(v schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldCredential, v))
 }
 
 // IsSecondGroup applies equality check predicate on the "isSecondGroup" field. It's identical to IsSecondGroupEQ.
@@ -290,46 +284,6 @@ func CredentialIDLT(v []byte) predicate.Passkey {
 // CredentialIDLTE applies the LTE predicate on the "credentialID" field.
 func CredentialIDLTE(v []byte) predicate.Passkey {
 	return predicate.Passkey(sql.FieldLTE(FieldCredentialID, v))
-}
-
-// CredentialEQ applies the EQ predicate on the "credential" field.
-func CredentialEQ(v schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldCredential, v))
-}
-
-// CredentialNEQ applies the NEQ predicate on the "credential" field.
-func CredentialNEQ(v schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNEQ(FieldCredential, v))
-}
-
-// CredentialIn applies the In predicate on the "credential" field.
-func CredentialIn(vs ...schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldIn(FieldCredential, vs...))
-}
-
-// CredentialNotIn applies the NotIn predicate on the "credential" field.
-func CredentialNotIn(vs ...schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNotIn(FieldCredential, vs...))
-}
-
-// CredentialGT applies the GT predicate on the "credential" field.
-func CredentialGT(v schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGT(FieldCredential, v))
-}
-
-// CredentialGTE applies the GTE predicate on the "credential" field.
-func CredentialGTE(v schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldGTE(FieldCredential, v))
-}
-
-// CredentialLT applies the LT predicate on the "credential" field.
-func CredentialLT(v schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLT(FieldCredential, v))
-}
-
-// CredentialLTE applies the LTE predicate on the "credential" field.
-func CredentialLTE(v schema.EncryptedCredential) predicate.Passkey {
-	return predicate.Passkey(sql.FieldLTE(FieldCredential, v))
 }
 
 // IsSecondGroupEQ applies the EQ predicate on the "isSecondGroup" field.

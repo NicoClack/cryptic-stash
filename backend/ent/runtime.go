@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
@@ -19,7 +20,10 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/twofactoraction"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/schema/field"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -50,6 +54,12 @@ func init() {
 			return nil
 		}
 	}()
+	// downloadsessionDescUserAgent is the schema descriptor for userAgent field.
+	downloadsessionDescUserAgent := downloadsessionFields[6].Descriptor()
+	downloadsession.ValueScanner.UserAgent = downloadsessionDescUserAgent.ValueScanner.(field.TypeValueScanner[string])
+	// downloadsessionDescIP is the schema descriptor for ip field.
+	downloadsessionDescIP := downloadsessionFields[7].Descriptor()
+	downloadsession.ValueScanner.IP = downloadsessionDescIP.ValueScanner.(field.TypeValueScanner[string])
 	// downloadsessionDescID is the schema descriptor for id field.
 	downloadsessionDescID := downloadsessionFields[0].Descriptor()
 	// downloadsession.DefaultID holds the default value on creation for the id field.
@@ -98,8 +108,13 @@ func init() {
 	}()
 	// inviteDescWebAuthnSession is the schema descriptor for webAuthnSession field.
 	inviteDescWebAuthnSession := inviteFields[7].Descriptor()
-	// invite.DefaultWebAuthnSession holds the default value on creation for the webAuthnSession field.
-	invite.DefaultWebAuthnSession = inviteDescWebAuthnSession.Default.(func() schema.OptionalEncryptedSessionData)
+	invite.ValueScanner.WebAuthnSession = inviteDescWebAuthnSession.ValueScanner.(field.TypeValueScanner[webauthn.SessionData])
+	// inviteDescUserAgent is the schema descriptor for userAgent field.
+	inviteDescUserAgent := inviteFields[8].Descriptor()
+	invite.ValueScanner.UserAgent = inviteDescUserAgent.ValueScanner.(field.TypeValueScanner[string])
+	// inviteDescIP is the schema descriptor for ip field.
+	inviteDescIP := inviteFields[9].Descriptor()
+	invite.ValueScanner.IP = inviteDescIP.ValueScanner.(field.TypeValueScanner[string])
 	// inviteDescID is the schema descriptor for id field.
 	inviteDescID := inviteFields[0].Descriptor()
 	// invite.DefaultID holds the default value on creation for the id field.
@@ -128,6 +143,9 @@ func init() {
 			return nil
 		}
 	}()
+	// jobDescBody is the schema descriptor for body field.
+	jobDescBody := jobFields[10].Descriptor()
+	job.ValueScanner.Body = jobDescBody.ValueScanner.(field.TypeValueScanner[json.RawMessage])
 	// jobDescRetries is the schema descriptor for retries field.
 	jobDescRetries := jobFields[12].Descriptor()
 	// job.DefaultRetries holds the default value on creation for the retries field.
@@ -234,6 +252,9 @@ func init() {
 			return nil
 		}
 	}()
+	// passkeyDescCredential is the schema descriptor for credential field.
+	passkeyDescCredential := passkeyFields[6].Descriptor()
+	passkey.ValueScanner.Credential = passkeyDescCredential.ValueScanner.(field.TypeValueScanner[webauthn.Credential])
 	// passkeyDescIsSecondGroup is the schema descriptor for isSecondGroup field.
 	passkeyDescIsSecondGroup := passkeyFields[7].Descriptor()
 	// passkey.DefaultIsSecondGroup holds the default value on creation for the isSecondGroup field.
@@ -294,6 +315,12 @@ func init() {
 			return nil
 		}
 	}()
+	// sessionDescUserAgent is the schema descriptor for userAgent field.
+	sessionDescUserAgent := sessionFields[5].Descriptor()
+	session.ValueScanner.UserAgent = sessionDescUserAgent.ValueScanner.(field.TypeValueScanner[string])
+	// sessionDescIP is the schema descriptor for ip field.
+	sessionDescIP := sessionFields[6].Descriptor()
+	session.ValueScanner.IP = sessionDescIP.ValueScanner.(field.TypeValueScanner[string])
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionFields[0].Descriptor()
 	// session.DefaultID holds the default value on creation for the id field.
@@ -358,6 +385,9 @@ func init() {
 			return nil
 		}
 	}()
+	// stashDescEncryptionDataKey is the schema descriptor for encryptionDataKey field.
+	stashDescEncryptionDataKey := stashFields[7].Descriptor()
+	stash.ValueScanner.EncryptionDataKey = stashDescEncryptionDataKey.ValueScanner.(field.TypeValueScanner[[]byte])
 	// stashDescPasswordSalt is the schema descriptor for passwordSalt field.
 	stashDescPasswordSalt := stashFields[8].Descriptor()
 	// stash.PasswordSaltValidator is a validator for the "passwordSalt" field. It is called by the builders before save.
@@ -462,6 +492,9 @@ func init() {
 	usermessengerDescEnabled := usermessengerFields[5].Descriptor()
 	// usermessenger.DefaultEnabled holds the default value on creation for the enabled field.
 	usermessenger.DefaultEnabled = usermessengerDescEnabled.Default.(bool)
+	// usermessengerDescOptions is the schema descriptor for options field.
+	usermessengerDescOptions := usermessengerFields[6].Descriptor()
+	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[json.RawMessage])
 	// usermessengerDescID is the schema descriptor for id field.
 	usermessengerDescID := usermessengerFields[0].Descriptor()
 	// usermessenger.DefaultID holds the default value on creation for the id field.

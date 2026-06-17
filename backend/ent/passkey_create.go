@@ -13,9 +13,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -58,7 +58,7 @@ func (_c *PasskeyCreate) SetCredentialID(v []byte) *PasskeyCreate {
 }
 
 // SetCredential sets the "credential" field.
-func (_c *PasskeyCreate) SetCredential(v schema.EncryptedCredential) *PasskeyCreate {
+func (_c *PasskeyCreate) SetCredential(v webauthn.Credential) *PasskeyCreate {
 	_c.mutation.SetCredential(v)
 	return _c
 }
@@ -208,7 +208,10 @@ func (_c *PasskeyCreate) sqlSave(ctx context.Context) (*Passkey, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -227,7 +230,7 @@ func (_c *PasskeyCreate) sqlSave(ctx context.Context) (*Passkey, error) {
 	return _node, nil
 }
 
-func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec) {
+func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &Passkey{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(passkey.Table, sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID))
@@ -258,7 +261,11 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec) {
 		_node.CredentialID = value
 	}
 	if value, ok := _c.mutation.Credential(); ok {
-		_spec.SetField(passkey.FieldCredential, field.TypeBytes, value)
+		vv, err := passkey.ValueScanner.Credential.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(passkey.FieldCredential, field.TypeBytes, vv)
 		_node.Credential = value
 	}
 	if value, ok := _c.mutation.IsSecondGroup(); ok {
@@ -298,7 +305,7 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -411,7 +418,7 @@ func (u *PasskeyUpsert) UpdateCredentialID() *PasskeyUpsert {
 }
 
 // SetCredential sets the "credential" field.
-func (u *PasskeyUpsert) SetCredential(v schema.EncryptedCredential) *PasskeyUpsert {
+func (u *PasskeyUpsert) SetCredential(v webauthn.Credential) *PasskeyUpsert {
 	u.Set(passkey.FieldCredential, v)
 	return u
 }
@@ -565,7 +572,7 @@ func (u *PasskeyUpsertOne) UpdateCredentialID() *PasskeyUpsertOne {
 }
 
 // SetCredential sets the "credential" field.
-func (u *PasskeyUpsertOne) SetCredential(v schema.EncryptedCredential) *PasskeyUpsertOne {
+func (u *PasskeyUpsertOne) SetCredential(v webauthn.Credential) *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.SetCredential(v)
 	})
@@ -674,7 +681,10 @@ func (_c *PasskeyCreateBulk) Save(ctx context.Context) ([]*Passkey, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -892,7 +902,7 @@ func (u *PasskeyUpsertBulk) UpdateCredentialID() *PasskeyUpsertBulk {
 }
 
 // SetCredential sets the "credential" field.
-func (u *PasskeyUpsertBulk) SetCredential(v schema.EncryptedCredential) *PasskeyUpsertBulk {
+func (u *PasskeyUpsertBulk) SetCredential(v webauthn.Credential) *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.SetCredential(v)
 	})

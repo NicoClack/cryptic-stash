@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 )
 
 // JobUpdate is the builder for updating Job entities.
@@ -175,16 +175,8 @@ func (_u *JobUpdate) AddWeight(v int) *JobUpdate {
 }
 
 // SetBody sets the "body" field.
-func (_u *JobUpdate) SetBody(v schema.EncryptedRawJSON) *JobUpdate {
+func (_u *JobUpdate) SetBody(v json.RawMessage) *JobUpdate {
 	_u.mutation.SetBody(v)
-	return _u
-}
-
-// SetNillableBody sets the "body" field if the given value is not nil.
-func (_u *JobUpdate) SetNillableBody(v *schema.EncryptedRawJSON) *JobUpdate {
-	if v != nil {
-		_u.SetBody(*v)
-	}
 	return _u
 }
 
@@ -366,7 +358,11 @@ func (_u *JobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.AddField(job.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Body(); ok {
-		_spec.SetField(job.FieldBody, field.TypeBytes, value)
+		vv, err := job.ValueScanner.Body.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(job.FieldBody, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(job.FieldStatus, field.TypeEnum, value)
@@ -552,16 +548,8 @@ func (_u *JobUpdateOne) AddWeight(v int) *JobUpdateOne {
 }
 
 // SetBody sets the "body" field.
-func (_u *JobUpdateOne) SetBody(v schema.EncryptedRawJSON) *JobUpdateOne {
+func (_u *JobUpdateOne) SetBody(v json.RawMessage) *JobUpdateOne {
 	_u.mutation.SetBody(v)
-	return _u
-}
-
-// SetNillableBody sets the "body" field if the given value is not nil.
-func (_u *JobUpdateOne) SetNillableBody(v *schema.EncryptedRawJSON) *JobUpdateOne {
-	if v != nil {
-		_u.SetBody(*v)
-	}
 	return _u
 }
 
@@ -773,7 +761,11 @@ func (_u *JobUpdateOne) sqlSave(ctx context.Context) (_node *Job, err error) {
 		_spec.AddField(job.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Body(); ok {
-		_spec.SetField(job.FieldBody, field.TypeBytes, value)
+		vv, err := job.ValueScanner.Body.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(job.FieldBody, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(job.FieldStatus, field.TypeEnum, value)

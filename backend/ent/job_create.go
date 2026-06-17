@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -88,7 +88,7 @@ func (_c *JobCreate) SetWeight(v int) *JobCreate {
 }
 
 // SetBody sets the "body" field.
-func (_c *JobCreate) SetBody(v schema.EncryptedRawJSON) *JobCreate {
+func (_c *JobCreate) SetBody(v json.RawMessage) *JobCreate {
 	_c.mutation.SetBody(v)
 	return _c
 }
@@ -278,7 +278,10 @@ func (_c *JobCreate) sqlSave(ctx context.Context) (*Job, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -297,7 +300,7 @@ func (_c *JobCreate) sqlSave(ctx context.Context) (*Job, error) {
 	return _node, nil
 }
 
-func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
+func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &Job{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(job.Table, sqlgraph.NewFieldSpec(job.FieldID, field.TypeUUID))
@@ -344,7 +347,11 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 		_node.Weight = value
 	}
 	if value, ok := _c.mutation.Body(); ok {
-		_spec.SetField(job.FieldBody, field.TypeBytes, value)
+		vv, err := job.ValueScanner.Body.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(job.FieldBody, field.TypeBytes, vv)
 		_node.Body = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
@@ -363,7 +370,7 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 		_spec.SetField(job.FieldLoggedStallWarning, field.TypeBool, value)
 		_node.LoggedStallWarning = value
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -548,7 +555,7 @@ func (u *JobUpsert) AddWeight(v int) *JobUpsert {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsert) SetBody(v schema.EncryptedRawJSON) *JobUpsert {
+func (u *JobUpsert) SetBody(v json.RawMessage) *JobUpsert {
 	u.Set(job.FieldBody, v)
 	return u
 }
@@ -822,7 +829,7 @@ func (u *JobUpsertOne) UpdateWeight() *JobUpsertOne {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsertOne) SetBody(v schema.EncryptedRawJSON) *JobUpsertOne {
+func (u *JobUpsertOne) SetBody(v json.RawMessage) *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
 		s.SetBody(v)
 	})
@@ -973,7 +980,10 @@ func (_c *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -1275,7 +1285,7 @@ func (u *JobUpsertBulk) UpdateWeight() *JobUpsertBulk {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsertBulk) SetBody(v schema.EncryptedRawJSON) *JobUpsertBulk {
+func (u *JobUpsertBulk) SetBody(v json.RawMessage) *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
 		s.SetBody(v)
 	})

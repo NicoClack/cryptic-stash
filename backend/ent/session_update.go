@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -73,13 +72,13 @@ func (_u *SessionUpdate) SetNillableExpiresAt(v *time.Time) *SessionUpdate {
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SessionUpdate) SetUserAgent(v schema.EncryptedField[string]) *SessionUpdate {
+func (_u *SessionUpdate) SetUserAgent(v string) *SessionUpdate {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableUserAgent(v *schema.EncryptedField[string]) *SessionUpdate {
+func (_u *SessionUpdate) SetNillableUserAgent(v *string) *SessionUpdate {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -87,13 +86,13 @@ func (_u *SessionUpdate) SetNillableUserAgent(v *schema.EncryptedField[string]) 
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdate) SetIP(v schema.EncryptedField[string]) *SessionUpdate {
+func (_u *SessionUpdate) SetIP(v string) *SessionUpdate {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableIP(v *schema.EncryptedField[string]) *SessionUpdate {
+func (_u *SessionUpdate) SetNillableIP(v *string) *SessionUpdate {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -232,10 +231,18 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeBytes, value)
+		vv, err := session.ValueScanner.UserAgent.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(session.FieldUserAgent, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeBytes, value)
+		vv, err := session.ValueScanner.IP.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(session.FieldIP, field.TypeBytes, vv)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -356,13 +363,13 @@ func (_u *SessionUpdateOne) SetNillableExpiresAt(v *time.Time) *SessionUpdateOne
 }
 
 // SetUserAgent sets the "userAgent" field.
-func (_u *SessionUpdateOne) SetUserAgent(v schema.EncryptedField[string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetUserAgent(v string) *SessionUpdateOne {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "userAgent" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetNillableUserAgent(v *string) *SessionUpdateOne {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -370,13 +377,13 @@ func (_u *SessionUpdateOne) SetNillableUserAgent(v *schema.EncryptedField[string
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdateOne) SetIP(v schema.EncryptedField[string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetIP(v string) *SessionUpdateOne {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableIP(v *schema.EncryptedField[string]) *SessionUpdateOne {
+func (_u *SessionUpdateOne) SetNillableIP(v *string) *SessionUpdateOne {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -545,10 +552,18 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeBytes, value)
+		vv, err := session.ValueScanner.UserAgent.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(session.FieldUserAgent, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeBytes, value)
+		vv, err := session.ValueScanner.IP.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(session.FieldIP, field.TypeBytes, vv)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

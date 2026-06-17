@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -33,11 +33,11 @@ type Invite struct {
 	// ExpiredReason holds the value of the "expiredReason" field.
 	ExpiredReason *invite.ExpiredReason `json:"expiredReason,omitempty"`
 	// WebAuthnSession holds the value of the "webAuthnSession" field.
-	WebAuthnSession schema.OptionalEncryptedSessionData `json:"webAuthnSession,omitempty"`
+	WebAuthnSession *webauthn.SessionData `json:"webAuthnSession,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
-	UserAgent schema.EncryptedField[string] `json:"userAgent,omitempty"`
+	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
-	IP schema.EncryptedField[string] `json:"ip,omitempty"`
+	IP string `json:"ip,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -73,16 +73,18 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case invite.FieldHashedCode:
 			values[i] = new([]byte)
-		case invite.FieldUserAgent, invite.FieldIP:
-			values[i] = new(schema.EncryptedField[string])
-		case invite.FieldWebAuthnSession:
-			values[i] = new(schema.OptionalEncryptedSessionData)
 		case invite.FieldEmail, invite.FieldExpiredReason:
 			values[i] = new(sql.NullString)
 		case invite.FieldCreatedAt, invite.FieldUpdatedAt, invite.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case invite.FieldID, invite.FieldUserID:
 			values[i] = new(uuid.UUID)
+		case invite.FieldWebAuthnSession:
+			values[i] = invite.ValueScanner.WebAuthnSession.ScanValue()
+		case invite.FieldUserAgent:
+			values[i] = invite.ValueScanner.UserAgent.ScanValue()
+		case invite.FieldIP:
+			values[i] = invite.ValueScanner.IP.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -142,22 +144,22 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 				*_m.ExpiredReason = invite.ExpiredReason(value.String)
 			}
 		case invite.FieldWebAuthnSession:
-			if value, ok := values[i].(*schema.OptionalEncryptedSessionData); !ok {
-				return fmt.Errorf("unexpected type %T for field webAuthnSession", values[i])
-			} else if value != nil {
-				_m.WebAuthnSession = *value
+			if value, err := invite.ValueScanner.WebAuthnSession.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.WebAuthnSession = value
 			}
 		case invite.FieldUserAgent:
-			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
-				return fmt.Errorf("unexpected type %T for field userAgent", values[i])
-			} else if value != nil {
-				_m.UserAgent = *value
+			if value, err := invite.ValueScanner.UserAgent.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.UserAgent = value
 			}
 		case invite.FieldIP:
-			if value, ok := values[i].(*schema.EncryptedField[string]); !ok {
-				return fmt.Errorf("unexpected type %T for field ip", values[i])
-			} else if value != nil {
-				_m.IP = *value
+			if value, err := invite.ValueScanner.IP.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.IP = value
 			}
 		case invite.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -226,8 +228,10 @@ func (_m *Invite) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("webAuthnSession=")
-	builder.WriteString(fmt.Sprintf("%v", _m.WebAuthnSession))
+	if v := _m.WebAuthnSession; v != nil {
+		builder.WriteString("webAuthnSession=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("userAgent=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserAgent))

@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -31,7 +31,7 @@ type Passkey struct {
 	// CredentialID holds the value of the "credentialID" field.
 	CredentialID []byte `json:"credentialID,omitempty"`
 	// Credential holds the value of the "credential" field.
-	Credential schema.EncryptedCredential `json:"credential,omitempty"`
+	Credential webauthn.Credential `json:"credential,omitempty"`
 	// IsSecondGroup holds the value of the "isSecondGroup" field.
 	IsSecondGroup bool `json:"isSecondGroup,omitempty"`
 	// UserID holds the value of the "userID" field.
@@ -80,8 +80,6 @@ func (*Passkey) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case passkey.FieldCredentialID:
 			values[i] = new([]byte)
-		case passkey.FieldCredential:
-			values[i] = new(schema.EncryptedCredential)
 		case passkey.FieldAllowSuperUser, passkey.FieldIsSecondGroup:
 			values[i] = new(sql.NullBool)
 		case passkey.FieldName:
@@ -90,6 +88,8 @@ func (*Passkey) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case passkey.FieldID, passkey.FieldUserID:
 			values[i] = new(uuid.UUID)
+		case passkey.FieldCredential:
+			values[i] = passkey.ValueScanner.Credential.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -142,10 +142,10 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 				_m.CredentialID = *value
 			}
 		case passkey.FieldCredential:
-			if value, ok := values[i].(*schema.EncryptedCredential); !ok {
-				return fmt.Errorf("unexpected type %T for field credential", values[i])
-			} else if value != nil {
-				_m.Credential = *value
+			if value, err := passkey.ValueScanner.Credential.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.Credential = value
 			}
 		case passkey.FieldIsSecondGroup:
 			if value, ok := values[i].(*sql.NullBool); !ok {

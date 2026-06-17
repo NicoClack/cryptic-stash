@@ -8,7 +8,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -75,16 +74,6 @@ func HashedToken(v []byte) predicate.Session {
 // ExpiresAt applies equality check predicate on the "expiresAt" field. It's identical to ExpiresAtEQ.
 func ExpiresAt(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldExpiresAt, v))
-}
-
-// UserAgent applies equality check predicate on the "userAgent" field. It's identical to UserAgentEQ.
-func UserAgent(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldUserAgent, v))
-}
-
-// IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
-func IP(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldIP, v))
 }
 
 // PasskeyID applies equality check predicate on the "passkeyID" field. It's identical to PasskeyIDEQ.
@@ -255,86 +244,6 @@ func ExpiresAtLT(v time.Time) predicate.Session {
 // ExpiresAtLTE applies the LTE predicate on the "expiresAt" field.
 func ExpiresAtLTE(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldExpiresAt, v))
-}
-
-// UserAgentEQ applies the EQ predicate on the "userAgent" field.
-func UserAgentEQ(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldUserAgent, v))
-}
-
-// UserAgentNEQ applies the NEQ predicate on the "userAgent" field.
-func UserAgentNEQ(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldNEQ(FieldUserAgent, v))
-}
-
-// UserAgentIn applies the In predicate on the "userAgent" field.
-func UserAgentIn(vs ...schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldIn(FieldUserAgent, vs...))
-}
-
-// UserAgentNotIn applies the NotIn predicate on the "userAgent" field.
-func UserAgentNotIn(vs ...schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldNotIn(FieldUserAgent, vs...))
-}
-
-// UserAgentGT applies the GT predicate on the "userAgent" field.
-func UserAgentGT(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldGT(FieldUserAgent, v))
-}
-
-// UserAgentGTE applies the GTE predicate on the "userAgent" field.
-func UserAgentGTE(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldGTE(FieldUserAgent, v))
-}
-
-// UserAgentLT applies the LT predicate on the "userAgent" field.
-func UserAgentLT(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldLT(FieldUserAgent, v))
-}
-
-// UserAgentLTE applies the LTE predicate on the "userAgent" field.
-func UserAgentLTE(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldLTE(FieldUserAgent, v))
-}
-
-// IPEQ applies the EQ predicate on the "ip" field.
-func IPEQ(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldIP, v))
-}
-
-// IPNEQ applies the NEQ predicate on the "ip" field.
-func IPNEQ(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldNEQ(FieldIP, v))
-}
-
-// IPIn applies the In predicate on the "ip" field.
-func IPIn(vs ...schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldIn(FieldIP, vs...))
-}
-
-// IPNotIn applies the NotIn predicate on the "ip" field.
-func IPNotIn(vs ...schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldNotIn(FieldIP, vs...))
-}
-
-// IPGT applies the GT predicate on the "ip" field.
-func IPGT(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldGT(FieldIP, v))
-}
-
-// IPGTE applies the GTE predicate on the "ip" field.
-func IPGTE(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldGTE(FieldIP, v))
-}
-
-// IPLT applies the LT predicate on the "ip" field.
-func IPLT(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldLT(FieldIP, v))
-}
-
-// IPLTE applies the LTE predicate on the "ip" field.
-func IPLTE(v schema.EncryptedField[string]) predicate.Session {
-	return predicate.Session(sql.FieldLTE(FieldIP, v))
 }
 
 // PasskeyIDEQ applies the EQ predicate on the "passkeyID" field.

@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -72,7 +71,7 @@ func (_c *StashCreate) SetFileName(v []byte) *StashCreate {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (_c *StashCreate) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashCreate {
+func (_c *StashCreate) SetEncryptionDataKey(v []byte) *StashCreate {
 	_c.mutation.SetEncryptionDataKey(v)
 	return _c
 }
@@ -312,7 +311,10 @@ func (_c *StashCreate) sqlSave(ctx context.Context) (*Stash, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -331,7 +333,7 @@ func (_c *StashCreate) sqlSave(ctx context.Context) (*Stash, error) {
 	return _node, nil
 }
 
-func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
+func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &Stash{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(stash.Table, sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID))
@@ -366,7 +368,11 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 		_node.FileName = value
 	}
 	if value, ok := _c.mutation.EncryptionDataKey(); ok {
-		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
+		vv, err := stash.ValueScanner.EncryptionDataKey.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, vv)
 		_node.EncryptionDataKey = value
 	}
 	if value, ok := _c.mutation.PasswordSalt(); ok {
@@ -434,7 +440,7 @@ func (_c *StashCreate) createSpec() (*Stash, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -565,7 +571,7 @@ func (u *StashUpsert) UpdateFileName() *StashUpsert {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (u *StashUpsert) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpsert {
+func (u *StashUpsert) SetEncryptionDataKey(v []byte) *StashUpsert {
 	u.Set(stash.FieldEncryptionDataKey, v)
 	return u
 }
@@ -848,7 +854,7 @@ func (u *StashUpsertOne) UpdateFileName() *StashUpsertOne {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (u *StashUpsertOne) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpsertOne {
+func (u *StashUpsertOne) SetEncryptionDataKey(v []byte) *StashUpsertOne {
 	return u.Update(func(s *StashUpsert) {
 		s.SetEncryptionDataKey(v)
 	})
@@ -1083,7 +1089,10 @@ func (_c *StashCreateBulk) Save(ctx context.Context) ([]*Stash, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -1322,7 +1331,7 @@ func (u *StashUpsertBulk) UpdateFileName() *StashUpsertBulk {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (u *StashUpsertBulk) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpsertBulk {
+func (u *StashUpsertBulk) SetEncryptionDataKey(v []byte) *StashUpsertBulk {
 	return u.Update(func(s *StashUpsert) {
 		s.SetEncryptionDataKey(v)
 	})

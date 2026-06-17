@@ -13,9 +13,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 )
 
@@ -87,13 +87,13 @@ func (_u *PasskeyUpdate) SetCredentialID(v []byte) *PasskeyUpdate {
 }
 
 // SetCredential sets the "credential" field.
-func (_u *PasskeyUpdate) SetCredential(v schema.EncryptedCredential) *PasskeyUpdate {
+func (_u *PasskeyUpdate) SetCredential(v webauthn.Credential) *PasskeyUpdate {
 	_u.mutation.SetCredential(v)
 	return _u
 }
 
 // SetNillableCredential sets the "credential" field if the given value is not nil.
-func (_u *PasskeyUpdate) SetNillableCredential(v *schema.EncryptedCredential) *PasskeyUpdate {
+func (_u *PasskeyUpdate) SetNillableCredential(v *webauthn.Credential) *PasskeyUpdate {
 	if v != nil {
 		_u.SetCredential(*v)
 	}
@@ -262,7 +262,11 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.Credential(); ok {
-		_spec.SetField(passkey.FieldCredential, field.TypeBytes, value)
+		vv, err := passkey.ValueScanner.Credential.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(passkey.FieldCredential, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
@@ -416,13 +420,13 @@ func (_u *PasskeyUpdateOne) SetCredentialID(v []byte) *PasskeyUpdateOne {
 }
 
 // SetCredential sets the "credential" field.
-func (_u *PasskeyUpdateOne) SetCredential(v schema.EncryptedCredential) *PasskeyUpdateOne {
+func (_u *PasskeyUpdateOne) SetCredential(v webauthn.Credential) *PasskeyUpdateOne {
 	_u.mutation.SetCredential(v)
 	return _u
 }
 
 // SetNillableCredential sets the "credential" field if the given value is not nil.
-func (_u *PasskeyUpdateOne) SetNillableCredential(v *schema.EncryptedCredential) *PasskeyUpdateOne {
+func (_u *PasskeyUpdateOne) SetNillableCredential(v *webauthn.Credential) *PasskeyUpdateOne {
 	if v != nil {
 		_u.SetCredential(*v)
 	}
@@ -621,7 +625,11 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.Credential(); ok {
-		_spec.SetField(passkey.FieldCredential, field.TypeBytes, value)
+		vv, err := passkey.ValueScanner.Credential.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(passkey.FieldCredential, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)

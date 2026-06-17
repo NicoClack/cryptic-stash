@@ -3,11 +3,11 @@
 package job
 
 import (
+	"encoding/json"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/google/uuid"
 )
 
@@ -102,8 +102,9 @@ func Weight(v int) predicate.Job {
 }
 
 // Body applies equality check predicate on the "body" field. It's identical to BodyEQ.
-func Body(v schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldEQ(FieldBody, v))
+func Body(v json.RawMessage) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldEQ(FieldBody, vc), err)
 }
 
 // Retries applies equality check predicate on the "retries" field. It's identical to RetriesEQ.
@@ -517,43 +518,67 @@ func WeightLTE(v int) predicate.Job {
 }
 
 // BodyEQ applies the EQ predicate on the "body" field.
-func BodyEQ(v schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldEQ(FieldBody, v))
+func BodyEQ(v json.RawMessage) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldEQ(FieldBody, vc), err)
 }
 
 // BodyNEQ applies the NEQ predicate on the "body" field.
-func BodyNEQ(v schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldNEQ(FieldBody, v))
+func BodyNEQ(v json.RawMessage) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldNEQ(FieldBody, vc), err)
 }
 
 // BodyIn applies the In predicate on the "body" field.
-func BodyIn(vs ...schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldIn(FieldBody, vs...))
+func BodyIn(vs ...json.RawMessage) predicate.Job {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.Body.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.JobOrErr(sql.FieldIn(FieldBody, v...), err)
 }
 
 // BodyNotIn applies the NotIn predicate on the "body" field.
-func BodyNotIn(vs ...schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldNotIn(FieldBody, vs...))
+func BodyNotIn(vs ...json.RawMessage) predicate.Job {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.Body.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.JobOrErr(sql.FieldNotIn(FieldBody, v...), err)
 }
 
 // BodyGT applies the GT predicate on the "body" field.
-func BodyGT(v schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldGT(FieldBody, v))
+func BodyGT(v json.RawMessage) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldGT(FieldBody, vc), err)
 }
 
 // BodyGTE applies the GTE predicate on the "body" field.
-func BodyGTE(v schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldGTE(FieldBody, v))
+func BodyGTE(v json.RawMessage) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldGTE(FieldBody, vc), err)
 }
 
 // BodyLT applies the LT predicate on the "body" field.
-func BodyLT(v schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldLT(FieldBody, v))
+func BodyLT(v json.RawMessage) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldLT(FieldBody, vc), err)
 }
 
 // BodyLTE applies the LTE predicate on the "body" field.
-func BodyLTE(v schema.EncryptedRawJSON) predicate.Job {
-	return predicate.Job(sql.FieldLTE(FieldBody, v))
+func BodyLTE(v json.RawMessage) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldLTE(FieldBody, vc), err)
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

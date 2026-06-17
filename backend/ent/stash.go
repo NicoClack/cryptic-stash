@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -33,7 +32,7 @@ type Stash struct {
 	// FileName holds the value of the "fileName" field.
 	FileName []byte `json:"fileName,omitempty"`
 	// EncryptionDataKey holds the value of the "encryptionDataKey" field.
-	EncryptionDataKey schema.EncryptedField[[]uint8] `json:"encryptionDataKey,omitempty"`
+	EncryptionDataKey []byte `json:"encryptionDataKey,omitempty"`
 	// PasswordSalt holds the value of the "passwordSalt" field.
 	PasswordSalt []byte `json:"passwordSalt,omitempty"`
 	// HashTime holds the value of the "hashTime" field.
@@ -96,8 +95,6 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case stash.FieldContent, stash.FieldFileName, stash.FieldPasswordSalt:
 			values[i] = new([]byte)
-		case stash.FieldEncryptionDataKey:
-			values[i] = new(schema.EncryptedField[[]uint8])
 		case stash.FieldIsSelfLocked, stash.FieldIsAdminLocked:
 			values[i] = new(sql.NullBool)
 		case stash.FieldHashTime, stash.FieldHashMemory, stash.FieldHashThreads:
@@ -108,6 +105,8 @@ func (*Stash) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case stash.FieldID, stash.FieldUserID:
 			values[i] = new(uuid.UUID)
+		case stash.FieldEncryptionDataKey:
+			values[i] = stash.ValueScanner.EncryptionDataKey.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -166,10 +165,10 @@ func (_m *Stash) assignValues(columns []string, values []any) error {
 				_m.FileName = *value
 			}
 		case stash.FieldEncryptionDataKey:
-			if value, ok := values[i].(*schema.EncryptedField[[]uint8]); !ok {
-				return fmt.Errorf("unexpected type %T for field encryptionDataKey", values[i])
-			} else if value != nil {
-				_m.EncryptionDataKey = *value
+			if value, err := stash.ValueScanner.EncryptionDataKey.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.EncryptionDataKey = value
 			}
 		case stash.FieldPasswordSalt:
 			if value, ok := values[i].(*[]byte); !ok {

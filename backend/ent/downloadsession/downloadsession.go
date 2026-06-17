@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -83,6 +84,11 @@ var (
 	HashedAuthCodeValidator func([]byte) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all DownloadSession fields.
+	ValueScanner struct {
+		UserAgent field.TypeValueScanner[string]
+		IP        field.TypeValueScanner[string]
+	}
 )
 
 // OrderOption defines the ordering options for the DownloadSession queries.

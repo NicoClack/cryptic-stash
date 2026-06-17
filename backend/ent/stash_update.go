@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
@@ -99,16 +98,8 @@ func (_u *StashUpdate) SetFileName(v []byte) *StashUpdate {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (_u *StashUpdate) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpdate {
+func (_u *StashUpdate) SetEncryptionDataKey(v []byte) *StashUpdate {
 	_u.mutation.SetEncryptionDataKey(v)
-	return _u
-}
-
-// SetNillableEncryptionDataKey sets the "encryptionDataKey" field if the given value is not nil.
-func (_u *StashUpdate) SetNillableEncryptionDataKey(v *schema.EncryptedField[[]uint8]) *StashUpdate {
-	if v != nil {
-		_u.SetEncryptionDataKey(*v)
-	}
 	return _u
 }
 
@@ -407,7 +398,11 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(stash.FieldFileName, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.EncryptionDataKey(); ok {
-		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
+		vv, err := stash.ValueScanner.EncryptionDataKey.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.PasswordSalt(); ok {
 		_spec.SetField(stash.FieldPasswordSalt, field.TypeBytes, value)
@@ -606,16 +601,8 @@ func (_u *StashUpdateOne) SetFileName(v []byte) *StashUpdateOne {
 }
 
 // SetEncryptionDataKey sets the "encryptionDataKey" field.
-func (_u *StashUpdateOne) SetEncryptionDataKey(v schema.EncryptedField[[]uint8]) *StashUpdateOne {
+func (_u *StashUpdateOne) SetEncryptionDataKey(v []byte) *StashUpdateOne {
 	_u.mutation.SetEncryptionDataKey(v)
-	return _u
-}
-
-// SetNillableEncryptionDataKey sets the "encryptionDataKey" field if the given value is not nil.
-func (_u *StashUpdateOne) SetNillableEncryptionDataKey(v *schema.EncryptedField[[]uint8]) *StashUpdateOne {
-	if v != nil {
-		_u.SetEncryptionDataKey(*v)
-	}
 	return _u
 }
 
@@ -944,7 +931,11 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 		_spec.SetField(stash.FieldFileName, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.EncryptionDataKey(); ok {
-		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
+		vv, err := stash.ValueScanner.EncryptionDataKey.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.PasswordSalt(); ok {
 		_spec.SetField(stash.FieldPasswordSalt, field.TypeBytes, value)

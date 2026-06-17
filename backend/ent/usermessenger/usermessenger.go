@@ -3,10 +3,12 @@
 package usermessenger
 
 import (
+	"encoding/json"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -82,6 +84,10 @@ var (
 	DefaultEnabled bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all UserMessenger fields.
+	ValueScanner struct {
+		Options field.TypeValueScanner[json.RawMessage]
+	}
 )
 
 // OrderOption defines the ordering options for the UserMessenger queries.

@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -117,6 +118,10 @@ var (
 	DefaultIsAdminLocked bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all Stash fields.
+	ValueScanner struct {
+		EncryptionDataKey field.TypeValueScanner[[]byte]
+	}
 )
 
 // OrderOption defines the ordering options for the Stash queries.
