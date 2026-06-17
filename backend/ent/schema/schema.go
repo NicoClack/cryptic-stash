@@ -95,6 +95,8 @@ func Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, error) {
 
 type EncryptedField[T any] struct {
 	KeyName string
+	// These run before encryption
+	Validators []EncryptedValidator[T]
 }
 
 func (encryptedField EncryptedField[T]) Value(val T) (driver.Value, error) {
@@ -108,6 +110,13 @@ func (encryptedField EncryptedField[T]) Value(val T) (driver.Value, error) {
 			// There isn't much point in encrypting nils because they're easy to guess based on their length.
 			// Plus they're easy to modify by just reusing an encrypted nil with the same key name.
 			return nil, nil
+		}
+	}
+
+	for _, validator := range encryptedField.Validators {
+		stdErr := validator(val)
+		if stdErr != nil {
+			return nil, fmt.Errorf("EncryptedField.Value: validation failed: %w", stdErr)
 		}
 	}
 
@@ -159,9 +168,6 @@ func (bScanner *binaryScanner) Scan(src any) error {
 }
 
 func (bScanner *binaryScanner) Value() (driver.Value, error) {
-	if bScanner.val == nil {
-		return nil, nil
-	}
 	return bScanner.val, nil
 }
 
@@ -186,6 +192,10 @@ func (encryptedField EncryptedField[T]) FromValue(rawValue driver.Value) (T, err
 	default:
 		var zero T
 		return zero, fmt.Errorf("EncryptedField.FromValue: unexpected type %T", rawValue)
+	}
+	if encryptedBytes == nil {
+		var zero T
+		return zero, nil
 	}
 
 	encryptionKey, ok := encryptionKeys[encryptedField.KeyName]

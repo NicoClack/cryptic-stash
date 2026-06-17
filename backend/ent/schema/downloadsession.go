@@ -31,10 +31,23 @@ func (DownloadSession) Fields() []ent.Field {
 		field.Time("validUntil"),
 		field.Bytes("userAgent").
 			GoType("").
-			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			ValueScanner(EncryptedField[string]{
+				KeyName: "security_pii_logging_1",
+				Validators: []EncryptedValidator[string]{
+					MinLen[string](1),
+					MaxLen[string](512),
+				},
+			}),
 		field.Bytes("ip").
 			GoType("").
-			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			ValueScanner(EncryptedField[string]{
+				KeyName: "security_pii_logging_1",
+				Validators: []EncryptedValidator[string]{
+					MinLen[string](1),
+					MaxLen[string](45),
+				},
+			}),
+
 		field.UUID("stashID", uuid.Nil),
 	}
 }

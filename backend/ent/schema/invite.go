@@ -36,12 +36,29 @@ func (Invite) Fields() []ent.Field {
 			GoType(&webauthn.SessionData{}).
 			ValueScanner(EncryptedField[*webauthn.SessionData]{KeyName: "auth_1"}).
 			Optional().Nillable(),
+
+		// Details about the client that used the invite, rather than the creator
 		field.Bytes("userAgent").
-			GoType("").
-			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			GoType(new(string)).
+			ValueScanner(EncryptedField[*string]{
+				KeyName: "security_pii_logging_1",
+				Validators: []EncryptedValidator[*string]{
+					MinLen[*string](1),
+					MaxLen[*string](512),
+				},
+			}).
+			Optional().Nillable(),
 		field.Bytes("ip").
-			GoType("").
-			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			GoType(new(string)).
+			ValueScanner(EncryptedField[*string]{
+				KeyName: "security_pii_logging_1",
+				Validators: []EncryptedValidator[*string]{
+					MinLen[*string](1),
+					MaxLen[*string](45),
+				},
+			}).
+			Optional().Nillable(),
+
 		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any
 	}
 }

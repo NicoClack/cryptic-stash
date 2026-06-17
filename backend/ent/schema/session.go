@@ -26,10 +26,22 @@ func (Session) Fields() []ent.Field {
 		field.Time("expiresAt"),
 		field.Bytes("userAgent").
 			GoType("").
-			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			ValueScanner(EncryptedField[string]{
+				KeyName: "security_pii_logging_1",
+				Validators: []EncryptedValidator[string]{
+					MinLen[string](1),
+					MaxLen[string](512),
+				},
+			}),
 		field.Bytes("ip").
 			GoType("").
-			ValueScanner(EncryptedField[string]{KeyName: "security_pii_logging_1"}),
+			ValueScanner(EncryptedField[string]{
+				KeyName: "security_pii_logging_1",
+				Validators: []EncryptedValidator[string]{
+					MinLen[string](1),
+					MaxLen[string](45),
+				},
+			}),
 
 		field.UUID("passkeyID", uuid.Nil), // For now, all sessions are created through a passkey
 		field.UUID("userID", uuid.Nil),
