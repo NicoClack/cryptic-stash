@@ -1,11 +1,16 @@
 # TODO
 
+- Review key names, might need a new one?
+- Add tests for the different encrypted fields, are all the edge cases handled correctly? What's actually getting encrypted?
+- Delete expired invites that are unused
 - Rename adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Remove service level encryption for stashes
 - Replace non-standard Authorization headers with Bearer scheme
 - Create account system with passkeys
-- Standardise passkey/credential naming
+- Remove old endpoints
+- Rate limit auth endpoints
+- - No need to rate limit per endpoint, WebAuthn is unguessable so the main concern is DoS due to SQLite locks
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
 - Remove admin auth code logic
 - Add unique userID + publicName index to stashes
@@ -14,6 +19,10 @@
 - Prevent disabling main email messenger
 - Replace env.STASH_ENCRYPTION_KEY with key derivation algorithm
 - Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
+- Allow general API and static asset rate limits to be set independently
+- - Maybe 180 requests per 2 minutes for API? 1.5 req/s
+- - Maybe 400 requests per 2 minutes for static assets
+- - If using a WAF, it's probably better to let it handle these, to minimise in-memory locks
 - Rate limit hashing
 - - Limit number of concurrent hash requests to avoid using too much RAM
 - - Block IPs who get passwords wrong too often. Use exponential backoff

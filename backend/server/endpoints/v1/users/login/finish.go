@@ -3,10 +3,10 @@ package login
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
+	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
@@ -28,6 +28,16 @@ type LoginFinishResponse struct {
 }
 
 func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
+	// Note: username enumeration shouldn't be possible in the future for this endpoint.
+	// It's might be possible to detect if a credential ID or a user ID is valid, but that's not useful information
+	// because I don't ever plan to add an endpoint that returns information about another user.
+	// An endpoint that confirms if a credential ID is valid can be used to confirm if a user is registered on this site,
+	// but they're likely one step away from being pwned at that point e.g:
+	// 1. Physical access (but no PIN access) to a security key that leaks metadata
+	//    -> Only needs PIN to access account, decent chance the key has other vulnerabilities.
+	//       Mitigated if passkey is revoked from the user's account.
+	// 2. Malware gets credential IDs from a password manager that doesn't secure metadata
+	//    -> Probably also has browsing history, can session steal.
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		body := LoginFinishPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
@@ -65,9 +75,9 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 			},
 		)
 		if stdErr != nil {
-			var protoErr *protocol.Error
-			if errors.As(stdErr, &protoErr) && protoErr.Type == protocol.ErrBadRequest.Type {
-				return servercommon.NewError(stdErr).SetStatus(http.StatusBadRequest).
+			if common.IsErrorType[*protocol.Error](stdErr) {
+				return servercommon.NewError(stdErr).
+					SetStatus(http.StatusBadRequest).
 					AddDetail(servercommon.ErrorDetail{
 						Message: "invalid credential",
 						Code:    "INVALID_CREDENTIAL",

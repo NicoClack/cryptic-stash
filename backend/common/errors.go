@@ -415,6 +415,13 @@ func WrapErrorWithCategories(stdErr error, categories ...string) WrappedError {
 			errType:    reflect.TypeOf(stdErr),
 			categories: []string{},
 		}
+		if IsErrorType[WrappedError](stdErr) {
+			wrappedErr.AddDebugValuesMut(DebugValue{
+				Name: "double wrapped error",
+				Message: "This error contained a nested common.WrappedError, " +
+					"which was wrapped again to preserve details from the outer error",
+			})
+		}
 	}
 
 	wrappedErr.AddCategoriesMut(categories...)

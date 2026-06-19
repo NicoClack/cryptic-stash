@@ -101,7 +101,6 @@ func createUserWithCredential(
 	return userOb, credential, vAuthenticator
 }
 
-// TODO: create user enumeration integration and unit tests
 func TestLoginFlow(t *testing.T) {
 	t.Parallel()
 
@@ -244,7 +243,7 @@ func TestLoginFlow_SyncablePasskey(t *testing.T) {
 	require.Equal(t, userOb.ID, finishResp.UserID)
 }
 
-func TestLoginFlow_InvalidCredential(t *testing.T) {
+func TestLoginFlow_ClientServerMismatches(t *testing.T) {
 	t.Parallel()
 
 	runTest := func(t *testing.T, serverAssociatesWithUser bool, authenticatorAssociatesWithUser bool) {
@@ -316,6 +315,63 @@ func TestLoginFlow_InvalidCredential(t *testing.T) {
 	})
 }
 
+func TestLoginFlow_RejectsTamperedSignature(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/users/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
+
+	var startResp login.LoginStartResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startResp.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	// Tamper with the signature
+	require.NotEmpty(t, parsedAssertion.AssertionResponse.Signature)
+	parsedAssertion.AssertionResponse.Signature[0] ^= 0xFF
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/users/login/finish/",
+		login.LoginFinishPayload{
+			CredentialAssertionResponse: parsedAssertion,
+			WebAuthnSessionID:           startResp.WebAuthnSessionID,
+		},
+	)
+	testcommon.AssertJSONResponse(
+		t, finishRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "invalid credential",
+					Code:    "INVALID_CREDENTIAL",
+				},
+			},
+		},
+	)
+}
+
 func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 	t.Parallel()
 
@@ -376,3 +432,6 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 		},
 	)
 }
+
+// No tests for username enumeration because it's impossible with this setup,
+// see the comments in the start and finish endpoint implementations

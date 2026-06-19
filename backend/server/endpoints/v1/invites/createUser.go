@@ -2,6 +2,7 @@ package invites
 
 import (
 	"context"
+	"encoding/base64"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
@@ -25,6 +26,8 @@ type CreateUserPayload struct {
 }
 type CreateUserResponse struct {
 	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
+	UserID uuid.UUID                  `                   json:"userId"`
+	Token  string                     `                   json:"token"`
 }
 
 func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -72,7 +75,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					)
 				}
 
-				_, wrappedErr := app.Auth.FinishRegisterPasskey(
+				passkeyOb, wrappedErr := app.Auth.FinishRegisterPasskey(
 					inviteOb.WebAuthnSession,
 					inviteOb.Email,
 					parsedCredential,
@@ -94,6 +97,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 						_, stdErr = tx.Invite.UpdateOneID(inviteOb.ID).
 							SetUser(createdUserOb).
 							SetWebAuthnSession(nil).
+							// ^ We don't need this anymore and the user edge prevents the invite being used twice
 							SetUserAgent(new(ginCtx.Request.UserAgent())).
 							SetIP(new(ginCtx.ClientIP())).
 							Save(ctx)
@@ -119,8 +123,22 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					)
 				}
 
+				_, token, wrappedErr := app.Auth.CreateSession(
+					passkeyOb.UserID,
+					passkeyOb.ID,
+					ginCtx.Request.UserAgent(),
+					ginCtx.ClientIP(),
+					tx,
+					ctx,
+				)
+				if wrappedErr != nil {
+					return nil, wrappedErr
+				}
+
 				return &CreateUserResponse{
 					Errors: []servercommon.ErrorDetail{},
+					UserID: passkeyOb.UserID,
+					Token:  base64.RawURLEncoding.EncodeToString(token),
 				}, nil
 			},
 		)

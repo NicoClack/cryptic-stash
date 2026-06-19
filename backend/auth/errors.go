@@ -11,6 +11,8 @@ const (
 	ErrTypeValidateSession       = "validate session"
 
 	ErrTypeGetUserCallback = "get user callback"
+	// FinishLogin has to read the user in a callback provided to go-webauthn
+	ErrTypeInternalGetUser = "internal get user"
 )
 
 var ErrInvalidWebAuthnSessionID = common.NewErrorWithCategories(
@@ -42,5 +44,5 @@ var ErrWrapperCreateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrType
 var ErrWrapperValidateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeValidateSession)
 
 var ErrWrapperGetUserCallback = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeGetUserCallback)
-
+var ErrWrapperInternalGetUser = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeInternalGetUser)
 var ErrWrapperDatabase = common.NewErrorWrapper(common.ErrTypeAuth).SetChild(common.ErrWrapperDatabase)

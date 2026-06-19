@@ -12,6 +12,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/descope/virtualwebauthn"
+	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/stretchr/testify/require"
 )
@@ -42,8 +43,8 @@ func TestCreateUser_NoWebAuthnSession(t *testing.T) {
 	testcommon.AssertJSONResponse(
 		t, respRecorder,
 		http.StatusBadRequest,
-		&invites.CreateUserResponse{
-			Errors: []servercommon.ErrorDetail{
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
 				{
 					Message: "invalid WebAuthn credential",
 					Code:    "INVALID_CREDENTIAL",
@@ -93,8 +94,8 @@ func TestCreateUser_UsernameTaken(t *testing.T) {
 	testcommon.AssertJSONResponse(
 		t, respRecorder,
 		http.StatusUnauthorized,
-		&invites.CreateUserResponse{
-			Errors: []servercommon.ErrorDetail{},
+		gin.H{
+			"errors": []servercommon.ErrorDetail{},
 		},
 	)
 }

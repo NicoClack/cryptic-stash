@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
@@ -84,6 +85,15 @@ func FinishLogin(
 		parsedResponse,
 	)
 	if stdErr != nil {
+		// Avoid wrapping *protocol.Error -> common.WrappedError in another common.WrappedError.
+		// Instead we strip the outer layer because ErrWrapperInternalGetUser represents it well enough
+		innerErr := errors.Unwrap(stdErr)
+		if common.IsErrorType[common.WrappedError](innerErr) {
+			return nil, nil, ErrWrapperFinishLogin.Wrap(
+				ErrWrapperInternalGetUser.Wrap(innerErr),
+			)
+		}
+		// Some other error, probably a client one
 		return nil, nil, ErrWrapperFinishLogin.Wrap(stdErr)
 	}
 
