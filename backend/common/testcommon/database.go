@@ -20,6 +20,7 @@ import (
 )
 
 type TestDatabase struct {
+	db           *sql.DB
 	client       *ent.Client
 	logger       common.Logger
 	startTxHooks []func(tx *ent.Tx) error
@@ -68,6 +69,7 @@ func CreateDB(t *testing.T) *TestDatabase {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	return &TestDatabase{
+		db:           db,
 		client:       client,
 		logger:       common.GetLogger(context.Background(), nil),
 		startTxHooks: []func(tx *ent.Tx) error{},
@@ -76,6 +78,9 @@ func CreateDB(t *testing.T) *TestDatabase {
 
 func (db *TestDatabase) Start() {
 	// TODO: move initialisation logic into here like the real DB service?
+}
+func (db *TestDatabase) DB() *sql.DB {
+	return db.db
 }
 func (db *TestDatabase) Client() *ent.Client {
 	return db.client

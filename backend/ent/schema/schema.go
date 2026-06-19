@@ -127,12 +127,16 @@ func (encryptedField EncryptedField[T]) Value(val T) (driver.Value, error) {
 
 	var plaintextBytes []byte
 
-	// Special handling for string and []byte to avoid JSON overhead
-	switch any(val).(type) {
+	// Special handling for string and []byte (and pointers to them) to avoid JSON overhead
+	switch v := any(val).(type) {
 	case string:
-		plaintextBytes = []byte(any(val).(string))
+		plaintextBytes = []byte(v)
+	case *string:
+		plaintextBytes = []byte(*v)
 	case []byte:
-		plaintextBytes = any(val).([]byte)
+		plaintextBytes = v
+	case *[]byte:
+		plaintextBytes = *v
 	default:
 		var stdErr error
 		plaintextBytes, stdErr = json.Marshal(val)
@@ -209,13 +213,23 @@ func (encryptedField EncryptedField[T]) FromValue(rawValue driver.Value) (T, err
 		return zero, fmt.Errorf("EncryptedField.FromValue: failed to decrypt data: %w", stdErr)
 	}
 
-	// Special handling for string and []byte to avoid JSON overhead
+	// Special handling for string and []byte (including pointers) to avoid JSON overhead
 	var val T
-	switch any(&val).(type) {
+	switch v := any(&val).(type) {
 	case *string:
-		return any(string(plaintextBytes)).(T), nil
+		*v = string(plaintextBytes)
+		return val, nil
+	case **string:
+		s := string(plaintextBytes)
+		*v = &s
+		return val, nil
 	case *[]byte:
-		return any(plaintextBytes).(T), nil
+		*v = plaintextBytes
+		return val, nil
+	case **[]byte:
+		b := plaintextBytes
+		*v = &b
+		return val, nil
 	default:
 		if stdErr := json.Unmarshal(plaintextBytes, &val); stdErr != nil {
 			var zero T
