@@ -411,4 +411,6 @@ type AdminAuthEnvVars struct {
 	AdminTotpSecret string `json:"ADMIN_TOTP_SECRET"`
 	//nolint:tagliatelle
 	StashEncryptionKey string `json:"STASH_ENCRYPTION_KEY"`
+	//nolint:tagliatelle
+	BaseEncryptionKey string `json:"BASE_ENCRYPTION_KEY"`
 }

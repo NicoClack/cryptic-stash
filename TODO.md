@@ -5,6 +5,8 @@ Pending schema changes:
 - Rename stash encryptionDataKey?
 - Add superUserMode bool to sessions
 
+- Is it safe to make env.BASE_ENCRYPTION_KEY optional until setup is completed?
+- Store the returned session during signup
 - Create an invite service
 - - Delete expired invites that are unused, should be called by the cleanup task
 - Passkey support:
@@ -12,7 +14,6 @@ Pending schema changes:
 - - Enabling/disabling superuser access for a passkey
 - - Prompt for passkey to enter sudo mode when required
 - - 2 group authentication, allow enabling and disabling, and moving passkeys between groups
-- Generate BASE_ENCRYPTION_KEY during setup
 - Replace adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Remove service level encryption for stashes
