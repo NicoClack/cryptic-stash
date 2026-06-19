@@ -14,6 +14,7 @@
 	import { Label } from "$lib/components/ui/label";
 	import { Textarea } from "$lib/components/ui/textarea";
 	import { formatTime, normalizeEmail } from "$lib/utils";
+	import { SvelteURL } from "svelte/reactivity";
 
 	interface Invite {
 		id: string;
@@ -67,12 +68,10 @@
 	async function copyLatestInviteLink() {
 		if (!latestInvite) return;
 
-		const inviteUrl = new URL(
-			`/invites/${latestInvite.id}/?code=${latestInvite.code}`,
-			document.baseURI,
-		).toString();
+		const inviteUrl = new SvelteURL(`/invites/${latestInvite.id}/`, document.baseURI);
+		inviteUrl.hash = latestInvite.code;
 		try {
-			await navigator.clipboard.writeText(inviteUrl);
+			await navigator.clipboard.writeText(inviteUrl.toString());
 			copyState = "copied";
 		} catch {
 			copyState = "failed";

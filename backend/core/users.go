@@ -63,7 +63,7 @@ func SendActiveDownloadSessionReminders(
 			Type:               common.MessageActiveDownloadSessionReminder,
 			User:               stashOb.Edges.User,
 			StashName:          stashOb.PublicName,
-			Time:               downloadSessionObs[0].ValidFrom,
+			Time:               downloadSessionObs[0].ValidFrom, // The one valid soonest
 			DownloadSessionIDs: downloadSessionIDs,
 		})
 	}

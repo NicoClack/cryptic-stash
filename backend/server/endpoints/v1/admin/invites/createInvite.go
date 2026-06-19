@@ -169,7 +169,7 @@ func getInviteURL(
 ) string {
 	rel := &url.URL{
 		Path:     fmt.Sprintf("/invites/%s/", inviteID.String()),
-		RawQuery: "code=" + url.QueryEscape(code),
+		Fragment: code,
 	}
 	return frontendBaseURL.ResolveReference(rel).String()
 }

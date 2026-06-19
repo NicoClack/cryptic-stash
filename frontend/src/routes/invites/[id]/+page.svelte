@@ -27,7 +27,7 @@
 		attestation?: string;
 	}
 
-	const inviteCode = page.url.searchParams.get("code")?.trim() ?? "";
+	const inviteCode = page.url.hash.slice(1).trim();
 	const inviteId = page.params.id ?? "";
 
 	let isLoadingLink = $state(true);

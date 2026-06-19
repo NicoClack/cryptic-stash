@@ -1,24 +1,29 @@
 # TODO
 
-- Review key names, might need a new one?
-- Add tests for the different encrypted fields, are all the edge cases handled correctly? What's actually getting encrypted?
-- Delete expired invites that are unused
-- Rename adminCode
+Pending schema changes:
+- Add unique userID + publicName index to stashes
+- Rename stash encryptionDataKey?
+- Add superUserMode bool to sessions
+
+- Create an invite service
+- - Delete expired invites that are unused, should be called by the cleanup task
+- Passkey support:
+- - Adding, removing and renaming passkeys
+- - Enabling/disabling superuser access for a passkey
+- - Prompt for passkey to enter sudo mode when required
+- - 2 group authentication, allow enabling and disabling, and moving passkeys between groups
+- Generate BASE_ENCRYPTION_KEY during setup
+- Replace adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Remove service level encryption for stashes
 - Replace non-standard Authorization headers with Bearer scheme
-- Create account system with passkeys
 - Remove old endpoints
 - Rate limit auth endpoints
 - - No need to rate limit per endpoint, WebAuthn is unguessable so the main concern is DoS due to SQLite locks
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
 - Remove admin auth code logic
-- Add unique userID + publicName index to stashes
-- Rework functions in core/users.go to take stashes instead
 - Remove 2FA actions
 - Prevent disabling main email messenger
-- Replace env.STASH_ENCRYPTION_KEY with key derivation algorithm
-- Move env encryption from the service? Stash content and filenames don't need to be encrypted by it because the encryption keys for them are encrypted with the env var
 - Allow general API and static asset rate limits to be set independently
 - - Maybe 180 requests per 2 minutes for API? 1.5 req/s
 - - Maybe 400 requests per 2 minutes for static assets
@@ -27,18 +32,6 @@
 - - Limit number of concurrent hash requests to avoid using too much RAM
 - - Block IPs who get passwords wrong too often. Use exponential backoff
 - Use hash to store code in invite links rather than search param, that way it doesn't show up in logs
-- Prevent username enumeration? Does user ID enumeration matter if the login endpoint only accepts usernames?
-- - n8n just seems to mitigate with jitter, probably enough: https://github.com/n8n-io/n8n/pull/24553/changes
-- - Reset emails should always succeed unless triggered by an admin (maybe only implement the latter for now)
-- - Invites should specify the email and not allow it to be changed, like n8n
-- - If using usernames on signup page, could mitigate by limiting failed uses of an invite link and requiring a unique credit card for public signups (if I ever implement that)
-- - Can fake salts by hashing something deterministic like the email with a static pepper. If the pepper is leaked, I can just rotate it. If the database is leaked, the attacker has the stash records anyway. This approach means I don't need to store the random data I'm sending to ensure consistent results 
-- Create account system for users to manage their stashes
-- - Require FIDO2 passkeys/physical security keys
-- - Allow optional 2 group FIDO2 with "userVerification" set to "discouraged" by default, allowing it to be set to "required". Intended for login via password manager + security key, which is usually still 2FA but means 2 systems have to be breached for an unauthorised login. Look into WebAuthn mediated logins for this
-- - Locking account permanently or temporarily should only require a single credential, either a first or a second group. That way you can block attempts with just access to your password manager or a security key with someone else's device
-- - User logins can be reset by the admin generating a link. Maybe it could also require a code sent to their email?
-- - Admin logins can be reset by changing env vars
 - Send message when a stash password is correctly entered while it's locked
 - Implement some form of E2E encryption
 - - My design is probably secure but would be best to stick to a standard system if possible. Although it looks like different password managers use different ones
