@@ -29,6 +29,9 @@ var ErrWrapperParseObjectID = common.NewErrorWrapper(
 var ErrUnauthorized = NewError(common.NewErrorWithCategories(
 	"unauthorized", common.ErrTypeServerCommon, common.ErrTypeClient,
 )).SetStatus(http.StatusUnauthorized)
+var ErrForbidden = NewError(common.NewErrorWithCategories(
+	"forbidden", common.ErrTypeServerCommon, common.ErrTypeClient,
+)).SetStatus(http.StatusForbidden)
 var ErrNotFound = NewError(common.NewErrorWithCategories(
 	"not found", common.ErrTypeServerCommon, common.ErrTypeClient,
 )).SetStatus(http.StatusNotFound).DisableLogging()
@@ -47,6 +50,9 @@ var ErrWrapperBadRequest = common.NewErrorWrapper(common.ErrTypeServerCommon, Er
 
 func NewUnauthorizedError() *Error {
 	return ErrUnauthorized.Clone()
+}
+func NewForbiddenError() *Error {
+	return ErrForbidden.Clone()
 }
 func NewNotFoundError() *Error {
 	return ErrNotFound.Clone()
