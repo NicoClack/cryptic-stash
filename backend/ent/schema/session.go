@@ -24,6 +24,7 @@ func (Session) Fields() []ent.Field {
 						MinLen(32).
 						MaxLen(32),
 		field.Time("expiresAt"),
+		field.Bool("superUserMode").Default(false),
 		field.Bytes("userAgent").
 			GoType("").
 			ValueScanner(EncryptedField[string]{

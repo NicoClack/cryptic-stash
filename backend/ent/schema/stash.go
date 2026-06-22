@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -28,7 +29,8 @@ func (Stash) Fields() []ent.Field {
 		field.Bytes("fileName").NotEmpty().MaxLen(256),
 
 		// Encrypted with a key derived from the user's password, then again by the ValueScanner
-		// TODO: rename?
+		// There's also encryption at the service level.
+		// The whole stash system will be reworked soon as part of the E2E OPAQUE system
 		field.Bytes("encryptionDataKey").
 			ValueScanner(EncryptedField[[]byte]{KeyName: "stash_1"}),
 		field.Bytes("passwordSalt").NotEmpty(),
@@ -54,5 +56,12 @@ func (Stash) Edges() []ent.Edge {
 			Field("userID").Unique().Required(),
 		edge.To("downloadSessions", DownloadSession.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
+	}
+}
+
+// Indexes of the Stash.
+func (Stash) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("userID", "publicName").Unique(),
 	}
 }

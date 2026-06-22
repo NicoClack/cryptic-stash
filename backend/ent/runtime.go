@@ -315,11 +315,15 @@ func init() {
 			return nil
 		}
 	}()
+	// sessionDescSuperUserMode is the schema descriptor for superUserMode field.
+	sessionDescSuperUserMode := sessionFields[5].Descriptor()
+	// session.DefaultSuperUserMode holds the default value on creation for the superUserMode field.
+	session.DefaultSuperUserMode = sessionDescSuperUserMode.Default.(bool)
 	// sessionDescUserAgent is the schema descriptor for userAgent field.
-	sessionDescUserAgent := sessionFields[5].Descriptor()
+	sessionDescUserAgent := sessionFields[6].Descriptor()
 	session.ValueScanner.UserAgent = sessionDescUserAgent.ValueScanner.(field.TypeValueScanner[string])
 	// sessionDescIP is the schema descriptor for ip field.
-	sessionDescIP := sessionFields[6].Descriptor()
+	sessionDescIP := sessionFields[7].Descriptor()
 	session.ValueScanner.IP = sessionDescIP.ValueScanner.(field.TypeValueScanner[string])
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionFields[0].Descriptor()

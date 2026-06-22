@@ -24,6 +24,8 @@ const (
 	FieldHashedToken = "hashed_token"
 	// FieldExpiresAt holds the string denoting the expiresat field in the database.
 	FieldExpiresAt = "expires_at"
+	// FieldSuperUserMode holds the string denoting the superusermode field in the database.
+	FieldSuperUserMode = "super_user_mode"
 	// FieldUserAgent holds the string denoting the useragent field in the database.
 	FieldUserAgent = "user_agent"
 	// FieldIP holds the string denoting the ip field in the database.
@@ -61,6 +63,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldHashedToken,
 	FieldExpiresAt,
+	FieldSuperUserMode,
 	FieldUserAgent,
 	FieldIP,
 	FieldPasskeyID,
@@ -82,6 +85,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// HashedTokenValidator is a validator for the "hashedToken" field. It is called by the builders before save.
 	HashedTokenValidator func([]byte) error
+	// DefaultSuperUserMode holds the default value on creation for the "superUserMode" field.
+	DefaultSuperUserMode bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 	// ValueScanner of all Session fields.
@@ -112,6 +117,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiresAt orders the results by the expiresAt field.
 func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
+}
+
+// BySuperUserMode orders the results by the superUserMode field.
+func BySuperUserMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSuperUserMode, opts...).ToFunc()
 }
 
 // ByPasskeyID orders the results by the passkeyID field.

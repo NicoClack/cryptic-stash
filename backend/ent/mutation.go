@@ -6755,6 +6755,7 @@ type SessionMutation struct {
 	updatedAt      *time.Time
 	hashedToken    *[]byte
 	expiresAt      *time.Time
+	superUserMode  *bool
 	userAgent      *string
 	ip             *string
 	clearedFields  map[string]struct{}
@@ -7015,6 +7016,42 @@ func (m *SessionMutation) ResetExpiresAt() {
 	m.expiresAt = nil
 }
 
+// SetSuperUserMode sets the "superUserMode" field.
+func (m *SessionMutation) SetSuperUserMode(b bool) {
+	m.superUserMode = &b
+}
+
+// SuperUserMode returns the value of the "superUserMode" field in the mutation.
+func (m *SessionMutation) SuperUserMode() (r bool, exists bool) {
+	v := m.superUserMode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSuperUserMode returns the old "superUserMode" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldSuperUserMode(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSuperUserMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSuperUserMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSuperUserMode: %w", err)
+	}
+	return oldValue.SuperUserMode, nil
+}
+
+// ResetSuperUserMode resets all changes to the "superUserMode" field.
+func (m *SessionMutation) ResetSuperUserMode() {
+	m.superUserMode = nil
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (m *SessionMutation) SetUserAgent(s string) {
 	m.userAgent = &s
@@ -7247,7 +7284,7 @@ func (m *SessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.createdAt != nil {
 		fields = append(fields, session.FieldCreatedAt)
 	}
@@ -7259,6 +7296,9 @@ func (m *SessionMutation) Fields() []string {
 	}
 	if m.expiresAt != nil {
 		fields = append(fields, session.FieldExpiresAt)
+	}
+	if m.superUserMode != nil {
+		fields = append(fields, session.FieldSuperUserMode)
 	}
 	if m.userAgent != nil {
 		fields = append(fields, session.FieldUserAgent)
@@ -7288,6 +7328,8 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.HashedToken()
 	case session.FieldExpiresAt:
 		return m.ExpiresAt()
+	case session.FieldSuperUserMode:
+		return m.SuperUserMode()
 	case session.FieldUserAgent:
 		return m.UserAgent()
 	case session.FieldIP:
@@ -7313,6 +7355,8 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldHashedToken(ctx)
 	case session.FieldExpiresAt:
 		return m.OldExpiresAt(ctx)
+	case session.FieldSuperUserMode:
+		return m.OldSuperUserMode(ctx)
 	case session.FieldUserAgent:
 		return m.OldUserAgent(ctx)
 	case session.FieldIP:
@@ -7357,6 +7401,13 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExpiresAt(v)
+		return nil
+	case session.FieldSuperUserMode:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSuperUserMode(v)
 		return nil
 	case session.FieldUserAgent:
 		v, ok := value.(string)
@@ -7446,6 +7497,9 @@ func (m *SessionMutation) ResetField(name string) error {
 		return nil
 	case session.FieldExpiresAt:
 		m.ResetExpiresAt()
+		return nil
+	case session.FieldSuperUserMode:
+		m.ResetSuperUserMode()
 		return nil
 	case session.FieldUserAgent:
 		m.ResetUserAgent()

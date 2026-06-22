@@ -264,6 +264,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "hashed_token", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "super_user_mode", Type: field.TypeBool, Default: false},
 		{Name: "user_agent", Type: field.TypeBytes},
 		{Name: "ip", Type: field.TypeBytes},
 		{Name: "passkey_id", Type: field.TypeUUID},
@@ -277,13 +278,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "sessions_passkeys_sessions",
-				Columns:    []*schema.Column{SessionsColumns[7]},
+				Columns:    []*schema.Column{SessionsColumns[8]},
 				RefColumns: []*schema.Column{PasskeysColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "sessions_users_sessions",
-				Columns:    []*schema.Column{SessionsColumns[8]},
+				Columns:    []*schema.Column{SessionsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -320,6 +321,13 @@ var (
 				Columns:    []*schema.Column{StashesColumns[16]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "stash_user_id_public_name",
+				Unique:  true,
+				Columns: []*schema.Column{StashesColumns[16], StashesColumns[4]},
 			},
 		},
 	}

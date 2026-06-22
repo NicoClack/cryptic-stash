@@ -28,6 +28,8 @@ type Session struct {
 	HashedToken []byte `json:"hashedToken,omitempty"`
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
+	// SuperUserMode holds the value of the "superUserMode" field.
+	SuperUserMode bool `json:"superUserMode,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
 	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
@@ -82,6 +84,8 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case session.FieldHashedToken:
 			values[i] = new([]byte)
+		case session.FieldSuperUserMode:
+			values[i] = new(sql.NullBool)
 		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case session.FieldID, session.FieldPasskeyID, session.FieldUserID:
@@ -134,6 +138,12 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field expiresAt", values[i])
 			} else if value.Valid {
 				_m.ExpiresAt = value.Time
+			}
+		case session.FieldSuperUserMode:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field superUserMode", values[i])
+			} else if value.Valid {
+				_m.SuperUserMode = value.Bool
 			}
 		case session.FieldUserAgent:
 			if value, err := session.ValueScanner.UserAgent.FromValue(values[i]); err != nil {
@@ -216,6 +226,9 @@ func (_m *Session) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("expiresAt=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("superUserMode=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SuperUserMode))
 	builder.WriteString(", ")
 	builder.WriteString("userAgent=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserAgent))

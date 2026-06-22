@@ -50,6 +50,20 @@ func (_c *SessionCreate) SetExpiresAt(v time.Time) *SessionCreate {
 	return _c
 }
 
+// SetSuperUserMode sets the "superUserMode" field.
+func (_c *SessionCreate) SetSuperUserMode(v bool) *SessionCreate {
+	_c.mutation.SetSuperUserMode(v)
+	return _c
+}
+
+// SetNillableSuperUserMode sets the "superUserMode" field if the given value is not nil.
+func (_c *SessionCreate) SetNillableSuperUserMode(v *bool) *SessionCreate {
+	if v != nil {
+		_c.SetSuperUserMode(*v)
+	}
+	return _c
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (_c *SessionCreate) SetUserAgent(v string) *SessionCreate {
 	_c.mutation.SetUserAgent(v)
@@ -133,6 +147,10 @@ func (_c *SessionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SessionCreate) defaults() {
+	if _, ok := _c.mutation.SuperUserMode(); !ok {
+		v := session.DefaultSuperUserMode
+		_c.mutation.SetSuperUserMode(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := session.DefaultID()
 		_c.mutation.SetID(v)
@@ -157,6 +175,9 @@ func (_c *SessionCreate) check() error {
 	}
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expiresAt", err: errors.New(`ent: missing required field "Session.expiresAt"`)}
+	}
+	if _, ok := _c.mutation.SuperUserMode(); !ok {
+		return &ValidationError{Name: "superUserMode", err: errors.New(`ent: missing required field "Session.superUserMode"`)}
 	}
 	if _, ok := _c.mutation.UserAgent(); !ok {
 		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Session.userAgent"`)}
@@ -230,6 +251,10 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec, error) {
 	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
+	}
+	if value, ok := _c.mutation.SuperUserMode(); ok {
+		_spec.SetField(session.FieldSuperUserMode, field.TypeBool, value)
+		_node.SuperUserMode = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		vv, err := session.ValueScanner.UserAgent.Value(value)
@@ -378,6 +403,18 @@ func (u *SessionUpsert) SetExpiresAt(v time.Time) *SessionUpsert {
 // UpdateExpiresAt sets the "expiresAt" field to the value that was provided on create.
 func (u *SessionUpsert) UpdateExpiresAt() *SessionUpsert {
 	u.SetExcluded(session.FieldExpiresAt)
+	return u
+}
+
+// SetSuperUserMode sets the "superUserMode" field.
+func (u *SessionUpsert) SetSuperUserMode(v bool) *SessionUpsert {
+	u.Set(session.FieldSuperUserMode, v)
+	return u
+}
+
+// UpdateSuperUserMode sets the "superUserMode" field to the value that was provided on create.
+func (u *SessionUpsert) UpdateSuperUserMode() *SessionUpsert {
+	u.SetExcluded(session.FieldSuperUserMode)
 	return u
 }
 
@@ -530,6 +567,20 @@ func (u *SessionUpsertOne) SetExpiresAt(v time.Time) *SessionUpsertOne {
 func (u *SessionUpsertOne) UpdateExpiresAt() *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateExpiresAt()
+	})
+}
+
+// SetSuperUserMode sets the "superUserMode" field.
+func (u *SessionUpsertOne) SetSuperUserMode(v bool) *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.SetSuperUserMode(v)
+	})
+}
+
+// UpdateSuperUserMode sets the "superUserMode" field to the value that was provided on create.
+func (u *SessionUpsertOne) UpdateSuperUserMode() *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.UpdateSuperUserMode()
 	})
 }
 
@@ -860,6 +911,20 @@ func (u *SessionUpsertBulk) SetExpiresAt(v time.Time) *SessionUpsertBulk {
 func (u *SessionUpsertBulk) UpdateExpiresAt() *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateExpiresAt()
+	})
+}
+
+// SetSuperUserMode sets the "superUserMode" field.
+func (u *SessionUpsertBulk) SetSuperUserMode(v bool) *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.SetSuperUserMode(v)
+	})
+}
+
+// UpdateSuperUserMode sets the "superUserMode" field to the value that was provided on create.
+func (u *SessionUpsertBulk) UpdateSuperUserMode() *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.UpdateSuperUserMode()
 	})
 }
 

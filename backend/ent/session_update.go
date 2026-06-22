@@ -71,6 +71,20 @@ func (_u *SessionUpdate) SetNillableExpiresAt(v *time.Time) *SessionUpdate {
 	return _u
 }
 
+// SetSuperUserMode sets the "superUserMode" field.
+func (_u *SessionUpdate) SetSuperUserMode(v bool) *SessionUpdate {
+	_u.mutation.SetSuperUserMode(v)
+	return _u
+}
+
+// SetNillableSuperUserMode sets the "superUserMode" field if the given value is not nil.
+func (_u *SessionUpdate) SetNillableSuperUserMode(v *bool) *SessionUpdate {
+	if v != nil {
+		_u.SetSuperUserMode(*v)
+	}
+	return _u
+}
+
 // SetUserAgent sets the "userAgent" field.
 func (_u *SessionUpdate) SetUserAgent(v string) *SessionUpdate {
 	_u.mutation.SetUserAgent(v)
@@ -230,6 +244,9 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.SuperUserMode(); ok {
+		_spec.SetField(session.FieldSuperUserMode, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		vv, err := session.ValueScanner.UserAgent.Value(value)
 		if err != nil {
@@ -358,6 +375,20 @@ func (_u *SessionUpdateOne) SetExpiresAt(v time.Time) *SessionUpdateOne {
 func (_u *SessionUpdateOne) SetNillableExpiresAt(v *time.Time) *SessionUpdateOne {
 	if v != nil {
 		_u.SetExpiresAt(*v)
+	}
+	return _u
+}
+
+// SetSuperUserMode sets the "superUserMode" field.
+func (_u *SessionUpdateOne) SetSuperUserMode(v bool) *SessionUpdateOne {
+	_u.mutation.SetSuperUserMode(v)
+	return _u
+}
+
+// SetNillableSuperUserMode sets the "superUserMode" field if the given value is not nil.
+func (_u *SessionUpdateOne) SetNillableSuperUserMode(v *bool) *SessionUpdateOne {
+	if v != nil {
+		_u.SetSuperUserMode(*v)
 	}
 	return _u
 }
@@ -550,6 +581,9 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.SuperUserMode(); ok {
+		_spec.SetField(session.FieldSuperUserMode, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		vv, err := session.ValueScanner.UserAgent.Value(value)

@@ -44,11 +44,13 @@ CREATE TABLE `periodic_tasks` (`id` uuid NOT NULL, `created_at` datetime NOT NUL
 -- create index "periodic_tasks_name_key" to table: "periodic_tasks"
 CREATE UNIQUE INDEX `periodic_tasks_name_key` ON `periodic_tasks` (`name`);
 -- create "sessions" table
-CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_token` blob NOT NULL, `expires_at` datetime NOT NULL, `user_agent` blob NOT NULL, `ip` blob NOT NULL, `passkey_id` uuid NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_passkeys_sessions` FOREIGN KEY (`passkey_id`) REFERENCES `passkeys` (`id`) ON DELETE CASCADE, CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_token` blob NOT NULL, `expires_at` datetime NOT NULL, `super_user_mode` bool NOT NULL DEFAULT (false), `user_agent` blob NOT NULL, `ip` blob NOT NULL, `passkey_id` uuid NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_passkeys_sessions` FOREIGN KEY (`passkey_id`) REFERENCES `passkeys` (`id`) ON DELETE CASCADE, CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
 -- create index "sessions_hashed_token_key" to table: "sessions"
 CREATE UNIQUE INDEX `sessions_hashed_token_key` ON `sessions` (`hashed_token`);
 -- create "stashes" table
 CREATE TABLE `stashes` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `last_download_at` datetime NULL, `public_name` text NOT NULL, `content` blob NOT NULL, `file_name` blob NOT NULL, `encryption_data_key` blob NOT NULL, `password_salt` blob NOT NULL, `hash_time` integer NOT NULL, `hash_memory` integer NOT NULL, `hash_threads` integer NOT NULL, `is_self_locked` bool NOT NULL DEFAULT (false), `is_admin_locked` bool NOT NULL DEFAULT (false), `self_locked_until` datetime NULL, `download_sessions_valid_from` datetime NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `stashes_users_stashes` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+-- create index "stash_user_id_public_name" to table: "stashes"
+CREATE UNIQUE INDEX `stash_user_id_public_name` ON `stashes` (`user_id`, `public_name`);
 -- create "two_factor_actions" table
 CREATE TABLE `two_factor_actions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `type` text NOT NULL, `version` integer NOT NULL, `body` json NOT NULL, `expires_at` datetime NOT NULL, `code` text NOT NULL, PRIMARY KEY (`id`));
 -- create index "twofactoraction_code" to table: "two_factor_actions"
@@ -79,6 +81,8 @@ DROP TABLE `users`;
 DROP INDEX `twofactoraction_code`;
 -- reverse: create "two_factor_actions" table
 DROP TABLE `two_factor_actions`;
+-- reverse: create index "stash_user_id_public_name" to table: "stashes"
+DROP INDEX `stash_user_id_public_name`;
 -- reverse: create "stashes" table
 DROP TABLE `stashes`;
 -- reverse: create index "sessions_hashed_token_key" to table: "sessions"

@@ -76,6 +76,11 @@ func ExpiresAt(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldExpiresAt, v))
 }
 
+// SuperUserMode applies equality check predicate on the "superUserMode" field. It's identical to SuperUserModeEQ.
+func SuperUserMode(v bool) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldSuperUserMode, v))
+}
+
 // PasskeyID applies equality check predicate on the "passkeyID" field. It's identical to PasskeyIDEQ.
 func PasskeyID(v uuid.UUID) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldPasskeyID, v))
@@ -244,6 +249,16 @@ func ExpiresAtLT(v time.Time) predicate.Session {
 // ExpiresAtLTE applies the LTE predicate on the "expiresAt" field.
 func ExpiresAtLTE(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldExpiresAt, v))
+}
+
+// SuperUserModeEQ applies the EQ predicate on the "superUserMode" field.
+func SuperUserModeEQ(v bool) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldSuperUserMode, v))
+}
+
+// SuperUserModeNEQ applies the NEQ predicate on the "superUserMode" field.
+func SuperUserModeNEQ(v bool) predicate.Session {
+	return predicate.Session(sql.FieldNEQ(FieldSuperUserMode, v))
 }
 
 // PasskeyIDEQ applies the EQ predicate on the "passkeyID" field.
