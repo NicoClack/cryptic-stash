@@ -129,6 +129,7 @@
 - Restructure services so that implementations wrap errors defined in a more common package, e.g defined in twofactoractions/service.go. Messenger based implementation defined in twofactoractions/messengers/
 - Review SQLite connection pool config
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
+- Improve validation for messenger options
 
 - When messengers are changed, send a message to all of the previous messengers
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks

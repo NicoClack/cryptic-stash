@@ -16,7 +16,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/NicoClack/cryptic-stash/backend/jobs"
-	"github.com/bytedance/gopkg/util/logger"
 	"github.com/google/uuid"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -281,7 +280,7 @@ func (registry *Registry) Send(
 		return ErrWrapperSend.Wrap(ErrWrapperEnqueueJob.Wrap(wrappedErr))
 	}
 
-	logger.Info(
+	registry.App.Logger.Info(
 		"sending message to user",
 		"userID", message.User.ID,
 		"messageType", message.Type,
