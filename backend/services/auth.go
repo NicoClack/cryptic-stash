@@ -24,10 +24,6 @@ func NewAuth(app *common.App) *Auth {
 	}
 }
 
-func (service *Auth) WebAuthn() *webauthn.WebAuthn {
-	return service.webAuthnApp
-}
-
 func (service *Auth) StartLogin(
 	ctx context.Context,
 ) (
@@ -47,6 +43,46 @@ func (service *Auth) FinishLogin(
 	return auth.FinishLogin(
 		sessionID,
 		parsedResponse,
+		ginCtx,
+		service.webAuthnApp,
+		tx,
+		service.app.TempKeyValue,
+		service.app.Clock,
+		service.app.Logger,
+		service.app.Env.SESSION_DURATION,
+	)
+}
+
+func (service *Auth) GetEligiblePasskeysForSuperUserMode(sessionOb *ent.Session, userOb *ent.User) (
+	[]*ent.Passkey,
+	common.WrappedError,
+) {
+	return auth.GetEligiblePasskeysForSuperUserMode(sessionOb, userOb)
+}
+func (service *Auth) StartElevation(
+	sessionOb *ent.Session, // Must have Passkey preloaded
+	userOb *ent.User, // Must have Passkeys preloaded
+) (uuid.UUID, protocol.PublicKeyCredentialRequestOptions, common.WrappedError) {
+	return auth.StartElevation(
+		sessionOb,
+		userOb,
+		service.webAuthnApp,
+		service.app.TempKeyValue,
+		service.app.Clock,
+	)
+}
+
+func (service *Auth) FinishElevation(
+	webAuthnSessionID uuid.UUID,
+	parsedResponse *protocol.ParsedCredentialAssertionData,
+	sessionOb *ent.Session, // Must have Passkey preloaded
+	ginCtx *gin.Context,
+	tx *ent.Tx,
+) common.WrappedError {
+	return auth.FinishElevation(
+		webAuthnSessionID,
+		parsedResponse,
+		sessionOb,
 		ginCtx,
 		service.webAuthnApp,
 		tx,
@@ -116,4 +152,13 @@ func (service *Auth) ValidateSession(
 	ctx context.Context,
 ) (*ent.Session, common.WrappedError) {
 	return auth.ValidateSession(token, tx, service.app.Clock, ctx)
+}
+
+func (service *Auth) ElevateSession(sessionOb *ent.Session, tx *ent.Tx, ctx context.Context) common.WrappedError {
+	return auth.ElevateSession(
+		sessionOb.ID,
+		service.app.Clock.Now().Add(service.app.Env.SESSION_DURATION),
+		tx,
+		ctx,
+	)
 }

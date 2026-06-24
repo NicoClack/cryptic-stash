@@ -47,11 +47,17 @@ func NewServer(app *common.App) *Server {
 	router.Use(middleware.NewRateLimiting("api", app.RateLimiter))
 	router.Use(middleware.NewError())
 
-	adminMiddleware := middleware.NewAdminProtected(app.Core)
+	adminMiddleware := middleware.NewAdminProtected(app.Core) // TODO: replace with config of NewSessionAuth
+	defaultAuthMiddleware := middleware.NewSessionAuth(app.Auth, app.Database, nil)
+	superUserModeMiddleware := middleware.NewSessionAuth(app.Auth, app.Database, &middleware.SessionAuthOptions{
+		RequireSuperuser: true,
+	})
 	serverApp := &servercommon.ServerApp{
-		App:             app,
-		Router:          router,
-		AdminMiddleware: adminMiddleware,
+		App:                     app,
+		Router:                  router,
+		AdminMiddleware:         adminMiddleware,
+		DefaultAuthMiddleware:   defaultAuthMiddleware,
+		SuperUserModeMiddleware: superUserModeMiddleware,
 	}
 	endpoints.ConfigureEndpoints(&servercommon.Group{
 		RouterGroup: router.Group(""),

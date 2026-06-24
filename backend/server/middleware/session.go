@@ -17,7 +17,7 @@ const (
 	userContextKey    = "user"
 )
 
-type SessionValidationOptions struct {
+type SessionAuthOptions struct {
 	RequireSuperuser bool
 	AdminProtected   bool
 	AllowAnonymous   bool
@@ -27,10 +27,10 @@ type SessionValidationOptions struct {
 func NewSessionAuth(
 	auth common.AuthService,
 	db common.DatabaseService,
-	options *SessionValidationOptions,
+	options *SessionAuthOptions,
 ) gin.HandlerFunc {
 	if options == nil {
-		options = &SessionValidationOptions{}
+		options = &SessionAuthOptions{}
 	}
 
 	return func(ginCtx *gin.Context) {
@@ -105,27 +105,4 @@ func NewSessionAuth(
 		ginCtx.Set(userContextKey, sessionOb.Edges.User)
 		ginCtx.Next()
 	}
-}
-
-func RequireSuperUserMode(
-	auth common.AuthService,
-	db common.DatabaseService,
-) gin.HandlerFunc {
-	return NewSessionAuth(
-		auth, db,
-		&SessionValidationOptions{
-			RequireSuperuser: true,
-		},
-	)
-}
-func RequireAdmin(
-	auth common.AuthService,
-	db common.DatabaseService,
-) gin.HandlerFunc {
-	return NewSessionAuth(
-		auth, db,
-		&SessionValidationOptions{
-			AdminProtected: true,
-		},
-	)
 }

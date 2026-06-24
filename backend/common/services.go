@@ -1,7 +1,7 @@
 package common
 
 /*
-The core principal is to abstract just enough that:
+The core principle is to abstract just enough that:
 * The service can be mocked to some extent (although I don't think this is really necessary for the database)
 * The service can be used in simplified ways for testing.
 e.g a test can use a different job registry with a real implementation
@@ -117,8 +117,6 @@ type App struct {
 }
 
 type AuthService interface {
-	WebAuthn() *webauthn.WebAuthn
-
 	// TODO: standardise parsing data from gin Context vs passing it in
 	StartLogin(ctx context.Context) (
 		sessionID uuid.UUID,
@@ -131,6 +129,22 @@ type AuthService interface {
 		ginCtx *gin.Context,
 		tx *ent.Tx,
 	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
+
+	GetEligiblePasskeysForSuperUserMode(sessionOb *ent.Session, userOb *ent.User) (
+		[]*ent.Passkey,
+		WrappedError,
+	)
+	StartElevation(
+		sessionOb *ent.Session, // Must have Passkey preloaded
+		userOb *ent.User, // Must have Passkeys preloaded
+	) (uuid.UUID, protocol.PublicKeyCredentialRequestOptions, WrappedError)
+	FinishElevation(
+		webAuthnSessionID uuid.UUID,
+		parsedResponse *protocol.ParsedCredentialAssertionData,
+		sessionOb *ent.Session, // Must have passkeys loaded
+		ginCtx *gin.Context,
+		tx *ent.Tx,
+	) WrappedError
 
 	StartRegisterPasskey(
 		user webauthn.User,
@@ -158,6 +172,7 @@ type AuthService interface {
 		tx *ent.Tx,
 		ctx context.Context,
 	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
+	ElevateSession(sessionOb *ent.Session, tx *ent.Tx, ctx context.Context) WrappedError
 	// Note: must load user edge
 	ValidateSession(token []byte, tx *ent.Tx, ctx context.Context) (*ent.Session, WrappedError)
 }

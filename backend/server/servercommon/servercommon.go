@@ -7,8 +7,10 @@ import (
 
 type ServerApp struct {
 	*common.App
-	Router          *gin.Engine
-	AdminMiddleware gin.HandlerFunc
+	Router                  *gin.Engine
+	AdminMiddleware         gin.HandlerFunc
+	DefaultAuthMiddleware   gin.HandlerFunc
+	SuperUserModeMiddleware gin.HandlerFunc
 }
 
 type Group struct {
