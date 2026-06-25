@@ -157,6 +157,7 @@ type AuthService interface {
 	FinishRegisterPasskey(
 		credentialName string,
 		allowSuperUser bool,
+		isSecondGroup bool,
 		username string,
 		session *webauthn.SessionData,
 		parsedCredential *protocol.ParsedCredentialCreationData,

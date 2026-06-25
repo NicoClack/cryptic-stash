@@ -76,8 +76,8 @@ func TestStartElevation_NoAuthHeader_ReturnsBadRequest(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Code:    "MISSING_AUTHORIZATION_HEADER",
 					Message: "authorization: header is required",
+					Code:    "MISSING_AUTHORIZATION_HEADER",
 				},
 			},
 		},
@@ -158,8 +158,8 @@ func TestStartElevation_AlreadyElevated_ReturnsConflict(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Code:    "SESSION_ALREADY_ELEVATED",
 					Message: "session is already in superuser mode",
+					Code:    "SESSION_ALREADY_ELEVATED",
 				},
 			},
 		},

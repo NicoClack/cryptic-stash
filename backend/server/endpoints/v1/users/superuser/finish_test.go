@@ -34,8 +34,8 @@ func TestFinishElevation_NoAuthHeader_ReturnsBadRequest(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Code:    "MISSING_AUTHORIZATION_HEADER",
 					Message: "authorization: header is required",
+					Code:    "MISSING_AUTHORIZATION_HEADER",
 				},
 			},
 		},

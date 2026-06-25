@@ -107,6 +107,7 @@ func (service *Auth) StartRegisterPasskey(
 func (service *Auth) FinishRegisterPasskey(
 	credentialName string,
 	allowSuperUser bool,
+	isSecondGroup bool,
 	username string,
 	session *webauthn.SessionData,
 	parsedCredential *protocol.ParsedCredentialCreationData,
@@ -117,6 +118,7 @@ func (service *Auth) FinishRegisterPasskey(
 	return auth.FinishRegisterPasskey(
 		credentialName,
 		allowSuperUser,
+		isSecondGroup,
 		username,
 		session,
 		parsedCredential,

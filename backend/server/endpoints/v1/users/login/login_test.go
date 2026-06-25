@@ -83,6 +83,7 @@ func createUserWithCredential(
 			_, wrappedErr = app.Auth.FinishRegisterPasskey(
 				"Test Passkey",
 				false,
+				false,
 				userOb.Username,
 				sessionData,
 				parsedCredential,

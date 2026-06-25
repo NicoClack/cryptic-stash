@@ -78,6 +78,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				passkeyOb, wrappedErr := app.Auth.FinishRegisterPasskey(
 					body.CredentialName,
 					false,
+					false,
 					inviteOb.Email,
 					inviteOb.WebAuthnSession,
 					parsedCredential,

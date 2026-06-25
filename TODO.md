@@ -131,6 +131,7 @@
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 - Improve validation for messenger options
 - If a credential is cloned, block superuser mode for it. Allow regular login to block downloads
+- Should FinishRegisterPasskey demote existing sessions when a second group passkey is added for the first time?
 
 - When messengers are changed, send a message to all of the previous messengers
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks
