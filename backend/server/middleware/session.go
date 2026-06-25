@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"net/http"
 
+	authpkg "github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
@@ -34,9 +35,11 @@ func NewSessionAuth(
 	}
 
 	return func(ginCtx *gin.Context) {
-		givenTokenStr, serverErr := servercommon.RequireAuthorizationScheme("Session", ginCtx)
+		givenTokenStr, serverErr := servercommon.RequireAuthorizationScheme("Bearer", ginCtx)
 		if serverErr != nil {
 			if options.AllowAnonymous {
+				ginCtx.Set(sessionContextKey, nil)
+				ginCtx.Set(userContextKey, nil)
 				ginCtx.Next()
 				return
 			}
@@ -71,7 +74,11 @@ func NewSessionAuth(
 			},
 		)
 		if stdErr != nil {
-			ginCtx.Error(stdErr)
+			ginCtx.Error(servercommon.ExpectError(
+				stdErr, authpkg.ErrInvalidSession,
+				http.StatusUnauthorized,
+				nil,
+			))
 			ginCtx.Abort()
 			return
 		}

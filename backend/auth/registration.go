@@ -25,10 +25,11 @@ func StartRegisterPasskey(
 }
 
 func FinishRegisterPasskey(
-	session *webauthn.SessionData,
-	username string,
-	parsedCredential *protocol.ParsedCredentialCreationData,
 	credentialName string,
+	allowSuperUser bool,
+	username string,
+	session *webauthn.SessionData,
+	parsedCredential *protocol.ParsedCredentialCreationData,
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
 	clock clockwork.Clock,
@@ -70,7 +71,7 @@ func FinishRegisterPasskey(
 		SetUpdatedAt(now).
 		SetUserID(userOb.ID).
 		SetName(credentialName).
-		SetAllowSuperUser(false). // TODO: add argument
+		SetAllowSuperUser(allowSuperUser).
 		SetCredentialID(credential.ID).
 		SetCredential(*credential).
 		Save(ctx)

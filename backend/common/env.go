@@ -49,8 +49,8 @@ func RequireStrArrEnv(name string) []string {
 func RequireIntEnv(name string) int {
 	rawValue := RequireEnv(name)
 
-	value, err := strconv.Atoi(rawValue)
-	if err != nil {
+	value, stdErr := strconv.Atoi(rawValue)
+	if stdErr != nil {
 		log.Fatalf("couldn't parse environment variable \"%v\" into an integer", name)
 	}
 
@@ -60,8 +60,8 @@ func RequireIntEnv(name string) int {
 func RequireInt64Env(name string) int64 {
 	rawValue := RequireEnv(name)
 
-	value, err := strconv.ParseInt(rawValue, 10, 0)
-	if err != nil {
+	value, stdErr := strconv.ParseInt(rawValue, 10, 0)
+	if stdErr != nil {
 		log.Fatalf("couldn't parse environment variable \"%v\" into an int64", name)
 	}
 

@@ -13,6 +13,7 @@ import (
 )
 
 func CreateSession(
+	superUserMode bool,
 	userID uuid.UUID,
 	passkeyID uuid.UUID,
 	userAgent string,
@@ -32,6 +33,7 @@ func CreateSession(
 		SetUpdatedAt(now).
 		SetUserID(userID).
 		SetPasskeyID(passkeyID).
+		SetSuperUserMode(superUserMode).
 		SetHashedToken(hashedToken[:]).
 		SetExpiresAt(expiresAt).
 		SetUserAgent(userAgent).

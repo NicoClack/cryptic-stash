@@ -105,19 +105,21 @@ func (service *Auth) StartRegisterPasskey(
 }
 
 func (service *Auth) FinishRegisterPasskey(
-	session *webauthn.SessionData,
-	username string,
-	parsedCredential *protocol.ParsedCredentialCreationData,
 	credentialName string,
+	allowSuperUser bool,
+	username string,
+	session *webauthn.SessionData,
+	parsedCredential *protocol.ParsedCredentialCreationData,
 	tx *ent.Tx,
 	ctx context.Context,
-	getUser func(uuid.UUID, *ent.Tx) (*ent.User, error),
+	getUser func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error),
 ) (*ent.Passkey, common.WrappedError) {
 	return auth.FinishRegisterPasskey(
-		session,
-		username,
-		parsedCredential,
 		credentialName,
+		allowSuperUser,
+		username,
+		session,
+		parsedCredential,
 		service.webAuthnApp,
 		tx,
 		service.app.Clock,
@@ -127,6 +129,7 @@ func (service *Auth) FinishRegisterPasskey(
 }
 
 func (service *Auth) CreateSession(
+	superUserMode bool,
 	userID uuid.UUID,
 	passkeyID uuid.UUID,
 	userAgent string,
@@ -135,6 +138,7 @@ func (service *Auth) CreateSession(
 	ctx context.Context,
 ) (*ent.Session, []byte, common.WrappedError) {
 	return auth.CreateSession(
+		superUserMode,
 		userID,
 		passkeyID,
 		userAgent,

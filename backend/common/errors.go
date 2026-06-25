@@ -45,8 +45,8 @@ const (
 )
 
 func HasErrors(errs []error) bool {
-	for _, err := range errs {
-		if err != nil {
+	for _, stdErr := range errs {
+		if stdErr != nil {
 			return true
 		}
 	}
@@ -57,8 +57,8 @@ func GetSuccessfulActionIDs(actionIDs []string, errs []*ErrWithStrId) []string {
 	successfulActionIDs := make([]string, len(actionIDs))
 	copy(successfulActionIDs, actionIDs)
 
-	for _, err := range errs {
-		index := slices.Index(successfulActionIDs, err.Id)
+	for _, stdErr := range errs {
+		index := slices.Index(successfulActionIDs, stdErr.Id)
 		if index != -1 {
 			successfulActionIDs = slices.Delete(successfulActionIDs, index, index+1)
 		}

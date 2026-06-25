@@ -54,7 +54,7 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SaveX(t.Context())
 
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/users/auth-test/", nil)
-	request.Header.Set("Authorization", "Session "+base64.RawURLEncoding.EncodeToString([]byte(sessionToken)))
+	request.Header.Set("Authorization", "Bearer "+base64.RawURLEncoding.EncodeToString([]byte(sessionToken)))
 	respRecorder := httptest.NewRecorder()
 	app.Server.ServeHTTP(respRecorder, request)
 

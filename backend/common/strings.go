@@ -37,8 +37,8 @@ func ParseVersionedType(versionedType string) (string, int, WrappedError) {
 	if separatorIndex == -1 {
 		return "", 0, ErrWrapperParseVersionedType.Wrap(ErrMalformedVersionedType)
 	}
-	version, err := strconv.Atoi(versionedType[separatorIndex+1:])
-	if err != nil {
+	version, stdErr := strconv.Atoi(versionedType[separatorIndex+1:])
+	if stdErr != nil {
 		return "", 0, ErrWrapperParseVersionedType.Wrap(ErrMalformedVersionedType)
 	}
 

@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoginFinish_MissingSessionID_ReturnsBadRequest(t *testing.T) {
+func TestLoginFinish_MissingWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -45,7 +45,7 @@ func TestLoginFinish_MissingSessionID_ReturnsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_InvalidSessionID_ReturnsBadRequest(t *testing.T) {
+func TestLoginFinish_InvalidWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -75,7 +75,7 @@ func TestLoginFinish_InvalidSessionID_ReturnsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_MissingSession_ReturnsBadRequest(t *testing.T) {
+func TestLoginFinish_UnknownWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -111,6 +111,35 @@ func TestLoginFinish_MissingSession_ReturnsBadRequest(t *testing.T) {
 				{
 					Message: "WebAuthn session missing or expired",
 					Code:    "INVALID_WEBAUTHN_SESSION",
+				},
+			},
+		},
+	)
+}
+
+func TestLoginFinish_MalformedCredentialAssertion_ReturnsBadRequest(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/users/login/finish/",
+		gin.H{
+			"webAuthnSessionId": uuid.New(),
+			"id":                "definitely-not-base64",
+			"rawId":             "also-not-base64",
+			"type":              "public-key",
+		},
+	)
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "malformed WebAuthn assertion response",
+					Code:    "MALFORMED_CREDENTIAL_ASSERTION_RESPONSE",
 				},
 			},
 		},

@@ -178,8 +178,8 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 	}
 	wg.Wait()
 
-	jobOb, err := db.Client().Job.Query().Where(job.TypeEQ("counter")).Only(t.Context())
-	require.NoError(t, err)
+	jobOb, stdErr := db.Client().Job.Query().Where(job.TypeEQ("counter")).Only(t.Context())
+	require.NoError(t, stdErr)
 	var body struct {
 		Count int `json:"count"`
 	}

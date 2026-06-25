@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
@@ -80,7 +81,20 @@ func FinishElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 					DisableLogging()
 			}
 
-			return stdErr
+			return servercommon.ExpectError(
+				stdErr, auth.ErrInvalidWebAuthnSessionID, http.StatusBadRequest,
+				&servercommon.ErrorDetail{
+					Message: "WebAuthn session missing or expired",
+					Code:    "INVALID_WEBAUTHN_SESSION",
+				},
+			).Expect(
+				auth.ErrNeitherPasskeySuperEligible,
+				http.StatusForbidden,
+				&servercommon.ErrorDetail{
+					Message: "neither passkey is eligible for superuser mode",
+					Code:    "NEITHER_PASSKEY_SUPER_ELIGIBLE",
+				},
+			)
 		}
 
 		ginCtx.JSON(http.StatusOK, &FinishElevationResponse{

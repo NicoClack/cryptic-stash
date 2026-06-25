@@ -155,16 +155,18 @@ type AuthService interface {
 		wrappedErr WrappedError,
 	)
 	FinishRegisterPasskey(
-		session *webauthn.SessionData,
-		username string,
-		parsedCredential *protocol.ParsedCredentialCreationData,
 		credentialName string,
+		allowSuperUser bool,
+		username string,
+		session *webauthn.SessionData,
+		parsedCredential *protocol.ParsedCredentialCreationData,
 		tx *ent.Tx,
 		ctx context.Context,
 		getUser func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error),
 	) (*ent.Passkey, WrappedError)
 
 	CreateSession(
+		superUserMode bool,
 		userID uuid.UUID,
 		passkeyID uuid.UUID,
 		userAgent string,

@@ -47,15 +47,15 @@ func (service *TwoFactorActions) Create(
 		)
 	}
 	code := common.CryptoRandomAlphaNum(twofactoractions.CODE_LENGTH)
-	action, err := tx.TwoFactorAction.Create().
+	action, stdErr := tx.TwoFactorAction.Create().
 		SetType(jobType).
 		SetVersion(version).
 		SetBody(encoded).
 		SetExpiresAt(expiresAt).
 		SetCode(code).Save(ctx)
-	if err != nil {
+	if stdErr != nil {
 		return nil, code, twofactoractions.ErrWrapperCreate.Wrap(
-			twofactoractions.ErrWrapperDatabase.Wrap(err),
+			twofactoractions.ErrWrapperDatabase.Wrap(stdErr),
 		)
 	}
 

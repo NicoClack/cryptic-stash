@@ -6,8 +6,8 @@ import (
 )
 
 func DumpJSON(value any) {
-	formattedBytes, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
+	formattedBytes, stdErr := json.MarshalIndent(value, "", "  ")
+	if stdErr != nil {
 		//nolint:forbidigo
 		fmt.Printf("DEBUG: warning: couldn't dump JSON")
 		return

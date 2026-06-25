@@ -81,10 +81,11 @@ func createUserWithCredential(
 				return stdErr
 			}
 			_, wrappedErr = app.Auth.FinishRegisterPasskey(
-				sessionData,
-				userOb.Username,
-				parsedCredential,
 				"Test Passkey",
+				false,
+				userOb.Username,
+				sessionData,
+				parsedCredential,
 				tx,
 				ctx,
 				func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error) {
@@ -156,6 +157,7 @@ func TestLoginFlow(t *testing.T) {
 			WebAuthnSessionID:           webAuthnSessionID,
 		},
 	)
+	sessionCreatedAt := time.Now()
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 
 	var finishResp login.LoginFinishResponse
@@ -179,6 +181,13 @@ func TestLoginFlow(t *testing.T) {
 		Only(t.Context())
 	require.NoError(t, stdErr)
 	require.Equal(t, userOb.ID, sessionOb.UserID)
+	require.False(t, sessionOb.SuperUserMode)
+	require.WithinDuration(
+		t,
+		sessionCreatedAt.Add(app.Env.SESSION_DURATION),
+		sessionOb.ExpiresAt,
+		100*time.Millisecond,
+	)
 }
 
 func TestLoginFlow_SyncablePasskey(t *testing.T) {

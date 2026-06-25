@@ -76,7 +76,8 @@ export async function fetchJson(
 		const authHeader = new Headers(init?.headers).get("authorization");
 		if (page.route.id?.startsWith("/admin") || page.route.id === "/setup/admin-messengers") {
 			goToAdminLogin();
-		} else if (authHeader?.startsWith("Session ")) {
+		} else if (authHeader?.startsWith("Bearer ")) {
+			// TODO: ^ how do I distinguish between user and admin auth if they both use Bearer tokens?
 			goToLogin();
 		}
 	}

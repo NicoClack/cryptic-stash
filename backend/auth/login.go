@@ -160,6 +160,7 @@ func FinishLogin(
 	}
 
 	sessionOb, sessionToken, wrappedErr := CreateSession(
+		false,
 		userOb.ID,
 		passkeyOb.ID,
 		ginCtx.Request.UserAgent(),

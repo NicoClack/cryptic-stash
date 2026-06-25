@@ -17,6 +17,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: create tests for the whole flow. Assert that the passkey and session are superuser
+
 func TestCreateUser_NoWebAuthnSession(t *testing.T) {
 	t.Parallel()
 

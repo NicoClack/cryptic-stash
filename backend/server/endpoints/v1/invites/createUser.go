@@ -76,10 +76,11 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				passkeyOb, wrappedErr := app.Auth.FinishRegisterPasskey(
-					inviteOb.WebAuthnSession,
-					inviteOb.Email,
-					parsedCredential,
 					body.CredentialName,
+					false,
+					inviteOb.Email,
+					inviteOb.WebAuthnSession,
+					parsedCredential,
 					tx,
 					ctx,
 					func(pendingUserID uuid.UUID, tx *ent.Tx) (*ent.User, error) {
@@ -124,6 +125,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				_, token, wrappedErr := app.Auth.CreateSession(
+					false,
 					passkeyOb.UserID,
 					passkeyOb.ID,
 					ginCtx.Request.UserAgent(),
