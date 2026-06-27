@@ -10,6 +10,7 @@
 - - Enabling/disabling superuser access for a passkey
 - - Prompt for passkey to enter sudo mode when required
 - - 2 group authentication, allow enabling and disabling, and moving passkeys between groups
+- - Check implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/
 - Create development Docker Compose setup
 - - Switch to Deno and limit postinstall scripts (locally and in CI)
 - Review and update deps
