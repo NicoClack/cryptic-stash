@@ -101,8 +101,13 @@
 				return;
 			}
 
-			const { userId, token } = finishResponse.data as { userId: string; token: string };
-			userAuth.login(token, userId);
+			const { userId, token, username, isSuperUserMode } = finishResponse.data as {
+				userId: string;
+				token: string;
+				username: string;
+				isSuperUserMode: boolean;
+			};
+			userAuth.login(token, userId, username, isSuperUserMode);
 		} finally {
 			isLoading = false;
 		}

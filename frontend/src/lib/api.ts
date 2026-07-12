@@ -74,10 +74,19 @@ export async function fetchJson(
 		page.route.id !== "/login"
 	) {
 		const authHeader = new Headers(init?.headers).get("authorization");
+
+		if (resp.status === 403 && responseHasErrorCode(jsonResponse, "SUPERUSER_MODE_REQUIRED")) {
+			jsonResponse.redirecting = true;
+			goToElevate();
+		}
+
 		if (page.route.id?.startsWith("/admin") || page.route.id === "/setup/admin-messengers") {
+			jsonResponse.redirecting = true;
 			goToAdminLogin();
 		} else if (authHeader?.startsWith("Bearer ")) {
 			// TODO: ^ how do I distinguish between user and admin auth if they both use Bearer tokens?
+			jsonResponse.redirecting = true;
+			userAuth.logout();
 			goToLogin();
 		}
 	}
@@ -152,6 +161,11 @@ export function goToAdminLogin(): void {
 }
 export function goToLogin(): void {
 	const urlObj = new SvelteURL(resolve("/login"), location.origin);
+	urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
+	goto(urlObj.toString());
+}
+export function goToElevate(): void {
+	const urlObj = new SvelteURL(resolve("/elevate"), location.origin);
 	urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
 	goto(urlObj.toString());
 }
