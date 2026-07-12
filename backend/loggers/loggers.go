@@ -84,7 +84,7 @@ func NewHandler(
 		Level:          level,
 		SaveToDatabase: saveToDatabase,
 		ShouldPrint:    shouldPrint,
-		tintHandler: tint.NewHandler(os.Stdout, &tint.Options{
+		tintHandler: tint.NewTextHandler(os.Stdout, &tint.Options{
 			Level:      level,
 			AddSource:  true,
 			TimeFormat: time.TimeOnly,
