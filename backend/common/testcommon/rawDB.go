@@ -19,7 +19,7 @@ import (
 func RawColumnQuery(t *testing.T, sqlDB *sql.DB, query string, args ...any) []byte {
 	t.Helper()
 	var result []byte
-	stdErr := sqlDB.QueryRow(query, args...).Scan(&result)
+	stdErr := sqlDB.QueryRowContext(t.Context(), query, args...).Scan(&result)
 	require.NoError(t, stdErr)
 	return result
 }

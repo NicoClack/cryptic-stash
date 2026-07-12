@@ -16,8 +16,9 @@ func createInvite(
 	email string,
 	expiresAt time.Time,
 ) (*ent.Invite, string) {
+	t.Helper()
 	code := app.Core.RandomAuthCode()
-	hashed := sha256.Sum256([]byte(code))
+	hashed := sha256.Sum256(code)
 	now := app.Clock.Now()
 
 	inviteOb := app.Database.Client().Invite.Create().

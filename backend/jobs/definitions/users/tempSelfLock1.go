@@ -34,7 +34,6 @@ func TempSelfLock1(app *common.App) *jobs.Definition {
 				jobCtx.Context, app.Database,
 				func(tx *ent.Tx, ctx context.Context) error {
 					panic("not implemented")
-					return nil
 				},
 			)
 		},

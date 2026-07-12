@@ -46,7 +46,7 @@ func Post(
 	require.NoError(t, stdErr)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "test-agent")
-	req.Header.Set("test-proxy-original-ip", "127.0.0.1")
+	req.Header.Set("Test-Proxy-Original-Ip", "127.0.0.1")
 
 	for _, option := range options {
 		option(req)

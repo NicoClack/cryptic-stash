@@ -2,7 +2,6 @@ package users
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
@@ -30,11 +29,6 @@ func AdminUnlock(app *servercommon.ServerApp) gin.HandlerFunc {
 			func(tx *ent.Tx, ctx context.Context) error {
 				// TODO: take stash ID rather than username
 				panic("not implemented")
-
-				ginCtx.JSON(http.StatusOK, AdminUnlockResponse{
-					Errors: []servercommon.ErrorDetail{},
-				})
-				return nil
 			},
 		)
 	})

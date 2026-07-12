@@ -37,7 +37,7 @@ func RegisterFinish(app *servercommon.ServerApp) gin.HandlerFunc {
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
 		}
-		parsedCredential, stdErr := body.CredentialCreationResponse.Parse()
+		parsedCredential, stdErr := body.Parse()
 		if stdErr != nil {
 			return servercommon.NewError(stdErr).
 				SetStatus(http.StatusBadRequest).

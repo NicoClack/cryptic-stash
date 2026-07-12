@@ -29,7 +29,7 @@ var defaultMessageMap = map[common.MessageType]func(message *common.Message) *Fo
 			Body:    fmt.Sprintf("%v\nClick here to get started: %v", message.InviteMessage, message.URL),
 		}
 	},
-	common.MessageUserUpdate: func(message *common.Message) *FormattedMessage {
+	common.MessageUserUpdate: func(_ *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "Cryptic Stash account updated",
 			Body:    "Your account password and/or stash have been updated by your admin.",
@@ -47,14 +47,14 @@ var defaultMessageMap = map[common.MessageType]func(message *common.Message) *Fo
 			Body:    "REMINDER: YOU HAVE A PENDING LOGIN ATTEMPT! " + getLoginAttemptMessageBody(message),
 		}
 	},
-	common.MessageDownload: func(message *common.Message) *FormattedMessage {
+	common.MessageDownload: func(_ *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "Cryptic Stash download completed",
 			Body: "Your stash has been downloaded. If this wasn't you, " +
 				"please rotate your 2FA backup codes immediately and contact your admin!",
 		}
 	},
-	common.MessageTest: func(message *common.Message) *FormattedMessage {
+	common.MessageTest: func(_ *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "Cryptic Stash test message",
 			Body:    "If you're reading this message, it means your updated contacts are working.",
@@ -66,14 +66,14 @@ var defaultMessageMap = map[common.MessageType]func(message *common.Message) *Fo
 			Body:    fmt.Sprintf("2FA code: %s", message.Code),
 		}
 	},
-	common.MessageLock: func(message *common.Message) *FormattedMessage {
+	common.MessageLock: func(_ *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "Cryptic Stash account locked",
 			Body: "Your account has been locked by your admin, this will replace your self lock if you have one. " +
 				"The lock will remain until your admin removes it.",
 		}
 	},
-	common.MessageUnlock: func(message *common.Message) *FormattedMessage {
+	common.MessageUnlock: func(_ *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "Cryptic Stash account unlocked",
 			Body:    "Your account has been unlocked by your admin, you (or anyone else) can now try to log in again.",
@@ -85,13 +85,13 @@ var defaultMessageMap = map[common.MessageType]func(message *common.Message) *Fo
 			Body:    fmt.Sprintf("You have locked your account until %s", message.Time.Format("2006-01-02 15:04:05")),
 		}
 	},
-	common.MessageSelfUnlock: func(message *common.Message) *FormattedMessage {
+	common.MessageSelfUnlock: func(_ *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "Cryptic Stash self-lock expired",
 			Body:    "Warning: your account freeze has expired, you (or anyone else) can now try to log in again.",
 		}
 	},
-	common.MessageAdminError: func(message *common.Message) *FormattedMessage {
+	common.MessageAdminError: func(_ *common.Message) *FormattedMessage {
 		return &FormattedMessage{
 			Subject: "[Admin] Cryptic Stash error",
 			Body: "[Admin] An error has occurred! Please investigate the logs and possibly create an issue at " +

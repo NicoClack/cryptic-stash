@@ -33,6 +33,7 @@ func createUserWithCredential(
 	app *testhelpers.App,
 	setupAuthenticator func(*virtualwebauthn.Authenticator),
 ) (*ent.User, virtualwebauthn.Credential, virtualwebauthn.Authenticator) {
+	t.Helper()
 	userOb := testcommon.NewDummyUser(1, app.TestDatabase.Client(), t.Context(), app.Clock)
 
 	vAuthenticator := virtualwebauthn.NewAuthenticator()
@@ -59,7 +60,7 @@ func createUserWithCredential(
 		func(tx *ent.Tx, ctx context.Context) error {
 			options, sessionData, wrappedErr := app.Auth.StartRegisterPasskey(&auth.RealWebAuthnUser{
 				User: userOb,
-			}, t.Context())
+			}, ctx)
 			if wrappedErr != nil {
 				return wrappedErr
 			}
@@ -261,6 +262,7 @@ func TestLoginFlow_ClientServerMismatches(t *testing.T) {
 	t.Parallel()
 
 	runTest := func(t *testing.T, serverAssociatesWithUser bool, authenticatorAssociatesWithUser bool) {
+		t.Helper()
 		app := testhelpers.NewApp(t, nil)
 		relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 		_, credential, vAuthenticator := createUserWithCredential(

@@ -20,7 +20,7 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 		ctx := t.Context()
 		dbClient := db.Client()
 
-		_, stashOb := createUserAndStash(t, dbClient, ctx)
+		stashOb := createUserAndStash(t, dbClient, ctx)
 		userAgent := "TestAgent/1.0"
 		ip := "192.0.2.1"
 		now := time.Now()
@@ -47,7 +47,7 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 		ctx := t.Context()
 		dbClient := db.Client()
 
-		_, stashOb := createUserAndStash(t, dbClient, ctx)
+		stashOb := createUserAndStash(t, dbClient, ctx)
 		now := time.Now()
 		userAgent := "direct-bytes-check"
 		ip := "5.6.7.8"
@@ -82,7 +82,7 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 		ctx := t.Context()
 		dbClient := db.Client()
 
-		_, stashOb := createUserAndStash(t, dbClient, ctx)
+		stashOb := createUserAndStash(t, dbClient, ctx)
 		now := time.Now()
 		_, stdErr := dbClient.DownloadSession.Create().
 			SetHashedAuthCode(common.CryptoRandomBytes(32)).
@@ -105,7 +105,7 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 		ctx := t.Context()
 		dbClient := db.Client()
 
-		_, stashOb := createUserAndStash(t, dbClient, ctx)
+		stashOb := createUserAndStash(t, dbClient, ctx)
 		now := time.Now()
 		_, stdErr := dbClient.DownloadSession.Create().
 			SetHashedAuthCode(common.CryptoRandomBytes(32)).

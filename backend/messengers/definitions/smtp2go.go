@@ -74,10 +74,10 @@ type smtp2goSendRequest struct {
 	Sender   string   `json:"sender"`
 	To       []string `json:"to"`
 	Subject  string   `json:"subject"`
-	TextBody string   `json:"text_body"`
+	TextBody string   `json:"text_body"` //nolint:tagliatelle
 }
 type smtp2goSendResponse struct {
-	RequestID string              `json:"request_id"`
+	RequestID string              `json:"request_id"` //nolint:tagliatelle
 	Data      smtp2goResponseData `json:"data"`
 	Error     string              `json:"error"`
 }
@@ -164,7 +164,7 @@ func SMTP2GO1(app *common.App) *messengers.Definition {
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("X-Smtp2go-Api-Key", app.Env.SMTP2GO_API_KEY)
 
-			resp, stdErr := httpClient.Do(req)
+			resp, stdErr := httpClient.Do(req) // #nosec G704 // URL is from env var
 			if stdErr != nil {
 				return ErrWrapperSMTP2GO.Wrap(stdErr)
 			}

@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
@@ -46,7 +47,7 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
 		}
-		parsedResponse, stdErr := body.CredentialAssertionResponse.Parse()
+		parsedResponse, stdErr := body.Parse()
 		if stdErr != nil {
 			return servercommon.NewError(stdErr).
 				SetStatus(http.StatusBadRequest).
@@ -81,7 +82,8 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 			},
 		)
 		if stdErr != nil {
-			if common.IsErrorType[*protocol.Error](stdErr) {
+			if common.IsErrorType[*protocol.Error](stdErr) ||
+				errors.Is(stdErr, auth.ErrWebAuthnUserNotFound) {
 				return servercommon.NewError(stdErr).
 					SetStatus(http.StatusBadRequest).
 					AddDetail(servercommon.ErrorDetail{

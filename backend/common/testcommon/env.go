@@ -70,6 +70,12 @@ func DefaultEnv() *common.Env {
 		SMTP_PASSWORD:            "",
 		SMTP_FROM_EMAIL:          "",
 		SMTP_FROM_NAME:           "Cryptic Stash",
+		SMTP_REQUIRE_TLS:         false,
+		SMTP_IMPLICIT_TLS:        false,
+		SMTP2GO_API_KEY:          "",
+		SMTP2GO_BASE_URL:         nil,
+		SMTP2GO_FROM_EMAIL:       "",
+		SMTP2GO_FROM_NAME:        "",
 		EMAIL_MESSENGER_TYPE:     "",
 	}
 }

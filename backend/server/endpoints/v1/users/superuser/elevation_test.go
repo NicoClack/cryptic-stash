@@ -49,6 +49,7 @@ func createUserWithPasskeys(
 		Authenticator virtualwebauthn.Authenticator
 	},
 ) {
+	t.Helper()
 	userOb := testcommon.NewDummyUser(counter, app.TestDatabase.Client(), t.Context(), app.Clock)
 
 	var results []struct {
@@ -81,7 +82,7 @@ func createUserWithPasskeys(
 			func(tx *ent.Tx, ctx context.Context) (*ent.Passkey, error) {
 				options, sessionData, wrappedErr := app.Auth.StartRegisterPasskey(&auth.RealWebAuthnUser{
 					User: userOb,
-				}, t.Context())
+				}, ctx)
 				if wrappedErr != nil {
 					return nil, wrappedErr
 				}
@@ -140,6 +141,7 @@ func createUserWithPasskey(
 	virtualwebauthn.Credential,
 	virtualwebauthn.Authenticator,
 ) {
+	t.Helper()
 	userOb, results := createUserWithPasskeys(t, counter, app, []passkeyConfig{
 		config,
 	})
@@ -513,6 +515,7 @@ func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T)
 	t.Parallel()
 
 	runTest := func(t *testing.T, claimsOtherUserHandle bool, claimsOtherCredentialID bool) {
+		t.Helper()
 		app := testhelpers.NewApp(t, nil)
 		relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 		user1Ob, passkey1Ob, _, _ := createUserWithPasskey(t, 1, app, passkeyConfig{

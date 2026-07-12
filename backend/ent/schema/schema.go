@@ -102,14 +102,15 @@ type EncryptedField[T any] struct {
 func (encryptedField EncryptedField[T]) Value(val T) (driver.Value, error) {
 	reflectedValue := reflect.ValueOf(val)
 	if !reflectedValue.IsValid() {
-		return nil, nil
+		return nil, nil //nolint: nilnil // nil is a valid SQL value
 	}
+	//nolint:exhaustive // Using as a guard clause
 	switch reflectedValue.Kind() {
-	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
 		if reflectedValue.IsNil() {
 			// There isn't much point in encrypting nils because they're easy to guess based on their length.
 			// Plus they're easy to modify by just reusing an encrypted nil with the same key name.
-			return nil, nil
+			return nil, nil //nolint: nilnil // nil is a valid SQL value
 		}
 	}
 

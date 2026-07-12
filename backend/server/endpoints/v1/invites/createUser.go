@@ -36,7 +36,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 			return serverErr
 		}
 
-		parsedCredential, stdErr := body.CredentialCreationResponse.Parse()
+		parsedCredential, stdErr := body.Parse()
 		if stdErr != nil {
 			return servercommon.NewError(stdErr).
 				SetStatus(http.StatusBadRequest).

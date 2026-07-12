@@ -63,7 +63,7 @@ func ValidateLogin(
 		func(rawID, userHandle []byte) (webauthn.User, error) {
 			userID, stdErr := uuid.FromBytes(userHandle)
 			if stdErr != nil {
-				return nil, nil
+				return nil, stdErr
 			}
 			userOb, stdErr = tx.User.Query().
 				Where(user.ID(userID)).
@@ -71,7 +71,7 @@ func ValidateLogin(
 				Only(ctx)
 			if stdErr != nil {
 				if ent.IsNotFound(stdErr) {
-					return nil, nil
+					return nil, ErrWebAuthnUserNotFound.Clone()
 				}
 				return nil, ErrWrapperDatabase.Wrap(stdErr)
 			}

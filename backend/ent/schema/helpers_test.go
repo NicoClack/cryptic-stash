@@ -84,7 +84,7 @@ func createPasskey(
 		SaveX(ctx)
 }
 
-func createUserAndStash(t *testing.T, client *ent.Client, ctx context.Context) (*ent.User, *ent.Stash) {
+func createUserAndStash(t *testing.T, client *ent.Client, ctx context.Context) *ent.Stash {
 	t.Helper()
 	now := time.Now()
 	userOb := createUser(t, client, ctx)
@@ -105,5 +105,5 @@ func createUserAndStash(t *testing.T, client *ent.Client, ctx context.Context) (
 		SetUser(userOb).
 		SetDownloadSessionsValidFrom(now).
 		SaveX(ctx)
-	return userOb, stashOb
+	return stashOb
 }

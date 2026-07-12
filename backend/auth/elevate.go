@@ -173,7 +173,7 @@ func GetEligiblePasskeysForSuperUserMode(
 
 	var eligible []*ent.Passkey
 	for _, passkeyOb := range passkeyObs {
-		if !(passkeyOb.AllowSuperUser || sessionOb.Edges.Passkey.AllowSuperUser) {
+		if !passkeyOb.AllowSuperUser && !sessionOb.Edges.Passkey.AllowSuperUser {
 			continue
 		}
 		if hasSecondGroupPasskey && passkeyOb.IsSecondGroup == sessionOb.Edges.Passkey.IsSecondGroup {

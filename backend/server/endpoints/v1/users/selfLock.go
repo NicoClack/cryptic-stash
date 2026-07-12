@@ -37,6 +37,5 @@ func SelfLock(app *servercommon.ServerApp) gin.HandlerFunc {
 		// )
 
 		panic("not implemented")
-		return nil
 	})
 }

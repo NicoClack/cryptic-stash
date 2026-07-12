@@ -51,6 +51,10 @@ var ErrSessionAlreadyElevated = common.NewErrorWithCategories(
 	"session is already in superuser mode",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
+var ErrWebAuthnUserNotFound = common.NewErrorWithCategories(
+	"no user found for WebAuthn user handle",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
 
 var ErrWrapperStartRegisterPasskey = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeStartRegisterPasskey)
 var ErrWrapperFinishRegisterPasskey = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeFinishRegisterPasskey)
