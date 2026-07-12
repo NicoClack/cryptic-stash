@@ -1011,6 +1011,7 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 	)
 }
 
+// TODO: this is failing because the start elevation endpoint doesn't handle ErrNoSuperEligiblePasskeys errors
 func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *testing.T) {
 	t.Parallel()
 	app := testhelpers.NewApp(t, nil)

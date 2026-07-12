@@ -22,9 +22,12 @@ type LoginFinishPayload struct {
 }
 
 type LoginFinishResponse struct {
-	Errors []servercommon.ErrorDetail `json:"errors"`
-	UserID uuid.UUID                  `json:"userId"`
-	Token  string                     `json:"token"`
+	Errors          []servercommon.ErrorDetail `json:"errors"`
+	UserID          uuid.UUID                  `json:"userId"`
+	Token           string                     `json:"token"`
+	Username        string                     `json:"username"`
+	IsSuperUserMode bool                       `json:"isSuperUserMode"`
+	IsSecondGroup   bool                       `json:"isSecondGroup"`
 }
 
 func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -57,7 +60,7 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 			ginCtx.Request.Context(),
 			app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*LoginFinishResponse, error) {
-				sessionOb, token, wrappedErr := app.Auth.FinishLogin(
+				userOb, passkeyOb, sessionOb, token, wrappedErr := app.Auth.FinishLogin(
 					body.WebAuthnSessionID,
 					parsedResponse,
 					ginCtx,
@@ -68,9 +71,12 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				return &LoginFinishResponse{
-					Errors: []servercommon.ErrorDetail{},
-					UserID: sessionOb.UserID,
-					Token:  base64.RawURLEncoding.EncodeToString(token),
+					Errors:          []servercommon.ErrorDetail{},
+					UserID:          sessionOb.UserID,
+					Token:           base64.RawURLEncoding.EncodeToString(token),
+					Username:        userOb.Username,
+					IsSuperUserMode: sessionOb.SuperUserMode,
+					IsSecondGroup:   passkeyOb.IsSecondGroup,
 				}, nil
 			},
 		)

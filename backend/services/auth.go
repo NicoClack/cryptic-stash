@@ -39,7 +39,7 @@ func (service *Auth) FinishLogin(
 	parsedResponse *protocol.ParsedCredentialAssertionData,
 	ginCtx *gin.Context,
 	tx *ent.Tx,
-) (*ent.Session, []byte, common.WrappedError) {
+) (*ent.User, *ent.Passkey, *ent.Session, []byte, common.WrappedError) {
 	return auth.FinishLogin(
 		sessionID,
 		parsedResponse,

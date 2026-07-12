@@ -15,7 +15,16 @@ func StartRegisterPasskey(
 	user webauthn.User,
 	webAuthnApp *webauthn.WebAuthn,
 ) (protocol.PublicKeyCredentialCreationOptions, *webauthn.SessionData, common.WrappedError) {
-	creation, sessionData, stdErr := webAuthnApp.BeginRegistration(user)
+	credentials := user.WebAuthnCredentials()
+	excludedCredentials := make([]protocol.CredentialDescriptor, 0, len(credentials))
+	for _, credential := range credentials {
+		excludedCredentials = append(excludedCredentials, credential.Descriptor())
+	}
+
+	creation, sessionData, stdErr := webAuthnApp.BeginRegistration(
+		user,
+		webauthn.WithExclusions(excludedCredentials),
+	)
 	if stdErr != nil {
 		return protocol.PublicKeyCredentialCreationOptions{},
 			nil,

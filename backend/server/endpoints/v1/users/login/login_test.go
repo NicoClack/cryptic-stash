@@ -164,8 +164,12 @@ func TestLoginFlow(t *testing.T) {
 	var finishResp login.LoginFinishResponse
 	stdErr = json.Unmarshal(finishRecorder.Body.Bytes(), &finishResp)
 	require.NoError(t, stdErr)
+	require.Empty(t, finishResp.Errors)
 	require.Equal(t, userOb.ID, finishResp.UserID)
 	require.Len(t, finishResp.Token, 43) // 32 bytes
+	require.Equal(t, userOb.Username, finishResp.Username)
+	require.False(t, finishResp.IsSuperUserMode)
+	require.False(t, finishResp.IsSecondGroup)
 
 	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(finishResp.Token)
 	require.NoError(t, stdErr)

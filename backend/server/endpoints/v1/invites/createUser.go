@@ -15,19 +15,16 @@ import (
 	"github.com/google/uuid"
 )
 
-var ErrUsernameTaken = servercommon.NewUnauthorizedError().
-	SetChild(
-		common.NewErrorWithCategories("username already taken", common.ErrTypeClient),
-	)
-
 type CreateUserPayload struct {
 	protocol.CredentialCreationResponse
 	CredentialName string `json:"credentialName" binding:"required,min=1,max=64"`
 }
 type CreateUserResponse struct {
-	Errors []servercommon.ErrorDetail `binding:"required" json:"errors"`
-	UserID uuid.UUID                  `                   json:"userId"`
-	Token  string                     `                   json:"token"`
+	Errors          []servercommon.ErrorDetail `json:"errors"`
+	UserID          uuid.UUID                  `json:"userId"`
+	Token           string                     `json:"token"`
+	Username        string                     `json:"username"`
+	IsSuperUserMode bool                       `json:"isSuperUserMode"`
 }
 
 func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -49,6 +46,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				})
 		}
 
+		isUsernameTaken := false
 		resp, stdErr := useInvite(
 			id, ginCtx, app,
 			func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*CreateUserResponse, error) {
@@ -64,7 +62,8 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					if stdErr != nil {
 						return nil, stdErr
 					}
-					return nil, ErrUsernameTaken.Clone()
+					isUsernameTaken = true // So the transaction commits
+					return nil, nil
 				}
 
 				if inviteOb.WebAuthnSession == nil {
@@ -77,7 +76,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				passkeyOb, wrappedErr := app.Auth.FinishRegisterPasskey(
 					body.CredentialName,
-					false,
+					true,
 					false,
 					inviteOb.Email,
 					inviteOb.WebAuthnSession,
@@ -125,8 +124,8 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					)
 				}
 
-				_, token, wrappedErr := app.Auth.CreateSession(
-					false,
+				sessionOb, token, wrappedErr := app.Auth.CreateSession(
+					true,
 					passkeyOb.UserID,
 					passkeyOb.ID,
 					ginCtx.Request.UserAgent(),
@@ -139,14 +138,22 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				return &CreateUserResponse{
-					Errors: []servercommon.ErrorDetail{},
-					UserID: passkeyOb.UserID,
-					Token:  base64.RawURLEncoding.EncodeToString(token),
+					Errors:          []servercommon.ErrorDetail{},
+					UserID:          passkeyOb.UserID,
+					Token:           base64.RawURLEncoding.EncodeToString(token),
+					Username:        inviteOb.Email,
+					IsSuperUserMode: sessionOb.SuperUserMode,
 				}, nil
 			},
 		)
 		if stdErr != nil {
 			return stdErr
+		}
+		if isUsernameTaken {
+			return servercommon.NewUnauthorizedError().
+				SetChild(
+					common.NewErrorWithCategories("username already taken", common.ErrTypeClient),
+				)
 		}
 
 		ginCtx.JSON(http.StatusCreated, resp)

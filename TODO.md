@@ -1,5 +1,6 @@
 # TODO
 
+- Use trailing slashes for all endpoints
 - Is it safe to make env.BASE_ENCRYPTION_KEY optional until setup is completed?
 - - Make encrypted writes fail when it isn't set
 - Store the returned session during signup
@@ -61,6 +62,7 @@
 - Generally improve the frontend
 - Remove userID and publicMessage from logger, it's not worth the complexity and risks
 - - Maybe LoginAlerts should be used to display security messages when you log in?
+- Fix elevation softlocks, see the StartElevation endpoint
 - Can cancelling requests make views non-atomic if a view uses multiple transactions? Are there any security risks with this?
 - Standardise returning errors and using gin.H vs the endpoint specific download struct. That struct applies defaults which the other 2 approaches don't, so it could leak information
 - Implement Cloudflare Turnstile or reCAPTCHA. Turnstile is better for privacy so probably use that
@@ -80,6 +82,8 @@
 - - Matrix?
 - - Slack
 - CSRF?
+- Make non-email messengers act as echos, they should summarise the email and not provide any instructions. That way configuring more of them shouldn't really increase the phishing risk
+- Create a PDF to explain the recovery and more-so the blocking process (they might not have the PDF in an recovery scenario). 
 - Move more logic out of endpoints
 - CC admin (or all users?) when a user receives a login alert
 - Review contexts. Possibly want to give them all a timeout, partly to make shutdowns more predictable
@@ -121,6 +125,11 @@
 - Delete accounts if they're locked for too long (GDPR)
 - - Lock accounts if the user doesn't respond to the regular messenger check.
 - - The email messenger probably shouldn't ever be disabled automatically? Should it be manually disableable?
+- Periodically contact users and check they still know how to access their stash
+- - Don't include a link in these emails to reduce the phishing risk and to check they know the URL. Instead ask them to download their stash and click the dry run option
+- - Should have to tick a box to confirm they're using a guest browser profile
+- - Enter a dry run code from the email? Maybe that could reveal 3 random words that were included in the email that was sent when the stash was set up? Need to reduce the phishing risk somehow
+- - Then enter email and password. A confirmation email is sent.
 - Delete old logs and other sources of PII periodically
 - Improve frontend/local dev security:
 - - Use CSP to prevent fetches to other origins

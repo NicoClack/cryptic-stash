@@ -9,11 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// TODO: remove
+
 type AuthTestResponse struct {
-	Errors    []servercommon.ErrorDetail `json:"errors"`
-	SessionID uuid.UUID                  `json:"sessionId"`
-	UserID    uuid.UUID                  `json:"userId"`
-	Username  string                     `json:"username"`
+	Errors        []servercommon.ErrorDetail `json:"errors"`
+	SessionID     uuid.UUID                  `json:"sessionId"`
+	UserID        uuid.UUID                  `json:"userId"`
+	Username      string                     `json:"username"`
+	SuperUserMode bool                       `json:"superUserMode"`
 }
 
 func AuthTest(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -22,10 +25,11 @@ func AuthTest(app *servercommon.ServerApp) gin.HandlerFunc {
 		userOb := ginCtx.MustGet("user").(*ent.User)
 
 		ginCtx.JSON(http.StatusOK, AuthTestResponse{
-			Errors:    []servercommon.ErrorDetail{},
-			SessionID: sessionOb.ID,
-			UserID:    userOb.ID,
-			Username:  userOb.Username,
+			Errors:        []servercommon.ErrorDetail{},
+			SessionID:     sessionOb.ID,
+			UserID:        userOb.ID,
+			Username:      userOb.Username,
+			SuperUserMode: sessionOb.SuperUserMode,
 		})
 		return nil
 	})

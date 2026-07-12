@@ -39,6 +39,10 @@ var ErrInvalidSession = common.NewErrorWithCategories(
 	"invalid session",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
+var ErrNoSuperEligiblePasskeys = common.NewErrorWithCategories(
+	"no passkeys are eligible for superuser mode",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
 var ErrNeitherPasskeySuperEligible = common.NewErrorWithCategories(
 	"neither passkey is eligible for superuser mode",
 	common.ErrTypeAuth, common.ErrTypeClient,

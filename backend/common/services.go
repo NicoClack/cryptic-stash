@@ -128,7 +128,7 @@ type AuthService interface {
 		parsedResponse *protocol.ParsedCredentialAssertionData,
 		ginCtx *gin.Context,
 		tx *ent.Tx,
-	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
+	) (userOb *ent.User, passkeyOb *ent.Passkey, sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
 
 	GetEligiblePasskeysForSuperUserMode(sessionOb *ent.Session, userOb *ent.User) (
 		[]*ent.Passkey,

@@ -2,8 +2,10 @@ package dbcommon
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/NicoClack/cryptic-stash/backend/ent"
 )
 
 const (
@@ -32,3 +34,28 @@ var ErrUnexpectedTransaction = ErrWrapperStartTx.Wrap(
 		errors.New("found transaction in context. nested transactions are not supported"),
 	),
 )
+
+func IsUniqueConstraintError(stdErr error, tableNames ...string) bool {
+	constraintErr, ok := errors.AsType[*ent.ConstraintError](stdErr)
+	if !ok {
+		return false
+	}
+	unwrapped := constraintErr.Unwrap()
+	if unwrapped == nil {
+		// This shouldn't happen, but best to avoid a panic here
+		return false
+	}
+	msg := unwrapped.Error()
+	if !strings.Contains(msg, "UNIQUE constraint failed") {
+		return false
+	}
+	if len(tableNames) == 0 {
+		return true
+	}
+	for _, tableName := range tableNames {
+		if strings.Contains(msg, tableName) {
+			return true
+		}
+	}
+	return false
+}

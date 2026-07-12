@@ -142,7 +142,7 @@ func FinishLogin(
 	clock clockwork.Clock,
 	logger common.Logger,
 	sessionDuration time.Duration,
-) (*ent.Session, []byte, common.WrappedError) {
+) (*ent.User, *ent.Passkey, *ent.Session, []byte, common.WrappedError) {
 	userOb, passkeyOb, _, wrappedErr := ValidateLogin(
 		webAuthnSessionID,
 		parsedResponse,
@@ -154,7 +154,7 @@ func FinishLogin(
 		logger,
 	)
 	if wrappedErr != nil {
-		return nil, nil, ErrWrapperFinishLogin.Wrap(
+		return nil, nil, nil, nil, ErrWrapperFinishLogin.Wrap(
 			wrappedErr,
 		)
 	}
@@ -171,10 +171,10 @@ func FinishLogin(
 		ginCtx.Request.Context(),
 	)
 	if wrappedErr != nil {
-		return nil, nil, ErrWrapperFinishLogin.Wrap(
+		return nil, nil, nil, nil, ErrWrapperFinishLogin.Wrap(
 			wrappedErr,
 		)
 	}
 
-	return sessionOb, sessionToken, nil
+	return userOb, passkeyOb, sessionOb, sessionToken, nil
 }

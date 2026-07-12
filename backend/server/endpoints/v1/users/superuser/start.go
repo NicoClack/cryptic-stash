@@ -53,6 +53,10 @@ func StartElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 			},
 		)
 		if stdErr != nil {
+			// TODO: handle ErrNoSuperEligiblePasskeys and trigger sidevation? Require a superuser mode passkey from any group,
+			// then have them elevate again with a passkey from the other group.
+			// Currently a session can be unelevatable if a non-super passkey was used for login
+			// and the only other superuser passkey is in the same group.
 			return servercommon.ExpectError(
 				stdErr, auth.ErrSessionAlreadyElevated,
 				http.StatusConflict,

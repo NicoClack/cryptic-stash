@@ -1,6 +1,7 @@
 package invites_test
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/invites"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
@@ -23,6 +25,7 @@ func TestInviteFlow(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
+	dbClient := app.Database.Client()
 	email := "integration-test@example.com"
 	expiresAt := app.Clock.Now().Add(time.Hour).UTC()
 	inviteOb, code := createInvite(t, app, email, expiresAt)
@@ -85,11 +88,26 @@ func TestInviteFlow(t *testing.T) {
 	var createUserResp invites.CreateUserResponse
 	stdErr = json.Unmarshal(respRecorder.Body.Bytes(), &createUserResp)
 	require.NoError(t, stdErr)
+	require.Empty(t, createUserResp.Errors)
 	require.Equal(t, userID, createUserResp.UserID)
 	require.Len(t, createUserResp.Token, 43) // 32 bytes base64 encoded
-	// TODO: assert that the session is superuser mode
+	require.Equal(t, email, createUserResp.Username)
+	require.True(
+		t,
+		createUserResp.IsSuperUserMode,
+		// ^ The user will likely need to make account changes immediately after creating it
+	)
 
-	userOb := app.Database.Client().User.Query().
+	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(createUserResp.Token)
+	require.NoError(t, stdErr)
+	hashedToken := sha256.Sum256(decodedToken)
+	sessionOb, stdErr := dbClient.Session.Query().
+		Where(session.HashedToken(hashedToken[:])).
+		Only(t.Context())
+	require.NoError(t, stdErr)
+	require.True(t, sessionOb.SuperUserMode)
+
+	userOb := dbClient.User.Query().
 		Where(user.Username(email)).
 		WithPasskeys().
 		WithStashes().
@@ -250,6 +268,7 @@ func TestInviteFlow_ExpiredInvite(t *testing.T) {
 
 	// This information isn't too sensitive so it'll just get deleted along with the invite once
 	// that's got too old. The user email in that is more valuable information than this
+	panic("not implemented")
 	// TODO: implement that ^
 	inviteOb = dbClient.Invite.GetX(t.Context(), inviteOb.ID)
 	require.Equal(t, lastWebAuthnSession, inviteOb.WebAuthnSession)

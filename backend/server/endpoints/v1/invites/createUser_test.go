@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/invites"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
@@ -17,8 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: create tests for the whole flow. Assert that the passkey and session are superuser
-
 func TestCreateUser_NoWebAuthnSession(t *testing.T) {
 	t.Parallel()
 
@@ -26,20 +25,19 @@ func TestCreateUser_NoWebAuthnSession(t *testing.T) {
 	inviteOb, code := createInvite(t, app, "test@example.com", app.Clock.Now().Add(time.Hour))
 
 	// The WebAuthn session is normally created by the generate options endpoint, which isn't called here
-	createUserPayload := invites.CreateUserPayload{
-		CredentialName: "Test Key",
-		CredentialCreationResponse: protocol.CredentialCreationResponse{
-			AttestationResponse: protocol.AuthenticatorAttestationResponse{
-				AuthenticatorResponse: protocol.AuthenticatorResponse{
-					ClientDataJSON: protocol.URLEncodedBase64([]byte("{}")),
-				},
-			},
-		},
-	}
 	respRecorder := testcommon.Post(
 		t, app.Server,
 		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
-		createUserPayload,
+		invites.CreateUserPayload{
+			CredentialName: "Test Key",
+			CredentialCreationResponse: protocol.CredentialCreationResponse{
+				AttestationResponse: protocol.AuthenticatorAttestationResponse{
+					AuthenticatorResponse: protocol.AuthenticatorResponse{
+						ClientDataJSON: protocol.URLEncodedBase64([]byte("{}")),
+					},
+				},
+			},
+		},
 		testcommon.WithBearerToken(code),
 	)
 	testcommon.AssertJSONResponse(
@@ -48,8 +46,8 @@ func TestCreateUser_NoWebAuthnSession(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Message: "invalid WebAuthn credential",
-					Code:    "INVALID_CREDENTIAL",
+					Message: "WebAuthnSessionID: missing or expired",
+					Code:    "INVALID_WEBAUTHN_SESSION",
 				},
 			},
 		},
@@ -70,6 +68,7 @@ func TestCreateUser_UsernameTaken(t *testing.T) {
 		SaveX(t.Context())
 	inviteOb, code := createInvite(t, app, email, app.Clock.Now().Add(time.Hour))
 
+	// The username is checked before the passkey, so this can be a dummy
 	vAuthenticator := virtualwebauthn.NewAuthenticator()
 	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
 	vAuthenticator.AddCredential(credential)
@@ -97,7 +96,11 @@ func TestCreateUser_UsernameTaken(t *testing.T) {
 		t, respRecorder,
 		http.StatusUnauthorized,
 		gin.H{
-			"errors": []servercommon.ErrorDetail{},
+			"errors": []servercommon.ErrorDetail{}, // Don't reveal to the client
 		},
 	)
+
+	inviteOb = dbClient.Invite.Query().OnlyX(t.Context())
+	require.NotNil(t, inviteOb.ExpiredReason)
+	require.Equal(t, invite.ExpiredReason("username_taken"), *inviteOb.ExpiredReason)
 }

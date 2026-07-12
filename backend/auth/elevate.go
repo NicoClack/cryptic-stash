@@ -37,6 +37,12 @@ func StartElevation(
 			wrappedErr,
 		)
 	}
+	if len(eligiblePasskeys) == 0 {
+		return uuid.Nil, protocol.PublicKeyCredentialRequestOptions{}, ErrWrapperStartElevation.Wrap(
+			ErrNoSuperEligiblePasskeys,
+		)
+	}
+
 	allowedCredentials := make([]protocol.CredentialDescriptor, 0, len(eligiblePasskeys))
 	for _, passkeyOb := range eligiblePasskeys {
 		allowedCredentials = append(allowedCredentials, passkeyOb.Credential.Descriptor())
