@@ -14,30 +14,37 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/descope/virtualwebauthn"
 	"github.com/gin-gonic/gin"
-	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateUser_InvalidWebAuthnSession(t *testing.T) {
+func TestCreateUser_NoWebAuthnSession_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
 	inviteOb, code := createInvite(t, app, "test@example.com", app.Clock.Now().Add(time.Hour))
 
-	// The WebAuthn session is normally created by the generate options endpoint, which isn't called here
+	vAuthenticator := virtualwebauthn.NewAuthenticator()
+	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
+	vAuthenticator.AddCredential(credential)
+	credentialJSON := virtualwebauthn.CreateAttestationResponse(
+		testcommon.NewWebAuthnRelyingParty(app.Env),
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AttestationOptions{
+			Challenge: []byte("12345"),
+		},
+	)
+
+	var payload invites.CreateUserPayload
+	stdErr := json.Unmarshal([]byte(credentialJSON), &payload)
+	require.NoError(t, stdErr)
+	payload.CredentialName = "Test Key"
+
+	// The WebAuthn session is normally created for an invite by the generate options endpoint, which isn't called here
 	respRecorder := testcommon.Post(
 		t, app.Server,
 		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
-		invites.CreateUserPayload{
-			CredentialName: "Test Key",
-			CredentialCreationResponse: protocol.CredentialCreationResponse{
-				AttestationResponse: protocol.AuthenticatorAttestationResponse{
-					AuthenticatorResponse: protocol.AuthenticatorResponse{
-						ClientDataJSON: protocol.URLEncodedBase64([]byte("{}")),
-					},
-				},
-			},
-		},
+		payload,
 		testcommon.WithBearerToken(code),
 	)
 	testcommon.AssertJSONResponse(
@@ -46,8 +53,8 @@ func TestCreateUser_InvalidWebAuthnSession(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Message: "WebAuthnSessionID: missing or expired",
-					Code:    "INVALID_WEBAUTHN_SESSION",
+					Message: "credential: no active WebAuthn session, please refresh the page",
+					Code:    "NO_WEBAUTHN_SESSION",
 				},
 			},
 		},

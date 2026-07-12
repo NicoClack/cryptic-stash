@@ -268,8 +268,6 @@ func TestInviteFlow_ExpiredInvite(t *testing.T) {
 
 	// This information isn't too sensitive so it'll just get deleted along with the invite once
 	// that's got too old. The user email in that is more valuable information than this
-	panic("not implemented")
-	// TODO: implement that ^
 	inviteOb = dbClient.Invite.GetX(t.Context(), inviteOb.ID)
 	require.Equal(t, lastWebAuthnSession, inviteOb.WebAuthnSession)
 

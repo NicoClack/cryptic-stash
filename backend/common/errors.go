@@ -40,6 +40,7 @@ const (
 	ErrTypeAuth            = "auth [package]"
 	ErrTypeDbCommon        = "db common [package]"
 	ErrTypeServerCommon    = "server common [package]"
+	ErrTypeInvites         = "invites [package]"
 	ErrTypeServices        = "services [package]"
 	// Similar idea here if it's unknown
 )

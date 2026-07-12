@@ -107,6 +107,7 @@ type App struct {
 	KeyValue         KeyValueService
 	TempKeyValue     TempKeyValueService
 	TwoFactorActions TwoFactorActionService
+	Invites          InviteService
 	Messengers       MessengerService
 	Server           ServerService
 	Core             CoreService
@@ -381,6 +382,12 @@ type JobService interface {
 	WaitForJobs()
 	Encode(versionedType string, body any) (json.RawMessage, WrappedError)
 }
+
+// TODO: move more of the invite logic from endpoints into this service (e.g creating users)
+type InviteService interface {
+	DeleteExpiredInvites(tx *ent.Tx, ctx context.Context) WrappedError
+}
+
 type TwoFactorActionService interface {
 	Create(
 		versionedType string,

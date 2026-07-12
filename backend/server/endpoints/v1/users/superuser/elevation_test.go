@@ -1014,6 +1014,57 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 // TODO: this is failing because the start elevation endpoint doesn't handle ErrNoSuperEligiblePasskeys errors
 func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *testing.T) {
 	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
+		// Group 1
+		{
+			allowSuperUser: false,
+			isSecondGroup:  false,
+			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
+				vAuth.Options.BackupEligible = true
+				vAuth.Options.BackupState = true
+				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
+				vAuth.Options.UserHandle = userID[:]
+			},
+			name: "syncable-non-super",
+		},
+		// Group 2
+		{
+			allowSuperUser: false,
+			isSecondGroup:  true,
+			name:           "security-key-non-super",
+		},
+		{ // Not used, but otherwise the start endpoint will fail because there are no super-eligible passkeys it can request
+			allowSuperUser: true,
+			isSecondGroup:  true,
+			name:           "security-key-super",
+		},
+	})
+	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
+
+	finishRecorder := performElevation(
+		t, app, sessionToken,
+		passkeys[1].Credential,
+		passkeys[1].Authenticator,
+	)
+	testcommon.AssertJSONResponse(
+		t, finishRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "invalid credential",
+					Code:    "INVALID_CREDENTIAL",
+				},
+			},
+		},
+	)
+}
+
+func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotion_SendsForbidden(t *testing.T) {
+	t.Parallel()
+
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		{
@@ -1028,28 +1079,67 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *te
 			name: "syncable-non-super",
 		},
 		{
-			allowSuperUser: false,
+			allowSuperUser: true,
 			isSecondGroup:  true,
-			name:           "security-key-non-super",
+			name:           "security-key-temp-super", // Will be demoted partway through the test
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 
-	finishRecorder := performElevation(
-		t, app, sessionToken,
-		passkeys[1].Credential,
-		passkeys[1].Authenticator,
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/users/superuser/start-elevation/",
+		nil,
+		testcommon.WithBearerToken(sessionToken),
 	)
+
+	// The go-webauthn session will still accept this, but the application logic will return ErrNeitherPasskeySuperEligible
+	app.Database.Client().Passkey.UpdateOneID(passkeys[1].Passkey.ID).
+		SetAllowSuperUser(false).
+		ExecX(t.Context())
+
+	var startResp superuser.StartElevationResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		passkeys[1].Authenticator,
+		passkeys[1].Credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startResp.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/users/superuser/finish-elevation/",
+		superuser.FinishElevationPayload{
+			CredentialAssertionResponse: parsedAssertion,
+			WebAuthnSessionID:           startResp.WebAuthnSessionID,
+		},
+		testcommon.WithBearerToken(sessionToken),
+	)
+
 	testcommon.AssertJSONResponse(
 		t, finishRecorder,
-		http.StatusForbidden,
+		http.StatusBadRequest,
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Message: "neither passkey is eligible for superuser mode",
-					Code:    "NEITHER_PASSKEY_SUPER_ELIGIBLE",
+					Message: "invalid credential",
+					Code:    "INVALID_CREDENTIAL",
 				},
 			},
 		},
 	)
 }
+
+// TODO: create test that's similar to above but asserts the behaviour in the super softlock
+// i.e when the first passkey is non-super and the only super passkey is in the same group.
+// The 3rd is non-super in the other group

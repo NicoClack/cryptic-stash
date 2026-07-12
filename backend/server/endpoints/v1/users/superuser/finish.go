@@ -2,6 +2,7 @@ package superuser
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
@@ -71,7 +72,9 @@ func FinishElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 		)
 
 		if stdErr != nil {
-			if common.IsErrorType[*protocol.Error](stdErr) {
+			if common.IsErrorType[*protocol.Error](stdErr) ||
+				errors.Is(stdErr, auth.ErrNeitherPasskeySuperEligible) {
+				// ^ This error is from more of a sanity check, so we don't distinguish between it and a protocol.Error
 				return servercommon.NewError(stdErr).
 					SetStatus(http.StatusBadRequest).
 					AddDetail(servercommon.ErrorDetail{
@@ -86,13 +89,6 @@ func FinishElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 				&servercommon.ErrorDetail{
 					Message: "WebAuthn session missing or expired",
 					Code:    "INVALID_WEBAUTHN_SESSION",
-				},
-			).Expect(
-				auth.ErrNeitherPasskeySuperEligible,
-				http.StatusForbidden,
-				&servercommon.ErrorDetail{
-					Message: "neither passkey is eligible for superuser mode",
-					Code:    "NEITHER_PASSKEY_SUPER_ELIGIBLE",
 				},
 			)
 		}

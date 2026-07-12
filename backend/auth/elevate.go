@@ -95,6 +95,8 @@ func FinishElevation(
 		)
 	}
 
+	// go-webauthn validates this since we pass .WithAllowedCredentials to BeginDiscoverableLogin,
+	// but we'll double check in case the passkeys have changed during the session and to be safe.
 	eligiblePasskeys, wrappedErr := GetEligiblePasskeysForSuperUserMode(sessionOb, userOb)
 	if wrappedErr != nil {
 		return ErrWrapperFinishElevation.Wrap(

@@ -60,6 +60,7 @@ func main() {
 	app.KeyValue.Init()
 	app.Logger.Start()
 	app.TwoFactorActions = services.NewTwoFactorActions(app)
+	app.Invites = services.NewInvites(app)
 	{
 		messengerService := services.NewMessengers(app)
 		app.Messengers = messengerService

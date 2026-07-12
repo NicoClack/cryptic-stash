@@ -52,6 +52,10 @@ func NewScheduler(app *common.App) *Scheduler {
 					if wrappedErr != nil {
 						return wrappedErr
 					}
+					wrappedErr = app.Invites.DeleteExpiredInvites(tx, ctx)
+					if wrappedErr != nil {
+						return wrappedErr
+					}
 
 					return nil
 				},

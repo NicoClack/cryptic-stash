@@ -102,6 +102,7 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 	app.KeyValue = services.NewKeyValue(app)
 	app.TempKeyValue = services.NewTempKeyValue(app)
 	app.Auth = services.NewAuth(app)
+	app.Invites = services.NewInvites(app)
 	app.Database.Start()
 	app.KeyValue.Init()
 	app.Logger.Start()
