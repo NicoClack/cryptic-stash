@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateUser_NoWebAuthnSession(t *testing.T) {
+func TestCreateUser_InvalidWebAuthnSession(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)

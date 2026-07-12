@@ -78,7 +78,7 @@ func TestRegisterFinish_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
 	)
 }
 
-func TestRegisterFinish_InvalidWebAuthnSession(t *testing.T) {
+func TestRegisterFinish_InvalidWebAuthnSession_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)

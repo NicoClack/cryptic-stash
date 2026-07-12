@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFinishElevation_NoAuthHeader_ReturnsBadRequest(t *testing.T) {
+func TestFinishElevation_NoAuthHeader_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -41,7 +41,7 @@ func TestFinishElevation_NoAuthHeader_ReturnsBadRequest(t *testing.T) {
 		},
 	)
 }
-func TestFinishElevation_UnknownSessionToken_ReturnsUnauthorized(t *testing.T) {
+func TestFinishElevation_UnknownSessionToken_SendsUnauthorized(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -63,7 +63,7 @@ func TestFinishElevation_UnknownSessionToken_ReturnsUnauthorized(t *testing.T) {
 	)
 }
 
-func TestFinishElevation_MissingWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
+func TestFinishElevation_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -91,7 +91,7 @@ func TestFinishElevation_MissingWebAuthnSessionID_ReturnsBadRequest(t *testing.T
 	)
 }
 
-func TestFinishElevation_UnknownWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
+func TestFinishElevation_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -136,7 +136,7 @@ func TestFinishElevation_UnknownWebAuthnSessionID_ReturnsBadRequest(t *testing.T
 	)
 }
 
-func TestFinishElevation_MissingWebAuthnSession_ReturnsBadRequest(t *testing.T) {
+func TestFinishElevation_MissingWebAuthnSession_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -181,7 +181,7 @@ func TestFinishElevation_MissingWebAuthnSession_ReturnsBadRequest(t *testing.T) 
 	)
 }
 
-func TestFinishElevation_MalformedCredentialAssertion_ReturnsBadRequest(t *testing.T) {
+func TestFinishElevation_MalformedCredentialAssertion_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)

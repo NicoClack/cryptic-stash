@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestStartElevation_ValidSession_ReturnsWebAuthnChallenge(t *testing.T) {
+func TestStartElevation(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -60,7 +60,7 @@ func TestStartElevation_ValidSession_ReturnsWebAuthnChallenge(t *testing.T) {
 	)
 }
 
-func TestStartElevation_NoAuthHeader_ReturnsBadRequest(t *testing.T) {
+func TestStartElevation_NoAuthHeader_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -83,7 +83,7 @@ func TestStartElevation_NoAuthHeader_ReturnsBadRequest(t *testing.T) {
 		},
 	)
 }
-func TestStartElevation_UnknownSessionToken_ReturnsUnauthorized(t *testing.T) {
+func TestStartElevation_UnknownSessionToken_SendsUnauthorized(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -139,7 +139,7 @@ func TestStartElevation_MultipleRequests_UniqueSessionsAndChallenges(t *testing.
 	require.NotEqual(t, responses[0].PublicKey.Challenge, responses[2].PublicKey.Challenge)
 }
 
-func TestStartElevation_AlreadyElevated_ReturnsConflict(t *testing.T) {
+func TestStartElevation_AlreadyElevated_SendsConflictError(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)

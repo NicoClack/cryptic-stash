@@ -10,7 +10,7 @@ import (
 
 const errTypeTest = "test category [general]"
 
-func TestGetSuccessfulActionIDs_returnsCorrectIDs(t *testing.T) {
+func TestGetSuccessfulActionIDs_ReturnsCorrectIDs(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name      string
@@ -85,7 +85,7 @@ func TestGetSuccessfulActionIDs_returnsCorrectIDs(t *testing.T) {
 	}
 }
 
-func TestError_Error_returnsCorrectMessage(t *testing.T) {
+func TestError_Error_ReturnsCorrectMessage(t *testing.T) {
 	t.Parallel()
 	sentinelErr := common.NewErrorWithCategories(
 		"test error",

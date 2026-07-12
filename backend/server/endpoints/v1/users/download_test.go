@@ -145,7 +145,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 	)
 }
 
-func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T) {
+func TestDownload_UndeletedInvalidSession_SendsUnauthorized(t *testing.T) {
 	t.Parallel()
 
 	clock := clockwork.NewFakeClock()
@@ -264,7 +264,7 @@ func TestDownload_UndeletedInvalidSession_ReturnsUnauthorizedError(t *testing.T)
 	)
 }
 
-func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
+func TestDownload_TemporarilyLockedUser_SendsUnauthorized(t *testing.T) {
 	t.Parallel()
 	// TODO: assert messenger sent message, maybe improve the setup
 
@@ -429,7 +429,7 @@ func TestDownload_TemporarilyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
 	)
 }
 
-func TestDownload_PermanentlyLockedUser_ReturnsUnauthorizedError(t *testing.T) {
+func TestDownload_PermanentlyLockedUser_SendsUnauthorized(t *testing.T) {
 	t.Parallel()
 	// TODO: assert messenger sent message, maybe improve the setup
 

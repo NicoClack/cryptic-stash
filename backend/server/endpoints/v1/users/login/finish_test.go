@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoginFinish_MissingWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
+func TestLoginFinish_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -45,7 +45,7 @@ func TestLoginFinish_MissingWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_InvalidWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
+func TestLoginFinish_InvalidWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -75,7 +75,7 @@ func TestLoginFinish_InvalidWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_UnknownWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
+func TestLoginFinish_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -117,7 +117,7 @@ func TestLoginFinish_UnknownWebAuthnSessionID_ReturnsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_MalformedCredentialAssertion_ReturnsBadRequest(t *testing.T) {
+func TestLoginFinish_MalformedCredentialAssertion_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
