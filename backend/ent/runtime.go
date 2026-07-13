@@ -154,10 +154,10 @@ func init() {
 	jobDescRetriedFraction := jobFields[13].Descriptor()
 	// job.DefaultRetriedFraction holds the default value on creation for the retriedFraction field.
 	job.DefaultRetriedFraction = jobDescRetriedFraction.Default.(float64)
-	// jobDescLoggedStallWarning is the schema descriptor for loggedStallWarning field.
-	jobDescLoggedStallWarning := jobFields[14].Descriptor()
-	// job.DefaultLoggedStallWarning holds the default value on creation for the loggedStallWarning field.
-	job.DefaultLoggedStallWarning = jobDescLoggedStallWarning.Default.(bool)
+	// jobDescHasLoggedStallWarning is the schema descriptor for hasLoggedStallWarning field.
+	jobDescHasLoggedStallWarning := jobFields[14].Descriptor()
+	// job.DefaultHasLoggedStallWarning holds the default value on creation for the hasLoggedStallWarning field.
+	job.DefaultHasLoggedStallWarning = jobDescHasLoggedStallWarning.Default.(bool)
 	// jobDescID is the schema descriptor for id field.
 	jobDescID := jobFields[0].Descriptor()
 	// job.DefaultID holds the default value on creation for the id field.
@@ -315,10 +315,10 @@ func init() {
 			return nil
 		}
 	}()
-	// sessionDescSuperUserMode is the schema descriptor for superUserMode field.
-	sessionDescSuperUserMode := sessionFields[5].Descriptor()
-	// session.DefaultSuperUserMode holds the default value on creation for the superUserMode field.
-	session.DefaultSuperUserMode = sessionDescSuperUserMode.Default.(bool)
+	// sessionDescIsSudo is the schema descriptor for isSudo field.
+	sessionDescIsSudo := sessionFields[5].Descriptor()
+	// session.DefaultIsSudo holds the default value on creation for the isSudo field.
+	session.DefaultIsSudo = sessionDescIsSudo.Default.(bool)
 	// sessionDescUserAgent is the schema descriptor for userAgent field.
 	sessionDescUserAgent := sessionFields[6].Descriptor()
 	session.ValueScanner.UserAgent = sessionDescUserAgent.ValueScanner.(field.TypeValueScanner[string])
@@ -492,10 +492,10 @@ func init() {
 			return nil
 		}
 	}()
-	// usermessengerDescEnabled is the schema descriptor for enabled field.
-	usermessengerDescEnabled := usermessengerFields[5].Descriptor()
-	// usermessenger.DefaultEnabled holds the default value on creation for the enabled field.
-	usermessenger.DefaultEnabled = usermessengerDescEnabled.Default.(bool)
+	// usermessengerDescIsEnabled is the schema descriptor for isEnabled field.
+	usermessengerDescIsEnabled := usermessengerFields[5].Descriptor()
+	// usermessenger.DefaultIsEnabled holds the default value on creation for the isEnabled field.
+	usermessenger.DefaultIsEnabled = usermessengerDescIsEnabled.Default.(bool)
 	// usermessengerDescOptions is the schema descriptor for options field.
 	usermessengerDescOptions := usermessengerFields[6].Descriptor()
 	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[json.RawMessage])

@@ -117,9 +117,9 @@ func RetriedFraction(v float64) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldRetriedFraction, v))
 }
 
-// LoggedStallWarning applies equality check predicate on the "loggedStallWarning" field. It's identical to LoggedStallWarningEQ.
-func LoggedStallWarning(v bool) predicate.Job {
-	return predicate.Job(sql.FieldEQ(FieldLoggedStallWarning, v))
+// HasLoggedStallWarning applies equality check predicate on the "hasLoggedStallWarning" field. It's identical to HasLoggedStallWarningEQ.
+func HasLoggedStallWarning(v bool) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldHasLoggedStallWarning, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "createdAt" field.
@@ -681,14 +681,14 @@ func RetriedFractionLTE(v float64) predicate.Job {
 	return predicate.Job(sql.FieldLTE(FieldRetriedFraction, v))
 }
 
-// LoggedStallWarningEQ applies the EQ predicate on the "loggedStallWarning" field.
-func LoggedStallWarningEQ(v bool) predicate.Job {
-	return predicate.Job(sql.FieldEQ(FieldLoggedStallWarning, v))
+// HasLoggedStallWarningEQ applies the EQ predicate on the "hasLoggedStallWarning" field.
+func HasLoggedStallWarningEQ(v bool) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldHasLoggedStallWarning, v))
 }
 
-// LoggedStallWarningNEQ applies the NEQ predicate on the "loggedStallWarning" field.
-func LoggedStallWarningNEQ(v bool) predicate.Job {
-	return predicate.Job(sql.FieldNEQ(FieldLoggedStallWarning, v))
+// HasLoggedStallWarningNEQ applies the NEQ predicate on the "hasLoggedStallWarning" field.
+func HasLoggedStallWarningNEQ(v bool) predicate.Job {
+	return predicate.Job(sql.FieldNEQ(FieldHasLoggedStallWarning, v))
 }
 
 // And groups predicates with the AND operator between them.

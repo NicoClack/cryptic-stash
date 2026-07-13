@@ -87,16 +87,16 @@ func (_u *UserMessengerUpdate) AddVersion(v int) *UserMessengerUpdate {
 	return _u
 }
 
-// SetEnabled sets the "enabled" field.
-func (_u *UserMessengerUpdate) SetEnabled(v bool) *UserMessengerUpdate {
-	_u.mutation.SetEnabled(v)
+// SetIsEnabled sets the "isEnabled" field.
+func (_u *UserMessengerUpdate) SetIsEnabled(v bool) *UserMessengerUpdate {
+	_u.mutation.SetIsEnabled(v)
 	return _u
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *UserMessengerUpdate) SetNillableEnabled(v *bool) *UserMessengerUpdate {
+// SetNillableIsEnabled sets the "isEnabled" field if the given value is not nil.
+func (_u *UserMessengerUpdate) SetNillableIsEnabled(v *bool) *UserMessengerUpdate {
 	if v != nil {
-		_u.SetEnabled(*v)
+		_u.SetIsEnabled(*v)
 	}
 	return _u
 }
@@ -255,8 +255,8 @@ func (_u *UserMessengerUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.AddedVersion(); ok {
 		_spec.AddField(usermessenger.FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
+	if value, ok := _u.mutation.IsEnabled(); ok {
+		_spec.SetField(usermessenger.FieldIsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
 		vv, err := usermessenger.ValueScanner.Options.Value(value)
@@ -417,16 +417,16 @@ func (_u *UserMessengerUpdateOne) AddVersion(v int) *UserMessengerUpdateOne {
 	return _u
 }
 
-// SetEnabled sets the "enabled" field.
-func (_u *UserMessengerUpdateOne) SetEnabled(v bool) *UserMessengerUpdateOne {
-	_u.mutation.SetEnabled(v)
+// SetIsEnabled sets the "isEnabled" field.
+func (_u *UserMessengerUpdateOne) SetIsEnabled(v bool) *UserMessengerUpdateOne {
+	_u.mutation.SetIsEnabled(v)
 	return _u
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *UserMessengerUpdateOne) SetNillableEnabled(v *bool) *UserMessengerUpdateOne {
+// SetNillableIsEnabled sets the "isEnabled" field if the given value is not nil.
+func (_u *UserMessengerUpdateOne) SetNillableIsEnabled(v *bool) *UserMessengerUpdateOne {
 	if v != nil {
-		_u.SetEnabled(*v)
+		_u.SetIsEnabled(*v)
 	}
 	return _u
 }
@@ -615,8 +615,8 @@ func (_u *UserMessengerUpdateOne) sqlSave(ctx context.Context) (_node *UserMesse
 	if value, ok := _u.mutation.AddedVersion(); ok {
 		_spec.AddField(usermessenger.FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
+	if value, ok := _u.mutation.IsEnabled(); ok {
+		_spec.SetField(usermessenger.FieldIsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
 		vv, err := usermessenger.ValueScanner.Options.Value(value)

@@ -97,7 +97,7 @@ var (
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "running", "completed", "failed"}, Default: "pending"},
 		{Name: "retries", Type: field.TypeInt, Default: 0},
 		{Name: "retried_fraction", Type: field.TypeFloat64, Default: 0},
-		{Name: "logged_stall_warning", Type: field.TypeBool, Default: false},
+		{Name: "has_logged_stall_warning", Type: field.TypeBool, Default: false},
 	}
 	// JobsTable holds the schema information for the "jobs" table.
 	JobsTable = &schema.Table{
@@ -181,7 +181,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "sent_at", Type: field.TypeTime},
-		{Name: "confirmed", Type: field.TypeBool},
+		{Name: "is_confirmed", Type: field.TypeBool},
 		{Name: "download_session_id", Type: field.TypeUUID},
 		{Name: "user_messenger_id", Type: field.TypeUUID},
 	}
@@ -211,7 +211,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 64},
-		{Name: "allow_super_user", Type: field.TypeBool},
+		{Name: "allow_sudo", Type: field.TypeBool},
 		{Name: "credential_id", Type: field.TypeBytes, Unique: true, Size: 1023},
 		{Name: "credential", Type: field.TypeBytes},
 		{Name: "is_second_group", Type: field.TypeBool, Default: false},
@@ -264,10 +264,11 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "hashed_token", Type: field.TypeBytes, Unique: true, Size: 32},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "super_user_mode", Type: field.TypeBool, Default: false},
+		{Name: "is_sudo", Type: field.TypeBool, Default: false},
 		{Name: "user_agent", Type: field.TypeBytes},
 		{Name: "ip", Type: field.TypeBytes},
 		{Name: "passkey_id", Type: field.TypeUUID},
+		{Name: "elevation_passkey_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
@@ -283,8 +284,14 @@ var (
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "sessions_users_sessions",
+				Symbol:     "sessions_passkeys_elevatedSessions",
 				Columns:    []*schema.Column{SessionsColumns[9]},
+				RefColumns: []*schema.Column{PasskeysColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "sessions_users_sessions",
+				Columns:    []*schema.Column{SessionsColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -382,7 +389,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeString, Size: 128},
 		{Name: "version", Type: field.TypeInt},
-		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "is_enabled", Type: field.TypeBool, Default: true},
 		{Name: "options", Type: field.TypeBytes, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
@@ -433,7 +440,8 @@ func init() {
 	LoginAlertsTable.ForeignKeys[1].RefTable = UserMessengersTable
 	PasskeysTable.ForeignKeys[0].RefTable = UsersTable
 	SessionsTable.ForeignKeys[0].RefTable = PasskeysTable
-	SessionsTable.ForeignKeys[1].RefTable = UsersTable
+	SessionsTable.ForeignKeys[1].RefTable = PasskeysTable
+	SessionsTable.ForeignKeys[2].RefTable = UsersTable
 	StashesTable.ForeignKeys[0].RefTable = UsersTable
 	UserMessengersTable.ForeignKeys[0].RefTable = UsersTable
 }

@@ -45,9 +45,9 @@ type Job struct {
 	Retries int `json:"retries,omitempty"`
 	// RetriedFraction holds the value of the "retriedFraction" field.
 	RetriedFraction float64 `json:"retriedFraction,omitempty"`
-	// LoggedStallWarning holds the value of the "loggedStallWarning" field.
-	LoggedStallWarning bool `json:"loggedStallWarning,omitempty"`
-	selectValues       sql.SelectValues
+	// HasLoggedStallWarning holds the value of the "hasLoggedStallWarning" field.
+	HasLoggedStallWarning bool `json:"hasLoggedStallWarning,omitempty"`
+	selectValues          sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,7 +55,7 @@ func (*Job) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case job.FieldLoggedStallWarning:
+		case job.FieldHasLoggedStallWarning:
 			values[i] = new(sql.NullBool)
 		case job.FieldRetriedFraction:
 			values[i] = new(sql.NullFloat64)
@@ -168,11 +168,11 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RetriedFraction = value.Float64
 			}
-		case job.FieldLoggedStallWarning:
+		case job.FieldHasLoggedStallWarning:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field loggedStallWarning", values[i])
+				return fmt.Errorf("unexpected type %T for field hasLoggedStallWarning", values[i])
 			} else if value.Valid {
-				_m.LoggedStallWarning = value.Bool
+				_m.HasLoggedStallWarning = value.Bool
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -249,8 +249,8 @@ func (_m *Job) String() string {
 	builder.WriteString("retriedFraction=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RetriedFraction))
 	builder.WriteString(", ")
-	builder.WriteString("loggedStallWarning=")
-	builder.WriteString(fmt.Sprintf("%v", _m.LoggedStallWarning))
+	builder.WriteString("hasLoggedStallWarning=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HasLoggedStallWarning))
 	builder.WriteByte(')')
 	return builder.String()
 }

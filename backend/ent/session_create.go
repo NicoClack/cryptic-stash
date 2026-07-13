@@ -50,16 +50,16 @@ func (_c *SessionCreate) SetExpiresAt(v time.Time) *SessionCreate {
 	return _c
 }
 
-// SetSuperUserMode sets the "superUserMode" field.
-func (_c *SessionCreate) SetSuperUserMode(v bool) *SessionCreate {
-	_c.mutation.SetSuperUserMode(v)
+// SetIsSudo sets the "isSudo" field.
+func (_c *SessionCreate) SetIsSudo(v bool) *SessionCreate {
+	_c.mutation.SetIsSudo(v)
 	return _c
 }
 
-// SetNillableSuperUserMode sets the "superUserMode" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableSuperUserMode(v *bool) *SessionCreate {
+// SetNillableIsSudo sets the "isSudo" field if the given value is not nil.
+func (_c *SessionCreate) SetNillableIsSudo(v *bool) *SessionCreate {
 	if v != nil {
-		_c.SetSuperUserMode(*v)
+		_c.SetIsSudo(*v)
 	}
 	return _c
 }
@@ -88,6 +88,20 @@ func (_c *SessionCreate) SetUserID(v uuid.UUID) *SessionCreate {
 	return _c
 }
 
+// SetElevationPasskeyID sets the "elevationPasskeyID" field.
+func (_c *SessionCreate) SetElevationPasskeyID(v uuid.UUID) *SessionCreate {
+	_c.mutation.SetElevationPasskeyID(v)
+	return _c
+}
+
+// SetNillableElevationPasskeyID sets the "elevationPasskeyID" field if the given value is not nil.
+func (_c *SessionCreate) SetNillableElevationPasskeyID(v *uuid.UUID) *SessionCreate {
+	if v != nil {
+		_c.SetElevationPasskeyID(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SessionCreate) SetID(v uuid.UUID) *SessionCreate {
 	_c.mutation.SetID(v)
@@ -110,6 +124,11 @@ func (_c *SessionCreate) SetUser(v *User) *SessionCreate {
 // SetPasskey sets the "passkey" edge to the Passkey entity.
 func (_c *SessionCreate) SetPasskey(v *Passkey) *SessionCreate {
 	return _c.SetPasskeyID(v.ID)
+}
+
+// SetElevationPasskey sets the "elevationPasskey" edge to the Passkey entity.
+func (_c *SessionCreate) SetElevationPasskey(v *Passkey) *SessionCreate {
+	return _c.SetElevationPasskeyID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -147,9 +166,9 @@ func (_c *SessionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *SessionCreate) defaults() {
-	if _, ok := _c.mutation.SuperUserMode(); !ok {
-		v := session.DefaultSuperUserMode
-		_c.mutation.SetSuperUserMode(v)
+	if _, ok := _c.mutation.IsSudo(); !ok {
+		v := session.DefaultIsSudo
+		_c.mutation.SetIsSudo(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := session.DefaultID()
@@ -176,8 +195,8 @@ func (_c *SessionCreate) check() error {
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expiresAt", err: errors.New(`ent: missing required field "Session.expiresAt"`)}
 	}
-	if _, ok := _c.mutation.SuperUserMode(); !ok {
-		return &ValidationError{Name: "superUserMode", err: errors.New(`ent: missing required field "Session.superUserMode"`)}
+	if _, ok := _c.mutation.IsSudo(); !ok {
+		return &ValidationError{Name: "isSudo", err: errors.New(`ent: missing required field "Session.isSudo"`)}
 	}
 	if _, ok := _c.mutation.UserAgent(); !ok {
 		return &ValidationError{Name: "userAgent", err: errors.New(`ent: missing required field "Session.userAgent"`)}
@@ -252,9 +271,9 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec, error) {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
 	}
-	if value, ok := _c.mutation.SuperUserMode(); ok {
-		_spec.SetField(session.FieldSuperUserMode, field.TypeBool, value)
-		_node.SuperUserMode = value
+	if value, ok := _c.mutation.IsSudo(); ok {
+		_spec.SetField(session.FieldIsSudo, field.TypeBool, value)
+		_node.IsSudo = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
 		vv, err := session.ValueScanner.UserAgent.Value(value)
@@ -304,6 +323,23 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec, error) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.PasskeyID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ElevationPasskeyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.ElevationPasskeyTable,
+			Columns: []string{session.ElevationPasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ElevationPasskeyID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec, nil
@@ -406,15 +442,15 @@ func (u *SessionUpsert) UpdateExpiresAt() *SessionUpsert {
 	return u
 }
 
-// SetSuperUserMode sets the "superUserMode" field.
-func (u *SessionUpsert) SetSuperUserMode(v bool) *SessionUpsert {
-	u.Set(session.FieldSuperUserMode, v)
+// SetIsSudo sets the "isSudo" field.
+func (u *SessionUpsert) SetIsSudo(v bool) *SessionUpsert {
+	u.Set(session.FieldIsSudo, v)
 	return u
 }
 
-// UpdateSuperUserMode sets the "superUserMode" field to the value that was provided on create.
-func (u *SessionUpsert) UpdateSuperUserMode() *SessionUpsert {
-	u.SetExcluded(session.FieldSuperUserMode)
+// UpdateIsSudo sets the "isSudo" field to the value that was provided on create.
+func (u *SessionUpsert) UpdateIsSudo() *SessionUpsert {
+	u.SetExcluded(session.FieldIsSudo)
 	return u
 }
 
@@ -463,6 +499,24 @@ func (u *SessionUpsert) SetUserID(v uuid.UUID) *SessionUpsert {
 // UpdateUserID sets the "userID" field to the value that was provided on create.
 func (u *SessionUpsert) UpdateUserID() *SessionUpsert {
 	u.SetExcluded(session.FieldUserID)
+	return u
+}
+
+// SetElevationPasskeyID sets the "elevationPasskeyID" field.
+func (u *SessionUpsert) SetElevationPasskeyID(v uuid.UUID) *SessionUpsert {
+	u.Set(session.FieldElevationPasskeyID, v)
+	return u
+}
+
+// UpdateElevationPasskeyID sets the "elevationPasskeyID" field to the value that was provided on create.
+func (u *SessionUpsert) UpdateElevationPasskeyID() *SessionUpsert {
+	u.SetExcluded(session.FieldElevationPasskeyID)
+	return u
+}
+
+// ClearElevationPasskeyID clears the value of the "elevationPasskeyID" field.
+func (u *SessionUpsert) ClearElevationPasskeyID() *SessionUpsert {
+	u.SetNull(session.FieldElevationPasskeyID)
 	return u
 }
 
@@ -570,17 +624,17 @@ func (u *SessionUpsertOne) UpdateExpiresAt() *SessionUpsertOne {
 	})
 }
 
-// SetSuperUserMode sets the "superUserMode" field.
-func (u *SessionUpsertOne) SetSuperUserMode(v bool) *SessionUpsertOne {
+// SetIsSudo sets the "isSudo" field.
+func (u *SessionUpsertOne) SetIsSudo(v bool) *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
-		s.SetSuperUserMode(v)
+		s.SetIsSudo(v)
 	})
 }
 
-// UpdateSuperUserMode sets the "superUserMode" field to the value that was provided on create.
-func (u *SessionUpsertOne) UpdateSuperUserMode() *SessionUpsertOne {
+// UpdateIsSudo sets the "isSudo" field to the value that was provided on create.
+func (u *SessionUpsertOne) UpdateIsSudo() *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
-		s.UpdateSuperUserMode()
+		s.UpdateIsSudo()
 	})
 }
 
@@ -637,6 +691,27 @@ func (u *SessionUpsertOne) SetUserID(v uuid.UUID) *SessionUpsertOne {
 func (u *SessionUpsertOne) UpdateUserID() *SessionUpsertOne {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetElevationPasskeyID sets the "elevationPasskeyID" field.
+func (u *SessionUpsertOne) SetElevationPasskeyID(v uuid.UUID) *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.SetElevationPasskeyID(v)
+	})
+}
+
+// UpdateElevationPasskeyID sets the "elevationPasskeyID" field to the value that was provided on create.
+func (u *SessionUpsertOne) UpdateElevationPasskeyID() *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.UpdateElevationPasskeyID()
+	})
+}
+
+// ClearElevationPasskeyID clears the value of the "elevationPasskeyID" field.
+func (u *SessionUpsertOne) ClearElevationPasskeyID() *SessionUpsertOne {
+	return u.Update(func(s *SessionUpsert) {
+		s.ClearElevationPasskeyID()
 	})
 }
 
@@ -914,17 +989,17 @@ func (u *SessionUpsertBulk) UpdateExpiresAt() *SessionUpsertBulk {
 	})
 }
 
-// SetSuperUserMode sets the "superUserMode" field.
-func (u *SessionUpsertBulk) SetSuperUserMode(v bool) *SessionUpsertBulk {
+// SetIsSudo sets the "isSudo" field.
+func (u *SessionUpsertBulk) SetIsSudo(v bool) *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
-		s.SetSuperUserMode(v)
+		s.SetIsSudo(v)
 	})
 }
 
-// UpdateSuperUserMode sets the "superUserMode" field to the value that was provided on create.
-func (u *SessionUpsertBulk) UpdateSuperUserMode() *SessionUpsertBulk {
+// UpdateIsSudo sets the "isSudo" field to the value that was provided on create.
+func (u *SessionUpsertBulk) UpdateIsSudo() *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
-		s.UpdateSuperUserMode()
+		s.UpdateIsSudo()
 	})
 }
 
@@ -981,6 +1056,27 @@ func (u *SessionUpsertBulk) SetUserID(v uuid.UUID) *SessionUpsertBulk {
 func (u *SessionUpsertBulk) UpdateUserID() *SessionUpsertBulk {
 	return u.Update(func(s *SessionUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetElevationPasskeyID sets the "elevationPasskeyID" field.
+func (u *SessionUpsertBulk) SetElevationPasskeyID(v uuid.UUID) *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.SetElevationPasskeyID(v)
+	})
+}
+
+// UpdateElevationPasskeyID sets the "elevationPasskeyID" field to the value that was provided on create.
+func (u *SessionUpsertBulk) UpdateElevationPasskeyID() *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.UpdateElevationPasskeyID()
+	})
+}
+
+// ClearElevationPasskeyID clears the value of the "elevationPasskeyID" field.
+func (u *SessionUpsertBulk) ClearElevationPasskeyID() *SessionUpsertBulk {
+	return u.Update(func(s *SessionUpsert) {
+		s.ClearElevationPasskeyID()
 	})
 }
 

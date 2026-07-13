@@ -71,16 +71,16 @@ func (_u *SessionUpdate) SetNillableExpiresAt(v *time.Time) *SessionUpdate {
 	return _u
 }
 
-// SetSuperUserMode sets the "superUserMode" field.
-func (_u *SessionUpdate) SetSuperUserMode(v bool) *SessionUpdate {
-	_u.mutation.SetSuperUserMode(v)
+// SetIsSudo sets the "isSudo" field.
+func (_u *SessionUpdate) SetIsSudo(v bool) *SessionUpdate {
+	_u.mutation.SetIsSudo(v)
 	return _u
 }
 
-// SetNillableSuperUserMode sets the "superUserMode" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableSuperUserMode(v *bool) *SessionUpdate {
+// SetNillableIsSudo sets the "isSudo" field if the given value is not nil.
+func (_u *SessionUpdate) SetNillableIsSudo(v *bool) *SessionUpdate {
 	if v != nil {
-		_u.SetSuperUserMode(*v)
+		_u.SetIsSudo(*v)
 	}
 	return _u
 }
@@ -141,6 +141,26 @@ func (_u *SessionUpdate) SetNillableUserID(v *uuid.UUID) *SessionUpdate {
 	return _u
 }
 
+// SetElevationPasskeyID sets the "elevationPasskeyID" field.
+func (_u *SessionUpdate) SetElevationPasskeyID(v uuid.UUID) *SessionUpdate {
+	_u.mutation.SetElevationPasskeyID(v)
+	return _u
+}
+
+// SetNillableElevationPasskeyID sets the "elevationPasskeyID" field if the given value is not nil.
+func (_u *SessionUpdate) SetNillableElevationPasskeyID(v *uuid.UUID) *SessionUpdate {
+	if v != nil {
+		_u.SetElevationPasskeyID(*v)
+	}
+	return _u
+}
+
+// ClearElevationPasskeyID clears the value of the "elevationPasskeyID" field.
+func (_u *SessionUpdate) ClearElevationPasskeyID() *SessionUpdate {
+	_u.mutation.ClearElevationPasskeyID()
+	return _u
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (_u *SessionUpdate) SetUser(v *User) *SessionUpdate {
 	return _u.SetUserID(v.ID)
@@ -149,6 +169,11 @@ func (_u *SessionUpdate) SetUser(v *User) *SessionUpdate {
 // SetPasskey sets the "passkey" edge to the Passkey entity.
 func (_u *SessionUpdate) SetPasskey(v *Passkey) *SessionUpdate {
 	return _u.SetPasskeyID(v.ID)
+}
+
+// SetElevationPasskey sets the "elevationPasskey" edge to the Passkey entity.
+func (_u *SessionUpdate) SetElevationPasskey(v *Passkey) *SessionUpdate {
+	return _u.SetElevationPasskeyID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -165,6 +190,12 @@ func (_u *SessionUpdate) ClearUser() *SessionUpdate {
 // ClearPasskey clears the "passkey" edge to the Passkey entity.
 func (_u *SessionUpdate) ClearPasskey() *SessionUpdate {
 	_u.mutation.ClearPasskey()
+	return _u
+}
+
+// ClearElevationPasskey clears the "elevationPasskey" edge to the Passkey entity.
+func (_u *SessionUpdate) ClearElevationPasskey() *SessionUpdate {
+	_u.mutation.ClearElevationPasskey()
 	return _u
 }
 
@@ -244,8 +275,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.SuperUserMode(); ok {
-		_spec.SetField(session.FieldSuperUserMode, field.TypeBool, value)
+	if value, ok := _u.mutation.IsSudo(); ok {
+		_spec.SetField(session.FieldIsSudo, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		vv, err := session.ValueScanner.UserAgent.Value(value)
@@ -319,6 +350,35 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ElevationPasskeyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.ElevationPasskeyTable,
+			Columns: []string{session.ElevationPasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ElevationPasskeyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.ElevationPasskeyTable,
+			Columns: []string{session.ElevationPasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{session.Label}
@@ -379,16 +439,16 @@ func (_u *SessionUpdateOne) SetNillableExpiresAt(v *time.Time) *SessionUpdateOne
 	return _u
 }
 
-// SetSuperUserMode sets the "superUserMode" field.
-func (_u *SessionUpdateOne) SetSuperUserMode(v bool) *SessionUpdateOne {
-	_u.mutation.SetSuperUserMode(v)
+// SetIsSudo sets the "isSudo" field.
+func (_u *SessionUpdateOne) SetIsSudo(v bool) *SessionUpdateOne {
+	_u.mutation.SetIsSudo(v)
 	return _u
 }
 
-// SetNillableSuperUserMode sets the "superUserMode" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableSuperUserMode(v *bool) *SessionUpdateOne {
+// SetNillableIsSudo sets the "isSudo" field if the given value is not nil.
+func (_u *SessionUpdateOne) SetNillableIsSudo(v *bool) *SessionUpdateOne {
 	if v != nil {
-		_u.SetSuperUserMode(*v)
+		_u.SetIsSudo(*v)
 	}
 	return _u
 }
@@ -449,6 +509,26 @@ func (_u *SessionUpdateOne) SetNillableUserID(v *uuid.UUID) *SessionUpdateOne {
 	return _u
 }
 
+// SetElevationPasskeyID sets the "elevationPasskeyID" field.
+func (_u *SessionUpdateOne) SetElevationPasskeyID(v uuid.UUID) *SessionUpdateOne {
+	_u.mutation.SetElevationPasskeyID(v)
+	return _u
+}
+
+// SetNillableElevationPasskeyID sets the "elevationPasskeyID" field if the given value is not nil.
+func (_u *SessionUpdateOne) SetNillableElevationPasskeyID(v *uuid.UUID) *SessionUpdateOne {
+	if v != nil {
+		_u.SetElevationPasskeyID(*v)
+	}
+	return _u
+}
+
+// ClearElevationPasskeyID clears the value of the "elevationPasskeyID" field.
+func (_u *SessionUpdateOne) ClearElevationPasskeyID() *SessionUpdateOne {
+	_u.mutation.ClearElevationPasskeyID()
+	return _u
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (_u *SessionUpdateOne) SetUser(v *User) *SessionUpdateOne {
 	return _u.SetUserID(v.ID)
@@ -457,6 +537,11 @@ func (_u *SessionUpdateOne) SetUser(v *User) *SessionUpdateOne {
 // SetPasskey sets the "passkey" edge to the Passkey entity.
 func (_u *SessionUpdateOne) SetPasskey(v *Passkey) *SessionUpdateOne {
 	return _u.SetPasskeyID(v.ID)
+}
+
+// SetElevationPasskey sets the "elevationPasskey" edge to the Passkey entity.
+func (_u *SessionUpdateOne) SetElevationPasskey(v *Passkey) *SessionUpdateOne {
+	return _u.SetElevationPasskeyID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -473,6 +558,12 @@ func (_u *SessionUpdateOne) ClearUser() *SessionUpdateOne {
 // ClearPasskey clears the "passkey" edge to the Passkey entity.
 func (_u *SessionUpdateOne) ClearPasskey() *SessionUpdateOne {
 	_u.mutation.ClearPasskey()
+	return _u
+}
+
+// ClearElevationPasskey clears the "elevationPasskey" edge to the Passkey entity.
+func (_u *SessionUpdateOne) ClearElevationPasskey() *SessionUpdateOne {
+	_u.mutation.ClearElevationPasskey()
 	return _u
 }
 
@@ -582,8 +673,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.SuperUserMode(); ok {
-		_spec.SetField(session.FieldSuperUserMode, field.TypeBool, value)
+	if value, ok := _u.mutation.IsSudo(); ok {
+		_spec.SetField(session.FieldIsSudo, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
 		vv, err := session.ValueScanner.UserAgent.Value(value)
@@ -647,6 +738,35 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 			Inverse: true,
 			Table:   session.PasskeyTable,
 			Columns: []string{session.PasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ElevationPasskeyCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.ElevationPasskeyTable,
+			Columns: []string{session.ElevationPasskeyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ElevationPasskeyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.ElevationPasskeyTable,
+			Columns: []string{session.ElevationPasskeyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),

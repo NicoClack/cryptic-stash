@@ -28,8 +28,8 @@ type UserMessenger struct {
 	Type string `json:"type,omitempty"`
 	// Version holds the value of the "version" field.
 	Version int `json:"version,omitempty"`
-	// Enabled holds the value of the "enabled" field.
-	Enabled bool `json:"enabled,omitempty"`
+	// IsEnabled holds the value of the "isEnabled" field.
+	IsEnabled bool `json:"isEnabled,omitempty"`
 	// Options holds the value of the "options" field.
 	Options json.RawMessage `json:"options,omitempty"`
 	// UserID holds the value of the "userID" field.
@@ -76,7 +76,7 @@ func (*UserMessenger) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usermessenger.FieldEnabled:
+		case usermessenger.FieldIsEnabled:
 			values[i] = new(sql.NullBool)
 		case usermessenger.FieldVersion:
 			values[i] = new(sql.NullInt64)
@@ -133,11 +133,11 @@ func (_m *UserMessenger) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Version = int(value.Int64)
 			}
-		case usermessenger.FieldEnabled:
+		case usermessenger.FieldIsEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field enabled", values[i])
+				return fmt.Errorf("unexpected type %T for field isEnabled", values[i])
 			} else if value.Valid {
-				_m.Enabled = value.Bool
+				_m.IsEnabled = value.Bool
 			}
 		case usermessenger.FieldOptions:
 			if value, err := usermessenger.ValueScanner.Options.FromValue(values[i]); err != nil {
@@ -209,8 +209,8 @@ func (_m *UserMessenger) String() string {
 	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Version))
 	builder.WriteString(", ")
-	builder.WriteString("enabled=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
+	builder.WriteString("isEnabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("options=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Options))

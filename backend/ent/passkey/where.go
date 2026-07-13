@@ -71,9 +71,9 @@ func Name(v string) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldName, v))
 }
 
-// AllowSuperUser applies equality check predicate on the "allowSuperUser" field. It's identical to AllowSuperUserEQ.
-func AllowSuperUser(v bool) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldAllowSuperUser, v))
+// AllowSudo applies equality check predicate on the "allowSudo" field. It's identical to AllowSudoEQ.
+func AllowSudo(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldAllowSudo, v))
 }
 
 // CredentialID applies equality check predicate on the "credentialID" field. It's identical to CredentialIDEQ.
@@ -236,14 +236,14 @@ func NameContainsFold(v string) predicate.Passkey {
 	return predicate.Passkey(sql.FieldContainsFold(FieldName, v))
 }
 
-// AllowSuperUserEQ applies the EQ predicate on the "allowSuperUser" field.
-func AllowSuperUserEQ(v bool) predicate.Passkey {
-	return predicate.Passkey(sql.FieldEQ(FieldAllowSuperUser, v))
+// AllowSudoEQ applies the EQ predicate on the "allowSudo" field.
+func AllowSudoEQ(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldAllowSudo, v))
 }
 
-// AllowSuperUserNEQ applies the NEQ predicate on the "allowSuperUser" field.
-func AllowSuperUserNEQ(v bool) predicate.Passkey {
-	return predicate.Passkey(sql.FieldNEQ(FieldAllowSuperUser, v))
+// AllowSudoNEQ applies the NEQ predicate on the "allowSudo" field.
+func AllowSudoNEQ(v bool) predicate.Passkey {
+	return predicate.Passkey(sql.FieldNEQ(FieldAllowSudo, v))
 }
 
 // CredentialIDEQ applies the EQ predicate on the "credentialID" field.
@@ -354,6 +354,29 @@ func HasSessions() predicate.Passkey {
 func HasSessionsWith(preds ...predicate.Session) predicate.Passkey {
 	return predicate.Passkey(func(s *sql.Selector) {
 		step := newSessionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasElevatedSessions applies the HasEdge predicate on the "elevatedSessions" edge.
+func HasElevatedSessions() predicate.Passkey {
+	return predicate.Passkey(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ElevatedSessionsTable, ElevatedSessionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasElevatedSessionsWith applies the HasEdge predicate on the "elevatedSessions" edge with a given conditions (other predicates).
+func HasElevatedSessionsWith(preds ...predicate.Session) predicate.Passkey {
+	return predicate.Passkey(func(s *sql.Selector) {
+		step := newElevatedSessionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

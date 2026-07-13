@@ -45,9 +45,9 @@ func (_c *PasskeyCreate) SetName(v string) *PasskeyCreate {
 	return _c
 }
 
-// SetAllowSuperUser sets the "allowSuperUser" field.
-func (_c *PasskeyCreate) SetAllowSuperUser(v bool) *PasskeyCreate {
-	_c.mutation.SetAllowSuperUser(v)
+// SetAllowSudo sets the "allowSudo" field.
+func (_c *PasskeyCreate) SetAllowSudo(v bool) *PasskeyCreate {
+	_c.mutation.SetAllowSudo(v)
 	return _c
 }
 
@@ -117,6 +117,21 @@ func (_c *PasskeyCreate) AddSessions(v ...*Session) *PasskeyCreate {
 	return _c.AddSessionIDs(ids...)
 }
 
+// AddElevatedSessionIDs adds the "elevatedSessions" edge to the Session entity by IDs.
+func (_c *PasskeyCreate) AddElevatedSessionIDs(ids ...uuid.UUID) *PasskeyCreate {
+	_c.mutation.AddElevatedSessionIDs(ids...)
+	return _c
+}
+
+// AddElevatedSessions adds the "elevatedSessions" edges to the Session entity.
+func (_c *PasskeyCreate) AddElevatedSessions(v ...*Session) *PasskeyCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddElevatedSessionIDs(ids...)
+}
+
 // Mutation returns the PasskeyMutation object of the builder.
 func (_c *PasskeyCreate) Mutation() *PasskeyMutation {
 	return _c.mutation
@@ -178,8 +193,8 @@ func (_c *PasskeyCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Passkey.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.AllowSuperUser(); !ok {
-		return &ValidationError{Name: "allowSuperUser", err: errors.New(`ent: missing required field "Passkey.allowSuperUser"`)}
+	if _, ok := _c.mutation.AllowSudo(); !ok {
+		return &ValidationError{Name: "allowSudo", err: errors.New(`ent: missing required field "Passkey.allowSudo"`)}
 	}
 	if _, ok := _c.mutation.CredentialID(); !ok {
 		return &ValidationError{Name: "credentialID", err: errors.New(`ent: missing required field "Passkey.credentialID"`)}
@@ -252,9 +267,9 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec, error) {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.AllowSuperUser(); ok {
-		_spec.SetField(passkey.FieldAllowSuperUser, field.TypeBool, value)
-		_node.AllowSuperUser = value
+	if value, ok := _c.mutation.AllowSudo(); ok {
+		_spec.SetField(passkey.FieldAllowSudo, field.TypeBool, value)
+		_node.AllowSudo = value
 	}
 	if value, ok := _c.mutation.CredentialID(); ok {
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
@@ -295,6 +310,22 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec, error) {
 			Inverse: false,
 			Table:   passkey.SessionsTable,
 			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ElevatedSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.ElevatedSessionsTable,
+			Columns: []string{passkey.ElevatedSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -393,15 +424,15 @@ func (u *PasskeyUpsert) UpdateName() *PasskeyUpsert {
 	return u
 }
 
-// SetAllowSuperUser sets the "allowSuperUser" field.
-func (u *PasskeyUpsert) SetAllowSuperUser(v bool) *PasskeyUpsert {
-	u.Set(passkey.FieldAllowSuperUser, v)
+// SetAllowSudo sets the "allowSudo" field.
+func (u *PasskeyUpsert) SetAllowSudo(v bool) *PasskeyUpsert {
+	u.Set(passkey.FieldAllowSudo, v)
 	return u
 }
 
-// UpdateAllowSuperUser sets the "allowSuperUser" field to the value that was provided on create.
-func (u *PasskeyUpsert) UpdateAllowSuperUser() *PasskeyUpsert {
-	u.SetExcluded(passkey.FieldAllowSuperUser)
+// UpdateAllowSudo sets the "allowSudo" field to the value that was provided on create.
+func (u *PasskeyUpsert) UpdateAllowSudo() *PasskeyUpsert {
+	u.SetExcluded(passkey.FieldAllowSudo)
 	return u
 }
 
@@ -543,17 +574,17 @@ func (u *PasskeyUpsertOne) UpdateName() *PasskeyUpsertOne {
 	})
 }
 
-// SetAllowSuperUser sets the "allowSuperUser" field.
-func (u *PasskeyUpsertOne) SetAllowSuperUser(v bool) *PasskeyUpsertOne {
+// SetAllowSudo sets the "allowSudo" field.
+func (u *PasskeyUpsertOne) SetAllowSudo(v bool) *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.SetAllowSuperUser(v)
+		s.SetAllowSudo(v)
 	})
 }
 
-// UpdateAllowSuperUser sets the "allowSuperUser" field to the value that was provided on create.
-func (u *PasskeyUpsertOne) UpdateAllowSuperUser() *PasskeyUpsertOne {
+// UpdateAllowSudo sets the "allowSudo" field to the value that was provided on create.
+func (u *PasskeyUpsertOne) UpdateAllowSudo() *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateAllowSuperUser()
+		s.UpdateAllowSudo()
 	})
 }
 
@@ -873,17 +904,17 @@ func (u *PasskeyUpsertBulk) UpdateName() *PasskeyUpsertBulk {
 	})
 }
 
-// SetAllowSuperUser sets the "allowSuperUser" field.
-func (u *PasskeyUpsertBulk) SetAllowSuperUser(v bool) *PasskeyUpsertBulk {
+// SetAllowSudo sets the "allowSudo" field.
+func (u *PasskeyUpsertBulk) SetAllowSudo(v bool) *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.SetAllowSuperUser(v)
+		s.SetAllowSudo(v)
 	})
 }
 
-// UpdateAllowSuperUser sets the "allowSuperUser" field to the value that was provided on create.
-func (u *PasskeyUpsertBulk) UpdateAllowSuperUser() *PasskeyUpsertBulk {
+// UpdateAllowSudo sets the "allowSudo" field to the value that was provided on create.
+func (u *PasskeyUpsertBulk) UpdateAllowSudo() *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateAllowSuperUser()
+		s.UpdateAllowSudo()
 	})
 }
 

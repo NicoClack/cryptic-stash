@@ -66,16 +66,16 @@ func (_u *PasskeyUpdate) SetNillableName(v *string) *PasskeyUpdate {
 	return _u
 }
 
-// SetAllowSuperUser sets the "allowSuperUser" field.
-func (_u *PasskeyUpdate) SetAllowSuperUser(v bool) *PasskeyUpdate {
-	_u.mutation.SetAllowSuperUser(v)
+// SetAllowSudo sets the "allowSudo" field.
+func (_u *PasskeyUpdate) SetAllowSudo(v bool) *PasskeyUpdate {
+	_u.mutation.SetAllowSudo(v)
 	return _u
 }
 
-// SetNillableAllowSuperUser sets the "allowSuperUser" field if the given value is not nil.
-func (_u *PasskeyUpdate) SetNillableAllowSuperUser(v *bool) *PasskeyUpdate {
+// SetNillableAllowSudo sets the "allowSudo" field if the given value is not nil.
+func (_u *PasskeyUpdate) SetNillableAllowSudo(v *bool) *PasskeyUpdate {
 	if v != nil {
-		_u.SetAllowSuperUser(*v)
+		_u.SetAllowSudo(*v)
 	}
 	return _u
 }
@@ -148,6 +148,21 @@ func (_u *PasskeyUpdate) AddSessions(v ...*Session) *PasskeyUpdate {
 	return _u.AddSessionIDs(ids...)
 }
 
+// AddElevatedSessionIDs adds the "elevatedSessions" edge to the Session entity by IDs.
+func (_u *PasskeyUpdate) AddElevatedSessionIDs(ids ...uuid.UUID) *PasskeyUpdate {
+	_u.mutation.AddElevatedSessionIDs(ids...)
+	return _u
+}
+
+// AddElevatedSessions adds the "elevatedSessions" edges to the Session entity.
+func (_u *PasskeyUpdate) AddElevatedSessions(v ...*Session) *PasskeyUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddElevatedSessionIDs(ids...)
+}
+
 // Mutation returns the PasskeyMutation object of the builder.
 func (_u *PasskeyUpdate) Mutation() *PasskeyMutation {
 	return _u.mutation
@@ -178,6 +193,27 @@ func (_u *PasskeyUpdate) RemoveSessions(v ...*Session) *PasskeyUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSessionIDs(ids...)
+}
+
+// ClearElevatedSessions clears all "elevatedSessions" edges to the Session entity.
+func (_u *PasskeyUpdate) ClearElevatedSessions() *PasskeyUpdate {
+	_u.mutation.ClearElevatedSessions()
+	return _u
+}
+
+// RemoveElevatedSessionIDs removes the "elevatedSessions" edge to Session entities by IDs.
+func (_u *PasskeyUpdate) RemoveElevatedSessionIDs(ids ...uuid.UUID) *PasskeyUpdate {
+	_u.mutation.RemoveElevatedSessionIDs(ids...)
+	return _u
+}
+
+// RemoveElevatedSessions removes "elevatedSessions" edges to Session entities.
+func (_u *PasskeyUpdate) RemoveElevatedSessions(v ...*Session) *PasskeyUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveElevatedSessionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -255,8 +291,8 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AllowSuperUser(); ok {
-		_spec.SetField(passkey.FieldAllowSuperUser, field.TypeBool, value)
+	if value, ok := _u.mutation.AllowSudo(); ok {
+		_spec.SetField(passkey.FieldAllowSudo, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.CredentialID(); ok {
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
@@ -345,6 +381,51 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ElevatedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.ElevatedSessionsTable,
+			Columns: []string{passkey.ElevatedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedElevatedSessionsIDs(); len(nodes) > 0 && !_u.mutation.ElevatedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.ElevatedSessionsTable,
+			Columns: []string{passkey.ElevatedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ElevatedSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.ElevatedSessionsTable,
+			Columns: []string{passkey.ElevatedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{passkey.Label}
@@ -399,16 +480,16 @@ func (_u *PasskeyUpdateOne) SetNillableName(v *string) *PasskeyUpdateOne {
 	return _u
 }
 
-// SetAllowSuperUser sets the "allowSuperUser" field.
-func (_u *PasskeyUpdateOne) SetAllowSuperUser(v bool) *PasskeyUpdateOne {
-	_u.mutation.SetAllowSuperUser(v)
+// SetAllowSudo sets the "allowSudo" field.
+func (_u *PasskeyUpdateOne) SetAllowSudo(v bool) *PasskeyUpdateOne {
+	_u.mutation.SetAllowSudo(v)
 	return _u
 }
 
-// SetNillableAllowSuperUser sets the "allowSuperUser" field if the given value is not nil.
-func (_u *PasskeyUpdateOne) SetNillableAllowSuperUser(v *bool) *PasskeyUpdateOne {
+// SetNillableAllowSudo sets the "allowSudo" field if the given value is not nil.
+func (_u *PasskeyUpdateOne) SetNillableAllowSudo(v *bool) *PasskeyUpdateOne {
 	if v != nil {
-		_u.SetAllowSuperUser(*v)
+		_u.SetAllowSudo(*v)
 	}
 	return _u
 }
@@ -481,6 +562,21 @@ func (_u *PasskeyUpdateOne) AddSessions(v ...*Session) *PasskeyUpdateOne {
 	return _u.AddSessionIDs(ids...)
 }
 
+// AddElevatedSessionIDs adds the "elevatedSessions" edge to the Session entity by IDs.
+func (_u *PasskeyUpdateOne) AddElevatedSessionIDs(ids ...uuid.UUID) *PasskeyUpdateOne {
+	_u.mutation.AddElevatedSessionIDs(ids...)
+	return _u
+}
+
+// AddElevatedSessions adds the "elevatedSessions" edges to the Session entity.
+func (_u *PasskeyUpdateOne) AddElevatedSessions(v ...*Session) *PasskeyUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddElevatedSessionIDs(ids...)
+}
+
 // Mutation returns the PasskeyMutation object of the builder.
 func (_u *PasskeyUpdateOne) Mutation() *PasskeyMutation {
 	return _u.mutation
@@ -511,6 +607,27 @@ func (_u *PasskeyUpdateOne) RemoveSessions(v ...*Session) *PasskeyUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSessionIDs(ids...)
+}
+
+// ClearElevatedSessions clears all "elevatedSessions" edges to the Session entity.
+func (_u *PasskeyUpdateOne) ClearElevatedSessions() *PasskeyUpdateOne {
+	_u.mutation.ClearElevatedSessions()
+	return _u
+}
+
+// RemoveElevatedSessionIDs removes the "elevatedSessions" edge to Session entities by IDs.
+func (_u *PasskeyUpdateOne) RemoveElevatedSessionIDs(ids ...uuid.UUID) *PasskeyUpdateOne {
+	_u.mutation.RemoveElevatedSessionIDs(ids...)
+	return _u
+}
+
+// RemoveElevatedSessions removes "elevatedSessions" edges to Session entities.
+func (_u *PasskeyUpdateOne) RemoveElevatedSessions(v ...*Session) *PasskeyUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveElevatedSessionIDs(ids...)
 }
 
 // Where appends a list predicates to the PasskeyUpdate builder.
@@ -618,8 +735,8 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AllowSuperUser(); ok {
-		_spec.SetField(passkey.FieldAllowSuperUser, field.TypeBool, value)
+	if value, ok := _u.mutation.AllowSudo(); ok {
+		_spec.SetField(passkey.FieldAllowSudo, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.CredentialID(); ok {
 		_spec.SetField(passkey.FieldCredentialID, field.TypeBytes, value)
@@ -698,6 +815,51 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 			Inverse: false,
 			Table:   passkey.SessionsTable,
 			Columns: []string{passkey.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ElevatedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.ElevatedSessionsTable,
+			Columns: []string{passkey.ElevatedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedElevatedSessionsIDs(); len(nodes) > 0 && !_u.mutation.ElevatedSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.ElevatedSessionsTable,
+			Columns: []string{passkey.ElevatedSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ElevatedSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   passkey.ElevatedSessionsTable,
+			Columns: []string{passkey.ElevatedSessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),

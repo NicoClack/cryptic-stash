@@ -51,16 +51,16 @@ func (_c *UserMessengerCreate) SetVersion(v int) *UserMessengerCreate {
 	return _c
 }
 
-// SetEnabled sets the "enabled" field.
-func (_c *UserMessengerCreate) SetEnabled(v bool) *UserMessengerCreate {
-	_c.mutation.SetEnabled(v)
+// SetIsEnabled sets the "isEnabled" field.
+func (_c *UserMessengerCreate) SetIsEnabled(v bool) *UserMessengerCreate {
+	_c.mutation.SetIsEnabled(v)
 	return _c
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_c *UserMessengerCreate) SetNillableEnabled(v *bool) *UserMessengerCreate {
+// SetNillableIsEnabled sets the "isEnabled" field if the given value is not nil.
+func (_c *UserMessengerCreate) SetNillableIsEnabled(v *bool) *UserMessengerCreate {
 	if v != nil {
-		_c.SetEnabled(*v)
+		_c.SetIsEnabled(*v)
 	}
 	return _c
 }
@@ -146,9 +146,9 @@ func (_c *UserMessengerCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserMessengerCreate) defaults() {
-	if _, ok := _c.mutation.Enabled(); !ok {
-		v := usermessenger.DefaultEnabled
-		_c.mutation.SetEnabled(v)
+	if _, ok := _c.mutation.IsEnabled(); !ok {
+		v := usermessenger.DefaultIsEnabled
+		_c.mutation.SetIsEnabled(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := usermessenger.DefaultID()
@@ -175,8 +175,8 @@ func (_c *UserMessengerCreate) check() error {
 	if _, ok := _c.mutation.Version(); !ok {
 		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "UserMessenger.version"`)}
 	}
-	if _, ok := _c.mutation.Enabled(); !ok {
-		return &ValidationError{Name: "enabled", err: errors.New(`ent: missing required field "UserMessenger.enabled"`)}
+	if _, ok := _c.mutation.IsEnabled(); !ok {
+		return &ValidationError{Name: "isEnabled", err: errors.New(`ent: missing required field "UserMessenger.isEnabled"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "UserMessenger.userID"`)}
@@ -239,9 +239,9 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 		_spec.SetField(usermessenger.FieldVersion, field.TypeInt, value)
 		_node.Version = value
 	}
-	if value, ok := _c.mutation.Enabled(); ok {
-		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
-		_node.Enabled = value
+	if value, ok := _c.mutation.IsEnabled(); ok {
+		_spec.SetField(usermessenger.FieldIsEnabled, field.TypeBool, value)
+		_node.IsEnabled = value
 	}
 	if value, ok := _c.mutation.Options(); ok {
 		vv, err := usermessenger.ValueScanner.Options.Value(value)
@@ -390,15 +390,15 @@ func (u *UserMessengerUpsert) AddVersion(v int) *UserMessengerUpsert {
 	return u
 }
 
-// SetEnabled sets the "enabled" field.
-func (u *UserMessengerUpsert) SetEnabled(v bool) *UserMessengerUpsert {
-	u.Set(usermessenger.FieldEnabled, v)
+// SetIsEnabled sets the "isEnabled" field.
+func (u *UserMessengerUpsert) SetIsEnabled(v bool) *UserMessengerUpsert {
+	u.Set(usermessenger.FieldIsEnabled, v)
 	return u
 }
 
-// UpdateEnabled sets the "enabled" field to the value that was provided on create.
-func (u *UserMessengerUpsert) UpdateEnabled() *UserMessengerUpsert {
-	u.SetExcluded(usermessenger.FieldEnabled)
+// UpdateIsEnabled sets the "isEnabled" field to the value that was provided on create.
+func (u *UserMessengerUpsert) UpdateIsEnabled() *UserMessengerUpsert {
+	u.SetExcluded(usermessenger.FieldIsEnabled)
 	return u
 }
 
@@ -543,17 +543,17 @@ func (u *UserMessengerUpsertOne) UpdateVersion() *UserMessengerUpsertOne {
 	})
 }
 
-// SetEnabled sets the "enabled" field.
-func (u *UserMessengerUpsertOne) SetEnabled(v bool) *UserMessengerUpsertOne {
+// SetIsEnabled sets the "isEnabled" field.
+func (u *UserMessengerUpsertOne) SetIsEnabled(v bool) *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.SetEnabled(v)
+		s.SetIsEnabled(v)
 	})
 }
 
-// UpdateEnabled sets the "enabled" field to the value that was provided on create.
-func (u *UserMessengerUpsertOne) UpdateEnabled() *UserMessengerUpsertOne {
+// UpdateIsEnabled sets the "isEnabled" field to the value that was provided on create.
+func (u *UserMessengerUpsertOne) UpdateIsEnabled() *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.UpdateEnabled()
+		s.UpdateIsEnabled()
 	})
 }
 
@@ -873,17 +873,17 @@ func (u *UserMessengerUpsertBulk) UpdateVersion() *UserMessengerUpsertBulk {
 	})
 }
 
-// SetEnabled sets the "enabled" field.
-func (u *UserMessengerUpsertBulk) SetEnabled(v bool) *UserMessengerUpsertBulk {
+// SetIsEnabled sets the "isEnabled" field.
+func (u *UserMessengerUpsertBulk) SetIsEnabled(v bool) *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.SetEnabled(v)
+		s.SetIsEnabled(v)
 	})
 }
 
-// UpdateEnabled sets the "enabled" field to the value that was provided on create.
-func (u *UserMessengerUpsertBulk) UpdateEnabled() *UserMessengerUpsertBulk {
+// UpdateIsEnabled sets the "isEnabled" field to the value that was provided on create.
+func (u *UserMessengerUpsertBulk) UpdateIsEnabled() *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.UpdateEnabled()
+		s.UpdateIsEnabled()
 	})
 }
 

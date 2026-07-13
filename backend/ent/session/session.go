@@ -24,8 +24,8 @@ const (
 	FieldHashedToken = "hashed_token"
 	// FieldExpiresAt holds the string denoting the expiresat field in the database.
 	FieldExpiresAt = "expires_at"
-	// FieldSuperUserMode holds the string denoting the superusermode field in the database.
-	FieldSuperUserMode = "super_user_mode"
+	// FieldIsSudo holds the string denoting the issudo field in the database.
+	FieldIsSudo = "is_sudo"
 	// FieldUserAgent holds the string denoting the useragent field in the database.
 	FieldUserAgent = "user_agent"
 	// FieldIP holds the string denoting the ip field in the database.
@@ -34,10 +34,14 @@ const (
 	FieldPasskeyID = "passkey_id"
 	// FieldUserID holds the string denoting the userid field in the database.
 	FieldUserID = "user_id"
+	// FieldElevationPasskeyID holds the string denoting the elevationpasskeyid field in the database.
+	FieldElevationPasskeyID = "elevation_passkey_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgePasskey holds the string denoting the passkey edge name in mutations.
 	EdgePasskey = "passkey"
+	// EdgeElevationPasskey holds the string denoting the elevationpasskey edge name in mutations.
+	EdgeElevationPasskey = "elevationPasskey"
 	// Table holds the table name of the session in the database.
 	Table = "sessions"
 	// UserTable is the table that holds the user relation/edge.
@@ -54,6 +58,13 @@ const (
 	PasskeyInverseTable = "passkeys"
 	// PasskeyColumn is the table column denoting the passkey relation/edge.
 	PasskeyColumn = "passkey_id"
+	// ElevationPasskeyTable is the table that holds the elevationPasskey relation/edge.
+	ElevationPasskeyTable = "sessions"
+	// ElevationPasskeyInverseTable is the table name for the Passkey entity.
+	// It exists in this package in order to avoid circular dependency with the "passkey" package.
+	ElevationPasskeyInverseTable = "passkeys"
+	// ElevationPasskeyColumn is the table column denoting the elevationPasskey relation/edge.
+	ElevationPasskeyColumn = "elevation_passkey_id"
 )
 
 // Columns holds all SQL columns for session fields.
@@ -63,11 +74,12 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldHashedToken,
 	FieldExpiresAt,
-	FieldSuperUserMode,
+	FieldIsSudo,
 	FieldUserAgent,
 	FieldIP,
 	FieldPasskeyID,
 	FieldUserID,
+	FieldElevationPasskeyID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -85,8 +97,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// HashedTokenValidator is a validator for the "hashedToken" field. It is called by the builders before save.
 	HashedTokenValidator func([]byte) error
-	// DefaultSuperUserMode holds the default value on creation for the "superUserMode" field.
-	DefaultSuperUserMode bool
+	// DefaultIsSudo holds the default value on creation for the "isSudo" field.
+	DefaultIsSudo bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 	// ValueScanner of all Session fields.
@@ -119,9 +131,9 @@ func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
 }
 
-// BySuperUserMode orders the results by the superUserMode field.
-func BySuperUserMode(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSuperUserMode, opts...).ToFunc()
+// ByIsSudo orders the results by the isSudo field.
+func ByIsSudo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsSudo, opts...).ToFunc()
 }
 
 // ByPasskeyID orders the results by the passkeyID field.
@@ -132,6 +144,11 @@ func ByPasskeyID(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the userID field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByElevationPasskeyID orders the results by the elevationPasskeyID field.
+func ByElevationPasskeyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldElevationPasskeyID, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.
@@ -147,6 +164,13 @@ func ByPasskeyField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newPasskeyStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByElevationPasskeyField orders the results by elevationPasskey field.
+func ByElevationPasskeyField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newElevationPasskeyStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -159,5 +183,12 @@ func newPasskeyStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PasskeyInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, PasskeyTable, PasskeyColumn),
+	)
+}
+func newElevationPasskeyStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ElevationPasskeyInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ElevationPasskeyTable, ElevationPasskeyColumn),
 	)
 }

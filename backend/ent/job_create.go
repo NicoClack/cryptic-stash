@@ -135,16 +135,16 @@ func (_c *JobCreate) SetNillableRetriedFraction(v *float64) *JobCreate {
 	return _c
 }
 
-// SetLoggedStallWarning sets the "loggedStallWarning" field.
-func (_c *JobCreate) SetLoggedStallWarning(v bool) *JobCreate {
-	_c.mutation.SetLoggedStallWarning(v)
+// SetHasLoggedStallWarning sets the "hasLoggedStallWarning" field.
+func (_c *JobCreate) SetHasLoggedStallWarning(v bool) *JobCreate {
+	_c.mutation.SetHasLoggedStallWarning(v)
 	return _c
 }
 
-// SetNillableLoggedStallWarning sets the "loggedStallWarning" field if the given value is not nil.
-func (_c *JobCreate) SetNillableLoggedStallWarning(v *bool) *JobCreate {
+// SetNillableHasLoggedStallWarning sets the "hasLoggedStallWarning" field if the given value is not nil.
+func (_c *JobCreate) SetNillableHasLoggedStallWarning(v *bool) *JobCreate {
 	if v != nil {
-		_c.SetLoggedStallWarning(*v)
+		_c.SetHasLoggedStallWarning(*v)
 	}
 	return _c
 }
@@ -210,9 +210,9 @@ func (_c *JobCreate) defaults() {
 		v := job.DefaultRetriedFraction
 		_c.mutation.SetRetriedFraction(v)
 	}
-	if _, ok := _c.mutation.LoggedStallWarning(); !ok {
-		v := job.DefaultLoggedStallWarning
-		_c.mutation.SetLoggedStallWarning(v)
+	if _, ok := _c.mutation.HasLoggedStallWarning(); !ok {
+		v := job.DefaultHasLoggedStallWarning
+		_c.mutation.SetHasLoggedStallWarning(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := job.DefaultID()
@@ -268,8 +268,8 @@ func (_c *JobCreate) check() error {
 	if _, ok := _c.mutation.RetriedFraction(); !ok {
 		return &ValidationError{Name: "retriedFraction", err: errors.New(`ent: missing required field "Job.retriedFraction"`)}
 	}
-	if _, ok := _c.mutation.LoggedStallWarning(); !ok {
-		return &ValidationError{Name: "loggedStallWarning", err: errors.New(`ent: missing required field "Job.loggedStallWarning"`)}
+	if _, ok := _c.mutation.HasLoggedStallWarning(); !ok {
+		return &ValidationError{Name: "hasLoggedStallWarning", err: errors.New(`ent: missing required field "Job.hasLoggedStallWarning"`)}
 	}
 	return nil
 }
@@ -366,9 +366,9 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec, error) {
 		_spec.SetField(job.FieldRetriedFraction, field.TypeFloat64, value)
 		_node.RetriedFraction = value
 	}
-	if value, ok := _c.mutation.LoggedStallWarning(); ok {
-		_spec.SetField(job.FieldLoggedStallWarning, field.TypeBool, value)
-		_node.LoggedStallWarning = value
+	if value, ok := _c.mutation.HasLoggedStallWarning(); ok {
+		_spec.SetField(job.FieldHasLoggedStallWarning, field.TypeBool, value)
+		_node.HasLoggedStallWarning = value
 	}
 	return _node, _spec, nil
 }
@@ -614,15 +614,15 @@ func (u *JobUpsert) AddRetriedFraction(v float64) *JobUpsert {
 	return u
 }
 
-// SetLoggedStallWarning sets the "loggedStallWarning" field.
-func (u *JobUpsert) SetLoggedStallWarning(v bool) *JobUpsert {
-	u.Set(job.FieldLoggedStallWarning, v)
+// SetHasLoggedStallWarning sets the "hasLoggedStallWarning" field.
+func (u *JobUpsert) SetHasLoggedStallWarning(v bool) *JobUpsert {
+	u.Set(job.FieldHasLoggedStallWarning, v)
 	return u
 }
 
-// UpdateLoggedStallWarning sets the "loggedStallWarning" field to the value that was provided on create.
-func (u *JobUpsert) UpdateLoggedStallWarning() *JobUpsert {
-	u.SetExcluded(job.FieldLoggedStallWarning)
+// UpdateHasLoggedStallWarning sets the "hasLoggedStallWarning" field to the value that was provided on create.
+func (u *JobUpsert) UpdateHasLoggedStallWarning() *JobUpsert {
+	u.SetExcluded(job.FieldHasLoggedStallWarning)
 	return u
 }
 
@@ -898,17 +898,17 @@ func (u *JobUpsertOne) UpdateRetriedFraction() *JobUpsertOne {
 	})
 }
 
-// SetLoggedStallWarning sets the "loggedStallWarning" field.
-func (u *JobUpsertOne) SetLoggedStallWarning(v bool) *JobUpsertOne {
+// SetHasLoggedStallWarning sets the "hasLoggedStallWarning" field.
+func (u *JobUpsertOne) SetHasLoggedStallWarning(v bool) *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
-		s.SetLoggedStallWarning(v)
+		s.SetHasLoggedStallWarning(v)
 	})
 }
 
-// UpdateLoggedStallWarning sets the "loggedStallWarning" field to the value that was provided on create.
-func (u *JobUpsertOne) UpdateLoggedStallWarning() *JobUpsertOne {
+// UpdateHasLoggedStallWarning sets the "hasLoggedStallWarning" field to the value that was provided on create.
+func (u *JobUpsertOne) UpdateHasLoggedStallWarning() *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
-		s.UpdateLoggedStallWarning()
+		s.UpdateHasLoggedStallWarning()
 	})
 }
 
@@ -1354,17 +1354,17 @@ func (u *JobUpsertBulk) UpdateRetriedFraction() *JobUpsertBulk {
 	})
 }
 
-// SetLoggedStallWarning sets the "loggedStallWarning" field.
-func (u *JobUpsertBulk) SetLoggedStallWarning(v bool) *JobUpsertBulk {
+// SetHasLoggedStallWarning sets the "hasLoggedStallWarning" field.
+func (u *JobUpsertBulk) SetHasLoggedStallWarning(v bool) *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
-		s.SetLoggedStallWarning(v)
+		s.SetHasLoggedStallWarning(v)
 	})
 }
 
-// UpdateLoggedStallWarning sets the "loggedStallWarning" field to the value that was provided on create.
-func (u *JobUpsertBulk) UpdateLoggedStallWarning() *JobUpsertBulk {
+// UpdateHasLoggedStallWarning sets the "hasLoggedStallWarning" field to the value that was provided on create.
+func (u *JobUpsertBulk) UpdateHasLoggedStallWarning() *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
-		s.UpdateLoggedStallWarning()
+		s.UpdateHasLoggedStallWarning()
 	})
 }
 

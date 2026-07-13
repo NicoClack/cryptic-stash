@@ -26,8 +26,8 @@ type Passkey struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// AllowSuperUser holds the value of the "allowSuperUser" field.
-	AllowSuperUser bool `json:"allowSuperUser,omitempty"`
+	// AllowSudo holds the value of the "allowSudo" field.
+	AllowSudo bool `json:"allowSudo,omitempty"`
 	// CredentialID holds the value of the "credentialID" field.
 	CredentialID []byte `json:"credentialID,omitempty"`
 	// Credential holds the value of the "credential" field.
@@ -48,9 +48,11 @@ type PasskeyEdges struct {
 	User *User `json:"user,omitempty"`
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"sessions,omitempty"`
+	// ElevatedSessions holds the value of the elevatedSessions edge.
+	ElevatedSessions []*Session `json:"elevatedSessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -73,6 +75,15 @@ func (e PasskeyEdges) SessionsOrErr() ([]*Session, error) {
 	return nil, &NotLoadedError{edge: "sessions"}
 }
 
+// ElevatedSessionsOrErr returns the ElevatedSessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e PasskeyEdges) ElevatedSessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[2] {
+		return e.ElevatedSessions, nil
+	}
+	return nil, &NotLoadedError{edge: "elevatedSessions"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Passkey) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -80,7 +91,7 @@ func (*Passkey) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case passkey.FieldCredentialID:
 			values[i] = new([]byte)
-		case passkey.FieldAllowSuperUser, passkey.FieldIsSecondGroup:
+		case passkey.FieldAllowSudo, passkey.FieldIsSecondGroup:
 			values[i] = new(sql.NullBool)
 		case passkey.FieldName:
 			values[i] = new(sql.NullString)
@@ -129,11 +140,11 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case passkey.FieldAllowSuperUser:
+		case passkey.FieldAllowSudo:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field allowSuperUser", values[i])
+				return fmt.Errorf("unexpected type %T for field allowSudo", values[i])
 			} else if value.Valid {
-				_m.AllowSuperUser = value.Bool
+				_m.AllowSudo = value.Bool
 			}
 		case passkey.FieldCredentialID:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -182,6 +193,11 @@ func (_m *Passkey) QuerySessions() *SessionQuery {
 	return NewPasskeyClient(_m.config).QuerySessions(_m)
 }
 
+// QueryElevatedSessions queries the "elevatedSessions" edge of the Passkey entity.
+func (_m *Passkey) QueryElevatedSessions() *SessionQuery {
+	return NewPasskeyClient(_m.config).QueryElevatedSessions(_m)
+}
+
 // Update returns a builder for updating this Passkey.
 // Note that you need to call Passkey.Unwrap() before calling this method if this Passkey
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -214,8 +230,8 @@ func (_m *Passkey) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("allowSuperUser=")
-	builder.WriteString(fmt.Sprintf("%v", _m.AllowSuperUser))
+	builder.WriteString("allowSudo=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AllowSudo))
 	builder.WriteString(", ")
 	builder.WriteString("credentialID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CredentialID))

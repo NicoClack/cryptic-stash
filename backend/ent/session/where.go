@@ -76,9 +76,9 @@ func ExpiresAt(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldExpiresAt, v))
 }
 
-// SuperUserMode applies equality check predicate on the "superUserMode" field. It's identical to SuperUserModeEQ.
-func SuperUserMode(v bool) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldSuperUserMode, v))
+// IsSudo applies equality check predicate on the "isSudo" field. It's identical to IsSudoEQ.
+func IsSudo(v bool) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldIsSudo, v))
 }
 
 // PasskeyID applies equality check predicate on the "passkeyID" field. It's identical to PasskeyIDEQ.
@@ -89,6 +89,11 @@ func PasskeyID(v uuid.UUID) predicate.Session {
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldUserID, v))
+}
+
+// ElevationPasskeyID applies equality check predicate on the "elevationPasskeyID" field. It's identical to ElevationPasskeyIDEQ.
+func ElevationPasskeyID(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldElevationPasskeyID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "createdAt" field.
@@ -251,14 +256,14 @@ func ExpiresAtLTE(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldExpiresAt, v))
 }
 
-// SuperUserModeEQ applies the EQ predicate on the "superUserMode" field.
-func SuperUserModeEQ(v bool) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldSuperUserMode, v))
+// IsSudoEQ applies the EQ predicate on the "isSudo" field.
+func IsSudoEQ(v bool) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldIsSudo, v))
 }
 
-// SuperUserModeNEQ applies the NEQ predicate on the "superUserMode" field.
-func SuperUserModeNEQ(v bool) predicate.Session {
-	return predicate.Session(sql.FieldNEQ(FieldSuperUserMode, v))
+// IsSudoNEQ applies the NEQ predicate on the "isSudo" field.
+func IsSudoNEQ(v bool) predicate.Session {
+	return predicate.Session(sql.FieldNEQ(FieldIsSudo, v))
 }
 
 // PasskeyIDEQ applies the EQ predicate on the "passkeyID" field.
@@ -301,6 +306,36 @@ func UserIDNotIn(vs ...uuid.UUID) predicate.Session {
 	return predicate.Session(sql.FieldNotIn(FieldUserID, vs...))
 }
 
+// ElevationPasskeyIDEQ applies the EQ predicate on the "elevationPasskeyID" field.
+func ElevationPasskeyIDEQ(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldElevationPasskeyID, v))
+}
+
+// ElevationPasskeyIDNEQ applies the NEQ predicate on the "elevationPasskeyID" field.
+func ElevationPasskeyIDNEQ(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldNEQ(FieldElevationPasskeyID, v))
+}
+
+// ElevationPasskeyIDIn applies the In predicate on the "elevationPasskeyID" field.
+func ElevationPasskeyIDIn(vs ...uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldIn(FieldElevationPasskeyID, vs...))
+}
+
+// ElevationPasskeyIDNotIn applies the NotIn predicate on the "elevationPasskeyID" field.
+func ElevationPasskeyIDNotIn(vs ...uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldNotIn(FieldElevationPasskeyID, vs...))
+}
+
+// ElevationPasskeyIDIsNil applies the IsNil predicate on the "elevationPasskeyID" field.
+func ElevationPasskeyIDIsNil() predicate.Session {
+	return predicate.Session(sql.FieldIsNull(FieldElevationPasskeyID))
+}
+
+// ElevationPasskeyIDNotNil applies the NotNil predicate on the "elevationPasskeyID" field.
+func ElevationPasskeyIDNotNil() predicate.Session {
+	return predicate.Session(sql.FieldNotNull(FieldElevationPasskeyID))
+}
+
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
@@ -339,6 +374,29 @@ func HasPasskey() predicate.Session {
 func HasPasskeyWith(preds ...predicate.Passkey) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		step := newPasskeyStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasElevationPasskey applies the HasEdge predicate on the "elevationPasskey" edge.
+func HasElevationPasskey() predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ElevationPasskeyTable, ElevationPasskeyColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasElevationPasskeyWith applies the HasEdge predicate on the "elevationPasskey" edge with a given conditions (other predicates).
+func HasElevationPasskeyWith(preds ...predicate.Passkey) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		step := newElevationPasskeyStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

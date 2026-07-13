@@ -1876,32 +1876,32 @@ func (m *InviteMutation) ResetEdge(name string) error {
 // JobMutation represents an operation that mutates the Job nodes in the graph.
 type JobMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	createdAt          *time.Time
-	updatedAt          *time.Time
-	dueAt              *time.Time
-	originallyDueAt    *time.Time
-	startedAt          *time.Time
-	_type              *string
-	version            *int
-	addversion         *int
-	priority           *int8
-	addpriority        *int8
-	weight             *int
-	addweight          *int
-	body               *json.RawMessage
-	status             *job.Status
-	retries            *int
-	addretries         *int
-	retriedFraction    *float64
-	addretriedFraction *float64
-	loggedStallWarning *bool
-	clearedFields      map[string]struct{}
-	done               bool
-	oldValue           func(context.Context) (*Job, error)
-	predicates         []predicate.Job
+	op                    Op
+	typ                   string
+	id                    *uuid.UUID
+	createdAt             *time.Time
+	updatedAt             *time.Time
+	dueAt                 *time.Time
+	originallyDueAt       *time.Time
+	startedAt             *time.Time
+	_type                 *string
+	version               *int
+	addversion            *int
+	priority              *int8
+	addpriority           *int8
+	weight                *int
+	addweight             *int
+	body                  *json.RawMessage
+	status                *job.Status
+	retries               *int
+	addretries            *int
+	retriedFraction       *float64
+	addretriedFraction    *float64
+	hasLoggedStallWarning *bool
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*Job, error)
+	predicates            []predicate.Job
 }
 
 var _ ent.Mutation = (*JobMutation)(nil)
@@ -2589,40 +2589,40 @@ func (m *JobMutation) ResetRetriedFraction() {
 	m.addretriedFraction = nil
 }
 
-// SetLoggedStallWarning sets the "loggedStallWarning" field.
-func (m *JobMutation) SetLoggedStallWarning(b bool) {
-	m.loggedStallWarning = &b
+// SetHasLoggedStallWarning sets the "hasLoggedStallWarning" field.
+func (m *JobMutation) SetHasLoggedStallWarning(b bool) {
+	m.hasLoggedStallWarning = &b
 }
 
-// LoggedStallWarning returns the value of the "loggedStallWarning" field in the mutation.
-func (m *JobMutation) LoggedStallWarning() (r bool, exists bool) {
-	v := m.loggedStallWarning
+// HasLoggedStallWarning returns the value of the "hasLoggedStallWarning" field in the mutation.
+func (m *JobMutation) HasLoggedStallWarning() (r bool, exists bool) {
+	v := m.hasLoggedStallWarning
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLoggedStallWarning returns the old "loggedStallWarning" field's value of the Job entity.
+// OldHasLoggedStallWarning returns the old "hasLoggedStallWarning" field's value of the Job entity.
 // If the Job object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *JobMutation) OldLoggedStallWarning(ctx context.Context) (v bool, err error) {
+func (m *JobMutation) OldHasLoggedStallWarning(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLoggedStallWarning is only allowed on UpdateOne operations")
+		return v, errors.New("OldHasLoggedStallWarning is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLoggedStallWarning requires an ID field in the mutation")
+		return v, errors.New("OldHasLoggedStallWarning requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLoggedStallWarning: %w", err)
+		return v, fmt.Errorf("querying old value for OldHasLoggedStallWarning: %w", err)
 	}
-	return oldValue.LoggedStallWarning, nil
+	return oldValue.HasLoggedStallWarning, nil
 }
 
-// ResetLoggedStallWarning resets all changes to the "loggedStallWarning" field.
-func (m *JobMutation) ResetLoggedStallWarning() {
-	m.loggedStallWarning = nil
+// ResetHasLoggedStallWarning resets all changes to the "hasLoggedStallWarning" field.
+func (m *JobMutation) ResetHasLoggedStallWarning() {
+	m.hasLoggedStallWarning = nil
 }
 
 // Where appends a list predicates to the JobMutation builder.
@@ -2699,8 +2699,8 @@ func (m *JobMutation) Fields() []string {
 	if m.retriedFraction != nil {
 		fields = append(fields, job.FieldRetriedFraction)
 	}
-	if m.loggedStallWarning != nil {
-		fields = append(fields, job.FieldLoggedStallWarning)
+	if m.hasLoggedStallWarning != nil {
+		fields = append(fields, job.FieldHasLoggedStallWarning)
 	}
 	return fields
 }
@@ -2736,8 +2736,8 @@ func (m *JobMutation) Field(name string) (ent.Value, bool) {
 		return m.Retries()
 	case job.FieldRetriedFraction:
 		return m.RetriedFraction()
-	case job.FieldLoggedStallWarning:
-		return m.LoggedStallWarning()
+	case job.FieldHasLoggedStallWarning:
+		return m.HasLoggedStallWarning()
 	}
 	return nil, false
 }
@@ -2773,8 +2773,8 @@ func (m *JobMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldRetries(ctx)
 	case job.FieldRetriedFraction:
 		return m.OldRetriedFraction(ctx)
-	case job.FieldLoggedStallWarning:
-		return m.OldLoggedStallWarning(ctx)
+	case job.FieldHasLoggedStallWarning:
+		return m.OldHasLoggedStallWarning(ctx)
 	}
 	return nil, fmt.Errorf("unknown Job field %s", name)
 }
@@ -2875,12 +2875,12 @@ func (m *JobMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRetriedFraction(v)
 		return nil
-	case job.FieldLoggedStallWarning:
+	case job.FieldHasLoggedStallWarning:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLoggedStallWarning(v)
+		m.SetHasLoggedStallWarning(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Job field %s", name)
@@ -3042,8 +3042,8 @@ func (m *JobMutation) ResetField(name string) error {
 	case job.FieldRetriedFraction:
 		m.ResetRetriedFraction()
 		return nil
-	case job.FieldLoggedStallWarning:
-		m.ResetLoggedStallWarning()
+	case job.FieldHasLoggedStallWarning:
+		m.ResetHasLoggedStallWarning()
 		return nil
 	}
 	return fmt.Errorf("unknown Job field %s", name)
@@ -4687,7 +4687,7 @@ type LoginAlertMutation struct {
 	createdAt              *time.Time
 	updatedAt              *time.Time
 	sentAt                 *time.Time
-	confirmed              *bool
+	isConfirmed            *bool
 	clearedFields          map[string]struct{}
 	downloadSession        *uuid.UUID
 	cleareddownloadSession bool
@@ -4910,40 +4910,40 @@ func (m *LoginAlertMutation) ResetSentAt() {
 	m.sentAt = nil
 }
 
-// SetConfirmed sets the "confirmed" field.
-func (m *LoginAlertMutation) SetConfirmed(b bool) {
-	m.confirmed = &b
+// SetIsConfirmed sets the "isConfirmed" field.
+func (m *LoginAlertMutation) SetIsConfirmed(b bool) {
+	m.isConfirmed = &b
 }
 
-// Confirmed returns the value of the "confirmed" field in the mutation.
-func (m *LoginAlertMutation) Confirmed() (r bool, exists bool) {
-	v := m.confirmed
+// IsConfirmed returns the value of the "isConfirmed" field in the mutation.
+func (m *LoginAlertMutation) IsConfirmed() (r bool, exists bool) {
+	v := m.isConfirmed
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldConfirmed returns the old "confirmed" field's value of the LoginAlert entity.
+// OldIsConfirmed returns the old "isConfirmed" field's value of the LoginAlert entity.
 // If the LoginAlert object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LoginAlertMutation) OldConfirmed(ctx context.Context) (v bool, err error) {
+func (m *LoginAlertMutation) OldIsConfirmed(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldConfirmed is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsConfirmed is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldConfirmed requires an ID field in the mutation")
+		return v, errors.New("OldIsConfirmed requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldConfirmed: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsConfirmed: %w", err)
 	}
-	return oldValue.Confirmed, nil
+	return oldValue.IsConfirmed, nil
 }
 
-// ResetConfirmed resets all changes to the "confirmed" field.
-func (m *LoginAlertMutation) ResetConfirmed() {
-	m.confirmed = nil
+// ResetIsConfirmed resets all changes to the "isConfirmed" field.
+func (m *LoginAlertMutation) ResetIsConfirmed() {
+	m.isConfirmed = nil
 }
 
 // SetDownloadSessionID sets the "downloadSessionID" field.
@@ -5116,8 +5116,8 @@ func (m *LoginAlertMutation) Fields() []string {
 	if m.sentAt != nil {
 		fields = append(fields, loginalert.FieldSentAt)
 	}
-	if m.confirmed != nil {
-		fields = append(fields, loginalert.FieldConfirmed)
+	if m.isConfirmed != nil {
+		fields = append(fields, loginalert.FieldIsConfirmed)
 	}
 	if m.downloadSession != nil {
 		fields = append(fields, loginalert.FieldDownloadSessionID)
@@ -5139,8 +5139,8 @@ func (m *LoginAlertMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case loginalert.FieldSentAt:
 		return m.SentAt()
-	case loginalert.FieldConfirmed:
-		return m.Confirmed()
+	case loginalert.FieldIsConfirmed:
+		return m.IsConfirmed()
 	case loginalert.FieldDownloadSessionID:
 		return m.DownloadSessionID()
 	case loginalert.FieldUserMessengerID:
@@ -5160,8 +5160,8 @@ func (m *LoginAlertMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUpdatedAt(ctx)
 	case loginalert.FieldSentAt:
 		return m.OldSentAt(ctx)
-	case loginalert.FieldConfirmed:
-		return m.OldConfirmed(ctx)
+	case loginalert.FieldIsConfirmed:
+		return m.OldIsConfirmed(ctx)
 	case loginalert.FieldDownloadSessionID:
 		return m.OldDownloadSessionID(ctx)
 	case loginalert.FieldUserMessengerID:
@@ -5196,12 +5196,12 @@ func (m *LoginAlertMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSentAt(v)
 		return nil
-	case loginalert.FieldConfirmed:
+	case loginalert.FieldIsConfirmed:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetConfirmed(v)
+		m.SetIsConfirmed(v)
 		return nil
 	case loginalert.FieldDownloadSessionID:
 		v, ok := value.(uuid.UUID)
@@ -5275,8 +5275,8 @@ func (m *LoginAlertMutation) ResetField(name string) error {
 	case loginalert.FieldSentAt:
 		m.ResetSentAt()
 		return nil
-	case loginalert.FieldConfirmed:
-		m.ResetConfirmed()
+	case loginalert.FieldIsConfirmed:
+		m.ResetIsConfirmed()
 		return nil
 	case loginalert.FieldDownloadSessionID:
 		m.ResetDownloadSessionID()
@@ -5383,25 +5383,28 @@ func (m *LoginAlertMutation) ResetEdge(name string) error {
 // PasskeyMutation represents an operation that mutates the Passkey nodes in the graph.
 type PasskeyMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *uuid.UUID
-	createdAt       *time.Time
-	updatedAt       *time.Time
-	name            *string
-	allowSuperUser  *bool
-	credentialID    *[]byte
-	credential      *webauthn.Credential
-	isSecondGroup   *bool
-	clearedFields   map[string]struct{}
-	user            *uuid.UUID
-	cleareduser     bool
-	sessions        map[uuid.UUID]struct{}
-	removedsessions map[uuid.UUID]struct{}
-	clearedsessions bool
-	done            bool
-	oldValue        func(context.Context) (*Passkey, error)
-	predicates      []predicate.Passkey
+	op                      Op
+	typ                     string
+	id                      *uuid.UUID
+	createdAt               *time.Time
+	updatedAt               *time.Time
+	name                    *string
+	allowSudo               *bool
+	credentialID            *[]byte
+	credential              *webauthn.Credential
+	isSecondGroup           *bool
+	clearedFields           map[string]struct{}
+	user                    *uuid.UUID
+	cleareduser             bool
+	sessions                map[uuid.UUID]struct{}
+	removedsessions         map[uuid.UUID]struct{}
+	clearedsessions         bool
+	elevatedSessions        map[uuid.UUID]struct{}
+	removedelevatedSessions map[uuid.UUID]struct{}
+	clearedelevatedSessions bool
+	done                    bool
+	oldValue                func(context.Context) (*Passkey, error)
+	predicates              []predicate.Passkey
 }
 
 var _ ent.Mutation = (*PasskeyMutation)(nil)
@@ -5616,40 +5619,40 @@ func (m *PasskeyMutation) ResetName() {
 	m.name = nil
 }
 
-// SetAllowSuperUser sets the "allowSuperUser" field.
-func (m *PasskeyMutation) SetAllowSuperUser(b bool) {
-	m.allowSuperUser = &b
+// SetAllowSudo sets the "allowSudo" field.
+func (m *PasskeyMutation) SetAllowSudo(b bool) {
+	m.allowSudo = &b
 }
 
-// AllowSuperUser returns the value of the "allowSuperUser" field in the mutation.
-func (m *PasskeyMutation) AllowSuperUser() (r bool, exists bool) {
-	v := m.allowSuperUser
+// AllowSudo returns the value of the "allowSudo" field in the mutation.
+func (m *PasskeyMutation) AllowSudo() (r bool, exists bool) {
+	v := m.allowSudo
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAllowSuperUser returns the old "allowSuperUser" field's value of the Passkey entity.
+// OldAllowSudo returns the old "allowSudo" field's value of the Passkey entity.
 // If the Passkey object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PasskeyMutation) OldAllowSuperUser(ctx context.Context) (v bool, err error) {
+func (m *PasskeyMutation) OldAllowSudo(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAllowSuperUser is only allowed on UpdateOne operations")
+		return v, errors.New("OldAllowSudo is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAllowSuperUser requires an ID field in the mutation")
+		return v, errors.New("OldAllowSudo requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAllowSuperUser: %w", err)
+		return v, fmt.Errorf("querying old value for OldAllowSudo: %w", err)
 	}
-	return oldValue.AllowSuperUser, nil
+	return oldValue.AllowSudo, nil
 }
 
-// ResetAllowSuperUser resets all changes to the "allowSuperUser" field.
-func (m *PasskeyMutation) ResetAllowSuperUser() {
-	m.allowSuperUser = nil
+// ResetAllowSudo resets all changes to the "allowSudo" field.
+func (m *PasskeyMutation) ResetAllowSudo() {
+	m.allowSudo = nil
 }
 
 // SetCredentialID sets the "credentialID" field.
@@ -5877,6 +5880,60 @@ func (m *PasskeyMutation) ResetSessions() {
 	m.removedsessions = nil
 }
 
+// AddElevatedSessionIDs adds the "elevatedSessions" edge to the Session entity by ids.
+func (m *PasskeyMutation) AddElevatedSessionIDs(ids ...uuid.UUID) {
+	if m.elevatedSessions == nil {
+		m.elevatedSessions = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.elevatedSessions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearElevatedSessions clears the "elevatedSessions" edge to the Session entity.
+func (m *PasskeyMutation) ClearElevatedSessions() {
+	m.clearedelevatedSessions = true
+}
+
+// ElevatedSessionsCleared reports if the "elevatedSessions" edge to the Session entity was cleared.
+func (m *PasskeyMutation) ElevatedSessionsCleared() bool {
+	return m.clearedelevatedSessions
+}
+
+// RemoveElevatedSessionIDs removes the "elevatedSessions" edge to the Session entity by IDs.
+func (m *PasskeyMutation) RemoveElevatedSessionIDs(ids ...uuid.UUID) {
+	if m.removedelevatedSessions == nil {
+		m.removedelevatedSessions = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.elevatedSessions, ids[i])
+		m.removedelevatedSessions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedElevatedSessions returns the removed IDs of the "elevatedSessions" edge to the Session entity.
+func (m *PasskeyMutation) RemovedElevatedSessionsIDs() (ids []uuid.UUID) {
+	for id := range m.removedelevatedSessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ElevatedSessionsIDs returns the "elevatedSessions" edge IDs in the mutation.
+func (m *PasskeyMutation) ElevatedSessionsIDs() (ids []uuid.UUID) {
+	for id := range m.elevatedSessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetElevatedSessions resets all changes to the "elevatedSessions" edge.
+func (m *PasskeyMutation) ResetElevatedSessions() {
+	m.elevatedSessions = nil
+	m.clearedelevatedSessions = false
+	m.removedelevatedSessions = nil
+}
+
 // Where appends a list predicates to the PasskeyMutation builder.
 func (m *PasskeyMutation) Where(ps ...predicate.Passkey) {
 	m.predicates = append(m.predicates, ps...)
@@ -5921,8 +5978,8 @@ func (m *PasskeyMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, passkey.FieldName)
 	}
-	if m.allowSuperUser != nil {
-		fields = append(fields, passkey.FieldAllowSuperUser)
+	if m.allowSudo != nil {
+		fields = append(fields, passkey.FieldAllowSudo)
 	}
 	if m.credentialID != nil {
 		fields = append(fields, passkey.FieldCredentialID)
@@ -5950,8 +6007,8 @@ func (m *PasskeyMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case passkey.FieldName:
 		return m.Name()
-	case passkey.FieldAllowSuperUser:
-		return m.AllowSuperUser()
+	case passkey.FieldAllowSudo:
+		return m.AllowSudo()
 	case passkey.FieldCredentialID:
 		return m.CredentialID()
 	case passkey.FieldCredential:
@@ -5975,8 +6032,8 @@ func (m *PasskeyMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case passkey.FieldName:
 		return m.OldName(ctx)
-	case passkey.FieldAllowSuperUser:
-		return m.OldAllowSuperUser(ctx)
+	case passkey.FieldAllowSudo:
+		return m.OldAllowSudo(ctx)
 	case passkey.FieldCredentialID:
 		return m.OldCredentialID(ctx)
 	case passkey.FieldCredential:
@@ -6015,12 +6072,12 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case passkey.FieldAllowSuperUser:
+	case passkey.FieldAllowSudo:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAllowSuperUser(v)
+		m.SetAllowSudo(v)
 		return nil
 	case passkey.FieldCredentialID:
 		v, ok := value.([]byte)
@@ -6108,8 +6165,8 @@ func (m *PasskeyMutation) ResetField(name string) error {
 	case passkey.FieldName:
 		m.ResetName()
 		return nil
-	case passkey.FieldAllowSuperUser:
-		m.ResetAllowSuperUser()
+	case passkey.FieldAllowSudo:
+		m.ResetAllowSudo()
 		return nil
 	case passkey.FieldCredentialID:
 		m.ResetCredentialID()
@@ -6129,12 +6186,15 @@ func (m *PasskeyMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PasskeyMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, passkey.EdgeUser)
 	}
 	if m.sessions != nil {
 		edges = append(edges, passkey.EdgeSessions)
+	}
+	if m.elevatedSessions != nil {
+		edges = append(edges, passkey.EdgeElevatedSessions)
 	}
 	return edges
 }
@@ -6153,15 +6213,24 @@ func (m *PasskeyMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case passkey.EdgeElevatedSessions:
+		ids := make([]ent.Value, 0, len(m.elevatedSessions))
+		for id := range m.elevatedSessions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PasskeyMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedsessions != nil {
 		edges = append(edges, passkey.EdgeSessions)
+	}
+	if m.removedelevatedSessions != nil {
+		edges = append(edges, passkey.EdgeElevatedSessions)
 	}
 	return edges
 }
@@ -6176,18 +6245,27 @@ func (m *PasskeyMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case passkey.EdgeElevatedSessions:
+		ids := make([]ent.Value, 0, len(m.removedelevatedSessions))
+		for id := range m.removedelevatedSessions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PasskeyMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, passkey.EdgeUser)
 	}
 	if m.clearedsessions {
 		edges = append(edges, passkey.EdgeSessions)
+	}
+	if m.clearedelevatedSessions {
+		edges = append(edges, passkey.EdgeElevatedSessions)
 	}
 	return edges
 }
@@ -6200,6 +6278,8 @@ func (m *PasskeyMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case passkey.EdgeSessions:
 		return m.clearedsessions
+	case passkey.EdgeElevatedSessions:
+		return m.clearedelevatedSessions
 	}
 	return false
 }
@@ -6224,6 +6304,9 @@ func (m *PasskeyMutation) ResetEdge(name string) error {
 		return nil
 	case passkey.EdgeSessions:
 		m.ResetSessions()
+		return nil
+	case passkey.EdgeElevatedSessions:
+		m.ResetElevatedSessions()
 		return nil
 	}
 	return fmt.Errorf("unknown Passkey edge %s", name)
@@ -6748,24 +6831,26 @@ func (m *PeriodicTaskMutation) ResetEdge(name string) error {
 // SessionMutation represents an operation that mutates the Session nodes in the graph.
 type SessionMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	createdAt      *time.Time
-	updatedAt      *time.Time
-	hashedToken    *[]byte
-	expiresAt      *time.Time
-	superUserMode  *bool
-	userAgent      *string
-	ip             *string
-	clearedFields  map[string]struct{}
-	user           *uuid.UUID
-	cleareduser    bool
-	passkey        *uuid.UUID
-	clearedpasskey bool
-	done           bool
-	oldValue       func(context.Context) (*Session, error)
-	predicates     []predicate.Session
+	op                      Op
+	typ                     string
+	id                      *uuid.UUID
+	createdAt               *time.Time
+	updatedAt               *time.Time
+	hashedToken             *[]byte
+	expiresAt               *time.Time
+	isSudo                  *bool
+	userAgent               *string
+	ip                      *string
+	clearedFields           map[string]struct{}
+	user                    *uuid.UUID
+	cleareduser             bool
+	passkey                 *uuid.UUID
+	clearedpasskey          bool
+	elevationPasskey        *uuid.UUID
+	clearedelevationPasskey bool
+	done                    bool
+	oldValue                func(context.Context) (*Session, error)
+	predicates              []predicate.Session
 }
 
 var _ ent.Mutation = (*SessionMutation)(nil)
@@ -7016,40 +7101,40 @@ func (m *SessionMutation) ResetExpiresAt() {
 	m.expiresAt = nil
 }
 
-// SetSuperUserMode sets the "superUserMode" field.
-func (m *SessionMutation) SetSuperUserMode(b bool) {
-	m.superUserMode = &b
+// SetIsSudo sets the "isSudo" field.
+func (m *SessionMutation) SetIsSudo(b bool) {
+	m.isSudo = &b
 }
 
-// SuperUserMode returns the value of the "superUserMode" field in the mutation.
-func (m *SessionMutation) SuperUserMode() (r bool, exists bool) {
-	v := m.superUserMode
+// IsSudo returns the value of the "isSudo" field in the mutation.
+func (m *SessionMutation) IsSudo() (r bool, exists bool) {
+	v := m.isSudo
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSuperUserMode returns the old "superUserMode" field's value of the Session entity.
+// OldIsSudo returns the old "isSudo" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldSuperUserMode(ctx context.Context) (v bool, err error) {
+func (m *SessionMutation) OldIsSudo(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSuperUserMode is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsSudo is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSuperUserMode requires an ID field in the mutation")
+		return v, errors.New("OldIsSudo requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSuperUserMode: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsSudo: %w", err)
 	}
-	return oldValue.SuperUserMode, nil
+	return oldValue.IsSudo, nil
 }
 
-// ResetSuperUserMode resets all changes to the "superUserMode" field.
-func (m *SessionMutation) ResetSuperUserMode() {
-	m.superUserMode = nil
+// ResetIsSudo resets all changes to the "isSudo" field.
+func (m *SessionMutation) ResetIsSudo() {
+	m.isSudo = nil
 }
 
 // SetUserAgent sets the "userAgent" field.
@@ -7196,6 +7281,55 @@ func (m *SessionMutation) ResetUserID() {
 	m.user = nil
 }
 
+// SetElevationPasskeyID sets the "elevationPasskeyID" field.
+func (m *SessionMutation) SetElevationPasskeyID(u uuid.UUID) {
+	m.elevationPasskey = &u
+}
+
+// ElevationPasskeyID returns the value of the "elevationPasskeyID" field in the mutation.
+func (m *SessionMutation) ElevationPasskeyID() (r uuid.UUID, exists bool) {
+	v := m.elevationPasskey
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElevationPasskeyID returns the old "elevationPasskeyID" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldElevationPasskeyID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElevationPasskeyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElevationPasskeyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElevationPasskeyID: %w", err)
+	}
+	return oldValue.ElevationPasskeyID, nil
+}
+
+// ClearElevationPasskeyID clears the value of the "elevationPasskeyID" field.
+func (m *SessionMutation) ClearElevationPasskeyID() {
+	m.elevationPasskey = nil
+	m.clearedFields[session.FieldElevationPasskeyID] = struct{}{}
+}
+
+// ElevationPasskeyIDCleared returns if the "elevationPasskeyID" field was cleared in this mutation.
+func (m *SessionMutation) ElevationPasskeyIDCleared() bool {
+	_, ok := m.clearedFields[session.FieldElevationPasskeyID]
+	return ok
+}
+
+// ResetElevationPasskeyID resets all changes to the "elevationPasskeyID" field.
+func (m *SessionMutation) ResetElevationPasskeyID() {
+	m.elevationPasskey = nil
+	delete(m.clearedFields, session.FieldElevationPasskeyID)
+}
+
 // ClearUser clears the "user" edge to the User entity.
 func (m *SessionMutation) ClearUser() {
 	m.cleareduser = true
@@ -7250,6 +7384,33 @@ func (m *SessionMutation) ResetPasskey() {
 	m.clearedpasskey = false
 }
 
+// ClearElevationPasskey clears the "elevationPasskey" edge to the Passkey entity.
+func (m *SessionMutation) ClearElevationPasskey() {
+	m.clearedelevationPasskey = true
+	m.clearedFields[session.FieldElevationPasskeyID] = struct{}{}
+}
+
+// ElevationPasskeyCleared reports if the "elevationPasskey" edge to the Passkey entity was cleared.
+func (m *SessionMutation) ElevationPasskeyCleared() bool {
+	return m.ElevationPasskeyIDCleared() || m.clearedelevationPasskey
+}
+
+// ElevationPasskeyIDs returns the "elevationPasskey" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ElevationPasskeyID instead. It exists only for internal usage by the builders.
+func (m *SessionMutation) ElevationPasskeyIDs() (ids []uuid.UUID) {
+	if id := m.elevationPasskey; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetElevationPasskey resets all changes to the "elevationPasskey" edge.
+func (m *SessionMutation) ResetElevationPasskey() {
+	m.elevationPasskey = nil
+	m.clearedelevationPasskey = false
+}
+
 // Where appends a list predicates to the SessionMutation builder.
 func (m *SessionMutation) Where(ps ...predicate.Session) {
 	m.predicates = append(m.predicates, ps...)
@@ -7284,7 +7445,7 @@ func (m *SessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.createdAt != nil {
 		fields = append(fields, session.FieldCreatedAt)
 	}
@@ -7297,8 +7458,8 @@ func (m *SessionMutation) Fields() []string {
 	if m.expiresAt != nil {
 		fields = append(fields, session.FieldExpiresAt)
 	}
-	if m.superUserMode != nil {
-		fields = append(fields, session.FieldSuperUserMode)
+	if m.isSudo != nil {
+		fields = append(fields, session.FieldIsSudo)
 	}
 	if m.userAgent != nil {
 		fields = append(fields, session.FieldUserAgent)
@@ -7311,6 +7472,9 @@ func (m *SessionMutation) Fields() []string {
 	}
 	if m.user != nil {
 		fields = append(fields, session.FieldUserID)
+	}
+	if m.elevationPasskey != nil {
+		fields = append(fields, session.FieldElevationPasskeyID)
 	}
 	return fields
 }
@@ -7328,8 +7492,8 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.HashedToken()
 	case session.FieldExpiresAt:
 		return m.ExpiresAt()
-	case session.FieldSuperUserMode:
-		return m.SuperUserMode()
+	case session.FieldIsSudo:
+		return m.IsSudo()
 	case session.FieldUserAgent:
 		return m.UserAgent()
 	case session.FieldIP:
@@ -7338,6 +7502,8 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.PasskeyID()
 	case session.FieldUserID:
 		return m.UserID()
+	case session.FieldElevationPasskeyID:
+		return m.ElevationPasskeyID()
 	}
 	return nil, false
 }
@@ -7355,8 +7521,8 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldHashedToken(ctx)
 	case session.FieldExpiresAt:
 		return m.OldExpiresAt(ctx)
-	case session.FieldSuperUserMode:
-		return m.OldSuperUserMode(ctx)
+	case session.FieldIsSudo:
+		return m.OldIsSudo(ctx)
 	case session.FieldUserAgent:
 		return m.OldUserAgent(ctx)
 	case session.FieldIP:
@@ -7365,6 +7531,8 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldPasskeyID(ctx)
 	case session.FieldUserID:
 		return m.OldUserID(ctx)
+	case session.FieldElevationPasskeyID:
+		return m.OldElevationPasskeyID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Session field %s", name)
 }
@@ -7402,12 +7570,12 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExpiresAt(v)
 		return nil
-	case session.FieldSuperUserMode:
+	case session.FieldIsSudo:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSuperUserMode(v)
+		m.SetIsSudo(v)
 		return nil
 	case session.FieldUserAgent:
 		v, ok := value.(string)
@@ -7436,6 +7604,13 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
+		return nil
+	case session.FieldElevationPasskeyID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElevationPasskeyID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)
@@ -7466,7 +7641,11 @@ func (m *SessionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SessionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(session.FieldElevationPasskeyID) {
+		fields = append(fields, session.FieldElevationPasskeyID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -7479,6 +7658,11 @@ func (m *SessionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SessionMutation) ClearField(name string) error {
+	switch name {
+	case session.FieldElevationPasskeyID:
+		m.ClearElevationPasskeyID()
+		return nil
+	}
 	return fmt.Errorf("unknown Session nullable field %s", name)
 }
 
@@ -7498,8 +7682,8 @@ func (m *SessionMutation) ResetField(name string) error {
 	case session.FieldExpiresAt:
 		m.ResetExpiresAt()
 		return nil
-	case session.FieldSuperUserMode:
-		m.ResetSuperUserMode()
+	case session.FieldIsSudo:
+		m.ResetIsSudo()
 		return nil
 	case session.FieldUserAgent:
 		m.ResetUserAgent()
@@ -7513,18 +7697,24 @@ func (m *SessionMutation) ResetField(name string) error {
 	case session.FieldUserID:
 		m.ResetUserID()
 		return nil
+	case session.FieldElevationPasskeyID:
+		m.ResetElevationPasskeyID()
+		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, session.EdgeUser)
 	}
 	if m.passkey != nil {
 		edges = append(edges, session.EdgePasskey)
+	}
+	if m.elevationPasskey != nil {
+		edges = append(edges, session.EdgeElevationPasskey)
 	}
 	return edges
 }
@@ -7541,13 +7731,17 @@ func (m *SessionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.passkey; id != nil {
 			return []ent.Value{*id}
 		}
+	case session.EdgeElevationPasskey:
+		if id := m.elevationPasskey; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -7559,12 +7753,15 @@ func (m *SessionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, session.EdgeUser)
 	}
 	if m.clearedpasskey {
 		edges = append(edges, session.EdgePasskey)
+	}
+	if m.clearedelevationPasskey {
+		edges = append(edges, session.EdgeElevationPasskey)
 	}
 	return edges
 }
@@ -7577,6 +7774,8 @@ func (m *SessionMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case session.EdgePasskey:
 		return m.clearedpasskey
+	case session.EdgeElevationPasskey:
+		return m.clearedelevationPasskey
 	}
 	return false
 }
@@ -7591,6 +7790,9 @@ func (m *SessionMutation) ClearEdge(name string) error {
 	case session.EdgePasskey:
 		m.ClearPasskey()
 		return nil
+	case session.EdgeElevationPasskey:
+		m.ClearElevationPasskey()
+		return nil
 	}
 	return fmt.Errorf("unknown Session unique edge %s", name)
 }
@@ -7604,6 +7806,9 @@ func (m *SessionMutation) ResetEdge(name string) error {
 		return nil
 	case session.EdgePasskey:
 		m.ResetPasskey()
+		return nil
+	case session.EdgeElevationPasskey:
+		m.ResetElevationPasskey()
 		return nil
 	}
 	return fmt.Errorf("unknown Session edge %s", name)
@@ -10676,7 +10881,7 @@ type UserMessengerMutation struct {
 	_type              *string
 	version            *int
 	addversion         *int
-	enabled            *bool
+	isEnabled          *bool
 	options            *json.RawMessage
 	clearedFields      map[string]struct{}
 	user               *uuid.UUID
@@ -10957,40 +11162,40 @@ func (m *UserMessengerMutation) ResetVersion() {
 	m.addversion = nil
 }
 
-// SetEnabled sets the "enabled" field.
-func (m *UserMessengerMutation) SetEnabled(b bool) {
-	m.enabled = &b
+// SetIsEnabled sets the "isEnabled" field.
+func (m *UserMessengerMutation) SetIsEnabled(b bool) {
+	m.isEnabled = &b
 }
 
-// Enabled returns the value of the "enabled" field in the mutation.
-func (m *UserMessengerMutation) Enabled() (r bool, exists bool) {
-	v := m.enabled
+// IsEnabled returns the value of the "isEnabled" field in the mutation.
+func (m *UserMessengerMutation) IsEnabled() (r bool, exists bool) {
+	v := m.isEnabled
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldEnabled returns the old "enabled" field's value of the UserMessenger entity.
+// OldIsEnabled returns the old "isEnabled" field's value of the UserMessenger entity.
 // If the UserMessenger object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMessengerMutation) OldEnabled(ctx context.Context) (v bool, err error) {
+func (m *UserMessengerMutation) OldIsEnabled(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
+		return v, errors.New("OldIsEnabled is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEnabled requires an ID field in the mutation")
+		return v, errors.New("OldIsEnabled requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
+		return v, fmt.Errorf("querying old value for OldIsEnabled: %w", err)
 	}
-	return oldValue.Enabled, nil
+	return oldValue.IsEnabled, nil
 }
 
-// ResetEnabled resets all changes to the "enabled" field.
-func (m *UserMessengerMutation) ResetEnabled() {
-	m.enabled = nil
+// ResetIsEnabled resets all changes to the "isEnabled" field.
+func (m *UserMessengerMutation) ResetIsEnabled() {
+	m.isEnabled = nil
 }
 
 // SetOptions sets the "options" field.
@@ -11206,8 +11411,8 @@ func (m *UserMessengerMutation) Fields() []string {
 	if m.version != nil {
 		fields = append(fields, usermessenger.FieldVersion)
 	}
-	if m.enabled != nil {
-		fields = append(fields, usermessenger.FieldEnabled)
+	if m.isEnabled != nil {
+		fields = append(fields, usermessenger.FieldIsEnabled)
 	}
 	if m.options != nil {
 		fields = append(fields, usermessenger.FieldOptions)
@@ -11231,8 +11436,8 @@ func (m *UserMessengerMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case usermessenger.FieldVersion:
 		return m.Version()
-	case usermessenger.FieldEnabled:
-		return m.Enabled()
+	case usermessenger.FieldIsEnabled:
+		return m.IsEnabled()
 	case usermessenger.FieldOptions:
 		return m.Options()
 	case usermessenger.FieldUserID:
@@ -11254,8 +11459,8 @@ func (m *UserMessengerMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldType(ctx)
 	case usermessenger.FieldVersion:
 		return m.OldVersion(ctx)
-	case usermessenger.FieldEnabled:
-		return m.OldEnabled(ctx)
+	case usermessenger.FieldIsEnabled:
+		return m.OldIsEnabled(ctx)
 	case usermessenger.FieldOptions:
 		return m.OldOptions(ctx)
 	case usermessenger.FieldUserID:
@@ -11297,12 +11502,12 @@ func (m *UserMessengerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetVersion(v)
 		return nil
-	case usermessenger.FieldEnabled:
+	case usermessenger.FieldIsEnabled:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetEnabled(v)
+		m.SetIsEnabled(v)
 		return nil
 	case usermessenger.FieldOptions:
 		v, ok := value.(json.RawMessage)
@@ -11403,8 +11608,8 @@ func (m *UserMessengerMutation) ResetField(name string) error {
 	case usermessenger.FieldVersion:
 		m.ResetVersion()
 		return nil
-	case usermessenger.FieldEnabled:
-		m.ResetEnabled()
+	case usermessenger.FieldIsEnabled:
+		m.ResetIsEnabled()
 		return nil
 	case usermessenger.FieldOptions:
 		m.ResetOptions()

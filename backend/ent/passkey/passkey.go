@@ -23,8 +23,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldAllowSuperUser holds the string denoting the allowsuperuser field in the database.
-	FieldAllowSuperUser = "allow_super_user"
+	// FieldAllowSudo holds the string denoting the allowsudo field in the database.
+	FieldAllowSudo = "allow_sudo"
 	// FieldCredentialID holds the string denoting the credentialid field in the database.
 	FieldCredentialID = "credential_id"
 	// FieldCredential holds the string denoting the credential field in the database.
@@ -37,6 +37,8 @@ const (
 	EdgeUser = "user"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
 	EdgeSessions = "sessions"
+	// EdgeElevatedSessions holds the string denoting the elevatedsessions edge name in mutations.
+	EdgeElevatedSessions = "elevatedSessions"
 	// Table holds the table name of the passkey in the database.
 	Table = "passkeys"
 	// UserTable is the table that holds the user relation/edge.
@@ -53,6 +55,13 @@ const (
 	SessionsInverseTable = "sessions"
 	// SessionsColumn is the table column denoting the sessions relation/edge.
 	SessionsColumn = "passkey_id"
+	// ElevatedSessionsTable is the table that holds the elevatedSessions relation/edge.
+	ElevatedSessionsTable = "sessions"
+	// ElevatedSessionsInverseTable is the table name for the Session entity.
+	// It exists in this package in order to avoid circular dependency with the "session" package.
+	ElevatedSessionsInverseTable = "sessions"
+	// ElevatedSessionsColumn is the table column denoting the elevatedSessions relation/edge.
+	ElevatedSessionsColumn = "elevation_passkey_id"
 )
 
 // Columns holds all SQL columns for passkey fields.
@@ -61,7 +70,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
-	FieldAllowSuperUser,
+	FieldAllowSudo,
 	FieldCredentialID,
 	FieldCredential,
 	FieldIsSecondGroup,
@@ -118,9 +127,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByAllowSuperUser orders the results by the allowSuperUser field.
-func ByAllowSuperUser(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAllowSuperUser, opts...).ToFunc()
+// ByAllowSudo orders the results by the allowSudo field.
+func ByAllowSudo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAllowSudo, opts...).ToFunc()
 }
 
 // ByIsSecondGroup orders the results by the isSecondGroup field.
@@ -153,6 +162,20 @@ func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByElevatedSessionsCount orders the results by elevatedSessions count.
+func ByElevatedSessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newElevatedSessionsStep(), opts...)
+	}
+}
+
+// ByElevatedSessions orders the results by elevatedSessions terms.
+func ByElevatedSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newElevatedSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -165,5 +188,12 @@ func newSessionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+	)
+}
+func newElevatedSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ElevatedSessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ElevatedSessionsTable, ElevatedSessionsColumn),
 	)
 }

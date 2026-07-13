@@ -65,16 +65,16 @@ func (_u *LoginAlertUpdate) SetNillableSentAt(v *time.Time) *LoginAlertUpdate {
 	return _u
 }
 
-// SetConfirmed sets the "confirmed" field.
-func (_u *LoginAlertUpdate) SetConfirmed(v bool) *LoginAlertUpdate {
-	_u.mutation.SetConfirmed(v)
+// SetIsConfirmed sets the "isConfirmed" field.
+func (_u *LoginAlertUpdate) SetIsConfirmed(v bool) *LoginAlertUpdate {
+	_u.mutation.SetIsConfirmed(v)
 	return _u
 }
 
-// SetNillableConfirmed sets the "confirmed" field if the given value is not nil.
-func (_u *LoginAlertUpdate) SetNillableConfirmed(v *bool) *LoginAlertUpdate {
+// SetNillableIsConfirmed sets the "isConfirmed" field if the given value is not nil.
+func (_u *LoginAlertUpdate) SetNillableIsConfirmed(v *bool) *LoginAlertUpdate {
 	if v != nil {
-		_u.SetConfirmed(*v)
+		_u.SetIsConfirmed(*v)
 	}
 	return _u
 }
@@ -202,8 +202,8 @@ func (_u *LoginAlertUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.SentAt(); ok {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Confirmed(); ok {
-		_spec.SetField(loginalert.FieldConfirmed, field.TypeBool, value)
+	if value, ok := _u.mutation.IsConfirmed(); ok {
+		_spec.SetField(loginalert.FieldIsConfirmed, field.TypeBool, value)
 	}
 	if _u.mutation.DownloadSessionCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -317,16 +317,16 @@ func (_u *LoginAlertUpdateOne) SetNillableSentAt(v *time.Time) *LoginAlertUpdate
 	return _u
 }
 
-// SetConfirmed sets the "confirmed" field.
-func (_u *LoginAlertUpdateOne) SetConfirmed(v bool) *LoginAlertUpdateOne {
-	_u.mutation.SetConfirmed(v)
+// SetIsConfirmed sets the "isConfirmed" field.
+func (_u *LoginAlertUpdateOne) SetIsConfirmed(v bool) *LoginAlertUpdateOne {
+	_u.mutation.SetIsConfirmed(v)
 	return _u
 }
 
-// SetNillableConfirmed sets the "confirmed" field if the given value is not nil.
-func (_u *LoginAlertUpdateOne) SetNillableConfirmed(v *bool) *LoginAlertUpdateOne {
+// SetNillableIsConfirmed sets the "isConfirmed" field if the given value is not nil.
+func (_u *LoginAlertUpdateOne) SetNillableIsConfirmed(v *bool) *LoginAlertUpdateOne {
 	if v != nil {
-		_u.SetConfirmed(*v)
+		_u.SetIsConfirmed(*v)
 	}
 	return _u
 }
@@ -484,8 +484,8 @@ func (_u *LoginAlertUpdateOne) sqlSave(ctx context.Context) (_node *LoginAlert, 
 	if value, ok := _u.mutation.SentAt(); ok {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.Confirmed(); ok {
-		_spec.SetField(loginalert.FieldConfirmed, field.TypeBool, value)
+	if value, ok := _u.mutation.IsConfirmed(); ok {
+		_spec.SetField(loginalert.FieldIsConfirmed, field.TypeBool, value)
 	}
 	if _u.mutation.DownloadSessionCleared() {
 		edge := &sqlgraph.EdgeSpec{

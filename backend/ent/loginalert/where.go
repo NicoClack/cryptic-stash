@@ -71,9 +71,9 @@ func SentAt(v time.Time) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldEQ(FieldSentAt, v))
 }
 
-// Confirmed applies equality check predicate on the "confirmed" field. It's identical to ConfirmedEQ.
-func Confirmed(v bool) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldEQ(FieldConfirmed, v))
+// IsConfirmed applies equality check predicate on the "isConfirmed" field. It's identical to IsConfirmedEQ.
+func IsConfirmed(v bool) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldEQ(FieldIsConfirmed, v))
 }
 
 // DownloadSessionID applies equality check predicate on the "downloadSessionID" field. It's identical to DownloadSessionIDEQ.
@@ -206,14 +206,14 @@ func SentAtLTE(v time.Time) predicate.LoginAlert {
 	return predicate.LoginAlert(sql.FieldLTE(FieldSentAt, v))
 }
 
-// ConfirmedEQ applies the EQ predicate on the "confirmed" field.
-func ConfirmedEQ(v bool) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldEQ(FieldConfirmed, v))
+// IsConfirmedEQ applies the EQ predicate on the "isConfirmed" field.
+func IsConfirmedEQ(v bool) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldEQ(FieldIsConfirmed, v))
 }
 
-// ConfirmedNEQ applies the NEQ predicate on the "confirmed" field.
-func ConfirmedNEQ(v bool) predicate.LoginAlert {
-	return predicate.LoginAlert(sql.FieldNEQ(FieldConfirmed, v))
+// IsConfirmedNEQ applies the NEQ predicate on the "isConfirmed" field.
+func IsConfirmedNEQ(v bool) predicate.LoginAlert {
+	return predicate.LoginAlert(sql.FieldNEQ(FieldIsConfirmed, v))
 }
 
 // DownloadSessionIDEQ applies the EQ predicate on the "downloadSessionID" field.

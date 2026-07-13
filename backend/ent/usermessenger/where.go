@@ -77,9 +77,9 @@ func Version(v int) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldEQ(FieldVersion, v))
 }
 
-// Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
-func Enabled(v bool) predicate.UserMessenger {
-	return predicate.UserMessenger(sql.FieldEQ(FieldEnabled, v))
+// IsEnabled applies equality check predicate on the "isEnabled" field. It's identical to IsEnabledEQ.
+func IsEnabled(v bool) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldIsEnabled, v))
 }
 
 // Options applies equality check predicate on the "options" field. It's identical to OptionsEQ.
@@ -278,14 +278,14 @@ func VersionLTE(v int) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldLTE(FieldVersion, v))
 }
 
-// EnabledEQ applies the EQ predicate on the "enabled" field.
-func EnabledEQ(v bool) predicate.UserMessenger {
-	return predicate.UserMessenger(sql.FieldEQ(FieldEnabled, v))
+// IsEnabledEQ applies the EQ predicate on the "isEnabled" field.
+func IsEnabledEQ(v bool) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldIsEnabled, v))
 }
 
-// EnabledNEQ applies the NEQ predicate on the "enabled" field.
-func EnabledNEQ(v bool) predicate.UserMessenger {
-	return predicate.UserMessenger(sql.FieldNEQ(FieldEnabled, v))
+// IsEnabledNEQ applies the NEQ predicate on the "isEnabled" field.
+func IsEnabledNEQ(v bool) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNEQ(FieldIsEnabled, v))
 }
 
 // OptionsEQ applies the EQ predicate on the "options" field.

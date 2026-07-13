@@ -28,8 +28,8 @@ type Session struct {
 	HashedToken []byte `json:"hashedToken,omitempty"`
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
-	// SuperUserMode holds the value of the "superUserMode" field.
-	SuperUserMode bool `json:"superUserMode,omitempty"`
+	// IsSudo holds the value of the "isSudo" field.
+	IsSudo bool `json:"isSudo,omitempty"`
 	// UserAgent holds the value of the "userAgent" field.
 	UserAgent string `json:"userAgent,omitempty"`
 	// IP holds the value of the "ip" field.
@@ -38,6 +38,8 @@ type Session struct {
 	PasskeyID uuid.UUID `json:"passkeyID,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
+	// ElevationPasskeyID holds the value of the "elevationPasskeyID" field.
+	ElevationPasskeyID *uuid.UUID `json:"elevationPasskeyID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
 	Edges        SessionEdges `json:"edges"`
@@ -50,9 +52,11 @@ type SessionEdges struct {
 	User *User `json:"user,omitempty"`
 	// Passkey holds the value of the passkey edge.
 	Passkey *Passkey `json:"passkey,omitempty"`
+	// ElevationPasskey holds the value of the elevationPasskey edge.
+	ElevationPasskey *Passkey `json:"elevationPasskey,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -77,14 +81,27 @@ func (e SessionEdges) PasskeyOrErr() (*Passkey, error) {
 	return nil, &NotLoadedError{edge: "passkey"}
 }
 
+// ElevationPasskeyOrErr returns the ElevationPasskey value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SessionEdges) ElevationPasskeyOrErr() (*Passkey, error) {
+	if e.ElevationPasskey != nil {
+		return e.ElevationPasskey, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: passkey.Label}
+	}
+	return nil, &NotLoadedError{edge: "elevationPasskey"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Session) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case session.FieldElevationPasskeyID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case session.FieldHashedToken:
 			values[i] = new([]byte)
-		case session.FieldSuperUserMode:
+		case session.FieldIsSudo:
 			values[i] = new(sql.NullBool)
 		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -139,11 +156,11 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ExpiresAt = value.Time
 			}
-		case session.FieldSuperUserMode:
+		case session.FieldIsSudo:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field superUserMode", values[i])
+				return fmt.Errorf("unexpected type %T for field isSudo", values[i])
 			} else if value.Valid {
-				_m.SuperUserMode = value.Bool
+				_m.IsSudo = value.Bool
 			}
 		case session.FieldUserAgent:
 			if value, err := session.ValueScanner.UserAgent.FromValue(values[i]); err != nil {
@@ -169,6 +186,13 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.UserID = *value
 			}
+		case session.FieldElevationPasskeyID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field elevationPasskeyID", values[i])
+			} else if value.Valid {
+				_m.ElevationPasskeyID = new(uuid.UUID)
+				*_m.ElevationPasskeyID = *value.S.(*uuid.UUID)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -190,6 +214,11 @@ func (_m *Session) QueryUser() *UserQuery {
 // QueryPasskey queries the "passkey" edge of the Session entity.
 func (_m *Session) QueryPasskey() *PasskeyQuery {
 	return NewSessionClient(_m.config).QueryPasskey(_m)
+}
+
+// QueryElevationPasskey queries the "elevationPasskey" edge of the Session entity.
+func (_m *Session) QueryElevationPasskey() *PasskeyQuery {
+	return NewSessionClient(_m.config).QueryElevationPasskey(_m)
 }
 
 // Update returns a builder for updating this Session.
@@ -227,8 +256,8 @@ func (_m *Session) String() string {
 	builder.WriteString("expiresAt=")
 	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("superUserMode=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SuperUserMode))
+	builder.WriteString("isSudo=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsSudo))
 	builder.WriteString(", ")
 	builder.WriteString("userAgent=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserAgent))
@@ -241,6 +270,11 @@ func (_m *Session) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	if v := _m.ElevationPasskeyID; v != nil {
+		builder.WriteString("elevationPasskeyID=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
