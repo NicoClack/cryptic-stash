@@ -24,7 +24,7 @@ func (Session) Fields() []ent.Field {
 						MinLen(32).
 						MaxLen(32),
 		field.Time("expiresAt"),
-		field.Bool("superUserMode").Default(false),
+		field.Bool("isSudo").Default(false),
 		field.Bytes("userAgent").
 			GoType("").
 			ValueScanner(EncryptedField[string]{
@@ -46,6 +46,7 @@ func (Session) Fields() []ent.Field {
 
 		field.UUID("passkeyID", uuid.Nil), // For now, all sessions are created through a passkey
 		field.UUID("userID", uuid.Nil),
+		field.UUID("elevationPasskeyID", uuid.Nil).Optional().Nillable(),
 	}
 }
 
@@ -55,5 +56,7 @@ func (Session) Edges() []ent.Edge {
 			Field("userID").Required().Unique(),
 		edge.From("passkey", Passkey.Type).Ref("sessions").
 			Field("passkeyID").Required().Unique(),
+		edge.From("elevationPasskey", Passkey.Type).Ref("elevatedSessions").
+			Field("elevationPasskeyID").Unique(),
 	}
 }

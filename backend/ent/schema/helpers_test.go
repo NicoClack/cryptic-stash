@@ -75,7 +75,7 @@ func createPasskey(
 	now := time.Now()
 	return client.Passkey.Create().
 		SetName("test-passkey").
-		SetAllowSuperUser(false).
+		SetAllowSudo(false).
 		SetCredentialID(credential.ID).
 		SetCredential(credential).
 		SetCreatedAt(now).

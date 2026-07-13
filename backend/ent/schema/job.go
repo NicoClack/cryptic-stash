@@ -42,7 +42,7 @@ func (Job) Fields() []ent.Field {
 			Default("pending"),
 		field.Int("retries").Default(0),
 		field.Float("retriedFraction").Default(0),
-		field.Bool("loggedStallWarning").Default(false),
+		field.Bool("hasLoggedStallWarning").Default(false),
 	}
 }
 

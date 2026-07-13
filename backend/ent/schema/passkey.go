@@ -23,7 +23,7 @@ func (Passkey) Fields() []ent.Field {
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.String("name").MinLen(1).MaxLen(64),
-		field.Bool("allowSuperUser"),
+		field.Bool("allowSudo"),
 		field.Bytes("credentialID").Unique().MinLen(16).MaxLen(1023),
 		field.Bytes("credential").
 			GoType(webauthn.Credential{}).
@@ -39,6 +39,10 @@ func (Passkey) Edges() []ent.Edge {
 			Field("userID").Unique().Required(),
 		edge.To("sessions", Session.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("elevatedSessions", Session.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
+		// ^ Ideally we'd demote these sessions but sessions are short lived, so it's fine if we just delete them.
+		// The user is unlikely to be logged into multiple devices simultaneously
 	}
 }
 

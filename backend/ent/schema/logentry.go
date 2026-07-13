@@ -21,7 +21,8 @@ func (LogEntry) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
-		field.Time("loggedAt"),      // The entries should be batch created, so a default time wouldn't be accurate
+		field.Time("loggedAt"), // The entries should be batch created, so a default time wouldn't be accurate
+		// TODO: replace with required handledAt and optional eventTime?
 		field.Bool("loggedAtKnown"), // Some logs don't have a time, so an inaccurate time is added during processing
 		field.Int("level"),
 		field.String("message"),
