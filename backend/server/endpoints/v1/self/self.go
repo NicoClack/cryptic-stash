@@ -7,6 +7,6 @@ import (
 
 func ConfigureEndpoints(group *servercommon.Group) {
 	passkeyGroup := group.Group("/passkeys")
-	passkeyGroup.Use(group.App.SuperUserModeMiddleware)
+	passkeyGroup.Use(group.App.SudoModeMiddleware)
 	passkeys.ConfigureEndpoints(passkeyGroup)
 }

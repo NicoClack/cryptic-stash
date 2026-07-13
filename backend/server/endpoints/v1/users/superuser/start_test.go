@@ -158,7 +158,7 @@ func TestStartElevation_AlreadyElevated_SendsConflictError(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Message: "session is already in superuser mode",
+					Message: "session is already in sudo mode",
 					Code:    "SESSION_ALREADY_ELEVATED",
 				},
 			},

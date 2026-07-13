@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRegisterFinish_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
+func TestRegisterFinish_SessionNotSudo_SendsForbidden(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -33,7 +33,7 @@ func TestRegisterFinish_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
 		app.Database,
 		func(tx *ent.Tx, ctx context.Context) (string, error) {
 			sessionOb, token, wrappedErr := app.Auth.CreateSession(
-				false, // Not superuser mode
+				false, // Not sudo
 				userOb.ID,
 				passkeyOb.ID,
 				"Mozilla/5.0",
@@ -58,7 +58,7 @@ func TestRegisterFinish_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
 			CredentialCreationResponse: protocol.CredentialCreationResponse{},
 			WebAuthnSessionID:          uuid.New(),
 			Name:                       "Test passkey 2",
-			AllowSuperUser:             false,
+			AllowSudo:                  false,
 			IsSecondGroup:              false,
 		},
 		testcommon.WithBearerToken(sessionToken),
@@ -70,8 +70,8 @@ func TestRegisterFinish_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Message: "superuser mode required",
-					Code:    "SUPERUSER_MODE_REQUIRED",
+					Message: "sudo mode required",
+					Code:    "SUDO_MODE_REQUIRED",
 				},
 			},
 		},
@@ -109,7 +109,7 @@ func TestRegisterFinish_InvalidWebAuthnSession_SendsBadRequest(t *testing.T) {
 			CredentialCreationResponse: credentialResponse,
 			WebAuthnSessionID:          uuid.New(), // Non-existent
 			Name:                       "Test",
-			AllowSuperUser:             false,
+			AllowSudo:                  false,
 			IsSecondGroup:              false,
 		},
 		testcommon.WithBearerToken(sessionToken),

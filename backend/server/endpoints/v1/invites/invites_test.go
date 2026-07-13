@@ -94,7 +94,7 @@ func TestInviteFlow(t *testing.T) {
 	require.Equal(t, email, createUserResp.Username)
 	require.True(
 		t,
-		createUserResp.IsSuperUserMode,
+		createUserResp.IsSudo,
 		// ^ The user will likely need to make account changes immediately after creating it
 	)
 
@@ -105,7 +105,7 @@ func TestInviteFlow(t *testing.T) {
 		Where(session.HashedToken(hashedToken[:])).
 		Only(t.Context())
 	require.NoError(t, stdErr)
-	require.True(t, sessionOb.SuperUserMode)
+	require.True(t, sessionOb.IsSudo)
 
 	userOb := dbClient.User.Query().
 		Where(user.Username(email)).

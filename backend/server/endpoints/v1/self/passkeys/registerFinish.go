@@ -21,7 +21,7 @@ type RegisterFinishPayload struct {
 
 	WebAuthnSessionID uuid.UUID `binding:"required" json:"webAuthnSessionId"`
 	Name              string    `binding:"required" json:"name"`
-	AllowSuperUser    bool      `                   json:"allowSuperUser"`
+	AllowSudo         bool      `                   json:"allowSudo"`
 	IsSecondGroup     bool      `                   json:"isSecondGroup"`
 }
 
@@ -69,7 +69,7 @@ func RegisterFinish(app *servercommon.ServerApp) gin.HandlerFunc {
 
 				_, wrappedErr := app.Auth.FinishRegisterPasskey(
 					body.Name,
-					body.AllowSuperUser,
+					body.AllowSudo,
 					body.IsSecondGroup,
 					userOb.Username,
 					sessionData,

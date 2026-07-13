@@ -22,13 +22,13 @@ func StartElevation(
 	clock clockwork.Clock,
 ) (uuid.UUID, protocol.PublicKeyCredentialRequestOptions, common.WrappedError) {
 	// Prevent infinitely resetting the session timeout
-	if sessionOb.SuperUserMode {
+	if sessionOb.IsSudo {
 		return uuid.Nil, protocol.PublicKeyCredentialRequestOptions{}, ErrWrapperStartElevation.Wrap(
 			ErrSessionAlreadyElevated,
 		)
 	}
 
-	eligiblePasskeys, wrappedErr := GetEligiblePasskeysForSuperUserMode(
+	eligiblePasskeys, wrappedErr := GetEligiblePasskeysForSudo(
 		sessionOb,
 		userOb,
 	)
@@ -39,7 +39,7 @@ func StartElevation(
 	}
 	if len(eligiblePasskeys) == 0 {
 		return uuid.Nil, protocol.PublicKeyCredentialRequestOptions{}, ErrWrapperStartElevation.Wrap(
-			ErrNoSuperEligiblePasskeys,
+			ErrNoSudoEligiblePasskeys,
 		)
 	}
 
@@ -97,7 +97,7 @@ func FinishElevation(
 
 	// go-webauthn validates this since we pass .WithAllowedCredentials to BeginDiscoverableLogin,
 	// but we'll double check in case the passkeys have changed during the session and to be safe.
-	eligiblePasskeys, wrappedErr := GetEligiblePasskeysForSuperUserMode(sessionOb, userOb)
+	eligiblePasskeys, wrappedErr := GetEligiblePasskeysForSudo(sessionOb, userOb)
 	if wrappedErr != nil {
 		return ErrWrapperFinishElevation.Wrap(
 			wrappedErr,
@@ -112,12 +112,13 @@ func FinishElevation(
 	}
 	if !foundMatch {
 		return ErrWrapperFinishElevation.Wrap(
-			ErrNeitherPasskeySuperEligible,
+			ErrNeitherPasskeySudoEligible,
 		)
 	}
 
 	wrappedErr = ElevateSession(
 		sessionOb.ID,
+		passkeyOb.ID,
 		clock.Now().Add(sessionDuration),
 		tx,
 		ginCtx.Request.Context(),
@@ -131,15 +132,17 @@ func FinishElevation(
 	return nil
 }
 
-// Upgrades an existing session to superuser mode
+// Upgrades an existing session to sudo mode
 func ElevateSession(
 	sessionID uuid.UUID,
+	elevationPasskeyID uuid.UUID,
 	expiresAt time.Time,
 	tx *ent.Tx,
 	ctx context.Context,
 ) common.WrappedError {
 	stdErr := tx.Session.UpdateOneID(sessionID).
-		SetSuperUserMode(true).
+		SetIsSudo(true).
+		SetElevationPasskeyID(elevationPasskeyID).
 		SetExpiresAt(expiresAt).
 		Exec(ctx)
 	if stdErr != nil {
@@ -148,18 +151,18 @@ func ElevateSession(
 	return nil
 }
 
-// At least 1 of the 2 passkeys must allow superuser mode.
+// At least 1 of the 2 passkeys must allow sudo mode.
 // If the user has any second group passkeys, the two passkeys must be from opposite groups.
 // Otherwise, any passkey can be used, including the same one twice.
-func GetEligiblePasskeysForSuperUserMode(
+func GetEligiblePasskeysForSudo(
 	sessionOb *ent.Session,
 	userOb *ent.User,
 ) ([]*ent.Passkey, common.WrappedError) {
 	if sessionOb.Edges.Passkey == nil {
-		panic("GetEligiblePasskeysForSuperUserMode: sessionOb must have Passkey preloaded")
+		panic("GetEligiblePasskeysForSudo: sessionOb must have Passkey preloaded")
 	}
 	if userOb.Edges.Passkeys == nil {
-		panic("GetEligiblePasskeysForSuperUserMode: userOb must have Passkeys preloaded")
+		panic("GetEligiblePasskeysForSudo: userOb must have Passkeys preloaded")
 	}
 
 	passkeyObs := userOb.Edges.Passkeys
@@ -173,7 +176,7 @@ func GetEligiblePasskeysForSuperUserMode(
 
 	var eligible []*ent.Passkey
 	for _, passkeyOb := range passkeyObs {
-		if !passkeyOb.AllowSuperUser && !sessionOb.Edges.Passkey.AllowSuperUser {
+		if !passkeyOb.AllowSudo && !sessionOb.Edges.Passkey.AllowSudo {
 			continue
 		}
 		if hasSecondGroupPasskey && passkeyOb.IsSecondGroup == sessionOb.Edges.Passkey.IsSecondGroup {

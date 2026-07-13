@@ -169,7 +169,7 @@ func TestLoginFlow(t *testing.T) {
 	require.Equal(t, userOb.ID, finishResp.UserID)
 	require.Len(t, finishResp.Token, 43) // 32 bytes
 	require.Equal(t, userOb.Username, finishResp.Username)
-	require.False(t, finishResp.IsSuperUserMode)
+	require.False(t, finishResp.IsSudo)
 	require.False(t, finishResp.IsSecondGroup)
 
 	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(finishResp.Token)
@@ -187,7 +187,7 @@ func TestLoginFlow(t *testing.T) {
 		Only(t.Context())
 	require.NoError(t, stdErr)
 	require.Equal(t, userOb.ID, sessionOb.UserID)
-	require.False(t, sessionOb.SuperUserMode)
+	require.False(t, sessionOb.IsSudo)
 	require.WithinDuration(
 		t,
 		sessionCreatedAt.Add(app.Env.SESSION_DURATION),

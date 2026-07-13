@@ -49,15 +49,15 @@ func NewServer(app *common.App) *Server {
 
 	adminMiddleware := middleware.NewAdminProtected(app.Core) // TODO: replace with config of NewSessionAuth
 	defaultAuthMiddleware := middleware.NewSessionAuth(app.Auth, app.Database, nil)
-	superUserModeMiddleware := middleware.NewSessionAuth(app.Auth, app.Database, &middleware.SessionAuthOptions{
-		RequireSuperuser: true,
+	sudoModeMiddleware := middleware.NewSessionAuth(app.Auth, app.Database, &middleware.SessionAuthOptions{
+		RequireSudo: true,
 	})
 	serverApp := &servercommon.ServerApp{
-		App:                     app,
-		Router:                  router,
-		AdminMiddleware:         adminMiddleware,
-		DefaultAuthMiddleware:   defaultAuthMiddleware,
-		SuperUserModeMiddleware: superUserModeMiddleware,
+		App:                   app,
+		Router:                router,
+		AdminMiddleware:       adminMiddleware,
+		DefaultAuthMiddleware: defaultAuthMiddleware,
+		SudoModeMiddleware:    sudoModeMiddleware,
 	}
 	endpoints.ConfigureEndpoints(&servercommon.Group{
 		RouterGroup: router.Group(""),

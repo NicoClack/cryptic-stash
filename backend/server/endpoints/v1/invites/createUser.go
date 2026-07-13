@@ -20,11 +20,11 @@ type CreateUserPayload struct {
 	CredentialName string `json:"credentialName" binding:"required,min=1,max=64"`
 }
 type CreateUserResponse struct {
-	Errors          []servercommon.ErrorDetail `json:"errors"`
-	UserID          uuid.UUID                  `json:"userId"`
-	Token           string                     `json:"token"`
-	Username        string                     `json:"username"`
-	IsSuperUserMode bool                       `json:"isSuperUserMode"`
+	Errors   []servercommon.ErrorDetail `json:"errors"`
+	UserID   uuid.UUID                  `json:"userId"`
+	Token    string                     `json:"token"`
+	Username string                     `json:"username"`
+	IsSudo   bool                       `json:"isSudo"`
 }
 
 func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -142,7 +142,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 					UserID:          passkeyOb.UserID,
 					Token:           base64.RawURLEncoding.EncodeToString(token),
 					Username:        inviteOb.Email,
-					IsSuperUserMode: sessionOb.SuperUserMode,
+					IsSudo: sessionOb.IsSudo,
 				}, nil
 			},
 		)

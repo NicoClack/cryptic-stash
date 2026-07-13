@@ -17,7 +17,7 @@ import (
 
 func createSessionAndPasskey(
 	t *testing.T,
-	superUserMode bool,
+	isSudo bool,
 	userOb *ent.User,
 	app *testhelpers.App,
 ) (string, *ent.Passkey) {
@@ -31,7 +31,7 @@ func createSessionAndPasskey(
 		SetUpdatedAt(now).
 		SetUserID(userOb.ID).
 		SetName("test-passkey").
-		SetAllowSuperUser(true).
+		SetAllowSudo(true).
 		SetCredentialID(credentialID).
 		// Hardware key
 		SetCredential(webauthn.Credential{
@@ -55,11 +55,11 @@ func createSessionAndPasskey(
 		}).
 		SaveX(t.Context())
 
-	return createSession(t, superUserMode, userOb.ID, passkeyOb.ID, app), passkeyOb
+	return createSession(t, isSudo, userOb.ID, passkeyOb.ID, app), passkeyOb
 }
 func createSession(
 	t *testing.T,
-	superUserMode bool,
+	isSudo bool,
 	userID uuid.UUID,
 	passkeyID uuid.UUID,
 	app *testhelpers.App,
@@ -70,7 +70,7 @@ func createSession(
 		t.Context(), app.Database,
 		func(tx *ent.Tx, ctx context.Context) ([]byte, error) {
 			_, sessionToken, stdErr := app.Auth.CreateSession(
-				superUserMode,
+				isSudo,
 				userID,
 				passkeyID,
 				"test-agent",

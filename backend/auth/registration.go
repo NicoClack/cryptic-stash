@@ -35,7 +35,7 @@ func StartRegisterPasskey(
 
 func FinishRegisterPasskey(
 	credentialName string,
-	allowSuperUser bool,
+	allowSudo bool,
 	isSecondGroup bool,
 	username string,
 	session *webauthn.SessionData,
@@ -81,7 +81,7 @@ func FinishRegisterPasskey(
 		SetUpdatedAt(now).
 		SetUserID(userOb.ID).
 		SetName(credentialName).
-		SetAllowSuperUser(allowSuperUser).
+		SetAllowSudo(allowSudo).
 		SetIsSecondGroup(isSecondGroup).
 		SetCredentialID(credential.ID).
 		SetCredential(*credential).

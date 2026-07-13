@@ -75,7 +75,7 @@ func TestRegisterStart_NoAuthorizationHeader(t *testing.T) {
 		},
 	)
 }
-func TestRegisterStart_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
+func TestRegisterStart_SessionNotSudo_SendsForbidden(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -88,7 +88,7 @@ func TestRegisterStart_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
 		app.Database,
 		func(tx *ent.Tx, ctx context.Context) (string, error) {
 			sessionOb, token, wrappedErr := app.Auth.CreateSession(
-				false, // Not superuser mode
+				false, // Not sudo
 				userOb.ID,
 				passkeyOb.ID,
 				"Mozilla/5.0",
@@ -119,8 +119,8 @@ func TestRegisterStart_SessionNotSuperUserMode_SendsForbidden(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Message: "superuser mode required",
-					Code:    "SUPERUSER_MODE_REQUIRED",
+					Message: "sudo mode required",
+					Code:    "SUDO_MODE_REQUIRED",
 				},
 			},
 		},

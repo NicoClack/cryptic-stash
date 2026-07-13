@@ -28,7 +28,7 @@ import (
 )
 
 type passkeyConfig struct {
-	allowSuperUser     bool
+	allowSudo          bool
 	isSecondGroup      bool
 	setupAuthenticator func(*virtualwebauthn.Authenticator, uuid.UUID)
 	name               string
@@ -101,7 +101,7 @@ func createUserWithPasskeys(
 				}
 				return app.Auth.FinishRegisterPasskey(
 					config.name,
-					config.allowSuperUser,
+					config.allowSudo,
 					config.isSecondGroup,
 					userOb.Username,
 					sessionData,
@@ -202,8 +202,8 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 	dbClient := app.Database.Client()
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 	userOb, passkeyOb, credential, vAuthenticator := createUserWithPasskey(t, 1, app, passkeyConfig{
-		allowSuperUser: true,
-		name:           "Test Passkey",
+		allowSudo: true,
+		name:      "Test Passkey",
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
 
@@ -221,7 +221,7 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 		Where(session.HashedToken(hashedToken[:])).
 		Only(t.Context())
 	require.NoError(t, stdErr)
-	require.False(t, sessionOb.SuperUserMode)
+	require.False(t, sessionOb.IsSudo)
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
@@ -276,7 +276,7 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 		Where(session.HashedToken(hashedToken[:])).
 		Only(t.Context())
 	require.NoError(t, stdErr)
-	require.True(t, sessionOb.SuperUserMode)
+	require.True(t, sessionOb.IsSudo)
 	require.Equal(t, sessionOb.UserID, userOb.ID)
 	require.Greater(
 		t,
@@ -289,8 +289,8 @@ func TestElevationFlow_SingleGroup_TwoSuper(t *testing.T) {
 
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSuperUser: true, name: "super1"},
-		{allowSuperUser: true, name: "super2"},
+		{allowSudo: true, name: "super1"},
+		{allowSudo: true, name: "super2"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -306,8 +306,8 @@ func TestElevationFlow_SingleGroup_NonSuperThenSuper(t *testing.T) {
 
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSuperUser: false, name: "non-super"},
-		{allowSuperUser: true, name: "super"},
+		{allowSudo: false, name: "non-super"},
+		{allowSudo: true, name: "super"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -325,8 +325,8 @@ func TestElevationFlow_SingleGroup_SuperThenNonSuper(t *testing.T) {
 
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSuperUser: true, name: "super"},
-		{allowSuperUser: false, name: "non-super"},
+		{allowSudo: true, name: "super"},
+		{allowSudo: false, name: "non-super"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -346,8 +346,8 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		// Group 1
 		{
-			allowSuperUser: false,
-			isSecondGroup:  false,
+			allowSudo:     false,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -357,8 +357,8 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 			name: "syncable-non-super",
 		},
 		{
-			allowSuperUser: false,
-			isSecondGroup:  false,
+			allowSudo:     false,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -369,9 +369,9 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 		},
 		// Group 2
 		{
-			allowSuperUser: true,
-			isSecondGroup:  true,
-			name:           "security-key-super",
+			allowSudo:     true,
+			isSecondGroup: true,
+			name:          "security-key-super",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -421,8 +421,8 @@ func TestElevationFlow_DualGroup_Group2NonSuperGroup1Super(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		{ // Group 1
-			allowSuperUser: true,
-			isSecondGroup:  false,
+			allowSudo:     true,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -432,9 +432,9 @@ func TestElevationFlow_DualGroup_Group2NonSuperGroup1Super(t *testing.T) {
 			name: "syncable-super",
 		},
 		{ // Group 2
-			allowSuperUser: false,
-			isSecondGroup:  true,
-			name:           "security-key-non-super",
+			allowSudo:     false,
+			isSecondGroup: true,
+			name:          "security-key-non-super",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[1].Passkey.ID, app)
@@ -454,8 +454,8 @@ func TestElevationFlow_DualGroup_Group1SuperGroup2NonSuper(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		{ // Group 1
-			allowSuperUser: true,
-			isSecondGroup:  false,
+			allowSudo:     true,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -465,9 +465,9 @@ func TestElevationFlow_DualGroup_Group1SuperGroup2NonSuper(t *testing.T) {
 			name: "syncable-super",
 		},
 		{ // Group 2
-			allowSuperUser: false,
-			isSecondGroup:  true,
-			name:           "security-key-non-super",
+			allowSudo:     false,
+			isSecondGroup: true,
+			name:          "security-key-non-super",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -485,8 +485,8 @@ func TestElevationFlow_DualGroup_Group2SuperGroup1NonSuper(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		{ // Group 1
-			allowSuperUser: false,
-			isSecondGroup:  false,
+			allowSudo:     false,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -496,9 +496,9 @@ func TestElevationFlow_DualGroup_Group2SuperGroup1NonSuper(t *testing.T) {
 			name: "syncable-non-super",
 		},
 		{ // Group 2
-			allowSuperUser: true,
-			isSecondGroup:  true,
-			name:           "security-key-super",
+			allowSudo:     true,
+			isSecondGroup: true,
+			name:          "security-key-super",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[1].Passkey.ID, app)
@@ -519,8 +519,8 @@ func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T)
 		app := testhelpers.NewApp(t, nil)
 		relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 		user1Ob, passkey1Ob, _, _ := createUserWithPasskey(t, 1, app, passkeyConfig{
-			allowSuperUser: true,
-			name:           "Test Passkey",
+			allowSudo: true,
+			name:      "Test Passkey",
 		})
 		sessionToken1 := createSession(t, false, user1Ob.ID, passkey1Ob.ID, app)
 
@@ -536,7 +536,7 @@ func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T)
 			}
 		}
 		_, _, credential2, vAuthenticator2 := createUserWithPasskey(t, 2, app, passkeyConfig{
-			allowSuperUser:     true,
+			allowSudo:          true,
 			name:               "Test Passkey",
 			setupAuthenticator: setupAuthenticator,
 		})
@@ -607,7 +607,7 @@ func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T)
 			Where(session.HashedToken(hashedToken[:])).
 			Only(t.Context())
 		require.NoError(t, stdErr)
-		require.False(t, sessionOb.SuperUserMode)
+		require.False(t, sessionOb.IsSudo)
 	}
 
 	t.Run("Authenticator responds with wrong passkey", func(t *testing.T) {
@@ -638,8 +638,8 @@ func TestElevationFlow_RejectsTamperedSignature(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 	userOb, passkeyOb, credential, vAuthenticator := createUserWithPasskey(t, 1, app, passkeyConfig{
-		allowSuperUser: true,
-		name:           "Test Passkey",
+		allowSudo: true,
+		name:      "Test Passkey",
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
 
@@ -711,8 +711,8 @@ func TestElevationFlow_GivenExpiredWebAuthnSession_RejectsValidSignature(t *test
 	})
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 	userOb, passkeyOb, credential, vAuthenticator := createUserWithPasskey(t, 1, app, passkeyConfig{
-		allowSuperUser: true,
-		name:           "Test Passkey",
+		allowSudo: true,
+		name:      "Test Passkey",
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
 
@@ -778,8 +778,8 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 	dbClient := app.Database.Client()
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 	userOb, passkeyOb, credential, vAuthenticator := createUserWithPasskey(t, 1, app, passkeyConfig{
-		allowSuperUser: true,
-		name:           "Test Passkey",
+		allowSudo: true,
+		name:      "Test Passkey",
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
 
@@ -807,7 +807,7 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 				gin.H{
 					"errors": []servercommon.ErrorDetail{
 						{
-							Message: "session is already in superuser mode",
+							Message: "session is already in sudo mode",
 							Code:    "SESSION_ALREADY_ELEVATED",
 						},
 					},
@@ -870,9 +870,9 @@ func TestElevationFlow_SingleGroup_SameNonSuperTwice_SendsBadRequest(t *testing.
 	t.Parallel()
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSuperUser: false, name: "non-super1"},
-		{allowSuperUser: false, name: "unused-non-super2"},
-		{allowSuperUser: true, name: "unused-super"},
+		{allowSudo: false, name: "non-super1"},
+		{allowSudo: false, name: "unused-non-super2"},
+		{allowSudo: true, name: "unused-super"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -899,9 +899,9 @@ func TestElevationFlow_SingleGroup_TwoNonSuper_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSuperUser: false, name: "non-super1"},
-		{allowSuperUser: false, name: "non-super2"},
-		{allowSuperUser: true, name: "unused-super"},
+		{allowSudo: false, name: "non-super1"},
+		{allowSudo: false, name: "non-super2"},
+		{allowSudo: true, name: "unused-super"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -932,8 +932,8 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		// Group 1
 		{
-			allowSuperUser: true,
-			isSecondGroup:  false,
+			allowSudo:     true,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -943,8 +943,8 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 			name: "syncable-super1",
 		},
 		{
-			allowSuperUser: true,
-			isSecondGroup:  false,
+			allowSudo:     true,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -955,9 +955,9 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 		},
 		// Group 2
 		{
-			allowSuperUser: true,
-			isSecondGroup:  true,
-			name:           "security-key-super",
+			allowSudo:     true,
+			isSecondGroup: true,
+			name:          "security-key-super",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -1022,8 +1022,8 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *te
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		// Group 1
 		{
-			allowSuperUser: false,
-			isSecondGroup:  false,
+			allowSudo:     false,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -1034,14 +1034,14 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *te
 		},
 		// Group 2
 		{
-			allowSuperUser: false,
-			isSecondGroup:  true,
-			name:           "security-key-non-super",
+			allowSudo:     false,
+			isSecondGroup: true,
+			name:          "security-key-non-super",
 		},
 		{ // Not used, but otherwise the start endpoint will fail because there are no super-eligible passkeys it can request
-			allowSuperUser: true,
-			isSecondGroup:  true,
-			name:           "security-key-super",
+			allowSudo:     true,
+			isSecondGroup: true,
+			name:          "security-key-super",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -1071,8 +1071,8 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotio
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
 		{
-			allowSuperUser: false,
-			isSecondGroup:  false,
+			allowSudo:     false,
+			isSecondGroup: false,
 			setupAuthenticator: func(vAuth *virtualwebauthn.Authenticator, userID uuid.UUID) {
 				vAuth.Options.BackupEligible = true
 				vAuth.Options.BackupState = true
@@ -1082,9 +1082,9 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotio
 			name: "syncable-non-super",
 		},
 		{
-			allowSuperUser: true,
-			isSecondGroup:  true,
-			name:           "security-key-temp-super", // Will be demoted partway through the test
+			allowSudo:     true,
+			isSecondGroup: true,
+			name:          "security-key-temp-super", // Will be demoted partway through the test
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -1099,7 +1099,7 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotio
 
 	// The go-webauthn session will still accept this, but the application logic will return ErrNeitherPasskeySuperEligible
 	app.Database.Client().Passkey.UpdateOneID(passkeys[1].Passkey.ID).
-		SetAllowSuperUser(false).
+		SetAllowSudo(false).
 		ExecX(t.Context())
 
 	var startResp superuser.StartElevationResponse

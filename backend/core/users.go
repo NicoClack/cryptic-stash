@@ -138,7 +138,7 @@ func IsUserSufficientlyNotified(
 		loginAlerts := groupedLoginAlerts[messengerType]
 		confirmedLoginAlerts := []*ent.LoginAlert{}
 		for _, alert := range loginAlerts {
-			if alert.Confirmed {
+			if alert.IsConfirmed {
 				confirmedLoginAlerts = append(confirmedLoginAlerts, alert)
 			}
 		}

@@ -80,7 +80,7 @@ func TestRegisterFlow(t *testing.T) {
 			CredentialCreationResponse: credentialResponse,
 			WebAuthnSessionID:          startRespBody.WebAuthnSessionID,
 			Name:                       "Test Passkey 2",
-			AllowSuperUser:             true,
+			AllowSudo:                  true,
 			IsSecondGroup:              false,
 		},
 		testcommon.WithBearerToken(sessionToken),
@@ -91,7 +91,7 @@ func TestRegisterFlow(t *testing.T) {
 		Where(passkey.CredentialID(credential.ID)).
 		OnlyX(t.Context())
 	require.Equal(t, "Test Passkey 2", passkeyOb.Name)
-	require.True(t, passkeyOb.AllowSuperUser)
+	require.True(t, passkeyOb.AllowSudo)
 	require.False(t, passkeyOb.IsSecondGroup)
 }
 
@@ -144,7 +144,7 @@ func TestRegisterFlow_DuplicateName(t *testing.T) {
 			CredentialCreationResponse: credentialResponse,
 			WebAuthnSessionID:          startRespBody.WebAuthnSessionID,
 			Name:                       passkeyOb.Name, // The first passkey
-			AllowSuperUser:             false,
+			AllowSudo:                  false,
 			IsSecondGroup:              false,
 		},
 		testcommon.WithBearerToken(sessionToken),

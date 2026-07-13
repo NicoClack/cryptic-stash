@@ -154,7 +154,7 @@ func newInMemoryUser(
 				{
 					Type:    emailMessengerType,
 					Version: emailMessengerVersion,
-					Enabled: true,
+					IsEnabled: true,
 					Options: encodedOptions,
 				},
 			},

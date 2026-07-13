@@ -39,16 +39,16 @@ var ErrInvalidSession = common.NewErrorWithCategories(
 	"invalid session",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
-var ErrNoSuperEligiblePasskeys = common.NewErrorWithCategories(
-	"no passkeys are eligible for superuser mode",
+var ErrNoSudoEligiblePasskeys = common.NewErrorWithCategories(
+	"no passkeys are eligible for sudo mode",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
-var ErrNeitherPasskeySuperEligible = common.NewErrorWithCategories(
-	"neither passkey is eligible for superuser mode",
+var ErrNeitherPasskeySudoEligible = common.NewErrorWithCategories(
+	"neither passkey is eligible for sudo mode",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
 var ErrSessionAlreadyElevated = common.NewErrorWithCategories(
-	"session is already in superuser mode",
+	"session is already in sudo mode",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
 var ErrWebAuthnUserNotFound = common.NewErrorWithCategories(
@@ -67,7 +67,7 @@ var ErrWrapperFinishElevation = common.NewErrorWrapper(common.ErrTypeAuth, ErrTy
 var ErrWrapperValidateLogin = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeValidateLogin)
 var ErrWrapperCreateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeCreateSession)
 var ErrWrapperValidateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeValidateSession)
-var ErrWrapperGetEligiblePasskeys = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeGetEligiblePasskeys)
+var ErrWrapperGetEligiblePasskeysForSudo = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeGetEligiblePasskeys)
 var ErrWrapperElevateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeElevateSession)
 
 var ErrWrapperGetUserCallback = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeGetUserCallback)

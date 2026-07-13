@@ -73,7 +73,7 @@ func FinishElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 
 		if stdErr != nil {
 			if common.IsErrorType[*protocol.Error](stdErr) ||
-				errors.Is(stdErr, auth.ErrNeitherPasskeySuperEligible) ||
+				errors.Is(stdErr, auth.ErrNeitherPasskeySudoEligible) ||
 				// ^ This error is from more of a sanity check, so we don't distinguish between it and a protocol.Error
 				errors.Is(stdErr, auth.ErrWebAuthnUserNotFound) {
 				return servercommon.NewError(stdErr).

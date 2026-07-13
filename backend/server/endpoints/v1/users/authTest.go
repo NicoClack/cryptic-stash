@@ -12,11 +12,11 @@ import (
 // TODO: remove
 
 type AuthTestResponse struct {
-	Errors        []servercommon.ErrorDetail `json:"errors"`
-	SessionID     uuid.UUID                  `json:"sessionId"`
-	UserID        uuid.UUID                  `json:"userId"`
-	Username      string                     `json:"username"`
-	SuperUserMode bool                       `json:"superUserMode"`
+	Errors    []servercommon.ErrorDetail `json:"errors"`
+	SessionID uuid.UUID                  `json:"sessionId"`
+	UserID    uuid.UUID                  `json:"userId"`
+	Username  string                     `json:"username"`
+	IsSudo    bool                       `json:"isSudo"`
 }
 
 func AuthTest(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -29,7 +29,7 @@ func AuthTest(app *servercommon.ServerApp) gin.HandlerFunc {
 			SessionID:     sessionOb.ID,
 			UserID:        userOb.ID,
 			Username:      userOb.Username,
-			SuperUserMode: sessionOb.SuperUserMode,
+			IsSudo: sessionOb.IsSudo,
 		})
 		return nil
 	})

@@ -53,11 +53,11 @@ func (service *Auth) FinishLogin(
 	)
 }
 
-func (service *Auth) GetEligiblePasskeysForSuperUserMode(sessionOb *ent.Session, userOb *ent.User) (
+func (service *Auth) GetEligiblePasskeysForSudo(sessionOb *ent.Session, userOb *ent.User) (
 	[]*ent.Passkey,
 	common.WrappedError,
 ) {
-	return auth.GetEligiblePasskeysForSuperUserMode(sessionOb, userOb)
+	return auth.GetEligiblePasskeysForSudo(sessionOb, userOb)
 }
 func (service *Auth) StartElevation(
 	sessionOb *ent.Session, // Must have Passkey preloaded
@@ -106,7 +106,7 @@ func (service *Auth) StartRegisterPasskey(
 
 func (service *Auth) FinishRegisterPasskey(
 	credentialName string,
-	allowSuperUser bool,
+	allowSudo bool,
 	isSecondGroup bool,
 	username string,
 	session *webauthn.SessionData,
@@ -117,7 +117,7 @@ func (service *Auth) FinishRegisterPasskey(
 ) (*ent.Passkey, common.WrappedError) {
 	return auth.FinishRegisterPasskey(
 		credentialName,
-		allowSuperUser,
+		allowSudo,
 		isSecondGroup,
 		username,
 		session,
@@ -131,7 +131,7 @@ func (service *Auth) FinishRegisterPasskey(
 }
 
 func (service *Auth) CreateSession(
-	superUserMode bool,
+	isSudo bool,
 	userID uuid.UUID,
 	passkeyID uuid.UUID,
 	userAgent string,
@@ -140,7 +140,7 @@ func (service *Auth) CreateSession(
 	ctx context.Context,
 ) (*ent.Session, []byte, common.WrappedError) {
 	return auth.CreateSession(
-		superUserMode,
+		isSudo,
 		userID,
 		passkeyID,
 		userAgent,
@@ -160,9 +160,15 @@ func (service *Auth) ValidateSession(
 	return auth.ValidateSession(token, tx, service.app.Clock, ctx)
 }
 
-func (service *Auth) ElevateSession(sessionOb *ent.Session, tx *ent.Tx, ctx context.Context) common.WrappedError {
+func (service *Auth) ElevateSession(
+	sessionOb *ent.Session,
+	elevationPasskeyID uuid.UUID,
+	tx *ent.Tx,
+	ctx context.Context,
+) common.WrappedError {
 	return auth.ElevateSession(
 		sessionOb.ID,
+		elevationPasskeyID,
 		service.app.Clock.Now().Add(service.app.Env.SESSION_DURATION),
 		tx,
 		ctx,

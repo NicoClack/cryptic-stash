@@ -76,7 +76,7 @@ func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
 				VersionedType: versionedType,
 				Name:          definition.Name,
 				Created:       true,
-				Enabled:       messengerOb.Enabled,
+				Enabled:       messengerOb.IsEnabled,
 				CreatedAt:     new(messengerOb.CreatedAt),
 				UpdatedAt:     new(messengerOb.UpdatedAt),
 				Options:       messengerOb.Options,

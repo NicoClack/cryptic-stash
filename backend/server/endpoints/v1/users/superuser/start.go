@@ -53,15 +53,15 @@ func StartElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 			},
 		)
 		if stdErr != nil {
-			// TODO: handle ErrNoSuperEligiblePasskeys and trigger sidevation? Require a superuser mode passkey from any group,
+			// TODO: handle ErrNoSuperEligiblePasskeys and trigger sidevation? Require a sudo mode passkey from any group,
 			// then have them elevate again with a passkey from the other group.
-			// Currently a session can be unelevatable if a non-super passkey was used for login
-			// and the only other superuser passkey is in the same group.
+			// Currently a session can be unelevatable if a non-sudo passkey was used for login
+			// and the only other sudo passkey is in the same group.
 			return servercommon.ExpectError(
 				stdErr, auth.ErrSessionAlreadyElevated,
 				http.StatusConflict,
 				&servercommon.ErrorDetail{
-					Message: "session is already in superuser mode",
+					Message: "session is already in sudo mode",
 					Code:    "SESSION_ALREADY_ELEVATED",
 				},
 			)

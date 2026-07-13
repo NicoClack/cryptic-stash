@@ -16,7 +16,7 @@
 	import { decodeBase64UrlFormat, encodeBase64UrlFormat } from "$lib/utils";
 
 	userAuth.requireAuth();
-	if (userAuth.superUserMode) {
+	if (userAuth.sudoMode) {
 		redirectAfterElevation();
 	}
 
@@ -122,8 +122,9 @@
 			if (!finishResponse.ok) {
 				const errorCode = finishResponse.data?.errors?.[0]?.code;
 				if (errorCode === "NEITHER_PASSKEY_SUPER_ELIGIBLE") {
+					// TODO: this error was removed
 					requestError =
-						"None of your passkeys are eligible for superuser elevation. Please use a passkey that has superuser access enabled.";
+						"None of your passkeys are eligible for sudo mode elevation. Please use a passkey that has sudo mode access enabled.";
 				} else {
 					requestError =
 						finishResponse.data?.errors?.[0]?.message ?? "Elevation failed. Please try again.";
@@ -132,7 +133,7 @@
 				return;
 			}
 
-			// Success! Update superUserMode and redirect
+			// Success! Update sudo mode and redirect
 			userAuth.elevate();
 			redirectAfterElevation();
 		} finally {
@@ -172,9 +173,9 @@
 
 	<Card>
 		<CardHeader>
-			<CardTitle>Superuser Elevation Required</CardTitle>
+			<CardTitle>Sudo Mode Required</CardTitle>
 			<CardDescription>
-				You need to authenticate with an eligible passkey to enter superuser mode before proceeding.
+				You need to authenticate with an eligible passkey to enter sudo mode before proceeding.
 			</CardDescription>
 		</CardHeader>
 		<CardContent class="space-y-4">
@@ -184,8 +185,8 @@
 
 			{#if !hasStarted}
 				<p class="text-sm text-muted-foreground">
-					Superuser mode allows you to manage your passkeys and perform sensitive account actions.
-					Please authenticate with a passkey that has superuser access enabled.
+					Sudo mode allows you to manage your passkeys and perform sensitive account actions. Please
+					authenticate with a passkey that has sudo mode access enabled.
 				</p>
 				<Button onclick={handleElevate} disabled={isLoading} class="w-full">
 					{isLoading ? "Authenticating..." : "Authenticate to Elevate"}

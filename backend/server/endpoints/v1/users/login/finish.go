@@ -23,12 +23,12 @@ type LoginFinishPayload struct {
 }
 
 type LoginFinishResponse struct {
-	Errors          []servercommon.ErrorDetail `json:"errors"`
-	UserID          uuid.UUID                  `json:"userId"`
-	Token           string                     `json:"token"`
-	Username        string                     `json:"username"`
-	IsSuperUserMode bool                       `json:"isSuperUserMode"`
-	IsSecondGroup   bool                       `json:"isSecondGroup"`
+	Errors        []servercommon.ErrorDetail `json:"errors"`
+	UserID        uuid.UUID                  `json:"userId"`
+	Token         string                     `json:"token"`
+	Username      string                     `json:"username"`
+	IsSudo        bool                       `json:"isSudo"`
+	IsSecondGroup bool                       `json:"isSecondGroup"`
 }
 
 func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
@@ -72,12 +72,12 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				return &LoginFinishResponse{
-					Errors:          []servercommon.ErrorDetail{},
-					UserID:          sessionOb.UserID,
-					Token:           base64.RawURLEncoding.EncodeToString(token),
-					Username:        userOb.Username,
-					IsSuperUserMode: sessionOb.SuperUserMode,
-					IsSecondGroup:   passkeyOb.IsSecondGroup,
+					Errors:        []servercommon.ErrorDetail{},
+					UserID:        sessionOb.UserID,
+					Token:         base64.RawURLEncoding.EncodeToString(token),
+					Username:      userOb.Username,
+					IsSudo:        sessionOb.IsSudo,
+					IsSecondGroup: passkeyOb.IsSecondGroup,
 				}, nil
 			},
 		)

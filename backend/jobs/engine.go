@@ -290,7 +290,7 @@ func (engine *Engine) handleCompletedJob(completedJob completedJob, currentWeigh
 						SetDueAt(now.Add(backoff)).
 						AddRetries(1).
 						SetRetriedFraction(retriedFraction).
-						SetLoggedStallWarning(false).
+						SetHasLoggedStallWarning(false).
 						Exec(ctx)
 				}
 			},

@@ -9,25 +9,25 @@ import { SvelteURL } from "svelte/reactivity";
 const USER_SESSION_TOKEN_STORAGE_KEY = "userSessionToken";
 const USER_USER_ID_STORAGE_KEY = "userUserID";
 const USER_USERNAME_STORAGE_KEY = "userUsername";
-const USER_SUPER_USER_MODE_STORAGE_KEY = "userSuperUserMode";
+const USER_SUDO_MODE_STORAGE_KEY = "userSudoMode";
 
 class UserAuthState {
 	#sessionToken: string | null = $state(null);
 	#userID: string | null = $state(null);
 	#username: string | null = $state(null);
-	#isSuperUserMode: boolean = $state(false);
+	#isSudoMode: boolean = $state(false);
 
 	constructor() {
 		if (browser) {
 			const sessionToken = sessionStorage.getItem(USER_SESSION_TOKEN_STORAGE_KEY);
 			const userID = sessionStorage.getItem(USER_USER_ID_STORAGE_KEY);
 			const username = sessionStorage.getItem(USER_USERNAME_STORAGE_KEY);
-			const isSuperUserMode = sessionStorage.getItem(USER_SUPER_USER_MODE_STORAGE_KEY);
+			const isSudoMode = sessionStorage.getItem(USER_SUDO_MODE_STORAGE_KEY);
 			if (sessionToken && userID) {
 				this.#sessionToken = sessionToken;
 				this.#userID = userID;
 				this.#username = username;
-				this.#isSuperUserMode = isSuperUserMode === "true";
+				this.#isSudoMode = isSudoMode === "true";
 			}
 		}
 	}
@@ -38,15 +38,16 @@ class UserAuthState {
 	get username() {
 		return this.#username;
 	}
-	get superUserMode() {
-		return this.#isSuperUserMode;
+	get sudoMode() {
+		return this.#isSudoMode;
 	}
 
+	// TODO: are these needed?
 	isAuthenticated() {
 		return this.#sessionToken !== null && this.#userID !== null;
 	}
-	isSuperUserMode() {
-		return this.isAuthenticated() && this.#isSuperUserMode;
+	isSudoMode() {
+		return this.isAuthenticated() && this.#isSudoMode;
 	}
 
 	requireAuth(): boolean {
@@ -56,11 +57,11 @@ class UserAuthState {
 		}
 		return true;
 	}
-	requireSuperUserMode() {
+	requireSudoMode() {
 		if (
 			browser &&
 			this.requireAuth() &&
-			!this.#isSuperUserMode &&
+			!this.#isSudoMode &&
 			!page.route.id?.startsWith("/elevate")
 		) {
 			goToElevate();
@@ -77,15 +78,15 @@ class UserAuthState {
 		return `Bearer ${this.#sessionToken}`;
 	}
 
-	login(sessionToken: string, userID: string, username: string, isSuperUserMode: boolean) {
+	login(sessionToken: string, userID: string, username: string, isSudoMode: boolean) {
 		this.#sessionToken = sessionToken;
 		this.#userID = userID;
 		this.#username = username;
-		this.#isSuperUserMode = isSuperUserMode;
+		this.#isSudoMode = isSudoMode;
 		sessionStorage.setItem(USER_SESSION_TOKEN_STORAGE_KEY, sessionToken);
 		sessionStorage.setItem(USER_USER_ID_STORAGE_KEY, userID);
 		sessionStorage.setItem(USER_USERNAME_STORAGE_KEY, username);
-		sessionStorage.setItem(USER_SUPER_USER_MODE_STORAGE_KEY, this.#isSuperUserMode.toString());
+		sessionStorage.setItem(USER_SUDO_MODE_STORAGE_KEY, this.#isSudoMode.toString());
 
 		const redirectTo = page.url.searchParams.get("redirectTo");
 		if (redirectTo) {
@@ -98,18 +99,18 @@ class UserAuthState {
 		goto(resolve("/"));
 	}
 	elevate() {
-		this.#isSuperUserMode = true;
-		sessionStorage.setItem(USER_SUPER_USER_MODE_STORAGE_KEY, this.#isSuperUserMode.toString());
+		this.#isSudoMode = true;
+		sessionStorage.setItem(USER_SUDO_MODE_STORAGE_KEY, this.#isSudoMode.toString());
 	}
 	logout() {
 		this.#sessionToken = null;
 		this.#userID = null;
 		this.#username = null;
-		this.#isSuperUserMode = false;
+		this.#isSudoMode = false;
 		sessionStorage.removeItem(USER_SESSION_TOKEN_STORAGE_KEY);
 		sessionStorage.removeItem(USER_USER_ID_STORAGE_KEY);
 		sessionStorage.removeItem(USER_USERNAME_STORAGE_KEY);
-		sessionStorage.removeItem(USER_SUPER_USER_MODE_STORAGE_KEY);
+		sessionStorage.removeItem(USER_SUDO_MODE_STORAGE_KEY);
 	}
 }
 

@@ -75,7 +75,7 @@ export async function fetchJson(
 	) {
 		const authHeader = new Headers(init?.headers).get("authorization");
 
-		if (resp.status === 403 && responseHasErrorCode(jsonResponse, "SUPERUSER_MODE_REQUIRED")) {
+		if (resp.status === 403 && responseHasErrorCode(jsonResponse, "SUDO_MODE_REQUIRED")) {
 			jsonResponse.redirecting = true;
 			goToElevate();
 		}

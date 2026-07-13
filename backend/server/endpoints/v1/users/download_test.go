@@ -70,7 +70,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
-				SetEnabled(true).
+				SetIsEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -116,7 +116,7 @@ func TestDownload_SufficientlyNotifiedUser_AllowsDownload(t *testing.T) {
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
-				SetConfirmed(true).
+				SetIsConfirmed(true).
 				Exec(ctx)
 			return stdErr
 		},
@@ -194,7 +194,7 @@ func TestDownload_UndeletedInvalidSession_SendsUnauthorized(t *testing.T) {
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
-				SetEnabled(true).
+				SetIsEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -240,7 +240,7 @@ func TestDownload_UndeletedInvalidSession_SendsUnauthorized(t *testing.T) {
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
-				SetConfirmed(true).
+				SetIsConfirmed(true).
 				Exec(ctx)
 		},
 	)
@@ -312,7 +312,7 @@ func TestDownload_TemporarilyLockedUser_SendsUnauthorized(t *testing.T) {
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
-				SetEnabled(true).
+				SetIsEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -362,7 +362,7 @@ func TestDownload_TemporarilyLockedUser_SendsUnauthorized(t *testing.T) {
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
-				SetConfirmed(true).
+				SetIsConfirmed(true).
 				Exec(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -376,7 +376,7 @@ func TestDownload_TemporarilyLockedUser_SendsUnauthorized(t *testing.T) {
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now.Add(24 * time.Hour)).
 				SetUserMessenger(userMessengerOb).
-				SetConfirmed(true).
+				SetIsConfirmed(true).
 				Exec(ctx)
 		},
 	)
@@ -476,7 +476,7 @@ func TestDownload_PermanentlyLockedUser_SendsUnauthorized(t *testing.T) {
 				SetVersion(1).
 				SetUserID(userOb.ID).
 				SetOptions(nil).
-				SetEnabled(true).
+				SetIsEnabled(true).
 				Save(ctx)
 			if stdErr != nil {
 				return stdErr
@@ -527,7 +527,7 @@ func TestDownload_PermanentlyLockedUser_SendsUnauthorized(t *testing.T) {
 				SetDownloadSession(downloadSessionOb).
 				SetSentAt(now).
 				SetUserMessenger(userMessengerOb).
-				SetConfirmed(true).
+				SetIsConfirmed(true).
 				Exec(ctx)
 		},
 	)

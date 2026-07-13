@@ -1,5 +1,6 @@
 # TODO
 
+- Rename superuser mode to elevated or sudo mode
 - Use trailing slashes for all endpoints
 - Is it safe to make env.BASE_ENCRYPTION_KEY optional until setup is completed?
 - - Make encrypted writes fail when it isn't set

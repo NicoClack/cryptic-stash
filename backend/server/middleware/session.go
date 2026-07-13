@@ -19,9 +19,9 @@ const (
 )
 
 type SessionAuthOptions struct {
-	RequireSuperuser bool
-	AdminProtected   bool
-	AllowAnonymous   bool
+	RequireSudo    bool
+	AdminProtected bool
+	AllowAnonymous bool
 }
 
 // By default, any user can call the endpoint
@@ -95,12 +95,12 @@ func NewSessionAuth(
 				return
 			}
 		}
-		if options.RequireSuperuser || options.AdminProtected {
-			if !sessionOb.SuperUserMode {
+		if options.RequireSudo || options.AdminProtected {
+			if !sessionOb.IsSudo {
 				ginCtx.Error(servercommon.NewForbiddenError().
 					AddDetail(servercommon.ErrorDetail{
-						Message: "superuser mode required",
-						Code:    "SUPERUSER_MODE_REQUIRED",
+						Message: "sudo mode required",
+						Code:    "SUDO_MODE_REQUIRED",
 					}),
 				)
 				ginCtx.Abort()

@@ -22,12 +22,12 @@
 
 	let { onSuccess }: Props = $props();
 
-	userAuth.requireSuperUserMode(); // TODO: should this go in the page instead?
+	userAuth.requireSudoMode(); // TODO: should this go in the page instead?
 
 	let isLoading = $state(false);
 	let requestError = $state<string | null>(null);
 	let passKeyName = $state("");
-	let allowSuperUser = $state(true);
+	let allowSudo = $state(true);
 	let isSecondGroup = $state(false);
 	let hasStarted = $state(false);
 
@@ -130,7 +130,7 @@
 					},
 					webAuthnSessionId,
 					name: passKeyName,
-					allowSuperUser,
+					allowSudo,
 					isSecondGroup,
 				}),
 			});
@@ -148,7 +148,7 @@
 				onSuccess();
 			} else {
 				passKeyName = "";
-				allowSuperUser = false;
+				allowSudo = false;
 				isSecondGroup = false;
 				hasStarted = false;
 				requestError = "Passkey registered successfully!";
@@ -161,7 +161,7 @@
 	function handleCancel() {
 		hasStarted = false;
 		passKeyName = "";
-		allowSuperUser = false;
+		allowSudo = false;
 		isSecondGroup = false;
 		requestError = null;
 	}
@@ -193,11 +193,11 @@
 				</div>
 
 				<div class="flex items-center space-x-2">
-					<Checkbox id="allow-super-user" bind:checked={allowSuperUser} disabled={isLoading} />
-					<Label for="allow-super-user" class="cursor-pointer">Allow superuser elevation</Label>
+					<Checkbox id="allow-sudo" bind:checked={allowSudo} disabled={isLoading} />
+					<Label for="allow-sudo" class="cursor-pointer">Allow sudo mode elevation</Label>
 				</div>
 				<p class="text-sm text-muted-foreground">
-					If enabled, this passkey can be used to enter superuser mode for managing your account
+					If enabled, this passkey can be used to enter sudo mode for managing your account
 				</p>
 
 				<div class="flex items-center space-x-2">

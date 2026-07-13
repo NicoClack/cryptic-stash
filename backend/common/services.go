@@ -131,7 +131,7 @@ type AuthService interface {
 		tx *ent.Tx,
 	) (userOb *ent.User, passkeyOb *ent.Passkey, sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
 
-	GetEligiblePasskeysForSuperUserMode(sessionOb *ent.Session, userOb *ent.User) (
+	GetEligiblePasskeysForSudo(sessionOb *ent.Session, userOb *ent.User) (
 		[]*ent.Passkey,
 		WrappedError,
 	)
@@ -157,7 +157,7 @@ type AuthService interface {
 	)
 	FinishRegisterPasskey(
 		credentialName string,
-		allowSuperUser bool,
+		allowSudo bool,
 		isSecondGroup bool,
 		username string,
 		session *webauthn.SessionData,
@@ -168,7 +168,7 @@ type AuthService interface {
 	) (*ent.Passkey, WrappedError)
 
 	CreateSession(
-		superUserMode bool,
+		isSudo bool,
 		userID uuid.UUID,
 		passkeyID uuid.UUID,
 		userAgent string,
@@ -176,7 +176,7 @@ type AuthService interface {
 		tx *ent.Tx,
 		ctx context.Context,
 	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
-	ElevateSession(sessionOb *ent.Session, tx *ent.Tx, ctx context.Context) WrappedError
+	ElevateSession(sessionOb *ent.Session, elevationPasskeyID uuid.UUID, tx *ent.Tx, ctx context.Context) WrappedError
 	// Note: must load user edge
 	ValidateSession(token []byte, tx *ent.Tx, ctx context.Context) (*ent.Session, WrappedError)
 }

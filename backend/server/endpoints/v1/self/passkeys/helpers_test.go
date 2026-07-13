@@ -30,7 +30,7 @@ func createDummyPasskey(
 		SetUpdatedAt(time.Now()).
 		SetUserID(userOb.ID).
 		SetName("Test passkey").
-		SetAllowSuperUser(false).
+		SetAllowSudo(false).
 		SetIsSecondGroup(false).
 		SetCredentialID(credential.ID).
 		SetCredential(credential).
