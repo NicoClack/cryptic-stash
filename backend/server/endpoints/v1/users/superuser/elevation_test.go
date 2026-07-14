@@ -217,10 +217,9 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 	require.NoError(t, stdErr)
 	hashedToken := sha256.Sum256(decodedToken)
 
-	sessionOb, stdErr := dbClient.Session.Query().
+	sessionOb := dbClient.Session.Query().
 		Where(session.HashedToken(hashedToken[:])).
-		Only(t.Context())
-	require.NoError(t, stdErr)
+		OnlyX(t.Context())
 	require.False(t, sessionOb.IsSudo)
 
 	startRecorder := testcommon.Post(
@@ -272,12 +271,13 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 		},
 	)
 
-	sessionOb, stdErr = dbClient.Session.Query().
+	sessionOb = dbClient.Session.Query().
 		Where(session.HashedToken(hashedToken[:])).
-		Only(t.Context())
-	require.NoError(t, stdErr)
+		OnlyX(t.Context())
 	require.True(t, sessionOb.IsSudo)
 	require.Equal(t, sessionOb.UserID, userOb.ID)
+	require.NotNil(t, sessionOb.ElevationPasskeyID)
+	require.Equal(t, passkeyOb.ID, *sessionOb.ElevationPasskeyID)
 	require.Greater(
 		t,
 		sessionOb.ExpiresAt,
@@ -300,6 +300,7 @@ func TestElevationFlow_SingleGroup_TwoSuper(t *testing.T) {
 		passkeys[1].Authenticator,
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
+	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
 func TestElevationFlow_SingleGroup_NonSuperThenSuper(t *testing.T) {
 	t.Parallel()
@@ -317,6 +318,7 @@ func TestElevationFlow_SingleGroup_NonSuperThenSuper(t *testing.T) {
 		passkeys[1].Authenticator,
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
+	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
 func TestElevationFlow_SingleGroup_SuperThenNonSuper(t *testing.T) {
 	// It would be slightly more secure if the super passkey always had to be the second one,
@@ -336,6 +338,7 @@ func TestElevationFlow_SingleGroup_SuperThenNonSuper(t *testing.T) {
 		passkeys[1].Authenticator,
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
+	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
 
 func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
@@ -414,6 +417,7 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 		testcommon.WithBearerToken(sessionToken),
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
+	assertSessionElevationPasskey(t, sessionToken, passkeys[2].Passkey.ID, app)
 }
 func TestElevationFlow_DualGroup_Group2NonSuperGroup1Super(t *testing.T) {
 	t.Parallel()
@@ -445,6 +449,7 @@ func TestElevationFlow_DualGroup_Group2NonSuperGroup1Super(t *testing.T) {
 		passkeys[0].Authenticator,
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
+	assertSessionElevationPasskey(t, sessionToken, passkeys[0].Passkey.ID, app)
 }
 func TestElevationFlow_DualGroup_Group1SuperGroup2NonSuper(t *testing.T) {
 	// It would be slightly more secure if the super passkey always had to be the second one,
@@ -478,6 +483,7 @@ func TestElevationFlow_DualGroup_Group1SuperGroup2NonSuper(t *testing.T) {
 		passkeys[1].Authenticator,
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
+	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
 func TestElevationFlow_DualGroup_Group2SuperGroup1NonSuper(t *testing.T) {
 	t.Parallel()
@@ -509,6 +515,7 @@ func TestElevationFlow_DualGroup_Group2SuperGroup1NonSuper(t *testing.T) {
 		passkeys[0].Authenticator,
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
+	assertSessionElevationPasskey(t, sessionToken, passkeys[0].Passkey.ID, app)
 }
 
 func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T) {
@@ -603,10 +610,9 @@ func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T)
 		decodedToken, stdErr := base64.RawURLEncoding.DecodeString(sessionToken1)
 		require.NoError(t, stdErr)
 		hashedToken := sha256.Sum256(decodedToken)
-		sessionOb, stdErr := app.Database.Client().Session.Query().
+		sessionOb := app.Database.Client().Session.Query().
 			Where(session.HashedToken(hashedToken[:])).
-			Only(t.Context())
-		require.NoError(t, stdErr)
+			OnlyX(t.Context())
 		require.False(t, sessionOb.IsSudo)
 	}
 
@@ -815,10 +821,9 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 			)
 
 			lastExpiresAt := sessionOb.ExpiresAt
-			sessionOb, stdErr := dbClient.Session.Query().
+			sessionOb = dbClient.Session.Query().
 				Where(session.ID(sessionOb.ID)).
-				Only(t.Context())
-			require.NoError(t, stdErr)
+				OnlyX(t.Context())
 			require.Equal(t, lastExpiresAt, sessionOb.ExpiresAt) // It shouldn't have been extended a second time
 			break
 		}
@@ -859,10 +864,12 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 		require.NoError(t, stdErr)
 		hashedToken := sha256.Sum256(decodedToken)
 
-		sessionOb, stdErr = dbClient.Session.Query().
+		sessionOb = dbClient.Session.Query().
 			Where(session.HashedToken(hashedToken[:])).
-			Only(t.Context())
+			OnlyX(t.Context())
 		require.NoError(t, stdErr)
+		require.NotNil(t, sessionOb.ElevationPasskeyID)
+		require.Equal(t, passkeyOb.ID, *sessionOb.ElevationPasskeyID)
 	}
 }
 

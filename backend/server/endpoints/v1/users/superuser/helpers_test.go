@@ -2,12 +2,14 @@ package superuser_test
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"testing"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -83,4 +85,23 @@ func createSession(
 	)
 	require.NoError(t, stdErr)
 	return base64.RawURLEncoding.EncodeToString(sessionToken)
+}
+
+func assertSessionElevationPasskey(
+	t *testing.T,
+	sessionToken string,
+	expectedElevationPasskeyID uuid.UUID,
+	app *testhelpers.App,
+) {
+	t.Helper()
+	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(sessionToken)
+	require.NoError(t, stdErr)
+	hashedToken := sha256.Sum256(decodedToken)
+
+	sessionOb := app.Database.Client().Session.Query().
+		Where(session.HashedToken(hashedToken[:])).
+		OnlyX(t.Context())
+	require.True(t, sessionOb.IsSudo)
+	require.NotNil(t, sessionOb.ElevationPasskeyID)
+	require.Equal(t, expectedElevationPasskeyID, *sessionOb.ElevationPasskeyID)
 }
