@@ -1,6 +1,6 @@
 # TODO
 
-- Rename superuser mode to elevated or sudo mode
+- Finish renaming superuser mode to sudo
 - Use trailing slashes for all endpoints
 - Is it safe to make env.BASE_ENCRYPTION_KEY optional until setup is completed?
 - - Make encrypted writes fail when it isn't set
@@ -18,6 +18,7 @@
 - Review and update deps
 - Replace adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
+- Replace entity struct arguments to services with IDs? Like passkeyManagement.go does
 - Rework stash system
 - - Users should be able to manage their own stashes but maybe can't download them while logged in for now
 - - Remove the service-level encryption

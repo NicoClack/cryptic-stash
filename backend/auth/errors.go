@@ -19,6 +19,12 @@ const (
 	ErrTypeGetUserCallback = "get user callback"
 	// FinishLogin has to read the user in a callback provided to go-webauthn
 	ErrTypeInternalGetUser = "internal get user"
+
+	ErrTypeRenamePasskey       = "rename passkey"
+	ErrTypeSetPasskeyAllowSudo = "set passkey allow sudo"
+	ErrTypeMovePasskeyGroup    = "move passkey group"
+	ErrTypeDeletePasskey       = "delete passkey"
+	ErrTypeDisableTwoGroupAuth = "disable two group auth"
 )
 
 var ErrInvalidWebAuthnSessionID = common.NewErrorWithCategories(
@@ -55,6 +61,29 @@ var ErrWebAuthnUserNotFound = common.NewErrorWithCategories(
 	"no user found for WebAuthn user handle",
 	common.ErrTypeAuth, common.ErrTypeClient,
 )
+var ErrPasskeySudoConstraint = common.NewErrorWithCategories(
+	"can't disable sudo on this passkey, as doing so would remove sudo access from your session",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
+var ErrPasskeyGroupMoveConstraint = common.NewErrorWithCategories(
+	"can't move this passkey, as doing so may lock you out of sudo mode. to enable two group auth, "+
+		"use two different passkeys in your session and move one of them to the second group. "+
+		"to move back, disable two group auth entirely",
+	common.ErrTypeAuth,
+	common.ErrTypeClient,
+)
+var ErrPasskeyDeleteConstraint = common.NewErrorWithCategories(
+	"can't delete a passkey that is currently in use by your session",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
+var ErrPasskeyNotFound = common.NewErrorWithCategories(
+	"passkey not found",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
+var ErrUnauthorizedToModifyUser = common.NewErrorWithCategories(
+	"unauthorized to modify this user",
+	common.ErrTypeAuth, common.ErrTypeClient,
+)
 
 var ErrWrapperStartRegisterPasskey = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeStartRegisterPasskey)
 var ErrWrapperFinishRegisterPasskey = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeFinishRegisterPasskey)
@@ -73,3 +102,9 @@ var ErrWrapperElevateSession = common.NewErrorWrapper(common.ErrTypeAuth, ErrTyp
 var ErrWrapperGetUserCallback = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeGetUserCallback)
 var ErrWrapperInternalGetUser = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeInternalGetUser)
 var ErrWrapperDatabase = common.NewErrorWrapper(common.ErrTypeAuth).SetChild(common.ErrWrapperDatabase)
+
+var ErrWrapperRenamePasskey = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeRenamePasskey)
+var ErrWrapperSetPasskeyAllowSudo = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeSetPasskeyAllowSudo)
+var ErrWrapperMovePasskeyGroup = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeMovePasskeyGroup)
+var ErrWrapperDeletePasskey = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeDeletePasskey)
+var ErrWrapperDisableTwoGroupAuth = common.NewErrorWrapper(common.ErrTypeAuth, ErrTypeDisableTwoGroupAuth)

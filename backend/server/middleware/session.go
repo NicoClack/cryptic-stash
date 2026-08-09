@@ -16,6 +16,7 @@ import (
 const (
 	sessionContextKey = "session"
 	userContextKey    = "user"
+	actorContextKey   = "actor"
 )
 
 type SessionAuthOptions struct {
@@ -109,7 +110,13 @@ func NewSessionAuth(
 		}
 
 		ginCtx.Set(sessionContextKey, sessionOb)
-		ginCtx.Set(userContextKey, sessionOb.Edges.User)
+		userOb := sessionOb.Edges.User
+		ginCtx.Set(userContextKey, userOb)
+		ginCtx.Set(actorContextKey, &common.Actor{
+			UserID:    userOb.ID,
+			IP:        ginCtx.ClientIP(),
+			UserAgent: ginCtx.Request.UserAgent(),
+		})
 		ginCtx.Next()
 	}
 }

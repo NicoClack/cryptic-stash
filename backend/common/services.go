@@ -90,6 +90,14 @@ type Env struct {
 	SMTP2GO_FROM_EMAIL string
 	SMTP2GO_FROM_NAME  string
 }
+
+type Actor struct {
+	// Should be used by services to validate ownership
+	UserID    uuid.UUID
+	IP        string
+	UserAgent string
+}
+
 type PasswordHashSettings struct {
 	Time   uint32
 	Memory uint32
@@ -179,6 +187,41 @@ type AuthService interface {
 	ElevateSession(sessionOb *ent.Session, elevationPasskeyID uuid.UUID, tx *ent.Tx, ctx context.Context) WrappedError
 	// Note: must load user edge
 	ValidateSession(token []byte, tx *ent.Tx, ctx context.Context) (*ent.Session, WrappedError)
+
+	RenamePasskey(
+		passkeyID uuid.UUID,
+		newName string,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	SetPasskeyAllowSudo(
+		targetPasskeyID uuid.UUID,
+		sessionPasskeyID uuid.UUID,
+		sessionElevationPasskeyID *uuid.UUID,
+		newAllowSudo bool,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	MovePasskeyGroup(
+		targetPasskeyID uuid.UUID,
+		userID uuid.UUID,
+		sessionPasskeyID uuid.UUID,
+		sessionElevationPasskeyID *uuid.UUID,
+		newIsSecondGroup bool,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	DeletePasskey(
+		passkeyID uuid.UUID,
+		sessionID uuid.UUID,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	DisableTwoGroupAuth(userID uuid.UUID, actor *Actor, tx *ent.Tx, ctx context.Context) WrappedError
 }
 
 // If reason is "", the server will exit with a 0 exit code

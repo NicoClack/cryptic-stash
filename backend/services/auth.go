@@ -174,3 +174,68 @@ func (service *Auth) ElevateSession(
 		ctx,
 	)
 }
+
+func (service *Auth) RenamePasskey(
+	passkeyID uuid.UUID,
+	newName string,
+	actor *common.Actor,
+	tx *ent.Tx,
+	ctx context.Context,
+) common.WrappedError {
+	return auth.RenamePasskey(passkeyID, newName, actor, tx, ctx, service.app.Clock)
+}
+
+func (service *Auth) SetPasskeyAllowSudo(
+	targetPasskeyID uuid.UUID,
+	sessionPasskeyID uuid.UUID,
+	sessionElevationPasskeyID *uuid.UUID,
+	newAllowSudo bool,
+	actor *common.Actor,
+	tx *ent.Tx,
+	ctx context.Context,
+) common.WrappedError {
+	return auth.SetPasskeyAllowSudo(
+		targetPasskeyID,
+		sessionPasskeyID, sessionElevationPasskeyID,
+		newAllowSudo, actor, tx, ctx,
+		service.app.Clock, service.app.Logger,
+	)
+}
+
+func (service *Auth) MovePasskeyGroup(
+	targetPasskeyID uuid.UUID,
+	userID uuid.UUID,
+	sessionPasskeyID uuid.UUID,
+	sessionElevationPasskeyID *uuid.UUID,
+	newIsSecondGroup bool,
+	actor *common.Actor,
+	tx *ent.Tx,
+	ctx context.Context,
+) common.WrappedError {
+	return auth.MovePasskeyGroup(
+		targetPasskeyID,
+		userID, sessionPasskeyID, sessionElevationPasskeyID,
+		newIsSecondGroup,
+		actor, tx, ctx,
+		service.app.Clock,
+	)
+}
+
+func (service *Auth) DeletePasskey(
+	passkeyID uuid.UUID,
+	sessionID uuid.UUID,
+	actor *common.Actor,
+	tx *ent.Tx,
+	ctx context.Context,
+) common.WrappedError {
+	return auth.DeletePasskey(passkeyID, sessionID, actor, tx, ctx)
+}
+
+func (service *Auth) DisableTwoGroupAuth(
+	userID uuid.UUID,
+	actor *common.Actor,
+	tx *ent.Tx,
+	ctx context.Context,
+) common.WrappedError {
+	return auth.DisableTwoGroupAuth(userID, actor, tx, ctx, service.app.Clock)
+}

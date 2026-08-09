@@ -9,6 +9,7 @@ import (
 	"github.com/jonboulle/clockwork"
 )
 
+// TODO: call t.Helper()
 func NewDummyUser(counter int, dbClient *ent.Client, ctx context.Context, clock clockwork.Clock) *ent.User {
 	now := clock.Now()
 	userOb := dbClient.User.Create().
