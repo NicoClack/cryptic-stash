@@ -55,10 +55,7 @@ func Rename(app *servercommon.ServerApp) gin.HandlerFunc {
 			return servercommon.ExpectError(
 				stdErr, auth.ErrPasskeyNotFound,
 				http.StatusNotFound,
-				&servercommon.ErrorDetail{
-					Message: "passkey not found",
-					Code:    "PASSKEY_NOT_FOUND",
-				},
+				nil,
 			)
 		}
 

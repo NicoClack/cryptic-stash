@@ -36,6 +36,7 @@
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than *common.App
 - Remove admin auth code logic
 - Remove 2FA actions
+- Should Auth.CreateSession take a second passkey ID rather than a sudo mode bool? Its sudo sessions don't have an elevation passkey which is unrealistic, although it should probably be a handled edge case throughout the codebase
 - Prevent disabling main email messenger
 - Allow general API and static asset rate limits to be set independently
 - - Maybe 180 requests per 2 minutes for API? 1.5 req/s

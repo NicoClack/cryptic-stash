@@ -17,6 +17,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Note: the returned passkey is a dummy that can't be used for authentication,
+// but is sufficient for passing auth and testing the start-elevation endpoint.
 func createSessionAndPasskey(
 	t *testing.T,
 	isSudo bool,
@@ -40,7 +42,7 @@ func createSessionAndPasskey(
 			ID:              credentialID,
 			PublicKey:       common.CryptoRandomBytes(32),
 			AttestationType: "",
-			// ^ "packed" would be the most realistic, but this key is excluded in the AllowedCredentials sent to the client,
+			// ^ "packed" would be the most realistic, but this item is excluded in the AllowedCredentials sent to the client,
 			// so it makes asserts easier if we don't set it
 			Flags: webauthn.CredentialFlags{
 				UserPresent:  true,

@@ -42,11 +42,9 @@ func Delete(app *servercommon.ServerApp) gin.HandlerFunc {
 					Code:    "DELETE_CONSTRAINT",
 				},
 			).Expect(
-				auth.ErrPasskeyNotFound, http.StatusNotFound,
-				&servercommon.ErrorDetail{
-					Message: "passkey not found",
-					Code:    "PASSKEY_NOT_FOUND",
-				},
+				auth.ErrPasskeyNotFound,
+				http.StatusNotFound,
+				nil,
 			)
 		}
 

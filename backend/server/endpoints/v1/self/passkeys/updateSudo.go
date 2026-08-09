@@ -57,10 +57,7 @@ func UpdateSudo(app *servercommon.ServerApp) gin.HandlerFunc {
 			).Expect(
 				auth.ErrPasskeyNotFound,
 				http.StatusNotFound,
-				&servercommon.ErrorDetail{
-					Message: "passkey not found",
-					Code:    "PASSKEY_NOT_FOUND",
-				},
+				nil,
 			)
 		}
 

@@ -26,7 +26,7 @@ func TestRegisterFinish_SessionNotSudo_SendsForbidden(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
-	passkeyOb := createDummyPasskey(t, t.Context(), userOb, dbClient)
+	passkeyOb := createPasskey(t, "Test passkey", false, false, userOb.ID, dbClient)
 
 	sessionToken, stdErr := dbcommon.WithReadWriteTx(
 		t.Context(),
@@ -83,8 +83,8 @@ func TestRegisterFinish_InvalidWebAuthnSession_SendsBadRequest(t *testing.T) {
 
 	app := testhelpers.NewApp(t, nil)
 	userOb := testcommon.NewDummyUser(1, app.Database.Client(), t.Context(), app.Clock)
-	passkeyOb := createDummyPasskey(t, t.Context(), userOb, app.Database.Client())
-	sessionToken := createSuperSession(t, app, passkeyOb)
+	passkeyOb := createPasskey(t, "Test passkey", false, false, userOb.ID, app.Database.Client())
+	sessionToken := createSession(t, true, passkeyOb.UserID, passkeyOb.ID, app)
 
 	vAuthenticator := virtualwebauthn.NewAuthenticator()
 	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
