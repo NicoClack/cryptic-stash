@@ -68,7 +68,7 @@ var ErrPasskeySudoConstraint = common.NewErrorWithCategories(
 var ErrPasskeyGroupMoveConstraint = common.NewErrorWithCategories(
 	"can't move this passkey, as doing so may lock you out of sudo mode. to enable two group auth, "+
 		"use two different passkeys in your session and move one of them to the second group. "+
-		"to move back, disable two group auth entirely",
+		"to move back, first log in with different passkeys or disable two group auth entirely",
 	common.ErrTypeAuth,
 	common.ErrTypeClient,
 )

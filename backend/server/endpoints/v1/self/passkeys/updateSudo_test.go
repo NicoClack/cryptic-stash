@@ -80,18 +80,74 @@ func TestUpdateSudo_Disable_WithOtherSudoPasskey(t *testing.T) {
 	require.False(t, updated.AllowSudo)
 }
 
+// One sudo, one non-sudo in the session
 func TestUpdateSudo_Disable_TargetIsOnlySudoInSession_SendsConflictError(t *testing.T) {
 	t.Parallel()
 
-	// TODO: create session in the same way as TestList
-	panic("not implemented")
+	app := testhelpers.NewApp(t, nil)
+	dbClient := app.Database.Client()
+	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
+	nonSudoPasskey := createPasskey(t, "non-sudo-key", false, false, userOb.ID, dbClient)
+	sudoPasskeyToDemote := createPasskey(t, "sudo-key", true, false, userOb.ID, dbClient)
+	sessionToken := createSessionWithElevationPasskey(
+		t, nonSudoPasskey.UserID, nonSudoPasskey.ID, sudoPasskeyToDemote.ID, app,
+	)
+
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/self/passkeys/"+sudoPasskeyToDemote.ID.String()+"/update-sudo/",
+		passkeys.UpdateSudoPayload{
+			AllowSudo: false,
+		},
+		testcommon.WithBearerToken(sessionToken),
+	)
+
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusConflict,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "can't disable sudo on this passkey, as doing so would remove sudo access from your session",
+					Code:    "SUDO_CONSTRAINT",
+				},
+			},
+		},
+	)
 }
 
 func TestUpdateSudo_Disable_SamePasskeyUsedTwice_RejectsSessionPasskeyAsTarget(t *testing.T) {
 	t.Parallel()
 
-	// TODO: create session in the same way as TestList
-	panic("not implemented")
+	app := testhelpers.NewApp(t, nil)
+	dbClient := app.Database.Client()
+	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
+	passkeyOb := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
+	sessionToken := createSessionWithElevationPasskey(
+		t, passkeyOb.UserID, passkeyOb.ID, passkeyOb.ID, app,
+	)
+
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/self/passkeys/"+passkeyOb.ID.String()+"/update-sudo/",
+		passkeys.UpdateSudoPayload{
+			AllowSudo: false,
+		},
+		testcommon.WithBearerToken(sessionToken),
+	)
+
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusConflict,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "can't disable sudo on this passkey, as doing so would remove sudo access from your session",
+					Code:    "SUDO_CONSTRAINT",
+				},
+			},
+		},
+	)
 }
 
 func TestUpdateSudo_Disable_NoElevationPasskey_RejectsSessionPasskeyAsTarget(t *testing.T) {

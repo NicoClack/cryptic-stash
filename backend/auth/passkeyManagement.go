@@ -245,7 +245,27 @@ func DeletePasskey(
 		return ErrWrapperDeletePasskey.Wrap(ErrWrapperDatabase.Wrap(stdErr))
 	}
 	if count == 0 {
-		return ErrWrapperDeletePasskey.Wrap(ErrPasskeyNotFound)
+		exists, stdErr := tx.Passkey.Query().
+			Where(
+				passkey.ID(passkeyID),
+				dbcommon.MaybePredicate(
+					actor.UserID != uuid.Nil,
+					passkey.UserID(actor.UserID),
+				),
+			).
+			Exist(ctx)
+		if stdErr != nil {
+			wrappedErr := ErrWrapperDeletePasskey.Wrap(ErrWrapperDatabase.Wrap(stdErr))
+			wrappedErr.AddDebugValuesMut(common.DebugValue{
+				Message: "error originated from diagnosing a passkey deletion that affected zero rows",
+				Value:   passkeyID,
+			})
+			return wrappedErr
+		}
+		if !exists {
+			return ErrWrapperDeletePasskey.Wrap(ErrPasskeyNotFound)
+		}
+		return ErrWrapperDeletePasskey.Wrap(ErrPasskeyDeleteConstraint)
 	}
 	return nil
 }

@@ -16,7 +16,35 @@ import (
 func TestMoveGroup_CreateSecondGroup(t *testing.T) {
 	t.Parallel()
 
-	panic("not implemented")
+	app := testhelpers.NewApp(t, nil)
+	dbClient := app.Database.Client()
+	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
+	firstGroupPasskey := createPasskey(t, "first-group-key", true, false, userOb.ID, dbClient)
+	passkeyToMove := createPasskey(t, "moving-key", true, false, userOb.ID, dbClient)
+	sessionToken := createSessionWithElevationPasskey(
+		t, firstGroupPasskey.UserID, firstGroupPasskey.ID, passkeyToMove.ID, app,
+	)
+
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/self/passkeys/"+passkeyToMove.ID.String()+"/move-group/",
+		passkeys.MoveGroupPayload{
+			IsSecondGroup: true,
+		},
+		testcommon.WithBearerToken(sessionToken),
+	)
+
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusOK,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{},
+		},
+	)
+	movedPasskey := dbClient.Passkey.Query().
+		Where(passkey.ID(passkeyToMove.ID)).
+		OnlyX(t.Context())
+	require.True(t, movedPasskey.IsSecondGroup)
 }
 
 func TestMoveGroup_ExistingSecondGroup(t *testing.T) {
@@ -47,7 +75,6 @@ func TestMoveGroup_ExistingSecondGroup(t *testing.T) {
 			"errors": []servercommon.ErrorDetail{},
 		},
 	)
-
 	movedPasskey := dbClient.Passkey.Query().
 		Where(passkey.ID(passkeyToMove.ID)).
 		OnlyX(t.Context())
@@ -57,8 +84,37 @@ func TestMoveGroup_ExistingSecondGroup(t *testing.T) {
 func TestMoveGroup_SamePasskeyUsedTwice_SendsConflictError(t *testing.T) {
 	t.Parallel()
 
-	// TODO: create session in the same way as TestList
-	panic("not implemented")
+	app := testhelpers.NewApp(t, nil)
+	dbClient := app.Database.Client()
+	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
+	passkeyOb := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
+	sessionToken := createSessionWithElevationPasskey(
+		t, passkeyOb.UserID, passkeyOb.ID, passkeyOb.ID, app,
+	)
+
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/self/passkeys/"+passkeyOb.ID.String()+"/move-group/",
+		passkeys.MoveGroupPayload{
+			IsSecondGroup: true,
+		},
+		testcommon.WithBearerToken(sessionToken),
+	)
+
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusConflict,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "can't move this passkey, as doing so may lock you out of sudo mode. to enable two group auth, " +
+						"use two different passkeys in your session and move one of them to the second group. " +
+						"to move back, first log in with different passkeys or disable two group auth entirely",
+					Code: "GROUP_MOVE_CONSTRAINT",
+				},
+			},
+		},
+	)
 }
 
 func TestMoveGroup_NoElevationPasskey_SendsConflictError(t *testing.T) {
@@ -88,7 +144,7 @@ func TestMoveGroup_NoElevationPasskey_SendsConflictError(t *testing.T) {
 				{
 					Message: "can't move this passkey, as doing so may lock you out of sudo mode. to enable two group auth, " +
 						"use two different passkeys in your session and move one of them to the second group. " +
-						"to move back, disable two group auth entirely",
+						"to move back, first log in with different passkeys or disable two group auth entirely",
 					Code: "GROUP_MOVE_CONSTRAINT",
 				},
 			},
