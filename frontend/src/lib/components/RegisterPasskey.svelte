@@ -144,13 +144,13 @@
 			}
 
 			// Success!
+			passKeyName = "";
+			allowSudo = false;
+			isSecondGroup = false;
+			hasStarted = false;
 			if (onSuccess) {
 				onSuccess();
 			} else {
-				passKeyName = "";
-				allowSudo = false;
-				isSecondGroup = false;
-				hasStarted = false;
 				requestError = "Passkey registered successfully!";
 			}
 		} finally {

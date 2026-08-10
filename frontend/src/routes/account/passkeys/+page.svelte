@@ -1,0 +1,242 @@
+<script lang="ts">
+	import { resolve } from "$app/paths";
+	import { fetchUserJson, type ApiErrorDetail } from "$lib/api";
+	import PageMain from "$lib/components/PageMain.svelte";
+	import RegisterPasskey from "$lib/components/RegisterPasskey.svelte";
+	import { Button } from "$lib/components/ui/button";
+	import {
+		Card,
+		CardContent,
+		CardDescription,
+		CardHeader,
+		CardTitle,
+	} from "$lib/components/ui/card";
+	import { onMount } from "svelte";
+
+	interface PasskeyInfo {
+		id: string;
+		name: string;
+		isSudo: boolean;
+		isSessionFirst: boolean;
+		isSessionSecond: boolean;
+	}
+
+	interface PasskeyListResponse {
+		errors: ApiErrorDetail[];
+		firstGroupPasskeys: PasskeyInfo[];
+		secondGroupPasskeys: PasskeyInfo[];
+	}
+
+	const passkeysUrl = "/api/v1/self/passkeys/";
+
+	let firstGroupPasskeys = $state<PasskeyInfo[]>([]);
+	let secondGroupPasskeys = $state<PasskeyInfo[]>([]);
+	let isLoading = $state(true);
+	let requestError = $state<string | null>(null);
+	let busyPasskeyID = $state<string | null>(null);
+	let isDisablingTwoGroupAuth = $state(false);
+
+	function getResponseError(data: { errors?: ApiErrorDetail[] }): string {
+		return data.errors?.[0]?.message ?? "The request failed. Please try again.";
+	}
+
+	async function loadPasskeys() {
+		isLoading = true;
+		requestError = null;
+
+		try {
+			const response = await fetchUserJson(fetch, passkeysUrl);
+			if (!response.ok) {
+				requestError = getResponseError(response.data);
+				return;
+			}
+
+			const data = response.data as PasskeyListResponse;
+			firstGroupPasskeys = data.firstGroupPasskeys;
+			secondGroupPasskeys = data.secondGroupPasskeys;
+		} catch {
+			requestError = "Unable to load your passkeys. Please try again.";
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	async function updatePasskey(
+		passkey: PasskeyInfo,
+		path: string,
+		body?: Record<string, unknown>,
+	): Promise<boolean> {
+		busyPasskeyID = passkey.id;
+		requestError = null;
+
+		try {
+			const response = await fetchUserJson(fetch, `${passkeysUrl}${passkey.id}/${path}/`, {
+				method: "POST",
+				headers: body ? { "Content-Type": "application/json" } : undefined,
+				body: body ? JSON.stringify(body) : undefined,
+			});
+			if (!response.ok) {
+				requestError = getResponseError(response.data);
+				return false;
+			}
+			await loadPasskeys();
+			return true;
+		} catch {
+			requestError = "Unable to update this passkey. Please try again.";
+			return false;
+		} finally {
+			busyPasskeyID = null;
+		}
+	}
+
+	async function renamePasskey(passkey: PasskeyInfo) {
+		const name = window.prompt("Passkey name", passkey.name)?.trim();
+		if (!name || name === passkey.name) return;
+		await updatePasskey(passkey, "rename", { name });
+	}
+
+	async function deletePasskey(passkey: PasskeyInfo) {
+		if (passkey.isSessionFirst || passkey.isSessionSecond) return;
+		if (!window.confirm(`Delete the passkey "${passkey.name}"?`)) return;
+		await updatePasskey(passkey, "delete");
+	}
+
+	async function toggleSudo(passkey: PasskeyInfo) {
+		await updatePasskey(passkey, "update-sudo", { allowSudo: !passkey.isSudo });
+	}
+
+	async function movePasskey(passkey: PasskeyInfo) {
+		if (!window.confirm(`Move "${passkey.name}" to the other group?`)) return;
+		const isSecondGroup = !secondGroupPasskeys.some((item) => item.id === passkey.id);
+		await updatePasskey(passkey, "move-group", { isSecondGroup });
+	}
+
+	async function disableTwoGroupAuth() {
+		if (!window.confirm("Disable two-group authentication?")) return;
+		isDisablingTwoGroupAuth = true;
+		requestError = null;
+		try {
+			const response = await fetchUserJson(fetch, `${passkeysUrl}disable-two-group-auth/`, {
+				method: "POST",
+			});
+			if (!response.ok) {
+				requestError = getResponseError(response.data);
+				return;
+			}
+			await loadPasskeys();
+		} catch {
+			requestError = "Unable to disable two-group authentication. Please try again.";
+		} finally {
+			isDisablingTwoGroupAuth = false;
+		}
+	}
+
+	function handleSuccess() {
+		void loadPasskeys();
+	}
+
+	onMount(() => {
+		void loadPasskeys();
+	});
+</script>
+
+<PageMain>
+	<div class="w-full max-w-3xl space-y-6">
+		<div>
+			<h1 class="text-2xl font-semibold">Passkeys</h1>
+			<p class="text-muted-foreground">Manage the passkeys that protect your account.</p>
+		</div>
+
+		{#if requestError}
+			<p class="text-sm text-destructive">{requestError}</p>
+		{/if}
+
+		<Card>
+			<CardHeader>
+				<CardTitle>Your passkeys</CardTitle>
+				<CardDescription>Passkeys are grouped to support stronger account recovery.</CardDescription
+				>
+			</CardHeader>
+			<CardContent class="space-y-6">
+				{#if isLoading}
+					<p class="text-sm text-muted-foreground">Loading passkeys...</p>
+				{:else if firstGroupPasskeys.length === 0 && secondGroupPasskeys.length === 0}
+					<p class="text-sm text-muted-foreground">No passkeys registered yet.</p>
+				{:else}
+					{#each [{ title: "First group", items: firstGroupPasskeys }, { title: "Second group", items: secondGroupPasskeys }] as group (group.title)}
+						<section class="space-y-3">
+							<h2 class="font-medium">{group.title}</h2>
+							{#if group.items.length === 0}
+								<p class="text-sm text-muted-foreground">No passkeys in this group.</p>
+							{:else}
+								{#each group.items as passkey (passkey.id)}
+									<div class="space-y-3 rounded-md border p-4">
+										<div class="flex flex-col flex-wrap items-start justify-between gap-3">
+											<div>
+												<p class="font-medium">{passkey.name}</p>
+												<p class="text-sm text-muted-foreground">
+													{passkey.isSudo ? "Sudo" : "Non-sudo"}
+													{#if passkey.isSessionFirst}
+														· Was used to log in{/if}
+													{#if passkey.isSessionSecond}
+														· Was used to elevate your session{/if}
+												</p>
+											</div>
+											<div class="flex flex-wrap gap-2">
+												<Button
+													variant="outline"
+													onclick={() => renamePasskey(passkey)}
+													disabled={busyPasskeyID === passkey.id}>Rename</Button
+												>
+												<Button
+													variant="outline"
+													onclick={() => toggleSudo(passkey)}
+													disabled={busyPasskeyID === passkey.id}
+													>{passkey.isSudo ? "Disable sudo" : "Enable sudo"}</Button
+												>
+												<Button
+													variant="outline"
+													onclick={() => movePasskey(passkey)}
+													disabled={busyPasskeyID === passkey.id}>Move group</Button
+												>
+												<Button
+													variant="destructive"
+													onclick={() => deletePasskey(passkey)}
+													disabled={busyPasskeyID === passkey.id ||
+														passkey.isSessionFirst ||
+														passkey.isSessionSecond}>Delete</Button
+												>
+											</div>
+										</div>
+										{#if passkey.isSessionFirst || passkey.isSessionSecond}
+											<p class="text-xs text-muted-foreground">
+												This passkey is currently used by your session and cannot be deleted. If you
+												still want to delete it, please log in with a different passkey first.
+											</p>
+										{/if}
+									</div>
+								{/each}
+							{/if}
+						</section>
+					{/each}
+				{/if}
+
+				{#if secondGroupPasskeys.length > 0}
+					<Button
+						variant="outline"
+						onclick={disableTwoGroupAuth}
+						disabled={isDisablingTwoGroupAuth}
+					>
+						Disable two-group authentication
+					</Button>
+				{/if}
+			</CardContent>
+		</Card>
+
+		<RegisterPasskey onSuccess={handleSuccess} />
+
+		<div>
+			<Button href={resolve("/")} variant="ghost" class="w-full">Back</Button>
+		</div>
+	</div>
+</PageMain>

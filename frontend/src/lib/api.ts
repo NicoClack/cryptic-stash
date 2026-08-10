@@ -58,44 +58,54 @@ export async function fetchJson(
 	const json = await resp.json();
 
 	const jsonResponse = new JsonResponse(resp, json);
-	if (
-		resp.status === 404 &&
-		responseHasErrorCode(jsonResponse, "ENDPOINT_NOT_FOUND") &&
-		!page.route.id?.startsWith("/setup") &&
-		!urlObj.pathname.startsWith("/api/v1/setup/")
-	) {
-		if (await maybeGoToSetup(fetch)) {
-			jsonResponse.redirecting = true;
-		}
-	}
-	if (
-		(resp.status === 401 || resp.status === 403) &&
-		page.route.id !== "/admin/login" &&
-		page.route.id !== "/login"
-	) {
-		const authHeader = new Headers(init?.headers).get("authorization");
-
-		if (resp.status === 403 && responseHasErrorCode(jsonResponse, "SUDO_MODE_REQUIRED")) {
-			jsonResponse.redirecting = true;
-			goToElevate();
-		}
-
-		if (page.route.id?.startsWith("/admin") || page.route.id === "/setup/admin-messengers") {
-			jsonResponse.redirecting = true;
-			goToAdminLogin();
-		} else if (authHeader?.startsWith("Bearer ")) {
-			// TODO: ^ how do I distinguish between user and admin auth if they both use Bearer tokens?
-			jsonResponse.redirecting = true;
-			userAuth.logout();
-			goToLogin();
-		}
-	}
+	jsonResponse.redirecting = await handleAuthRedirects(fetch, jsonResponse, init, urlObj);
 	if (init?.throwForStatus) {
 		jsonResponse.throwForStatus();
 	}
 
 	return jsonResponse;
 }
+async function handleAuthRedirects(
+	fetch: typeof global.fetch,
+	jsonResponse: JsonResponse,
+	init: JsonResponseInit | undefined,
+	urlObj: URL,
+): Promise<boolean> {
+	if (
+		jsonResponse.status === 404 &&
+		responseHasErrorCode(jsonResponse, "ENDPOINT_NOT_FOUND") &&
+		!page.route.id?.startsWith("/setup") &&
+		!urlObj.pathname.startsWith("/api/v1/setup/")
+	) {
+		if (await maybeGoToSetup(fetch)) {
+			return true;
+		}
+	}
+	if (
+		(jsonResponse.status === 401 || jsonResponse.status === 403) &&
+		page.route.id !== "/admin/login" &&
+		page.route.id !== "/login"
+	) {
+		const authHeader = new Headers(init?.headers).get("authorization");
+
+		if (jsonResponse.status === 403 && responseHasErrorCode(jsonResponse, "SUDO_MODE_REQUIRED")) {
+			goToElevate();
+			return true;
+		}
+
+		if (page.route.id?.startsWith("/admin") || page.route.id === "/setup/admin-messengers") {
+			goToAdminLogin();
+			return true;
+		} else if (authHeader?.startsWith("Bearer ")) {
+			// TODO: ^ how do I distinguish between user and admin auth if they both use Bearer tokens?
+			userAuth.logout();
+			goToLogin();
+			return true;
+		}
+	}
+	return false;
+}
+
 export async function fetchAdminJson(
 	fetch: typeof global.fetch,
 	url: string,
