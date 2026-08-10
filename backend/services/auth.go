@@ -217,7 +217,7 @@ func (service *Auth) MovePasskeyGroup(
 		userID, sessionPasskeyID, sessionElevationPasskeyID,
 		newIsSecondGroup,
 		actor, tx, ctx,
-		service.app.Clock,
+		service.app.Clock, service.app.Logger,
 	)
 }
 

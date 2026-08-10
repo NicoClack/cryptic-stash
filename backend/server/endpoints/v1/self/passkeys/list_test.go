@@ -24,7 +24,9 @@ func TestList(t *testing.T) {
 	secondGroupPasskey := createPasskey(t, "second-group-key", true, true, userOb.ID, dbClient)
 	_ = createPasskey(t, "other-first-group-key", false, false, userOb.ID, dbClient)
 	sessionToken := createSessionWithElevationPasskey(
-		t, firstGroupPasskey.UserID, firstGroupPasskey.ID, secondGroupPasskey.ID, app,
+		t,
+		userOb.ID, firstGroupPasskey.ID, secondGroupPasskey.ID,
+		app,
 	)
 
 	respRecorder := testcommon.Get(

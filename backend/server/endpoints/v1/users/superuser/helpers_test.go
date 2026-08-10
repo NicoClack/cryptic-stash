@@ -2,12 +2,12 @@ package superuser_test
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/base64"
 	"testing"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
+	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
@@ -96,12 +96,9 @@ func assertSessionElevationPasskey(
 	app *testhelpers.App,
 ) {
 	t.Helper()
-	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(sessionToken)
-	require.NoError(t, stdErr)
-	hashedToken := sha256.Sum256(decodedToken)
 
 	sessionOb := app.Database.Client().Session.Query().
-		Where(session.HashedToken(hashedToken[:])).
+		Where(session.HashedToken(testcommon.HashSessionToken(t, sessionToken))).
 		OnlyX(t.Context())
 	require.True(t, sessionOb.IsSudo)
 	require.NotNil(t, sessionOb.ElevationPasskeyID)

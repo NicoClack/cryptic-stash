@@ -10,6 +10,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
+	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
 	"github.com/jonboulle/clockwork"
 )
@@ -131,24 +132,55 @@ func SetPasskeyAllowSudo(
 	return nil
 }
 
-// Demotes any sudo sessions whose passkeys are now both non-sudo, for a given user
+// Demotes any sudo sessions for the user whose passkey pair is no longer sudo eligible
 func demoteInvalidSudoSessions(
 	userID uuid.UUID,
 	tx *ent.Tx,
 	ctx context.Context,
 ) (int, common.WrappedError) {
+	// TODO: this can likely be optimised once GetEligiblePasskeysForSudo takes IDs
+	// Although if it then has to do DB queries, we might need a bulk variant of GetEligiblePasskeysForSudo.
+	// And it might not be necessary since a given user won't have many passkeys
+	userOb, stdErr := tx.User.Query().
+		Where(user.ID(userID)).
+		WithPasskeys().
+		Only(ctx)
+	if stdErr != nil {
+		return 0, ErrWrapperDatabase.Wrap(stdErr)
+	}
+
+	sudoSessions, stdErr := tx.Session.Query().
+		Where(session.UserID(userID), session.IsSudo(true)).
+		WithPasskey().
+		WithElevationPasskey().
+		All(ctx)
+	if stdErr != nil {
+		return 0, ErrWrapperDatabase.Wrap(stdErr)
+	}
+
+	var invalidSessionIDs []uuid.UUID
+	for _, sessionOb := range sudoSessions {
+		if sessionOb.Edges.Passkey == nil || sessionOb.Edges.ElevationPasskey == nil {
+			invalidSessionIDs = append(invalidSessionIDs, sessionOb.ID)
+			continue
+		}
+
+		eligible, wrappedErr := GetEligiblePasskeysForSudo(sessionOb, userOb)
+		if wrappedErr != nil {
+			return 0, wrappedErr
+		}
+		if !slices.ContainsFunc(eligible, func(eligiblePasskey *ent.Passkey) bool {
+			return eligiblePasskey.ID == sessionOb.Edges.ElevationPasskey.ID
+		}) {
+			invalidSessionIDs = append(invalidSessionIDs, sessionOb.ID)
+		}
+	}
+
+	if len(invalidSessionIDs) == 0 {
+		return 0, nil
+	}
 	count, stdErr := tx.Session.Update().
-		Where(
-			session.UserID(userID),
-			session.IsSudo(true),
-			session.And(
-				session.HasPasskeyWith(passkey.AllowSudo(false)),
-				session.Or(
-					session.ElevationPasskeyIDIsNil(),
-					session.HasElevationPasskeyWith(passkey.AllowSudo(false)),
-				),
-			),
-		).
+		Where(session.IDIn(invalidSessionIDs...)).
 		SetIsSudo(false).
 		ClearElevationPasskeyID().
 		Save(ctx)
@@ -174,6 +206,7 @@ func MovePasskeyGroup(
 	tx *ent.Tx,
 	ctx context.Context,
 	clock clockwork.Clock,
+	logger common.Logger,
 ) common.WrappedError {
 	if actor.UserID != uuid.Nil && actor.UserID != userID {
 		return ErrWrapperMovePasskeyGroup.Wrap(ErrUnauthorizedToModifyUser)
@@ -214,6 +247,28 @@ func MovePasskeyGroup(
 	if count == 0 {
 		return ErrWrapperMovePasskeyGroup.Wrap(ErrPasskeyNotFound)
 	}
+
+	demotedCount, wrappedErr := demoteInvalidSudoSessions(userID, tx, ctx)
+	if wrappedErr != nil {
+		return ErrWrapperMovePasskeyGroup.Wrap(wrappedErr)
+	}
+	message := "demoted session(s) for user due to passkey group change"
+	if demotedCount == 0 {
+		message = "no sessions to demote for user after passkey group change"
+	}
+	logger.Info(
+		message,
+		"sessionDemotionCount", demotedCount,
+		"userID", userID,
+		"targetPasskeyID", targetPasskeyID,
+		"newIsSecondGroup", newIsSecondGroup,
+		"sessionPasskeyID", sessionPasskeyID,
+		"sessionElevationPasskeyID", sessionElevationPasskeyID,
+		"actorID", actor.UserID,
+		"actorIP", actor.IP,
+		"actorUserAgent", actor.UserAgent,
+	)
+
 	return nil
 }
 

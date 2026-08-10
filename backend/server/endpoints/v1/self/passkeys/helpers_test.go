@@ -2,13 +2,13 @@ package passkeys_test
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/base64"
 	"testing"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
+	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
@@ -98,11 +98,8 @@ func createSessionWithElevationPasskey(
 	t.Helper()
 
 	sessionToken := createSession(t, true, userID, passkeyID, app)
-	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(sessionToken)
-	require.NoError(t, stdErr)
-	hashedToken := sha256.Sum256(decodedToken)
 	app.Database.Client().Session.Update().
-		Where(session.HashedToken(hashedToken[:])).
+		Where(session.HashedToken(testcommon.HashSessionToken(t, sessionToken))).
 		SetElevationPasskeyID(elevationPasskeyID).
 		ExecX(t.Context())
 	return sessionToken

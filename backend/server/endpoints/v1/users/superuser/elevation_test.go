@@ -206,16 +206,13 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 		name:      "Test Passkey",
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
+	hashedToken := testcommon.HashSessionToken(t, sessionToken)
 
 	// Ensure a small gap so we can test that expiresAt is reset.
 	// We can't use a mocked clock because go-webauthn and the TempKeyValue service would end up
 	// disagreeing on the current time, causing the WebAuthn session TTL in TempKeyValue to immediately expire.
 	time.Sleep(10 * time.Millisecond)
 	elevationStartedAt := time.Now()
-
-	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(sessionToken)
-	require.NoError(t, stdErr)
-	hashedToken := sha256.Sum256(decodedToken)
 
 	sessionOb := dbClient.Session.Query().
 		Where(session.HashedToken(hashedToken[:])).
@@ -231,7 +228,7 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 	require.Equal(t, http.StatusOK, startRecorder.Code)
 
 	var startResp superuser.StartElevationResponse
-	stdErr = json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 	require.NotEqual(t, uuid.Nil, startResp.WebAuthnSessionID)
 	require.NotNil(t, startResp.PublicKey)
@@ -272,7 +269,7 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 	)
 
 	sessionOb = dbClient.Session.Query().
-		Where(session.HashedToken(hashedToken[:])).
+		Where(session.HashedToken(hashedToken)).
 		OnlyX(t.Context())
 	require.True(t, sessionOb.IsSudo)
 	require.Equal(t, sessionOb.UserID, userOb.ID)
@@ -788,6 +785,7 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 		name:      "Test Passkey",
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
+	hashedToken := testcommon.HashSessionToken(t, sessionToken)
 
 	var sessionOb *ent.Session
 	for i := range 2 {
@@ -860,14 +858,9 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 		)
 		require.Equal(t, http.StatusOK, finishRecorder.Code)
 
-		decodedToken, stdErr := base64.RawURLEncoding.DecodeString(sessionToken)
-		require.NoError(t, stdErr)
-		hashedToken := sha256.Sum256(decodedToken)
-
 		sessionOb = dbClient.Session.Query().
-			Where(session.HashedToken(hashedToken[:])).
+			Where(session.HashedToken(hashedToken)).
 			OnlyX(t.Context())
-		require.NoError(t, stdErr)
 		require.NotNil(t, sessionOb.ElevationPasskeyID)
 		require.Equal(t, passkeyOb.ID, *sessionOb.ElevationPasskeyID)
 	}

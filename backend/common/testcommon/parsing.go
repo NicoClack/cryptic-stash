@@ -1,6 +1,7 @@
 package testcommon
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
 	"testing"
 
@@ -18,4 +19,13 @@ func MustDecodeRawURLBase64UUID(t *testing.T, encoded string) uuid.UUID {
 	decodedBytes, stdErr := base64.RawURLEncoding.DecodeString(encoded)
 	require.NoError(t, stdErr)
 	return uuid.UUID(decodedBytes)
+}
+
+func HashSessionToken(t *testing.T, token string) []byte {
+	t.Helper()
+
+	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(token)
+	require.NoError(t, stdErr)
+	hashed := sha256.Sum256(decodedToken)
+	return hashed[:]
 }
