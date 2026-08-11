@@ -62,7 +62,7 @@ func LoadEnvironmentVariables() *common.Env {
 			Threads: common.RequireUint8Env("PASSWORD_HASH_THREADS"),
 		},
 		STASH_ENCRYPTION_KEY: common.RequireBase64Env("STASH_ENCRYPTION_KEY"),
-		BASE_ENCRYPTION_KEY:  common.RequireBase64Env("BASE_ENCRYPTION_KEY"),
+		BASE_ENCRYPTION_KEY:  common.OptionalBase64Env("BASE_ENCRYPTION_KEY", []byte{}),
 
 		LOG_STORE_INTERVAL:     common.RequireMillisecondsEnv("LOG_STORE_INTERVAL"),
 		ADMIN_MESSAGE_TIMEOUT:  common.RequireSecondsEnv("ADMIN_MESSAGE_TIMEOUT"),
@@ -97,6 +97,13 @@ func NormalizeEnvironmentVariables(env *common.Env) {
 	env.SMTP2GO_BASE_URL = common.NormalizeBaseURL(env.SMTP2GO_BASE_URL)
 }
 func ValidateEnvironmentVariables(env *common.Env) {
+	if len(env.BASE_ENCRYPTION_KEY) != 0 && len(env.BASE_ENCRYPTION_KEY) != common.EncryptionKeyLength {
+		log.Fatalf("BASE_ENCRYPTION_KEY must decode to exactly %d bytes", common.EncryptionKeyLength)
+	}
+	if !env.ENABLE_ENV_SETUP && len(env.BASE_ENCRYPTION_KEY) == 0 {
+		log.Fatal("BASE_ENCRYPTION_KEY must be set when environment setup is disabled")
+	}
+
 	if !common.AllOrNone(
 		len(env.ADMIN_PASSWORD_HASH) == 0,
 		len(env.ADMIN_PASSWORD_SALT) == 0,

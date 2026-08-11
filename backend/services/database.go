@@ -55,7 +55,9 @@ func (service *Database) Start() {
 		db.SetMaxOpenConns(100)
 		db.SetConnMaxLifetime(time.Hour)
 
-		schema.Init(service.app.Env.BASE_ENCRYPTION_KEY)
+		if len(service.app.Env.BASE_ENCRYPTION_KEY) > 0 {
+			schema.Init(service.app.Env.BASE_ENCRYPTION_KEY)
+		}
 		driver := ent.Driver(entsql.OpenDB("sqlite3", db))
 		client := ent.NewClient(driver)
 

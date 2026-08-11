@@ -376,6 +376,9 @@ func (handler *Handler) individualWriteFallback(
 }
 
 func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificationErrorPtr *bool) bool {
+	if handler.App.Env.ENABLE_ENV_SETUP {
+		return false
+	}
 	if *loggedAdminNotificationErrorPtr {
 		return false
 	}

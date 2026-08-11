@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -29,8 +30,16 @@ var keyNames = []string{
 	"user_messenger_1",
 	"security_pii_logging_1", // e.g IPs and user agents
 }
-var encryptionKeys = map[string][]byte{}
+
+// Nil initialised so that the encryption/decryption logic knows if encryption was initialised,
+// since it won't be in setup mode
+var encryptionKeys map[string][]byte
 var initOnce sync.Once
+var encryptionKeysMu sync.RWMutex
+
+var ErrEncryptionUnavailable = errors.New(
+	"database encryption is unavailable because the base encryption key is not set, is the server in setup mode?",
+)
 
 func Init(baseEncryptionKey []byte) {
 	if len(baseEncryptionKey) != 32 {
@@ -38,6 +47,7 @@ func Init(baseEncryptionKey []byte) {
 	}
 
 	initOnce.Do(func() {
+		keys := make(map[string][]byte)
 		for _, keyName := range keyNames {
 			hkdf := hkdf.New(sha256.New, baseEncryptionKey, nil, []byte(keyName))
 			key := make([]byte, 32)
@@ -46,8 +56,12 @@ func Init(baseEncryptionKey []byte) {
 				panic(fmt.Sprintf("failed to derive key for %s: %v", keyName, stdErr))
 			}
 
-			encryptionKeys[keyName] = key
+			keys[keyName] = key
 		}
+
+		encryptionKeysMu.Lock()
+		encryptionKeys = keys
+		encryptionKeysMu.Unlock()
 	})
 }
 
@@ -121,7 +135,14 @@ func (encryptedField EncryptedField[T]) Value(val T) (driver.Value, error) {
 		}
 	}
 
+	encryptionKeysMu.RLock()
+	initialized := encryptionKeys != nil
 	encryptionKey, ok := encryptionKeys[encryptedField.KeyName]
+	encryptionKeysMu.RUnlock()
+	if !initialized {
+		var zero T
+		return zero, ErrEncryptionUnavailable
+	}
 	if !ok {
 		panic("EncryptedField.Value: invalid key name " + encryptedField.KeyName)
 	}
@@ -203,7 +224,14 @@ func (encryptedField EncryptedField[T]) FromValue(rawValue driver.Value) (T, err
 		return zero, nil
 	}
 
+	encryptionKeysMu.RLock()
+	initialized := encryptionKeys != nil
 	encryptionKey, ok := encryptionKeys[encryptedField.KeyName]
+	encryptionKeysMu.RUnlock()
+	if !initialized {
+		var zero T
+		return zero, ErrEncryptionUnavailable
+	}
 	if !ok {
 		panic("EncryptedField.FromValue: invalid key name " + encryptedField.KeyName)
 	}
