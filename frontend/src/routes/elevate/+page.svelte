@@ -44,7 +44,7 @@
 		hasStarted = true;
 
 		try {
-			const startResp = await fetchUserJson(fetch, "/api/v1/users/superuser/start-elevation/", {
+			const startResp = await fetchUserJson(fetch, "/api/v1/auth/sudo/start/", {
 				method: "POST",
 			});
 
@@ -96,7 +96,7 @@
 			const assertionResponse = credential.response as AuthenticatorAssertionResponse;
 			const finishResponse = await fetchUserJson(
 				fetch,
-				"/api/v1/users/superuser/finish-elevation/",
+				"/api/v1/auth/sudo/finish/",
 				{
 					method: "POST",
 					headers: {
@@ -121,7 +121,7 @@
 
 			if (!finishResponse.ok) {
 				const errorCode = finishResponse.data?.errors?.[0]?.code;
-				if (errorCode === "NEITHER_PASSKEY_SUPER_ELIGIBLE") {
+				if (errorCode === "NEITHER_PASSKEY_SUDO_ELIGIBLE") {
 					// TODO: this error was removed
 					requestError =
 						"None of your passkeys are eligible for sudo mode elevation. Please use a passkey that has sudo mode access enabled.";

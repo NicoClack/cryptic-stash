@@ -10,7 +10,7 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
-	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users/login"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/login"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/descope/virtualwebauthn"
@@ -27,7 +27,7 @@ func TestLoginFinish_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		login.LoginFinishPayload{},
 	)
 
@@ -52,7 +52,7 @@ func TestLoginFinish_InvalidWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		gin.H{
 			"webAuthnSessionId": strings.Repeat("a", 36), // Right length but not the format of a UUID
 		},
@@ -96,7 +96,7 @@ func TestLoginFinish_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		login.LoginFinishPayload{
 			WebAuthnSessionID:           uuid.New(),
 			CredentialAssertionResponse: parsedAssertion,
@@ -124,7 +124,7 @@ func TestLoginFinish_MalformedCredentialAssertion_SendsBadRequest(t *testing.T) 
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		gin.H{
 			"webAuthnSessionId": uuid.New(),
 			"id":                "definitely-not-base64",

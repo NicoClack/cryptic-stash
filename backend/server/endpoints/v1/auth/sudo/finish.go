@@ -1,4 +1,4 @@
-package superuser
+package sudo
 
 import (
 	"context"

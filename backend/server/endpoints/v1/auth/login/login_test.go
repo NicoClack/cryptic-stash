@@ -16,7 +16,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
-	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users/login"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/login"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/descope/virtualwebauthn"
@@ -114,7 +114,7 @@ func TestLoginFlow(t *testing.T) {
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/start/",
+		"/api/v1/auth/login/start/",
 		nil,
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
@@ -153,7 +153,7 @@ func TestLoginFlow(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		login.LoginFinishPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           webAuthnSessionID,
@@ -216,7 +216,7 @@ func TestLoginFlow_SyncablePasskey(t *testing.T) {
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/start/",
+		"/api/v1/auth/login/start/",
 		nil,
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
@@ -244,7 +244,7 @@ func TestLoginFlow_SyncablePasskey(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		login.LoginFinishPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
@@ -275,7 +275,7 @@ func TestLoginFlow_ClientServerMismatches(t *testing.T) {
 
 		startRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/login/start/",
+			"/api/v1/auth/login/start/",
 			nil,
 		)
 		require.Equal(t, http.StatusOK, startRecorder.Code)
@@ -301,7 +301,7 @@ func TestLoginFlow_ClientServerMismatches(t *testing.T) {
 
 		finishRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/login/finish/",
+			"/api/v1/auth/login/finish/",
 			login.LoginFinishPayload{
 				CredentialAssertionResponse: parsedAssertion,
 				WebAuthnSessionID:           startResp.WebAuthnSessionID,
@@ -340,7 +340,7 @@ func TestLoginFlow_RejectsTamperedSignature(t *testing.T) {
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/start/",
+		"/api/v1/auth/login/start/",
 		nil,
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
@@ -368,7 +368,7 @@ func TestLoginFlow_RejectsTamperedSignature(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		login.LoginFinishPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
@@ -402,7 +402,7 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/start/",
+		"/api/v1/auth/login/start/",
 		nil,
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
@@ -429,7 +429,7 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/finish/",
+		"/api/v1/auth/login/finish/",
 		login.LoginFinishPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,

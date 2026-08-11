@@ -1,4 +1,4 @@
-package superuser_test
+package sudo_test
 
 // Tests that span both endpoints
 
@@ -17,7 +17,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
-	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users/superuser"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/sudo"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/descope/virtualwebauthn"
@@ -161,12 +161,12 @@ func performElevation(
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 
-	var startResp superuser.StartElevationResponse
+	var startResp sudo.StartElevationResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -185,8 +185,8 @@ func performElevation(
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -215,19 +215,19 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 	elevationStartedAt := time.Now()
 
 	sessionOb := dbClient.Session.Query().
-		Where(session.HashedToken(hashedToken[:])).
+		Where(session.HashedToken(hashedToken)).
 		OnlyX(t.Context())
 	require.False(t, sessionOb.IsSudo)
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
 
-	var startResp superuser.StartElevationResponse
+	var startResp sudo.StartElevationResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 	require.NotEqual(t, uuid.Nil, startResp.WebAuthnSessionID)
@@ -253,8 +253,8 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -263,7 +263,7 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 	testcommon.AssertJSONResponse(
 		t, finishRecorder,
 		http.StatusOK,
-		superuser.FinishElevationResponse{
+		sudo.FinishElevationResponse{
 			Errors: []servercommon.ErrorDetail{},
 		},
 	)
@@ -281,13 +281,13 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 		elevationStartedAt, // The session expiry should have been extended
 	)
 }
-func TestElevationFlow_SingleGroup_TwoSuper(t *testing.T) {
+func TestElevationFlow_SingleGroup_TwoSudo(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSudo: true, name: "super1"},
-		{allowSudo: true, name: "super2"},
+		{allowSudo: true, name: "sudo1"},
+		{allowSudo: true, name: "sudo2"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -299,13 +299,13 @@ func TestElevationFlow_SingleGroup_TwoSuper(t *testing.T) {
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
-func TestElevationFlow_SingleGroup_NonSuperThenSuper(t *testing.T) {
+func TestElevationFlow_SingleGroup_NonSudoThenSudo(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSudo: false, name: "non-super"},
-		{allowSudo: true, name: "super"},
+		{allowSudo: false, name: "non-sudo"},
+		{allowSudo: true, name: "sudo"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -317,15 +317,15 @@ func TestElevationFlow_SingleGroup_NonSuperThenSuper(t *testing.T) {
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
-func TestElevationFlow_SingleGroup_SuperThenNonSuper(t *testing.T) {
-	// It would be slightly more secure if the super passkey always had to be the second one,
+func TestElevationFlow_SingleGroup_SudoThenNonSudo(t *testing.T) {
+	// It would be slightly more secure if the sudo passkey always had to be the second one,
 	// but sessions don't last very long anyway so I think UX improvement is worth it.
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSudo: true, name: "super"},
-		{allowSudo: false, name: "non-super"},
+		{allowSudo: true, name: "sudo"},
+		{allowSudo: false, name: "non-sudo"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -338,7 +338,7 @@ func TestElevationFlow_SingleGroup_SuperThenNonSuper(t *testing.T) {
 	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
 
-func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
+func TestElevationFlow_DualGroup_Group1NonSudoGroup2Sudo(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -354,7 +354,7 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-non-super",
+			name: "syncable-non-sudo",
 		},
 		{
 			allowSudo:     false,
@@ -365,29 +365,29 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-super",
+			name: "syncable-sudo",
 		},
 		// Group 2
 		{
 			allowSudo:     true,
 			isSecondGroup: true,
-			name:          "security-key-super",
+			name:          "security-key-sudo",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 
-	var startResp superuser.StartElevationResponse
+	var startResp sudo.StartElevationResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
-	// Only the super passkey from the other group can be used, not the other super in group 1
+	// Only the sudo passkey from the other group can be used, not the other sudo in group 1
 	require.Len(t, startResp.PublicKey.AllowedCredentials, 1)
 	require.Equal(t, passkeys[2].Passkey.CredentialID, []byte(startResp.PublicKey.AllowedCredentials[0].CredentialID))
 
@@ -406,8 +406,8 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -416,7 +416,7 @@ func TestElevationFlow_DualGroup_Group1NonSuperGroup2Super(t *testing.T) {
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 	assertSessionElevationPasskey(t, sessionToken, passkeys[2].Passkey.ID, app)
 }
-func TestElevationFlow_DualGroup_Group2NonSuperGroup1Super(t *testing.T) {
+func TestElevationFlow_DualGroup_Group2NonSudoGroup1Sudo(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -430,12 +430,12 @@ func TestElevationFlow_DualGroup_Group2NonSuperGroup1Super(t *testing.T) {
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-super",
+			name: "syncable-sudo",
 		},
 		{ // Group 2
 			allowSudo:     false,
 			isSecondGroup: true,
-			name:          "security-key-non-super",
+			name:          "security-key-non-sudo",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[1].Passkey.ID, app)
@@ -448,8 +448,8 @@ func TestElevationFlow_DualGroup_Group2NonSuperGroup1Super(t *testing.T) {
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 	assertSessionElevationPasskey(t, sessionToken, passkeys[0].Passkey.ID, app)
 }
-func TestElevationFlow_DualGroup_Group1SuperGroup2NonSuper(t *testing.T) {
-	// It would be slightly more secure if the super passkey always had to be the second one,
+func TestElevationFlow_DualGroup_Group1SudoGroup2NonSudo(t *testing.T) {
+	// It would be slightly more secure if the sudo passkey always had to be the second one,
 	// but sessions don't last very long anyway so I think UX improvement is worth it.
 	t.Parallel()
 
@@ -464,12 +464,12 @@ func TestElevationFlow_DualGroup_Group1SuperGroup2NonSuper(t *testing.T) {
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-super",
+			name: "syncable-sudo",
 		},
 		{ // Group 2
 			allowSudo:     false,
 			isSecondGroup: true,
-			name:          "security-key-non-super",
+			name:          "security-key-non-sudo",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -482,7 +482,7 @@ func TestElevationFlow_DualGroup_Group1SuperGroup2NonSuper(t *testing.T) {
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 	assertSessionElevationPasskey(t, sessionToken, passkeys[1].Passkey.ID, app)
 }
-func TestElevationFlow_DualGroup_Group2SuperGroup1NonSuper(t *testing.T) {
+func TestElevationFlow_DualGroup_Group2SudoGroup1NonSudo(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -496,12 +496,12 @@ func TestElevationFlow_DualGroup_Group2SuperGroup1NonSuper(t *testing.T) {
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-non-super",
+			name: "syncable-non-sudo",
 		},
 		{ // Group 2
 			allowSudo:     true,
 			isSecondGroup: true,
-			name:          "security-key-super",
+			name:          "security-key-sudo",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[1].Passkey.ID, app)
@@ -547,13 +547,13 @@ func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T)
 
 		startRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/superuser/start-elevation/",
+			"/api/v1/auth/sudo/start/",
 			nil,
 			testcommon.WithBearerToken(sessionToken1),
 		)
 		require.Equal(t, http.StatusOK, startRecorder.Code)
 
-		var startResp superuser.StartElevationResponse
+		var startResp sudo.StartElevationResponse
 		stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 		require.NoError(t, stdErr)
 
@@ -581,8 +581,8 @@ func TestElevationFlow_CredentialFromDifferentUser_SendsBadRequest(t *testing.T)
 		}
 		finishRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/superuser/finish-elevation/",
-			superuser.FinishElevationPayload{
+			"/api/v1/auth/sudo/finish/",
+			sudo.FinishElevationPayload{
 				CredentialAssertionResponse: parsedAssertion,
 				WebAuthnSessionID:           startResp.WebAuthnSessionID,
 			},
@@ -648,13 +648,13 @@ func TestElevationFlow_RejectsTamperedSignature(t *testing.T) {
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
 
-	var startResp superuser.StartElevationResponse
+	var startResp sudo.StartElevationResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -681,8 +681,8 @@ func TestElevationFlow_RejectsTamperedSignature(t *testing.T) {
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -721,13 +721,13 @@ func TestElevationFlow_GivenExpiredWebAuthnSession_RejectsValidSignature(t *test
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
 
-	var startResp superuser.StartElevationResponse
+	var startResp sudo.StartElevationResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -752,8 +752,8 @@ func TestElevationFlow_GivenExpiredWebAuthnSession_RejectsValidSignature(t *test
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -791,7 +791,7 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 	for i := range 2 {
 		startRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/superuser/start-elevation/",
+			"/api/v1/auth/sudo/start/",
 			nil,
 			testcommon.WithBearerToken(sessionToken),
 		)
@@ -826,7 +826,7 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 			break
 		}
 
-		var startResp superuser.StartElevationResponse
+		var startResp sudo.StartElevationResponse
 		stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 		require.NoError(t, stdErr)
 
@@ -849,8 +849,8 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 
 		finishRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/superuser/finish-elevation/",
-			superuser.FinishElevationPayload{
+			"/api/v1/auth/sudo/finish/",
+			sudo.FinishElevationPayload{
 				CredentialAssertionResponse: parsedAssertion,
 				WebAuthnSessionID:           startResp.WebAuthnSessionID,
 			},
@@ -866,13 +866,13 @@ func TestElevationFlow_GivenElevatedSession_RejectsFurtherElevations(t *testing.
 	}
 }
 
-func TestElevationFlow_SingleGroup_SameNonSuperTwice_SendsBadRequest(t *testing.T) {
+func TestElevationFlow_SingleGroup_SameNonSudoTwice_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSudo: false, name: "non-super1"},
-		{allowSudo: false, name: "unused-non-super2"},
-		{allowSudo: true, name: "unused-super"},
+		{allowSudo: false, name: "non-sudo1"},
+		{allowSudo: false, name: "unused-non-sudo2"},
+		{allowSudo: true, name: "unused-sudo"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -895,13 +895,13 @@ func TestElevationFlow_SingleGroup_SameNonSuperTwice_SendsBadRequest(t *testing.
 	)
 }
 
-func TestElevationFlow_SingleGroup_TwoNonSuper_SendsBadRequest(t *testing.T) {
+func TestElevationFlow_SingleGroup_TwoNonSudo_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 	app := testhelpers.NewApp(t, nil)
 	userOb, passkeys := createUserWithPasskeys(t, 1, app, []passkeyConfig{
-		{allowSudo: false, name: "non-super1"},
-		{allowSudo: false, name: "non-super2"},
-		{allowSudo: true, name: "unused-super"},
+		{allowSudo: false, name: "non-sudo1"},
+		{allowSudo: false, name: "non-sudo2"},
+		{allowSudo: true, name: "unused-sudo"},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
@@ -924,7 +924,7 @@ func TestElevationFlow_SingleGroup_TwoNonSuper_SendsBadRequest(t *testing.T) {
 	)
 }
 
-func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T) {
+func TestElevationFlow_DualGroup_TwoSudoSameGroup_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -940,7 +940,7 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-super1",
+			name: "syncable-sudo1",
 		},
 		{
 			allowSudo:     true,
@@ -951,25 +951,25 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-super2",
+			name: "syncable-sudo2",
 		},
 		// Group 2
 		{
 			allowSudo:     true,
 			isSecondGroup: true,
-			name:          "security-key-super",
+			name:          "security-key-sudo",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 
-	var startResp superuser.StartElevationResponse
+	var startResp sudo.StartElevationResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -993,8 +993,8 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -1014,8 +1014,7 @@ func TestElevationFlow_DualGroup_TwoSuperSameGroup_SendsBadRequest(t *testing.T)
 	)
 }
 
-// TODO: this is failing because the start elevation endpoint doesn't handle ErrNoSuperEligiblePasskeys errors
-func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *testing.T) {
+func TestElevationFlow_DualGroup_TwoNonSudoDifferentGroups_SendsForbidden(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -1030,18 +1029,18 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *te
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-non-super",
+			name: "syncable-non-sudo",
 		},
 		// Group 2
 		{
 			allowSudo:     false,
 			isSecondGroup: true,
-			name:          "security-key-non-super",
+			name:          "security-key-non-sudo",
 		},
-		{ // Not used, but otherwise the start endpoint will fail because there are no super-eligible passkeys it can request
+		{ // Not used, but otherwise the start endpoint will fail because there are no sudo-eligible passkeys it can request
 			allowSudo:     true,
 			isSecondGroup: true,
-			name:          "security-key-super",
+			name:          "security-key-sudo",
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -1065,7 +1064,7 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_SendsForbidden(t *te
 	)
 }
 
-func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotion_SendsForbidden(t *testing.T) {
+func TestElevationFlow_DualGroup_TwoNonSudoDifferentGroups_RaceConditionDemotion_SendsForbidden(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -1079,12 +1078,12 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotio
 				vAuth.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
 				vAuth.Options.UserHandle = userID[:]
 			},
-			name: "syncable-non-super",
+			name: "syncable-non-sudo",
 		},
 		{
 			allowSudo:     true,
 			isSecondGroup: true,
-			name:          "security-key-temp-super", // Will be demoted partway through the test
+			name:          "security-key-temp-sudo", // Will be demoted partway through the test
 		},
 	})
 	sessionToken := createSession(t, false, userOb.ID, passkeys[0].Passkey.ID, app)
@@ -1092,17 +1091,17 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotio
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 
-	// The go-webauthn session will still accept this, but the application logic will return ErrNeitherPasskeySuperEligible
+	// The go-webauthn session will still accept this, but the application logic will return ErrNeitherPasskeySudoEligible
 	app.Database.Client().Passkey.UpdateOneID(passkeys[1].Passkey.ID).
 		SetAllowSudo(false).
 		ExecX(t.Context())
 
-	var startResp superuser.StartElevationResponse
+	var startResp sudo.StartElevationResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -1121,8 +1120,8 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotio
 
 	finishRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -1143,6 +1142,6 @@ func TestElevationFlow_DualGroup_TwoNonSuperDifferentGroups_RaceConditionDemotio
 	)
 }
 
-// TODO: create test that's similar to above but asserts the behaviour in the super softlock
-// i.e when the first passkey is non-super and the only super passkey is in the same group.
-// The 3rd is non-super in the other group
+// TODO: create test that's similar to above but asserts the behaviour in the sudo softlock
+// i.e when the first passkey is non-sudo and the only sudo passkey is in the same group.
+// The 3rd is non-sudo in the other group

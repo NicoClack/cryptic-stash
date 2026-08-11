@@ -16,7 +16,7 @@
 	interface PasskeyInfo {
 		id: string;
 		name: string;
-		isSudo: boolean;
+		allowSudo: boolean;
 		isSessionFirst: boolean;
 		isSessionSecond: boolean;
 	}
@@ -104,7 +104,7 @@
 	}
 
 	async function toggleSudo(passkey: PasskeyInfo) {
-		await updatePasskey(passkey, "update-sudo", { allowSudo: !passkey.isSudo });
+		await updatePasskey(passkey, "update-sudo", { allowSudo: !passkey.allowSudo });
 	}
 
 	async function movePasskey(passkey: PasskeyInfo) {
@@ -210,7 +210,7 @@
 											<div>
 												<p class="font-medium">{passkey.name}</p>
 												<p class="text-sm text-muted-foreground">
-													{passkey.isSudo ? "Sudo" : "Non-sudo"}
+													{passkey.allowSudo ? "Sudo" : "Non-sudo"}
 													{#if passkey.isSessionFirst}
 														· Was used to log in{/if}
 													{#if passkey.isSessionSecond}
@@ -227,7 +227,7 @@
 													variant="outline"
 													onclick={() => toggleSudo(passkey)}
 													disabled={busyPasskeyID === passkey.id}
-													>{passkey.isSudo ? "Disable sudo" : "Enable sudo"}</Button
+													>{passkey.allowSudo ? "Disable sudo" : "Enable sudo"}</Button
 												>
 												<Button
 													variant="outline"

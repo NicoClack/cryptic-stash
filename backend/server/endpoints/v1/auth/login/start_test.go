@@ -10,7 +10,7 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
-	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users/login"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/login"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -25,7 +25,7 @@ func TestLoginStart(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/login/start/",
+		"/api/v1/auth/login/start/",
 		nil,
 	)
 	require.Equal(t, http.StatusOK, respRecorder.Code)
@@ -63,7 +63,7 @@ func TestLoginStart_MultipleRequests_UniqueSessionsAndChallenges(t *testing.T) {
 	for range 3 {
 		respRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/login/start/",
+			"/api/v1/auth/login/start/",
 			nil,
 		)
 		require.Equal(t, http.StatusOK, respRecorder.Code)

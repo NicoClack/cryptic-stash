@@ -34,7 +34,7 @@
 		requestError = null;
 
 		try {
-			const startResp = await fetchJson(fetch, "/api/v1/users/login/start/", {
+			const startResp = await fetchJson(fetch, "/api/v1/auth/login/start/", {
 				method: "POST",
 			});
 			if (!startResp.ok) {
@@ -74,7 +74,7 @@
 			}
 
 			const assertionResponse = credential.response as AuthenticatorAssertionResponse;
-			const finishResponse = await fetchJson(fetch, "/api/v1/users/login/finish/", {
+			const finishResponse = await fetchJson(fetch, "/api/v1/auth/login/finish/", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

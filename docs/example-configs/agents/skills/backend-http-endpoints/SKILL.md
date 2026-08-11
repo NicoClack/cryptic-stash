@@ -13,7 +13,7 @@ Endpoints follow a `ConfigureEndpoints(group *servercommon.Group)` pattern. Each
 // server/endpoints/v1/self/self.go
 func ConfigureEndpoints(group *servercommon.Group) {
     passkeyGroup := group.Group("/passkeys")
-    passkeyGroup.Use(group.App.SuperUserModeMiddleware)
+    passkeyGroup.Use(group.App.SudoModeMiddleware)
     passkeys.ConfigureEndpoints(passkeyGroup)
 }
 ```
@@ -27,10 +27,10 @@ Three middleware functions on `*servercommon.ServerApp`:
 | Middleware | Scheme | Endpoint Type |
 |---|---|---|
 | `DefaultAuthMiddleware` | `Bearer <token>` | Any authenticated user |
-| `SuperUserModeMiddleware` | `Bearer <token>` (elevated) | Sensitive operations (passkey management, account changes) |
+| `SudoModeMiddleware` | `Bearer <token>` (elevated) | Sensitive operations (passkey management, account changes) |
 | `AdminMiddleware` | `AdminCode <code>` | Admin-only operations |
 
-`SuperUserModeMiddleware` is `SessionAuth` with `RequireSuperuser: true` — the user must re-authenticate via WebAuthn before using these endpoints.
+`SudoModeMiddleware` is `SessionAuth` with `RequireSudo: true` — the user must re-authenticate via WebAuthn before using these endpoints.
 
 ## Handler Patterns
 

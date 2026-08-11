@@ -47,7 +47,7 @@ func TestList(t *testing.T) {
 	for _, passkeyInfo := range resp.FirstGroupPasskeys {
 		if passkeyInfo.ID == firstGroupPasskey.ID {
 			require.Equal(t, "first-group-key", passkeyInfo.Name)
-			require.False(t, passkeyInfo.IsSudo)
+			require.False(t, passkeyInfo.AllowSudo)
 			require.True(t, passkeyInfo.IsSessionFirst)
 			require.False(t, passkeyInfo.IsSessionSecond)
 		}
@@ -56,7 +56,7 @@ func TestList(t *testing.T) {
 	passkeyInfo := resp.SecondGroupPasskeys[0]
 	require.Equal(t, secondGroupPasskey.ID, passkeyInfo.ID)
 	require.Equal(t, "second-group-key", passkeyInfo.Name)
-	require.True(t, passkeyInfo.IsSudo)
+	require.True(t, passkeyInfo.AllowSudo)
 	require.False(t, passkeyInfo.IsSessionFirst)
 	require.True(t, passkeyInfo.IsSessionSecond)
 }

@@ -1,4 +1,4 @@
-package superuser_test
+package sudo_test
 
 import (
 	"encoding/base64"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
-	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users/superuser"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/sudo"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/descope/virtualwebauthn"
@@ -25,7 +25,7 @@ func TestFinishElevation_NoAuthHeader_SendsBadRequest(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
+		"/api/v1/auth/sudo/finish/",
 		nil,
 	)
 	testcommon.AssertJSONResponse(
@@ -48,7 +48,7 @@ func TestFinishElevation_UnknownSessionToken_SendsUnauthorized(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
+		"/api/v1/auth/sudo/finish/",
 		nil,
 		testcommon.WithBearerToken(base64.RawURLEncoding.EncodeToString(
 			common.CryptoRandomBytes(32),
@@ -72,8 +72,8 @@ func TestFinishElevation_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) 
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{},
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{},
 		testcommon.WithBearerToken(sessionToken),
 	)
 
@@ -114,8 +114,8 @@ func TestFinishElevation_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) 
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			WebAuthnSessionID:           uuid.New(),
 			CredentialAssertionResponse: parsedAssertion,
 		},
@@ -159,8 +159,8 @@ func TestFinishElevation_MissingWebAuthnSession_SendsBadRequest(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
-		superuser.FinishElevationPayload{
+		"/api/v1/auth/sudo/finish/",
+		sudo.FinishElevationPayload{
 			WebAuthnSessionID:           uuid.New(),
 			CredentialAssertionResponse: parsedAssertion,
 		},
@@ -190,7 +190,7 @@ func TestFinishElevation_MalformedCredentialAssertion_SendsBadRequest(t *testing
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/finish-elevation/",
+		"/api/v1/auth/sudo/finish/",
 		gin.H{
 			"webAuthnSessionId": uuid.New(),
 			"id":                "definitely-not-base64",

@@ -1,4 +1,4 @@
-package superuser_test
+package sudo_test
 
 import (
 	"encoding/base64"
@@ -10,7 +10,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
-	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/users/superuser"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/sudo"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/gin-gonic/gin"
@@ -28,14 +28,14 @@ func TestStartElevation(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)
 	webAuthnSessionCreatedAt := time.Now()
 	require.Equal(t, http.StatusOK, respRecorder.Code)
 
-	var response superuser.StartElevationResponse
+	var response sudo.StartElevationResponse
 	stdErr := json.Unmarshal(respRecorder.Body.Bytes(), &response)
 	require.NoError(t, stdErr)
 	require.NotEqual(t, response.WebAuthnSessionID, uuid.Nil)
@@ -67,7 +67,7 @@ func TestStartElevation_NoAuthHeader_SendsBadRequest(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 	)
 	testcommon.AssertJSONResponse(
@@ -90,7 +90,7 @@ func TestStartElevation_UnknownSessionToken_SendsUnauthorized(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(base64.RawURLEncoding.EncodeToString(
 			common.CryptoRandomBytes(32),
@@ -112,17 +112,17 @@ func TestStartElevation_MultipleRequests_UniqueSessionsAndChallenges(t *testing.
 	userOb := testcommon.NewDummyUser(1, app.Database.Client(), t.Context(), app.Clock)
 	sessionToken, _ := createSessionAndPasskey(t, false, userOb, app)
 
-	responses := make([]superuser.StartElevationResponse, 0, 3)
+	responses := make([]sudo.StartElevationResponse, 0, 3)
 	for range 3 {
 		respRecorder := testcommon.Post(
 			t, app.Server,
-			"/api/v1/users/superuser/start-elevation/",
+			"/api/v1/auth/sudo/start/",
 			nil,
 			testcommon.WithBearerToken(sessionToken),
 		)
 		require.Equal(t, http.StatusOK, respRecorder.Code)
 
-		var response superuser.StartElevationResponse
+		var response sudo.StartElevationResponse
 		stdErr := json.Unmarshal(respRecorder.Body.Bytes(), &response)
 		require.NoError(t, stdErr)
 		responses = append(responses, response)
@@ -148,7 +148,7 @@ func TestStartElevation_AlreadyElevated_SendsConflictError(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/users/superuser/start-elevation/",
+		"/api/v1/auth/sudo/start/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)

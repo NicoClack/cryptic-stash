@@ -15,7 +15,7 @@ import (
 type ListInfo struct {
 	ID              uuid.UUID `json:"id"`
 	Name            string    `json:"name"`
-	IsSudo          bool      `json:"isSudo"`
+	AllowSudo       bool      `json:"allowSudo"`
 	IsSessionFirst  bool      `json:"isSessionFirst"`
 	IsSessionSecond bool      `json:"isSessionSecond"`
 }
@@ -56,7 +56,7 @@ func List(app *servercommon.ServerApp) gin.HandlerFunc {
 						items = append(items, ListInfo{
 							ID:             passkeyOb.ID,
 							Name:           passkeyOb.Name,
-							IsSudo:         passkeyOb.AllowSudo,
+							AllowSudo:      passkeyOb.AllowSudo,
 							IsSessionFirst: sessionOb.PasskeyID == passkeyOb.ID,
 							IsSessionSecond: sessionOb.ElevationPasskeyID != nil &&
 								*sessionOb.ElevationPasskeyID == passkeyOb.ID,

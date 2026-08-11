@@ -1,6 +1,5 @@
 # TODO
 
-- Finish renaming superuser mode to sudo
 - Use trailing slashes for all endpoints
 - Is it safe to make env.BASE_ENCRYPTION_KEY optional until setup is completed?
 - - Make encrypted writes fail when it isn't set
@@ -9,7 +8,7 @@
 - - Delete expired invites that are unused, should be called by the cleanup task
 - Passkey support:
 - - Adding, removing and renaming passkeys
-- - Enabling/disabling superuser access for a passkey
+- - Enabling/disabling sudo access for a passkey
 - - Prompt for passkey to enter sudo mode when required
 - - 2 group authentication, allow enabling and disabling, and moving passkeys between groups
 - - Check implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/
@@ -143,7 +142,7 @@
 - Review SQLite connection pool config
 - Don't delete jobs on completion, instead periodically delete jobs older than 2 weeks or so. Could help with debugging
 - Improve validation for messenger options
-- If a credential is cloned, block superuser mode for it. Allow regular login to block downloads
+- If a credential is cloned, block sudo mode for it. Allow regular login to block downloads
 - Should FinishRegisterPasskey demote existing sessions when a second group passkey is added for the first time?
 
 - When messengers are changed, send a message to all of the previous messengers

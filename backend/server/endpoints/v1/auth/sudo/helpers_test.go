@@ -1,4 +1,4 @@
-package superuser_test
+package sudo_test
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 )
 
 // Note: the returned passkey is a dummy that can't be used for authentication,
-// but is sufficient for passing auth and testing the start-elevation endpoint.
+// but is sufficient for passing auth and testing the start endpoint.
 func createSessionAndPasskey(
 	t *testing.T,
 	isSudo bool,
