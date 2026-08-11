@@ -35,6 +35,8 @@
 	let requestError = $state<string | null>(null);
 	let busyPasskeyID = $state<string | null>(null);
 	let isDisablingTwoGroupAuth = $state(false);
+	let registrationDialog = $state<HTMLDialogElement | null>(null);
+	let registrationGroup = $state<boolean | null>(null);
 
 	function getResponseError(data: { errors?: ApiErrorDetail[] }): string {
 		return data.errors?.[0]?.message ?? "The request failed. Please try again.";
@@ -112,7 +114,12 @@
 	}
 
 	async function disableTwoGroupAuth() {
-		if (!window.confirm("Disable two-group authentication?")) return;
+		if (
+			!window.confirm(
+				"Are you sure you want to disable two-group authentication? This will allow you to use a single sudo passkey twice to enter sudo mode",
+			)
+		)
+			return;
 		isDisablingTwoGroupAuth = true;
 		requestError = null;
 		try {
@@ -133,6 +140,13 @@
 
 	function handleSuccess() {
 		void loadPasskeys();
+		registrationDialog?.close();
+		registrationGroup = null;
+	}
+
+	function openRegistration(isSecondGroup: boolean) {
+		registrationGroup = isSecondGroup;
+		requestAnimationFrame(() => registrationDialog?.showModal());
 	}
 
 	onMount(() => {
@@ -167,7 +181,28 @@
 						<section class="space-y-3">
 							<h2 class="font-medium">{group.title}</h2>
 							{#if group.items.length === 0}
-								<p class="text-sm text-muted-foreground">No passkeys in this group.</p>
+								{#if group.title === "First group"}
+									<p class="text-sm text-muted-foreground">
+										No first-group passkeys have been registered yet.
+									</p>
+								{:else}
+									<p class="text-sm text-muted-foreground">
+										Increase your account security by registering or moving a passkey to the second
+										group. You will then need one passkey from each group in order to perform
+										sensitive actions such as deleting a stash and at least one must allow sudo.
+										While this technically isn't an extra factor, it enables you to take advantages
+										of different types of passkeys, for example the entropy of the master password
+										for your password manager (first group) and the malware resistance of a hardware
+										key (second group). You can also still perform defensive actions with just one
+										passkey.
+									</p>
+									<p class="text-sm text-muted-foreground">
+										Alternatively, since synced passkeys stored in a password manager are overall
+										less secure than a hardware key, you can disable sudo mode for your synced
+										passkeys and use single group auth. That way, sudo mode just requires your
+										hardware key. And you can still perform defensive actions with either passkey.
+									</p>
+								{/if}
 							{:else}
 								{#each group.items as passkey (passkey.id)}
 									<div class="space-y-3 rounded-md border p-4">
@@ -217,6 +252,12 @@
 									</div>
 								{/each}
 							{/if}
+							<Button
+								variant="outline"
+								onclick={() => openRegistration(group.title === "Second group")}
+							>
+								Add a new passkey
+							</Button>
 						</section>
 					{/each}
 				{/if}
@@ -233,7 +274,17 @@
 			</CardContent>
 		</Card>
 
-		<RegisterPasskey onSuccess={handleSuccess} />
+		{#if registrationGroup !== null}
+			<dialog
+				bind:this={registrationDialog}
+				class="m-auto w-[calc(100%-2rem)] max-w-lg rounded-lg border bg-background p-0 text-foreground shadow-lg backdrop:bg-black/50"
+				onclose={() => (registrationGroup = null)}
+			>
+				{#key registrationGroup}
+					<RegisterPasskey isSecondGroup={registrationGroup} onSuccess={handleSuccess} />
+				{/key}
+			</dialog>
+		{/if}
 
 		<div>
 			<Button href={resolve("/")} variant="ghost" class="w-full">Back</Button>

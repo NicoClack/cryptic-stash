@@ -18,9 +18,10 @@
 
 	interface Props {
 		onSuccess?: () => void;
+		isSecondGroup?: boolean;
 	}
 
-	let { onSuccess }: Props = $props();
+	let { onSuccess, isSecondGroup = false }: Props = $props();
 
 	userAuth.requireSudoMode(); // TODO: should this go in the page instead?
 
@@ -28,7 +29,6 @@
 	let requestError = $state<string | null>(null);
 	let passKeyName = $state("");
 	let allowSudo = $state(true);
-	let isSecondGroup = $state(false);
 	let hasStarted = $state(false);
 
 	interface PublicKeyCredentialCreationOptionsJSON {
@@ -146,7 +146,6 @@
 			// Success!
 			passKeyName = "";
 			allowSudo = false;
-			isSecondGroup = false;
 			hasStarted = false;
 			if (onSuccess) {
 				onSuccess();
@@ -162,7 +161,6 @@
 		hasStarted = false;
 		passKeyName = "";
 		allowSudo = false;
-		isSecondGroup = false;
 		requestError = null;
 	}
 </script>
@@ -198,14 +196,6 @@
 				</div>
 				<p class="text-sm text-muted-foreground">
 					If enabled, this passkey can be used to enter sudo mode for managing your account
-				</p>
-
-				<div class="flex items-center space-x-2">
-					<Checkbox id="is-second-group" bind:checked={isSecondGroup} disabled={isLoading} />
-					<Label for="is-second-group" class="cursor-pointer">Is second group passkey</Label>
-				</div>
-				<p class="text-sm text-muted-foreground">
-					Designates this passkey as belonging to a secondary credential group
 				</p>
 
 				<Button
