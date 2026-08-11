@@ -187,20 +187,46 @@
 									</p>
 								{:else}
 									<p class="text-sm text-muted-foreground">
-										Increase your account security by registering or moving a passkey to the second
-										group. You will then need one passkey from each group in order to perform
-										sensitive actions such as deleting a stash and at least one must allow sudo.
-										While this technically isn't an extra factor, it enables you to take advantages
-										of different types of passkeys, for example the entropy of the master password
-										for your password manager (first group) and the malware resistance of a hardware
-										key (second group). You can also still perform defensive actions with just one
-										passkey.
+										Two keys to attack. One key to defend.
 									</p>
 									<p class="text-sm text-muted-foreground">
-										Alternatively, since synced passkeys stored in a password manager are overall
-										less secure than a hardware key, you can disable sudo mode for your synced
-										passkeys and use single group auth. That way, sudo mode just requires your
-										hardware key. And you can still perform defensive actions with either passkey.
+										Increase your account security by registering or moving a passkey to the second
+										group. You will then need one passkey from each group in order to perform
+										sensitive actions such as deleting a stash. While this technically isn't an
+										extra factor, it enables you to take advantage of the real-world strengths of
+										different types of passkeys:
+									</p>
+									<ul
+										class="list-disc space-y-2 pl-5 text-sm text-muted-foreground marker:text-foreground/60"
+									>
+										<li class="pl-1">
+											Major: passkeys stored on a hardware key can't be copied by malware or
+											manipulation. Also it's difficult for malware to silently use a hardware key
+											to log in, as it requires a physical tap.
+										</li>
+										<li class="pl-1">
+											Medium: hardware keys are less likely to be stolen than a device logged into
+											your password manager, as they are, or at least appear to be, less valuable.
+										</li>
+										<li class="pl-1">
+											Medium: hardware keys have a much lower attack surface area than a password
+											manager that runs alongside an OS, browser, extensions and other apps.
+										</li>
+										<li class="pl-1">
+											Medium: synced passkey providers usually support biometrics, which can't be
+											shoulder-surfed.
+										</li>
+									</ul>
+									<p class="text-sm text-muted-foreground">
+										Because each of these two types are compromised in different scenarios, you
+										should put each type in a separate group. That way two scenarios have to occur.
+										You can still block a download attempt with any single passkey.
+									</p>
+									<p class="text-sm text-muted-foreground">
+										Alternatively, if you only want to use a single passkey, you can disable sudo
+										access for your synced passkeys and use a single group. Synced passkeys are
+										overall less secure, but they're more accessible if you need to block a download
+										attempt. Then to make sensitive changes, you'll need your hardware key.
 									</p>
 								{/if}
 							{:else}
@@ -211,10 +237,13 @@
 												<p class="font-medium">{passkey.name}</p>
 												<p class="text-sm text-muted-foreground">
 													{passkey.allowSudo ? "Sudo" : "Non-sudo"}
-													{#if passkey.isSessionFirst}
-														· Was used to log in{/if}
-													{#if passkey.isSessionSecond}
-														· Was used to elevate your session{/if}
+													{#if passkey.isSessionFirst && passkey.isSessionSecond}
+														· Was used to log in and elevate your session
+													{:else if passkey.isSessionFirst}
+														· Was used to log in
+													{:else if passkey.isSessionSecond}
+														· Was used to elevate your session
+													{/if}
 												</p>
 											</div>
 											<div class="flex flex-wrap gap-2">
