@@ -43,7 +43,7 @@ func TestCreateUser_NoWebAuthnSession_SendsBadRequest(t *testing.T) {
 	// The WebAuthn session is normally created for an invite by the generate options endpoint, which isn't called here
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
 		payload,
 		testcommon.WithBearerToken(code),
 	)
@@ -95,7 +95,7 @@ func TestCreateUser_UsernameTaken(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
 		createUserPayload,
 		testcommon.WithBearerToken(code),
 	)

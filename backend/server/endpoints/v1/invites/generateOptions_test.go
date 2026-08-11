@@ -28,7 +28,7 @@ func TestGenerateOptions(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(code),
 	)
@@ -56,7 +56,7 @@ func TestGenerateOptions_InvalidToken(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(base64.RawURLEncoding.EncodeToString(
 			app.Core.RandomAuthCode(), // Wrong auth code
@@ -82,7 +82,7 @@ func TestGenerateOptions_ExpiredInvite(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(code),
 	)
@@ -91,7 +91,7 @@ func TestGenerateOptions_ExpiredInvite(t *testing.T) {
 	clock.Advance(app.Env.WEBAUTHN_SESSION_TIMEOUT)
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(code),
 	)

@@ -63,7 +63,7 @@
 		}
 
 		try {
-			const response = await fetchJson(fetch, `/api/v1/invites/${encodeURIComponent(inviteId)}`, {
+			const response = await fetchJson(fetch, `/api/v1/invites/${encodeURIComponent(inviteId)}/`, {
 				headers: getAuthHeaders(),
 			});
 			if (!response.ok) {
@@ -101,7 +101,7 @@
 		try {
 			const optionsResponse = await fetchJson(
 				fetch,
-				`/api/v1/invites/${encodeURIComponent(inviteId)}/generate-options`,
+				`/api/v1/invites/${encodeURIComponent(inviteId)}/generate-options/`,
 				{
 					method: "POST",
 					headers: getAuthHeaders(),
@@ -153,7 +153,7 @@
 			const attestationResponse = credential.response as AuthenticatorAttestationResponse;
 			const createResponse = await fetchJson(
 				fetch,
-				`/api/v1/invites/${encodeURIComponent(inviteId)}/create-user`,
+				`/api/v1/invites/${encodeURIComponent(inviteId)}/create-user/`,
 				{
 					method: "POST",
 					headers: {

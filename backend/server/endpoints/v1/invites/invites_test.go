@@ -32,7 +32,7 @@ func TestInviteFlow(t *testing.T) {
 
 	respRecorder := testcommon.Get(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/", inviteOb.ID),
 		testcommon.WithBearerToken(code),
 	)
 	require.Equal(t, http.StatusOK, respRecorder.Code)
@@ -44,7 +44,7 @@ func TestInviteFlow(t *testing.T) {
 
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(code),
 	)
@@ -79,7 +79,7 @@ func TestInviteFlow(t *testing.T) {
 
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
 		createUserPayload,
 		testcommon.WithBearerToken(code),
 	)
@@ -132,20 +132,20 @@ func TestInviteFlow(t *testing.T) {
 	// Invite should now be unusable
 	respRecorder = testcommon.Get(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/", inviteOb.ID),
 		testcommon.WithBearerToken(code),
 	)
 	require.Equal(t, http.StatusUnauthorized, respRecorder.Code)
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(code),
 	)
 	require.Equal(t, http.StatusUnauthorized, respRecorder.Code)
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
 		createUserPayload, // Reuse the old payload
 		testcommon.WithBearerToken(code),
 	)
@@ -162,7 +162,7 @@ func TestInviteFlow_SyncablePasskey(t *testing.T) {
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(code),
 	)
@@ -197,7 +197,7 @@ func TestInviteFlow_SyncablePasskey(t *testing.T) {
 
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
 		createUserPayload,
 		testcommon.WithBearerToken(code),
 	)
@@ -227,7 +227,7 @@ func TestInviteFlow_ExpiredInvite(t *testing.T) {
 
 	respRecorder := testcommon.Get(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/", inviteOb.ID),
 		testcommon.WithBearerToken(code),
 	)
 	require.Equal(t, http.StatusOK, respRecorder.Code)
@@ -237,7 +237,7 @@ func TestInviteFlow_ExpiredInvite(t *testing.T) {
 	for range 2 {
 		respRecorder = testcommon.Post(
 			t, app.Server,
-			fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+			fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 			nil,
 			testcommon.WithBearerToken(code),
 		)
@@ -254,13 +254,13 @@ func TestInviteFlow_ExpiredInvite(t *testing.T) {
 	// Expired
 	respRecorder = testcommon.Get(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/", inviteOb.ID),
 		testcommon.WithBearerToken(code),
 	)
 	require.Equal(t, http.StatusUnauthorized, respRecorder.Code)
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/generate-options", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/generate-options/", inviteOb.ID),
 		nil,
 		testcommon.WithBearerToken(code),
 	)
@@ -295,7 +295,7 @@ func TestInviteFlow_ExpiredInvite(t *testing.T) {
 	// Should fail because the invite has expired, but it would have succeeded if it was sent earlier
 	respRecorder = testcommon.Post(
 		t, app.Server,
-		fmt.Sprintf("/api/v1/invites/%s/create-user", inviteOb.ID),
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
 		createUserPayload,
 		testcommon.WithBearerToken(code),
 	)

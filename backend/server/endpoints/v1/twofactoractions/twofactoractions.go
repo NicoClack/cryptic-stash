@@ -5,5 +5,5 @@ import (
 )
 
 func ConfigureEndpoints(group *servercommon.Group) {
-	group.POST("/:id/confirm", Confirm(group.App))
+	group.POST("/:id/confirm/", Confirm(group.App))
 }
