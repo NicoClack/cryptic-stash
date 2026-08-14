@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
@@ -17,6 +18,7 @@ type Auth struct {
 	app         *common.App
 }
 
+// Note: due to the go-webauthn dependency, this service uses real time instead of app.Clock
 func NewAuth(app *common.App) *Auth {
 	return &Auth{
 		webAuthnApp: auth.NewWebAuthnApp(app.Env),
@@ -31,7 +33,7 @@ func (service *Auth) StartLogin(
 	protocol.PublicKeyCredentialRequestOptions,
 	common.WrappedError,
 ) {
-	return auth.StartLogin(service.webAuthnApp, service.app.TempKeyValue, service.app.Clock)
+	return auth.StartLogin(service.webAuthnApp, service.app.TempKeyValue)
 }
 
 func (service *Auth) FinishLogin(
@@ -47,7 +49,6 @@ func (service *Auth) FinishLogin(
 		service.webAuthnApp,
 		tx,
 		service.app.TempKeyValue,
-		service.app.Clock,
 		service.app.Logger,
 		service.app.Env.SESSION_DURATION,
 	)
@@ -68,7 +69,6 @@ func (service *Auth) StartElevation(
 		userOb,
 		service.webAuthnApp,
 		service.app.TempKeyValue,
-		service.app.Clock,
 	)
 }
 
@@ -87,7 +87,6 @@ func (service *Auth) FinishElevation(
 		service.webAuthnApp,
 		tx,
 		service.app.TempKeyValue,
-		service.app.Clock,
 		service.app.Logger,
 		service.app.Env.SESSION_DURATION,
 	)
@@ -124,7 +123,6 @@ func (service *Auth) FinishRegisterPasskey(
 		parsedCredential,
 		service.webAuthnApp,
 		tx,
-		service.app.Clock,
 		ctx,
 		getUser,
 	)
@@ -146,7 +144,6 @@ func (service *Auth) CreateSession(
 		userAgent,
 		ip,
 		tx,
-		service.app.Clock,
 		service.app.Env.SESSION_DURATION,
 		ctx,
 	)
@@ -157,7 +154,7 @@ func (service *Auth) ValidateSession(
 	tx *ent.Tx,
 	ctx context.Context,
 ) (*ent.Session, common.WrappedError) {
-	return auth.ValidateSession(token, tx, service.app.Clock, ctx)
+	return auth.ValidateSession(token, tx, ctx)
 }
 
 func (service *Auth) ElevateSession(
@@ -169,7 +166,7 @@ func (service *Auth) ElevateSession(
 	return auth.ElevateSession(
 		sessionOb.ID,
 		elevationPasskeyID,
-		service.app.Clock.Now().Add(service.app.Env.SESSION_DURATION),
+		time.Now().Add(service.app.Env.SESSION_DURATION),
 		tx,
 		ctx,
 	)
@@ -182,7 +179,7 @@ func (service *Auth) RenamePasskey(
 	tx *ent.Tx,
 	ctx context.Context,
 ) common.WrappedError {
-	return auth.RenamePasskey(passkeyID, newName, actor, tx, ctx, service.app.Clock)
+	return auth.RenamePasskey(passkeyID, newName, actor, tx, ctx)
 }
 
 func (service *Auth) SetPasskeyAllowSudo(
@@ -198,7 +195,7 @@ func (service *Auth) SetPasskeyAllowSudo(
 		targetPasskeyID,
 		sessionPasskeyID, sessionElevationPasskeyID,
 		newAllowSudo, actor, tx, ctx,
-		service.app.Clock, service.app.Logger,
+		service.app.Logger,
 	)
 }
 
@@ -217,7 +214,7 @@ func (service *Auth) MovePasskeyGroup(
 		userID, sessionPasskeyID, sessionElevationPasskeyID,
 		newIsSecondGroup,
 		actor, tx, ctx,
-		service.app.Clock, service.app.Logger,
+		service.app.Logger,
 	)
 }
 
@@ -237,5 +234,5 @@ func (service *Auth) DisableTwoGroupAuth(
 	tx *ent.Tx,
 	ctx context.Context,
 ) common.WrappedError {
-	return auth.DisableTwoGroupAuth(userID, actor, tx, ctx, service.app.Clock)
+	return auth.DisableTwoGroupAuth(userID, actor, tx, ctx)
 }

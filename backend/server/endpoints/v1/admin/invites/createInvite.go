@@ -152,10 +152,10 @@ func newInMemoryUser(
 		Edges: ent.UserEdges{
 			Messengers: []*ent.UserMessenger{
 				{
-					Type:    emailMessengerType,
-					Version: emailMessengerVersion,
+					Type:      emailMessengerType,
+					Version:   emailMessengerVersion,
 					IsEnabled: true,
-					Options: encodedOptions,
+					Options:   encodedOptions,
 				},
 			},
 		},

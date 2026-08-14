@@ -9,7 +9,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/google/uuid"
-	"github.com/jonboulle/clockwork"
 )
 
 func CreateSession(
@@ -19,13 +18,12 @@ func CreateSession(
 	userAgent string,
 	ip string,
 	tx *ent.Tx,
-	clock clockwork.Clock,
 	sessionDuration time.Duration,
 	ctx context.Context,
 ) (*ent.Session, []byte, common.WrappedError) {
 	sessionToken := common.CryptoRandomBytes(SessionTokenLength)
 	hashedToken := sha256.Sum256(sessionToken)
-	now := clock.Now()
+	now := time.Now()
 	expiresAt := now.Add(sessionDuration)
 
 	sessionOb, stdErr := tx.Session.Create().
@@ -49,7 +47,6 @@ func CreateSession(
 func ValidateSession(
 	token []byte,
 	tx *ent.Tx,
-	clock clockwork.Clock,
 	ctx context.Context,
 ) (*ent.Session, common.WrappedError) {
 	hashedToken := sha256.Sum256(token)
@@ -57,7 +54,7 @@ func ValidateSession(
 	sessionOb, stdErr := tx.Session.Query().
 		Where(
 			session.HashedToken(hashedToken[:]),
-			session.ExpiresAtGT(clock.Now()),
+			session.ExpiresAtGT(time.Now()),
 		).
 		WithUser().
 		Only(ctx)

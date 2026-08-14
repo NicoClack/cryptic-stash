@@ -11,7 +11,6 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
-	"github.com/jonboulle/clockwork"
 )
 
 func StartElevation(
@@ -19,7 +18,6 @@ func StartElevation(
 	userOb *ent.User, // Must have Passkeys preloaded
 	webAuthnApp *webauthn.WebAuthn,
 	tempKV common.TempKeyValueService,
-	clock clockwork.Clock,
 ) (uuid.UUID, protocol.PublicKeyCredentialRequestOptions, common.WrappedError) {
 	// Prevent infinitely resetting the session timeout
 	if sessionOb.IsSudo {
@@ -70,7 +68,6 @@ func FinishElevation(
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
 	tempKV common.TempKeyValueService,
-	clock clockwork.Clock,
 	logger common.Logger,
 	sessionDuration time.Duration,
 ) common.WrappedError {
@@ -81,7 +78,6 @@ func FinishElevation(
 		webAuthnApp,
 		tx,
 		tempKV,
-		clock,
 		logger,
 	)
 	if wrappedErr != nil {
@@ -119,7 +115,7 @@ func FinishElevation(
 	wrappedErr = ElevateSession(
 		sessionOb.ID,
 		passkeyOb.ID,
-		clock.Now().Add(sessionDuration),
+		time.Now().Add(sessionDuration),
 		tx,
 		ginCtx.Request.Context(),
 	)

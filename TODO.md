@@ -1,17 +1,20 @@
 # TODO
 
 - Store the returned session during signup
+- Create AccountAlert system:
+- - Should be viewable
+- - Admin should be CC'd
+- Create AccountAlert when passkey is cloned and demote the passkey
 - Create an invite service
 - - Delete expired invites that are unused, should be called by the cleanup task
-- Passkey support:
-- - Adding, removing and renaming passkeys
-- - Enabling/disabling sudo access for a passkey
-- - Prompt for passkey to enter sudo mode when required
-- - 2 group authentication, allow enabling and disabling, and moving passkeys between groups
-- - Check implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/
+- Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
+- - Consistently limit ceremonies to single use? e.g when there are unexpected errors
+- - Display the last used times for each passkey, as well as distinguishing between hardware and software keys
+- - Auto name passkeys based on AAGUID
+- - Finish integration tests, including credential replay
+- - Implement and add test for clone warning handling
 - Create development Docker Compose setup
 - - Switch to Deno and limit postinstall scripts (locally and in CI)
-- Review and update deps
 - Replace adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Replace entity struct arguments to services with IDs? Like passkeyManagement.go does

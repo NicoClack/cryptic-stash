@@ -23,6 +23,7 @@ func TestLoginStart(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	// Cryptic Stash uses username-less login, so we don't actually need to set up a user
 
+	webAuthnSessionCreatedAt := time.Now()
 	respRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/auth/login/start/",
@@ -51,7 +52,7 @@ func TestLoginStart(t *testing.T) {
 	require.Equal(t, response.PublicKey.Challenge.String(), sessionData.Challenge)
 	require.Equal(t, response.PublicKey.RelyingPartyID, sessionData.RelyingPartyID)
 	require.Empty(t, sessionData.UserID)
-	require.WithinDuration(t, app.Clock.Now().Add(2*time.Minute), sessionData.Expires, 10*time.Second)
+	require.WithinDuration(t, webAuthnSessionCreatedAt.Add(2*time.Minute), sessionData.Expires, 10*time.Second)
 }
 
 func TestLoginStart_MultipleRequests_UniqueSessionsAndChallenges(t *testing.T) {

@@ -110,7 +110,7 @@ func (registry *Registry) Register(definition *Definition) {
 			newJobCtx := *jobCtx
 			newJobCtx.Body = body.Inner
 			messengerCtx := &Context{
-				JobContext:    &newJobCtx,
+				JobContext:      &newJobCtx,
 				isConfirmedSent: false,
 			}
 			stdErr := definition.Handler(messengerCtx)

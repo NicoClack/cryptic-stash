@@ -2,13 +2,13 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
-	"github.com/jonboulle/clockwork"
 )
 
 func StartRegisterPasskey(
@@ -42,11 +42,10 @@ func FinishRegisterPasskey(
 	parsedCredential *protocol.ParsedCredentialCreationData,
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
-	clock clockwork.Clock,
 	ctx context.Context,
 	getUser func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error),
 ) (*ent.Passkey, common.WrappedError) {
-	if !session.Expires.IsZero() && clock.Now().After(session.Expires) {
+	if !session.Expires.IsZero() && time.Now().After(session.Expires) {
 		return nil, ErrWrapperFinishRegisterPasskey.Wrap(ErrWebAuthnSessionExpired)
 	}
 
@@ -75,7 +74,7 @@ func FinishRegisterPasskey(
 		)
 	}
 
-	now := clock.Now()
+	now := time.Now()
 	passkeyOb, stdErr := tx.Passkey.Create().
 		SetCreatedAt(now).
 		SetUpdatedAt(now).

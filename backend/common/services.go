@@ -125,6 +125,9 @@ type App struct {
 	Auth             AuthService
 }
 
+// Note: this service will misbehave if mocked time is used because the real time will be used by it due to
+// the go-webauthn dependency while the TempKeyValueService will use the mocked time.
+// A real clock can be injected into the TempKeyValueService using a custom service wrapper
 type AuthService interface {
 	// TODO: standardise parsing data from gin Context vs passing it in
 	StartLogin(ctx context.Context) (

@@ -13,13 +13,11 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
-	"github.com/jonboulle/clockwork"
 )
 
 func StartLogin(
 	webAuthnApp *webauthn.WebAuthn,
 	tempKV common.TempKeyValueService,
-	clock clockwork.Clock,
 ) (uuid.UUID, protocol.PublicKeyCredentialRequestOptions, common.WrappedError) {
 	creation, sessionData, stdErr := webAuthnApp.BeginDiscoverableLogin()
 	if stdErr != nil {
@@ -40,10 +38,11 @@ func ValidateLogin(
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
 	tempKV common.TempKeyValueService,
-	clock clockwork.Clock,
 	logger common.Logger,
 ) (*ent.User, *ent.Passkey, bool, common.WrappedError) {
 	var sessionData *webauthn.SessionData
+	// TODO: create and use a pop method to prevent reuse and concurrency issues?
+	// What happens if the transaction has to be retried?
 	if !tempKV.Get(WebAuthnSessionStoreName, webAuthnSessionID.String(), &sessionData) {
 		return nil, nil, false, ErrWrapperValidateLogin.Wrap(ErrInvalidWebAuthnSessionID)
 	}
@@ -120,7 +119,7 @@ func ValidateLogin(
 	passkeyOb.Credential = *credential
 	// TODO: race condition?
 	stdErr = tx.Passkey.UpdateOne(passkeyOb).
-		SetUpdatedAt(clock.Now()).
+		SetUpdatedAt(time.Now()).
 		SetCredential(passkeyOb.Credential).
 		Exec(ctx)
 	if stdErr != nil {
@@ -139,7 +138,6 @@ func FinishLogin(
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
 	tempKV common.TempKeyValueService,
-	clock clockwork.Clock,
 	logger common.Logger,
 	sessionDuration time.Duration,
 ) (*ent.User, *ent.Passkey, *ent.Session, []byte, common.WrappedError) {
@@ -150,7 +148,6 @@ func FinishLogin(
 		webAuthnApp,
 		tx,
 		tempKV,
-		clock,
 		logger,
 	)
 	if wrappedErr != nil {
@@ -166,7 +163,6 @@ func FinishLogin(
 		ginCtx.Request.UserAgent(),
 		ginCtx.ClientIP(),
 		tx,
-		clock,
 		sessionDuration,
 		ginCtx.Request.Context(),
 	)

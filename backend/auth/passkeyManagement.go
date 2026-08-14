@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"slices"
+	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
@@ -12,7 +13,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/google/uuid"
-	"github.com/jonboulle/clockwork"
 )
 
 func updateOwnPasskey(
@@ -41,10 +41,9 @@ func RenamePasskey(
 	actor *common.Actor,
 	tx *ent.Tx,
 	ctx context.Context,
-	clock clockwork.Clock,
 ) common.WrappedError {
 	count, stdErr := updateOwnPasskey(passkeyID, actor, tx).
-		SetUpdatedAt(clock.Now()).
+		SetUpdatedAt(time.Now()).
 		SetName(newName).
 		Save(ctx)
 	if stdErr != nil {
@@ -65,7 +64,6 @@ func SetPasskeyAllowSudo(
 	actor *common.Actor,
 	tx *ent.Tx,
 	ctx context.Context,
-	clock clockwork.Clock,
 	logger common.Logger,
 ) common.WrappedError {
 	isTargetUsedAsSessionFirst := targetPasskeyID == sessionPasskeyID
@@ -95,7 +93,7 @@ func SetPasskeyAllowSudo(
 	// both of their passkeys if they spam the API, which doesn't decrease security
 
 	count, stdErr := updateOwnPasskey(targetPasskeyID, actor, tx).
-		SetUpdatedAt(clock.Now()).
+		SetUpdatedAt(time.Now()).
 		SetAllowSudo(newAllowSudo).
 		Save(ctx)
 	if stdErr != nil {
@@ -205,7 +203,6 @@ func MovePasskeyGroup(
 	actor *common.Actor,
 	tx *ent.Tx,
 	ctx context.Context,
-	clock clockwork.Clock,
 	logger common.Logger,
 ) common.WrappedError {
 	if actor.UserID != uuid.Nil && actor.UserID != userID {
@@ -238,7 +235,7 @@ func MovePasskeyGroup(
 	// (which they didn't use for auth)
 
 	count, stdErr := updateOwnPasskey(targetPasskeyID, actor, tx).
-		SetUpdatedAt(clock.Now()).
+		SetUpdatedAt(time.Now()).
 		SetIsSecondGroup(newIsSecondGroup).
 		Save(ctx)
 	if stdErr != nil {
@@ -330,7 +327,6 @@ func DisableTwoGroupAuth(
 	actor *common.Actor,
 	tx *ent.Tx,
 	ctx context.Context,
-	clock clockwork.Clock,
 ) common.WrappedError {
 	if actor.UserID != uuid.Nil && actor.UserID != userID {
 		return ErrWrapperDisableTwoGroupAuth.Wrap(ErrUnauthorizedToModifyUser)
@@ -341,7 +337,7 @@ func DisableTwoGroupAuth(
 			passkey.UserID(userID),
 			passkey.IsSecondGroup(true),
 		).
-		SetUpdatedAt(clock.Now()).
+		SetUpdatedAt(time.Now()).
 		SetIsSecondGroup(false).
 		Exec(ctx)
 	if stdErr != nil {

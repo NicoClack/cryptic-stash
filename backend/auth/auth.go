@@ -1,3 +1,5 @@
+// Note: due to the go-webauthn dependency, this package uses real time instead of accepting clocks
+
 package auth
 
 import (

@@ -22,6 +22,7 @@ const (
 
 	ErrTypeRenamePasskey       = "rename passkey"
 	ErrTypeSetPasskeyAllowSudo = "set passkey allow sudo"
+	//nolint:gosec // false positive, this is not a password
 	ErrTypeMovePasskeyGroup    = "move passkey group"
 	ErrTypeDeletePasskey       = "delete passkey"
 	ErrTypeDisableTwoGroupAuth = "disable two group auth"

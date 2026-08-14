@@ -138,11 +138,11 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				return &CreateUserResponse{
-					Errors:          []servercommon.ErrorDetail{},
-					UserID:          passkeyOb.UserID,
-					Token:           base64.RawURLEncoding.EncodeToString(token),
-					Username:        inviteOb.Email,
-					IsSudo: sessionOb.IsSudo,
+					Errors:   []servercommon.ErrorDetail{},
+					UserID:   passkeyOb.UserID,
+					Token:    base64.RawURLEncoding.EncodeToString(token),
+					Username: inviteOb.Email,
+					IsSudo:   sessionOb.IsSudo,
 				}, nil
 			},
 		)

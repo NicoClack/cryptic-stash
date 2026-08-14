@@ -25,11 +25,11 @@ func AuthTest(app *servercommon.ServerApp) gin.HandlerFunc {
 		userOb := ginCtx.MustGet("user").(*ent.User)
 
 		ginCtx.JSON(http.StatusOK, AuthTestResponse{
-			Errors:        []servercommon.ErrorDetail{},
-			SessionID:     sessionOb.ID,
-			UserID:        userOb.ID,
-			Username:      userOb.Username,
-			IsSudo: sessionOb.IsSudo,
+			Errors:    []servercommon.ErrorDetail{},
+			SessionID: sessionOb.ID,
+			UserID:    userOb.ID,
+			Username:  userOb.Username,
+			IsSudo:    sessionOb.IsSudo,
 		})
 		return nil
 	})
