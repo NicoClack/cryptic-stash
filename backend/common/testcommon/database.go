@@ -37,7 +37,7 @@ func CreateDB(t *testing.T) *TestDatabase {
 	defer globals.MigrateMu.Unlock()
 	dbCounter++
 	db, stdErr := sql.Open("sqlite3", fmt.Sprintf(
-		"file:temp%v?mode=memory&cache=shared",
+		"file:temp%v?mode=memory&cache=shared&_txlock=immediate",
 		dbCounter,
 	))
 	require.NoError(t, stdErr)
@@ -132,4 +132,17 @@ func (db *TestDatabase) runStartTxHooks(tx *ent.Tx) error {
 		}
 	}
 	return nil
+}
+
+// Note: this should mostly be used in unit tests where you don't want the retries that
+// the dbcommon WithWriteTx() function provides
+func StartWriteTx(t *testing.T, db *TestDatabase) *ent.Tx {
+	t.Helper()
+
+	tx, stdErr := db.WriteTx(t.Context())
+	require.NoError(t, stdErr)
+	t.Cleanup(func() {
+		_ = tx.Rollback()
+	})
+	return tx
 }

@@ -46,7 +46,11 @@ func (service *Database) Start() {
 			log.Fatalf("couldn't create storage directory. error:\n%v", stdErr)
 		}
 
-		db, stdErr := sql.Open("sqlite3", filepath.Join(service.app.Env.MOUNT_PATH, "database.sqlite3"))
+		db, stdErr := sql.Open(
+			"sqlite3",
+			filepath.Join(service.app.Env.MOUNT_PATH, "database.sqlite3")+
+				"?_txlock=immediate",
+		)
 		if stdErr != nil {
 			log.Fatalf("couldn't start database. error:\n%v", stdErr)
 		}

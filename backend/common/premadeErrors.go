@@ -22,7 +22,10 @@ var ErrWrapperDatabase = NewDynamicErrorWrapper(func(err error) WrappedError {
 	}
 	sqliteErr := &sqlite.Error{}
 	if errors.As(err, &sqliteErr) {
-		code := sqliteErr.Code()
+		// Code() returns the extended result primaryCode (e.g. "database table is
+		// locked (262)" is SQLITE_LOCKED_SHAREDCACHE = SQLITE_LOCKED | (1<<8)).
+		// So we use a mask to get the primary primaryCode.
+		primaryCode := sqliteErr.Code() & 0xff
 		if slices.Index([]int{
 			sqlite3.SQLITE_FULL,
 			sqlite3.SQLITE_AUTH,
@@ -32,9 +35,9 @@ var ErrWrapperDatabase = NewDynamicErrorWrapper(func(err error) WrappedError {
 			sqlite3.SQLITE_IOERR,
 			sqlite3.SQLITE_LOCKED,
 			sqlite3.SQLITE_NOMEM,
-		}, code) != -1 {
+		}, primaryCode) != -1 {
 			wrappedErr.ConfigureRetriesMut(10, 50*time.Millisecond, 2)
-			if code == sqlite3.SQLITE_NOMEM {
+			if primaryCode == sqlite3.SQLITE_NOMEM {
 				wrappedErr.AddCategoriesMut(ErrTypeMemory, ErrTypeDatabase)
 			} else {
 				wrappedErr.AddCategoriesMut(ErrTypeDisk, ErrTypeDatabase)

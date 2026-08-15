@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
@@ -16,10 +15,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWithReadTx_AllowsConcurrentReads(t *testing.T) {
+type countingReadTxDB struct {
+	*testcommon.TestDatabase
+	startTxCount *atomic.Int32
+}
+
+func (db *countingReadTxDB) ReadTx(ctx context.Context) (*ent.Tx, error) {
+	db.startTxCount.Add(1)
+	return db.TestDatabase.ReadTx(ctx)
+}
+
+// Write transactions use BEGIN IMMEDIATE, which serialises writers. Read
+// transactions use a deferred BEGIN, so multiple readers should be able to run
+// concurrently and complete quickly.
+func TestWithReadTx_ReadsConcurrently(t *testing.T) {
 	t.Parallel()
 
-	const READ_COUNT = 100
+	const READ_COUNT = int32(100)
+	const CALLBACK_SLEEP = 10 * time.Millisecond
 	db := testcommon.CreateDB(t)
 	t.Cleanup(db.Shutdown)
 
@@ -36,23 +49,57 @@ func TestWithReadTx_AllowsConcurrentReads(t *testing.T) {
 		SetBody(json.RawMessage("{}")).
 		Save(t.Context())
 	require.NoError(t, stdErr)
-	jobID := jobOb.ID
 
+	var startTxCount atomic.Int32
+	countingDB := &countingReadTxDB{
+		TestDatabase: db,
+		startTxCount: &startTxCount,
+	}
+	var callbackCallCount atomic.Int32
+	var concurrentCountMu sync.Mutex
+	var concurrentCount int
+	var maxConcurrentCount int
+
+	start := time.Now()
 	var wg sync.WaitGroup
 	for range READ_COUNT {
 		wg.Go(func() {
+			concurrentCountMu.Lock()
+			concurrentCount++
+			if concurrentCount > maxConcurrentCount {
+				maxConcurrentCount = concurrentCount
+			}
+			concurrentCountMu.Unlock()
+			defer func() {
+				concurrentCountMu.Lock()
+				concurrentCount--
+				concurrentCountMu.Unlock()
+			}()
+
 			_, stdErr := dbcommon.WithReadTx(
-				t.Context(), db,
+				t.Context(), countingDB,
 				func(tx *ent.Tx, ctx context.Context) (*ent.Job, error) {
-					return tx.Job.Get(ctx, jobID)
+					callbackCallCount.Add(1)
+					// Hold the read transaction open briefly so concurrent reads overlap
+					time.Sleep(CALLBACK_SLEEP)
+					return tx.Job.Get(ctx, jobOb.ID)
 				},
 			)
 			require.NoError(t, stdErr)
 		})
 	}
+	wg.Wait()
+	elapsed := time.Since(start)
 
-	testcommon.CallWithTimeout(t, wg.Wait, 250*time.Millisecond)
+	// More than read must have run concurrently at some point
+	require.Greater(t, maxConcurrentCount, 1)
+	// Nothing should have had to be retried
+	require.Equal(t, READ_COUNT, startTxCount.Load())
+	require.Equal(t, READ_COUNT, callbackCallCount.Load())
+	// Concurrent reads take ~CALLBACK_SLEEP whereas serialised reads would take READ_COUNT*CALLBACK_SLEEP
+	require.Less(t, elapsed, time.Duration(READ_COUNT)*CALLBACK_SLEEP)
 }
+
 func TestWithWriteTx_NestedTransactions_ReturnsError(t *testing.T) {
 	t.Parallel()
 
@@ -112,12 +159,30 @@ func TestWithWriteTx_Supports50ConcurrentWrites(t *testing.T) {
 	require.NoError(t, stdErr)
 	require.Equal(t, JOB_COUNT, count)
 }
+
+type countingWriteTxDB struct {
+	*testcommon.TestDatabase
+	startTxAttemptCount *atomic.Int32
+}
+
+func (db *countingWriteTxDB) WriteTx(ctx context.Context) (*ent.Tx, error) {
+	db.startTxAttemptCount.Add(1)
+	return db.TestDatabase.WriteTx(ctx)
+}
+
 func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 	t.Parallel()
 
-	INCREMENT_COUNT := 25
+	INCREMENT_COUNT := int32(25)
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
+	t.Cleanup(db.Shutdown)
+
+	var startTxAttemptCount atomic.Int32
+	var callbackCallCount atomic.Int32
+	countingDB := &countingWriteTxDB{
+		TestDatabase:        db,
+		startTxAttemptCount: &startTxAttemptCount,
+	}
 
 	now := time.Now()
 	stdErr := db.Client().Job.Create().
@@ -133,19 +198,19 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 		Exec(t.Context())
 	require.NoError(t, stdErr)
 
-	var errCount atomic.Int32
 	var wg sync.WaitGroup
 	for range INCREMENT_COUNT {
 		wg.Go(func() {
 			stdErr := dbcommon.WithWriteTx(
-				t.Context(), db,
+				t.Context(), countingDB,
 				func(tx *ent.Tx, ctx context.Context) error {
+					callbackCallCount.Add(1)
 					job, stdErr := tx.Job.Query().Where(job.TypeEQ("counter")).Only(ctx)
 					if stdErr != nil {
-						errCount.Add(1)
-						return common.ErrWrapperDatabase.Wrap(stdErr)
+						return stdErr
 					}
-					// Extend the window when this transaction hasn't got a write lock
+					// These transactions now immediately have a write lock, but just in case there's an issue in the future,
+					// increase the chance of a collision
 					time.Sleep(10 * time.Millisecond)
 
 					var body struct {
@@ -153,24 +218,17 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 					}
 					stdErr = json.Unmarshal(job.Body, &body)
 					if stdErr != nil {
-						errCount.Add(1)
 						return stdErr
 					}
 					body.Count++
 					newBody, stdErr := json.Marshal(body)
 					if stdErr != nil {
-						errCount.Add(1)
 						return stdErr
 					}
-					stdErr = job.Update().
+					return job.Update().
 						SetUpdatedAt(now).
 						SetBody(json.RawMessage(newBody)).
 						Exec(ctx)
-					if stdErr != nil {
-						errCount.Add(1)
-						return common.ErrWrapperDatabase.Wrap(stdErr)
-					}
-					return nil
 				},
 			)
 			require.NoError(t, stdErr)
@@ -181,11 +239,15 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 	jobOb, stdErr := db.Client().Job.Query().Where(job.TypeEQ("counter")).Only(t.Context())
 	require.NoError(t, stdErr)
 	var body struct {
-		Count int `json:"count"`
+		Count int32 `json:"count"`
 	}
 	stdErr = json.Unmarshal(jobOb.Body, &body)
 	require.NoError(t, stdErr)
 	require.Equal(t, INCREMENT_COUNT, body.Count)
-	// Expect at least a few errors to have been retried (it should be way more than this on average)
-	require.GreaterOrEqual(t, errCount.Load(), int32(5))
+	// startTxAttemptCount should be much greater than INCREMENT_COUNT because
+	// the starting of a number of transactions should have had to be retried
+	require.Greater(t, startTxAttemptCount.Load(), INCREMENT_COUNT)
+	// Because BEGIN IMMEDIATE is used, there should have only been one callback running
+	// at a time, and therefore none of them should have had to be retried
+	require.Equal(t, INCREMENT_COUNT, callbackCallCount.Load())
 }

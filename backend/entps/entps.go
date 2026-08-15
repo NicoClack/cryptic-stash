@@ -17,14 +17,15 @@ type sqlite3DriverConn interface {
 }
 
 //nolint:nonamedreturns
-func (d sqlite3Driver) Open(name string) (conn driver.Conn, err error) {
-	conn, err = d.Driver.Open(name)
-	if err != nil {
+func (d sqlite3Driver) Open(name string) (conn driver.Conn, stdErr error) {
+	conn, stdErr = d.Driver.Open(name)
+	if stdErr != nil {
 		return
 	}
-	_, err = conn.(sqlite3DriverConn).Exec("PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 10000;", nil)
-	if err != nil {
+	_, stdErr = conn.(sqlite3DriverConn).Exec("PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 100;", nil)
+	if stdErr != nil {
 		_ = conn.Close()
+		return
 	}
 	return
 }
