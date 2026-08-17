@@ -22,7 +22,7 @@ linters:
         - copyloopvar
         # - cyclop # Maybe re-enable later?
         - decorder
-        - dogsled
+        # - dogsled # Maybe re-enable later? Review functions with 3 or more return values, this linter caught the issue way too late
         # - dupl # Maybe re-enable later?
         - dupword
         - durationcheck

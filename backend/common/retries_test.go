@@ -16,10 +16,11 @@ func TestCalculateBackoff(t *testing.T) {
 		longBackoff1 := common.CalculateBackoff(0, 30*time.Second, 2)
 		longBackoff2 := common.CalculateBackoff(1, 30*time.Second, 2)
 
-		require.Greater(t, shortBackoff1, 94*time.Millisecond)
-		require.Less(t, shortBackoff1, 106*time.Millisecond)
-		require.Greater(t, shortBackoff2, 189*time.Millisecond)
-		require.Less(t, shortBackoff2, 211*time.Millisecond)
+		// Assert it's within the jitter range (±BackoffJitter)
+		require.Greater(t, shortBackoff1, 84*time.Millisecond)
+		require.Less(t, shortBackoff1, 116*time.Millisecond)
+		require.Greater(t, shortBackoff2, 169*time.Millisecond)
+		require.Less(t, shortBackoff2, 231*time.Millisecond)
 
 		maxDiff := 501 * time.Millisecond
 		require.Greater(t, longBackoff1, (30*time.Second)-maxDiff)

@@ -1,10 +1,7 @@
 # TODO
 
+- Rename LoginStart and LoginFinish to StartLogin and FinishLogin to be consistent with elevation endpoints
 - Store the returned session during signup
-- Create AccountAlert system:
-- - Should be viewable
-- - Admin should be CC'd
-- Create AccountAlert when passkey is cloned and demote the passkey
 - Create an invite service
 - - Delete expired invites that are unused, should be called by the cleanup task
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
@@ -15,6 +12,10 @@
 - - Implement and add test for clone warning handling
 - Create development Docker Compose setup
 - - Switch to Deno and limit postinstall scripts (locally and in CI)
+- Create AccountAlert system:
+- - Should be viewable
+- - Admin should be CC'd
+- Create AccountAlert when passkey is cloned and demote the passkey
 - Replace adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Replace entity struct arguments to services with IDs? Like passkeyManagement.go does

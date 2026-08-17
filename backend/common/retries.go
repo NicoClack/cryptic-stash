@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const BackoffJitter = float64(0.05)
+const BackoffJitter = float64(0.15)
 const MaxBackoffJitter = 500 * time.Millisecond
 const BackoffMaxRetriesEpsilon = 1e-9
 
