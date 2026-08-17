@@ -15,6 +15,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
 	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/login"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
@@ -22,6 +23,7 @@ import (
 	"github.com/descope/virtualwebauthn"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
@@ -111,6 +113,9 @@ func TestLoginFlow(t *testing.T) {
 	dbClient := app.Database.Client()
 	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
 	userOb, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+	passkeyOb := dbClient.Passkey.Query().
+		Where(passkey.CredentialID(credential.ID)).
+		OnlyX(t.Context())
 
 	startRecorder := testcommon.Post(
 		t, app.Server,
@@ -187,13 +192,20 @@ func TestLoginFlow(t *testing.T) {
 		Only(t.Context())
 	require.NoError(t, stdErr)
 	require.Equal(t, userOb.ID, sessionOb.UserID)
+	require.Equal(t, passkeyOb.ID, sessionOb.PasskeyID)
 	require.False(t, sessionOb.IsSudo)
+	require.Equal(t, "test-agent", sessionOb.UserAgent)
+	require.Equal(t, "127.0.0.1", sessionOb.IP)
 	require.WithinDuration(
 		t,
 		sessionCreatedAt.Add(app.Env.SESSION_DURATION),
 		sessionOb.ExpiresAt,
 		100*time.Millisecond,
 	)
+
+	// The WebAuthn ceremony should've been deleted
+	var sessionData *webauthn.SessionData
+	require.False(t, app.TempKeyValue.Get(auth.WebAuthnSessionStoreName, webAuthnSessionID.String(), &sessionData))
 }
 
 func TestLoginFlow_SyncablePasskey(t *testing.T) {

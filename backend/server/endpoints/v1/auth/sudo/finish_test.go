@@ -136,51 +136,6 @@ func TestFinishElevation_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) 
 	)
 }
 
-func TestFinishElevation_MissingWebAuthnSession_SendsBadRequest(t *testing.T) {
-	t.Parallel()
-
-	app := testhelpers.NewApp(t, nil)
-	userOb := testcommon.NewDummyUser(1, app.Database.Client(), t.Context(), app.Clock)
-	sessionToken, _ := createSessionAndPasskey(t, false, userOb, app)
-
-	var parsedAssertion protocol.CredentialAssertionResponse
-	{
-		vAuthenticator := virtualwebauthn.NewAuthenticator()
-		credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
-		assertionJSON := virtualwebauthn.CreateAssertionResponse(
-			testcommon.NewWebAuthnRelyingParty(app.Env),
-			vAuthenticator,
-			credential,
-			virtualwebauthn.AssertionOptions{Challenge: common.CryptoRandomBytes(32)},
-		)
-		stdErr := json.Unmarshal([]byte(assertionJSON), &parsedAssertion)
-		require.NoError(t, stdErr)
-	}
-
-	respRecorder := testcommon.Post(
-		t, app.Server,
-		"/api/v1/auth/sudo/finish/",
-		sudo.FinishElevationPayload{
-			WebAuthnSessionID:           uuid.New(),
-			CredentialAssertionResponse: parsedAssertion,
-		},
-		testcommon.WithBearerToken(sessionToken),
-	)
-
-	testcommon.AssertJSONResponse(
-		t, respRecorder,
-		http.StatusBadRequest,
-		gin.H{
-			"errors": []servercommon.ErrorDetail{
-				{
-					Message: "WebAuthn session missing or expired",
-					Code:    "INVALID_WEBAUTHN_SESSION",
-				},
-			},
-		},
-	)
-}
-
 func TestFinishElevation_MalformedCredentialAssertion_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
