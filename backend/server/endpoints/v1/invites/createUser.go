@@ -125,7 +125,7 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				sessionOb, token, wrappedErr := app.Auth.CreateSession(
-					true,
+					true, // TODO: this session is unrealistic
 					passkeyOb.UserID,
 					passkeyOb.ID,
 					ginCtx.Request.UserAgent(),

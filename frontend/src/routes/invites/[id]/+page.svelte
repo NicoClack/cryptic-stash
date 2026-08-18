@@ -2,6 +2,7 @@
 	import { resolve } from "$app/paths";
 	import { page } from "$app/state";
 	import { fetchJson, type JsonResponse } from "$lib/api";
+	import { userAuth } from "$lib/auth/UserAuth.svelte";
 	import PageMain from "$lib/components/PageMain.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Card, CardContent, CardHeader, CardTitle } from "$lib/components/ui/card";
@@ -177,6 +178,19 @@
 				requestError = getErrorMessage(createResponse);
 				return;
 			}
+
+			const {
+				userId,
+				token,
+				username,
+				isSudo: isSudoMode,
+			} = createResponse.data as {
+				userId: string;
+				token: string;
+				username: string;
+				isSudo: boolean;
+			};
+			userAuth.login(token, userId, username, isSudoMode);
 
 			successMessage = "Account created successfully. Your passkey has been registered.";
 		} finally {
