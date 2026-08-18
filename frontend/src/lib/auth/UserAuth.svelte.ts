@@ -58,12 +58,7 @@ class UserAuthState {
 		return true;
 	}
 	requireSudoMode() {
-		if (
-			browser &&
-			this.requireAuth() &&
-			!this.#isSudoMode &&
-			!page.route.id?.startsWith("/elevate")
-		) {
+		if (browser && this.requireAuth() && !this.#isSudoMode && !page.route.id?.startsWith("/elevate")) {
 			goToElevate();
 			return false;
 		}

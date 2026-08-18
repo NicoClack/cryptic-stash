@@ -3,13 +3,7 @@
 	import { fetchJson } from "$lib/api";
 	import PageMain from "$lib/components/PageMain.svelte";
 	import { Button } from "$lib/components/ui/button";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
 	let isLoading = $state(false);
@@ -53,14 +47,7 @@
 			<form class="space-y-4" onsubmit={handleSubmit}>
 				<Label>
 					Username
-					<Input
-						required
-						disabled
-						type="text"
-						name="username"
-						autocomplete="username"
-						value="admin"
-					/>
+					<Input required disabled type="text" name="username" autocomplete="username" value="admin" />
 				</Label>
 				<Label>
 					Password

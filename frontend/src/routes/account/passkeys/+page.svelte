@@ -4,13 +4,7 @@
 	import PageMain from "$lib/components/PageMain.svelte";
 	import RegisterPasskey from "$lib/components/RegisterPasskey.svelte";
 	import { Button } from "$lib/components/ui/button";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 	import { onMount } from "svelte";
 
 	interface PasskeyInfo {
@@ -63,11 +57,7 @@
 		}
 	}
 
-	async function updatePasskey(
-		passkey: PasskeyInfo,
-		path: string,
-		body?: Record<string, unknown>,
-	): Promise<boolean> {
+	async function updatePasskey(passkey: PasskeyInfo, path: string, body?: Record<string, unknown>): Promise<boolean> {
 		busyPasskeyID = passkey.id;
 		requestError = null;
 
@@ -168,8 +158,7 @@
 		<Card>
 			<CardHeader>
 				<CardTitle>Your passkeys</CardTitle>
-				<CardDescription>Passkeys are grouped to support stronger account recovery.</CardDescription
-				>
+				<CardDescription>Passkeys are grouped to support stronger account recovery.</CardDescription>
 			</CardHeader>
 			<CardContent class="space-y-6">
 				{#if isLoading}
@@ -186,9 +175,7 @@
 										No first-group passkeys have been registered yet.
 									</p>
 								{:else}
-									<p class="text-sm text-muted-foreground">
-										Two keys to attack. One key to defend.
-									</p>
+									<p class="text-sm text-muted-foreground">Two keys to attack. One key to defend.</p>
 									<p class="text-sm text-muted-foreground">
 										Increase your account security by registering or moving a passkey to the second
 										group. You will then need one passkey from each group in order to perform
@@ -274,17 +261,15 @@
 										</div>
 										{#if passkey.isSessionFirst || passkey.isSessionSecond}
 											<p class="text-xs text-muted-foreground">
-												This passkey is currently used by your session and cannot be deleted. If you
-												still want to delete it, please log in with a different passkey first.
+												This passkey is currently used by your session and cannot be deleted. If
+												you still want to delete it, please log in with a different passkey
+												first.
 											</p>
 										{/if}
 									</div>
 								{/each}
 							{/if}
-							<Button
-								variant="outline"
-								onclick={() => openRegistration(group.title === "Second group")}
-							>
+							<Button variant="outline" onclick={() => openRegistration(group.title === "Second group")}>
 								Add a new passkey
 							</Button>
 						</section>
@@ -292,11 +277,7 @@
 				{/if}
 
 				{#if secondGroupPasskeys.length > 0}
-					<Button
-						variant="outline"
-						onclick={disableTwoGroupAuth}
-						disabled={isDisablingTwoGroupAuth}
-					>
+					<Button variant="outline" onclick={disableTwoGroupAuth} disabled={isDisablingTwoGroupAuth}>
 						Disable two-group authentication
 					</Button>
 				{/if}

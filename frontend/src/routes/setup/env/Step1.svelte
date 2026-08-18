@@ -89,10 +89,10 @@
 			/>
 		</Label>
 		<p class="text-sm text-muted-foreground md:text-base">
-			Note: We recommend using the random password button and storing it in your password manager.
-			This allows you to weaken the hashing for admin passwords, reducing server load. If you must
-			use a memorable password, use the correct horse battery staple method and set your admin
-			hashing env vars to match the recommendations for stash passwords.
+			Note: We recommend using the random password button and storing it in your password manager. This allows you
+			to weaken the hashing for admin passwords, reducing server load. If you must use a memorable password, use
+			the correct horse battery staple method and set your admin hashing env vars to match the recommendations for
+			stash passwords.
 		</p>
 		<Button type="submit" disabled={isLoading}>Next</Button>
 	</form>

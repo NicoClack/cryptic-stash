@@ -3,13 +3,7 @@
 	import { userAuth } from "$lib/auth/UserAuth.svelte";
 	import PageMain from "$lib/components/PageMain.svelte";
 	import { Button } from "$lib/components/ui/button";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 	import { decodeBase64UrlFormat, encodeBase64UrlFormat } from "$lib/utils";
 
 	let isLoading = $state(false);
@@ -96,12 +90,16 @@
 			});
 
 			if (!finishResponse.ok) {
-				requestError =
-					finishResponse.data?.errors?.[0]?.message ?? "Login failed. Please try again.";
+				requestError = finishResponse.data?.errors?.[0]?.message ?? "Login failed. Please try again.";
 				return;
 			}
 
-			const { userId, token, username, isSudo: isSudoMode } = finishResponse.data as {
+			const {
+				userId,
+				token,
+				username,
+				isSudo: isSudoMode,
+			} = finishResponse.data as {
 				userId: string;
 				token: string;
 				username: string;

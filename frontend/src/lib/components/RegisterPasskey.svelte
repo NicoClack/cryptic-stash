@@ -4,13 +4,7 @@
 	import { fetchUserJson } from "$lib/api";
 	import { userAuth } from "$lib/auth/UserAuth.svelte";
 	import { Button } from "$lib/components/ui/button";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 	import { Checkbox } from "$lib/components/ui/checkbox";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
@@ -137,8 +131,7 @@
 
 			if (!finishResponse.ok) {
 				requestError =
-					finishResponse.data?.errors?.[0]?.message ??
-					"Passkey registration failed. Please try again.";
+					finishResponse.data?.errors?.[0]?.message ?? "Passkey registration failed. Please try again.";
 				isLoading = false;
 				return;
 			}
@@ -216,9 +209,7 @@
 		{:else}
 			<div class="space-y-4">
 				<p class="text-sm">Follow the prompts on your device to complete passkey registration.</p>
-				<Button onclick={handleCancel} disabled={isLoading} variant="outline" class="w-full">
-					Cancel
-				</Button>
+				<Button onclick={handleCancel} disabled={isLoading} variant="outline" class="w-full">Cancel</Button>
 			</div>
 		{/if}
 	</CardContent>

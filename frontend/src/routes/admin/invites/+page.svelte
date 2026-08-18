@@ -3,13 +3,7 @@
 	import { fetchAdminJson, type InnerResponse, type JsonResponse } from "$lib/api";
 	import PageMain from "$lib/components/PageMain.svelte";
 	import { Button } from "$lib/components/ui/button";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
 	import { Textarea } from "$lib/components/ui/textarea";
@@ -120,8 +114,7 @@
 			}
 
 			const parsedHours = Number(expiresInHours);
-			const expiresInSeconds =
-				isNaN(parsedHours) || parsedHours < 0 ? null : Math.floor(parsedHours * 3600);
+			const expiresInSeconds = isNaN(parsedHours) || parsedHours < 0 ? null : Math.floor(parsedHours * 3600);
 
 			const response = await fetchAdminJson(fetch, "/api/v1/admin/invites/create/", {
 				method: "POST",
@@ -163,9 +156,7 @@
 		</div>
 
 		{#if requestError}
-			<div
-				class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-			>
+			<div class="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
 				{requestError}
 			</div>
 		{/if}

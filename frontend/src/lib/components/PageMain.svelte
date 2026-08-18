@@ -10,10 +10,6 @@
 	}: WithElementRef<HTMLAttributes<HTMLElement>> = $props();
 </script>
 
-<main
-	bind:this={ref}
-	class={cn("mx-auto w-full max-w-3xl space-y-6 px-6 py-10", className)}
-	{...restProps}
->
+<main bind:this={ref} class={cn("mx-auto w-full max-w-3xl space-y-6 px-6 py-10", className)} {...restProps}>
 	{@render children?.()}
 </main>

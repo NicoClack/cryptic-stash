@@ -6,13 +6,7 @@
 	import { fetchUserJson } from "$lib/api";
 	import { userAuth } from "$lib/auth/UserAuth.svelte";
 	import { Button } from "$lib/components/ui/button";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 	import { decodeBase64UrlFormat, encodeBase64UrlFormat } from "$lib/utils";
 
 	userAuth.requireAuth();
@@ -94,30 +88,26 @@
 			}
 
 			const assertionResponse = credential.response as AuthenticatorAssertionResponse;
-			const finishResponse = await fetchUserJson(
-				fetch,
-				"/api/v1/auth/sudo/finish/",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						id: credential.id,
-						type: credential.type,
-						rawId: encodeBase64UrlFormat(credential.rawId),
-						response: {
-							clientDataJSON: encodeBase64UrlFormat(assertionResponse.clientDataJSON),
-							authenticatorData: encodeBase64UrlFormat(assertionResponse.authenticatorData),
-							signature: encodeBase64UrlFormat(assertionResponse.signature),
-							userHandle: assertionResponse.userHandle
-								? encodeBase64UrlFormat(assertionResponse.userHandle)
-								: undefined,
-						},
-						webAuthnSessionId,
-					}),
+			const finishResponse = await fetchUserJson(fetch, "/api/v1/auth/sudo/finish/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
 				},
-			);
+				body: JSON.stringify({
+					id: credential.id,
+					type: credential.type,
+					rawId: encodeBase64UrlFormat(credential.rawId),
+					response: {
+						clientDataJSON: encodeBase64UrlFormat(assertionResponse.clientDataJSON),
+						authenticatorData: encodeBase64UrlFormat(assertionResponse.authenticatorData),
+						signature: encodeBase64UrlFormat(assertionResponse.signature),
+						userHandle: assertionResponse.userHandle
+							? encodeBase64UrlFormat(assertionResponse.userHandle)
+							: undefined,
+					},
+					webAuthnSessionId,
+				}),
+			});
 
 			if (!finishResponse.ok) {
 				const errorCode = finishResponse.data?.errors?.[0]?.code;
@@ -126,8 +116,7 @@
 					requestError =
 						"None of your passkeys are eligible for sudo mode elevation. Please use a passkey that has sudo mode access enabled.";
 				} else {
-					requestError =
-						finishResponse.data?.errors?.[0]?.message ?? "Elevation failed. Please try again.";
+					requestError = finishResponse.data?.errors?.[0]?.message ?? "Elevation failed. Please try again.";
 				}
 				isLoading = false;
 				return;
@@ -192,14 +181,10 @@
 					{isLoading ? "Authenticating..." : "Authenticate to Elevate"}
 				</Button>
 			{:else if isLoading}
-				<p class="text-sm text-muted-foreground">
-					Follow the prompts on your device to authenticate...
-				</p>
+				<p class="text-sm text-muted-foreground">Follow the prompts on your device to authenticate...</p>
 			{/if}
 
-			<Button onclick={handleCancel} variant="ghost" class="w-full" disabled={isLoading}>
-				Cancel
-			</Button>
+			<Button onclick={handleCancel} variant="ghost" class="w-full" disabled={isLoading}>Cancel</Button>
 		</CardContent>
 	</Card>
 </main>

@@ -14,14 +14,7 @@
 		isDisabled?: boolean;
 		submitLabel?: string;
 	}
-	let {
-		schema,
-		uiSchema,
-		initialValue = {},
-		onSubmit,
-		isDisabled = false,
-		submitLabel,
-	}: Props = $props();
+	let { schema, uiSchema, initialValue = {}, onSubmit, isDisabled = false, submitLabel }: Props = $props();
 
 	setShadcnContext();
 
@@ -65,9 +58,7 @@
 </script>
 
 {#if form}
-	<div
-		class="space-y-4 [&_form]:space-y-4 [&_p]:text-sm [&_p]:text-muted-foreground [&_p]:md:text-base"
-	>
+	<div class="space-y-4 [&_form]:space-y-4 [&_p]:text-sm [&_p]:text-muted-foreground [&_p]:md:text-base">
 		<BasicForm {form} />
 	</div>
 {/if}

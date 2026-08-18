@@ -5,8 +5,7 @@
 	const homepageLinks = [
 		{
 			title: "Download your stash",
-			description:
-				"You'll need your password and somewhere to store the authorisation code while you wait",
+			description: "You'll need your password and somewhere to store the authorisation code while you wait",
 			href: resolve("/download-stash"),
 		},
 		{
@@ -29,8 +28,8 @@
 				<h1>Welcome to Cryptic Stash</h1>
 			</CardTitle>
 			<CardDescription class="text-base">
-				Securely store and recover your 2FA recovery codes in case you lose access to your devices.
-				If an attacker tries to log in, you'll be notified and can block it.
+				Securely store and recover your 2FA recovery codes in case you lose access to your devices. If an
+				attacker tries to log in, you'll be notified and can block it.
 			</CardDescription>
 		</CardHeader>
 	</Card>
@@ -42,9 +41,7 @@
 		>
 			<Card>
 				<CardHeader>
-					<CardTitle
-						class="text-center transition-colors group-hover:text-primary group-hover:underline"
-					>
+					<CardTitle class="text-center transition-colors group-hover:text-primary group-hover:underline">
 						I'm being hacked!!!
 					</CardTitle>
 				</CardHeader>

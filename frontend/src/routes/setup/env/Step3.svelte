@@ -10,10 +10,7 @@
 		onComplete: (headerName: string) => unknown;
 	} = $props();
 
-	let echoHeadersUrlObj = new URL(
-		PUBLIC_API_DOMAIN + "/api/v1/setup/echo-headers/",
-		window.location.origin,
-	);
+	let echoHeadersUrlObj = new URL(PUBLIC_API_DOMAIN + "/api/v1/setup/echo-headers/", window.location.origin);
 	let isLoading = $state(false);
 	let headerName = $state("");
 
@@ -33,10 +30,10 @@
 		Please use Postman, curl, Node.js or another non-browser HTTP client to make a GET request to
 		<span class="rounded-sm bg-muted px-1 py-0.5 font-mono text-foreground">
 			{echoHeadersUrlObj.toString()}
-		</span>. Look for headers that contain your public IP address. Once you find a candidate, try
-		setting that header in your request to some other IP like 42.42.42.42 and make the request
-		again. If this overwrote the proxy's header or they were combined, try another header. Once you
-		have a header that can't be spoofed by the client, enter its name below.
+		</span>. Look for headers that contain your public IP address. Once you find a candidate, try setting that
+		header in your request to some other IP like 42.42.42.42 and make the request again. If this overwrote the
+		proxy's header or they were combined, try another header. Once you have a header that can't be spoofed by the
+		client, enter its name below.
 	</p>
 	<form class="space-y-4" onsubmit={handleSubmit}>
 		<Label>
