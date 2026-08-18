@@ -132,7 +132,7 @@ func TestLoginFlow(t *testing.T) {
 	// but the frontend needs to include it in its login/finish request later.
 	var webAuthnSessionID uuid.UUID
 	{
-		var startResp login.LoginStartResponse
+		var startResp login.StartLoginResponse
 		stdErr = json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 		require.NoError(t, stdErr)
 		webAuthnSessionID = startResp.WebAuthnSessionID
@@ -159,7 +159,7 @@ func TestLoginFlow(t *testing.T) {
 	finishRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/auth/login/finish/",
-		login.LoginFinishPayload{
+		login.FinishLoginPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           webAuthnSessionID,
 		},
@@ -167,7 +167,7 @@ func TestLoginFlow(t *testing.T) {
 	sessionCreatedAt := time.Now()
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 
-	var finishResp login.LoginFinishResponse
+	var finishResp login.FinishLoginResponse
 	stdErr = json.Unmarshal(finishRecorder.Body.Bytes(), &finishResp)
 	require.NoError(t, stdErr)
 	require.Empty(t, finishResp.Errors)
@@ -233,7 +233,7 @@ func TestLoginFlow_SyncablePasskey(t *testing.T) {
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
 
-	var startResp login.LoginStartResponse
+	var startResp login.StartLoginResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -257,14 +257,14 @@ func TestLoginFlow_SyncablePasskey(t *testing.T) {
 	finishRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/auth/login/finish/",
-		login.LoginFinishPayload{
+		login.FinishLoginPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
 	)
 	require.Equal(t, http.StatusOK, finishRecorder.Code)
 
-	var finishResp login.LoginFinishResponse
+	var finishResp login.FinishLoginResponse
 	stdErr = json.Unmarshal(finishRecorder.Body.Bytes(), &finishResp)
 	require.NoError(t, stdErr)
 	require.Equal(t, userOb.ID, finishResp.UserID)
@@ -293,7 +293,7 @@ func TestLoginFlow_ClientServerMismatches(t *testing.T) {
 		require.Equal(t, http.StatusOK, startRecorder.Code)
 		// virtualwebauthn.ParseAssertionOptions isn't used because we need the WebAuthSessionID
 		// and TestLoginFlow already has coverage to ensure it's parsable by authenticators like that
-		var startResp login.LoginStartResponse
+		var startResp login.StartLoginResponse
 		stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 		require.NoError(t, stdErr)
 
@@ -314,7 +314,7 @@ func TestLoginFlow_ClientServerMismatches(t *testing.T) {
 		finishRecorder := testcommon.Post(
 			t, app.Server,
 			"/api/v1/auth/login/finish/",
-			login.LoginFinishPayload{
+			login.FinishLoginPayload{
 				CredentialAssertionResponse: parsedAssertion,
 				WebAuthnSessionID:           startResp.WebAuthnSessionID,
 			},
@@ -357,7 +357,7 @@ func TestLoginFlow_RejectsTamperedSignature(t *testing.T) {
 	)
 	require.Equal(t, http.StatusOK, startRecorder.Code)
 
-	var startResp login.LoginStartResponse
+	var startResp login.StartLoginResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -381,7 +381,7 @@ func TestLoginFlow_RejectsTamperedSignature(t *testing.T) {
 	finishRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/auth/login/finish/",
-		login.LoginFinishPayload{
+		login.FinishLoginPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},
@@ -420,7 +420,7 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 	require.Equal(t, http.StatusOK, startRecorder.Code)
 	// virtualwebauthn.ParseAssertionOptions isn't used because we need the WebAuthSessionID
 	// and TestLoginFlow already has coverage to ensure it's parsable by authenticators like that
-	var startResp login.LoginStartResponse
+	var startResp login.StartLoginResponse
 	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
 	require.NoError(t, stdErr)
 
@@ -442,7 +442,7 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 	finishRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/auth/login/finish/",
-		login.LoginFinishPayload{
+		login.FinishLoginPayload{
 			CredentialAssertionResponse: parsedAssertion,
 			WebAuthnSessionID:           startResp.WebAuthnSessionID,
 		},

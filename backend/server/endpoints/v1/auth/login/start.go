@@ -9,13 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type LoginStartResponse struct {
+type StartLoginResponse struct {
 	Errors            []servercommon.ErrorDetail                 `json:"errors"`
 	WebAuthnSessionID uuid.UUID                                  `json:"webAuthnSessionId"`
 	PublicKey         protocol.PublicKeyCredentialRequestOptions `json:"publicKey"`
 }
 
-func LoginStart(app *servercommon.ServerApp) gin.HandlerFunc {
+func StartLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 	// Note: currently username enumeration isn't possible because even the server doesn't know
 	// who is logging in when this endpoint is called.
 	// If in the future this endpoint accepts an email in order to get a list of AllowedCredentials, we'll need to
@@ -30,7 +30,7 @@ func LoginStart(app *servercommon.ServerApp) gin.HandlerFunc {
 			return wrappedErr
 		}
 
-		ginCtx.JSON(http.StatusOK, &LoginStartResponse{
+		ginCtx.JSON(http.StatusOK, &StartLoginResponse{
 			Errors:            []servercommon.ErrorDetail{},
 			WebAuthnSessionID: sessionID,
 			PublicKey:         options,

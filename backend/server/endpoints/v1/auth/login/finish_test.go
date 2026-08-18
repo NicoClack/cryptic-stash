@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoginFinish_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
+func TestFinishLogin_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -28,7 +28,7 @@ func TestLoginFinish_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	finishRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/auth/login/finish/",
-		login.LoginFinishPayload{},
+		login.FinishLoginPayload{},
 	)
 
 	testcommon.AssertJSONResponse(
@@ -45,7 +45,7 @@ func TestLoginFinish_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_InvalidWebAuthnSessionID_SendsBadRequest(t *testing.T) {
+func TestFinishLogin_InvalidWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -75,7 +75,7 @@ func TestLoginFinish_InvalidWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
+func TestFinishLogin_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)
@@ -97,7 +97,7 @@ func TestLoginFinish_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	finishRecorder := testcommon.Post(
 		t, app.Server,
 		"/api/v1/auth/login/finish/",
-		login.LoginFinishPayload{
+		login.FinishLoginPayload{
 			WebAuthnSessionID:           uuid.New(),
 			CredentialAssertionResponse: parsedAssertion,
 		},
@@ -117,7 +117,7 @@ func TestLoginFinish_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
 	)
 }
 
-func TestLoginFinish_MalformedCredentialAssertion_SendsBadRequest(t *testing.T) {
+func TestFinishLogin_MalformedCredentialAssertion_SendsBadRequest(t *testing.T) {
 	t.Parallel()
 
 	app := testhelpers.NewApp(t, nil)

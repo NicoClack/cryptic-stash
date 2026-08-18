@@ -16,13 +16,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type LoginFinishPayload struct {
+type FinishLoginPayload struct {
 	protocol.CredentialAssertionResponse
 
 	WebAuthnSessionID uuid.UUID `binding:"required" json:"webAuthnSessionId"`
 }
 
-type LoginFinishResponse struct {
+type FinishLoginResponse struct {
 	Errors        []servercommon.ErrorDetail `json:"errors"`
 	UserID        uuid.UUID                  `json:"userId"`
 	Token         string                     `json:"token"`
@@ -43,7 +43,7 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 	// 2. Malware gets credential IDs from a password manager that doesn't secure metadata
 	//    -> Probably also has browsing history, can session steal.
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		body := LoginFinishPayload{}
+		body := FinishLoginPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
 		}
@@ -60,7 +60,7 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(),
 			app.Database,
-			func(tx *ent.Tx, ctx context.Context) (*LoginFinishResponse, error) {
+			func(tx *ent.Tx, ctx context.Context) (*FinishLoginResponse, error) {
 				userOb, passkeyOb, sessionOb, token, wrappedErr := app.Auth.FinishLogin(
 					body.WebAuthnSessionID,
 					parsedResponse,
@@ -71,7 +71,7 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 					return nil, wrappedErr
 				}
 
-				return &LoginFinishResponse{
+				return &FinishLoginResponse{
 					Errors:        []servercommon.ErrorDetail{},
 					UserID:        sessionOb.UserID,
 					Token:         base64.RawURLEncoding.EncodeToString(token),
