@@ -201,7 +201,7 @@ func (service *Auth) SetPasskeyAllowSudo(
 
 func (service *Auth) MovePasskeyGroup(
 	targetPasskeyID uuid.UUID,
-	userID uuid.UUID,
+	targetUserID uuid.UUID,
 	sessionPasskeyID uuid.UUID,
 	sessionElevationPasskeyID *uuid.UUID,
 	newIsSecondGroup bool,
@@ -211,7 +211,7 @@ func (service *Auth) MovePasskeyGroup(
 ) common.WrappedError {
 	return auth.MovePasskeyGroup(
 		targetPasskeyID,
-		userID, sessionPasskeyID, sessionElevationPasskeyID,
+		targetUserID, sessionPasskeyID, sessionElevationPasskeyID,
 		newIsSecondGroup,
 		actor, tx, ctx,
 		service.app.Logger,

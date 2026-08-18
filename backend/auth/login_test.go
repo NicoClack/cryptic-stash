@@ -3,8 +3,10 @@ package auth_test
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/auth"
+	"github.com/NicoClack/cryptic-stash/backend/auth/testdata"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
 	"github.com/descope/virtualwebauthn"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -75,8 +77,86 @@ func TestValidateLogin_RejectsUnknownWebAuthnSessionID(t *testing.T) {
 	require.ErrorIs(t, wrappedErr, auth.ErrInvalidWebAuthnSessionID)
 }
 
-// --- Integration-ish tests ---
+func TestValidateLogin_UnknownUser(t *testing.T) {
+	t.Parallel()
 
+	db := testcommon.CreateDB(t)
+	webAuthnApp := auth.NewWebAuthnApp(testcommon.DefaultEnv())
+	tempKV := newMinimalTempKeyValueService(t)
+
+	vAuthenticator, credential := newVirtualAuthenticator(
+		uuid.New(), // Unknown user
+	)
+
+	sessionID, options, wrappedErr := auth.StartLogin(webAuthnApp, tempKV)
+	require.NoError(t, wrappedErr)
+	parsedAssertionResp := createAssertion(t, options, vAuthenticator, credential)
+
+	tx := testcommon.StartWriteTx(t, db)
+	_, _, _, wrappedErr = auth.ValidateLogin(
+		sessionID,
+		parsedAssertionResp,
+		t.Context(),
+		webAuthnApp,
+		tx,
+		tempKV,
+		testcommon.NewTestLogger(),
+	)
+	require.ErrorIs(t, wrappedErr, auth.ErrWebAuthnUserNotFound)
+}
+
+// Loads a pregenerated passkey to test that the format hasn't changed and so previously created passkeys still work
+func TestValidateLogin_ExistingPasskey(t *testing.T) {
+	t.Parallel()
+
+	db := testcommon.CreateDB(t)
+	dbClient := db.Client()
+	webAuthnApp := auth.NewWebAuthnApp(testcommon.DefaultEnv())
+	tempKV := newMinimalTempKeyValueService(t)
+
+	var clientCredential virtualwebauthn.Credential
+	require.NoError(t, json.Unmarshal([]byte(testdata.ExistingClientCredentialJSON), &clientCredential))
+
+	var serverCredential webauthn.Credential
+	require.NoError(t, json.Unmarshal([]byte(testdata.ExistingServerCredentialJSON), &serverCredential))
+
+	userOb := createUser(t, dbClient)
+	passkeyOb := dbClient.Passkey.Create().
+		SetCreatedAt(time.Now()).
+		SetUpdatedAt(time.Now()).
+		SetName("existing-passkey").
+		SetAllowSudo(true).
+		SetCredentialID(serverCredential.ID).
+		SetCredential(serverCredential).
+		SetIsSecondGroup(false).
+		SetUserID(userOb.ID).
+		SaveX(t.Context())
+
+	vAuthenticator := virtualwebauthn.NewAuthenticator()
+	vAuthenticator.Options.UserHandle = userOb.ID[:]
+	vAuthenticator.AddCredential(clientCredential)
+
+	sessionID, options, wrappedErr := auth.StartLogin(webAuthnApp, tempKV)
+	require.NoError(t, wrappedErr)
+	parsedAssertionResp := createAssertion(t, options, vAuthenticator, clientCredential)
+
+	tx := testcommon.StartWriteTx(t, db)
+	returnedUser, returnedPasskey, _, wrappedErr := auth.ValidateLogin(
+		sessionID,
+		parsedAssertionResp,
+		t.Context(),
+		webAuthnApp,
+		tx,
+		tempKV,
+		testcommon.NewTestLogger(),
+	)
+	require.NoError(t, wrappedErr)
+	require.Equal(t, userOb.ID, returnedUser.ID)
+	require.Equal(t, passkeyOb.ID, returnedPasskey.ID)
+}
+
+// This integration test can't go at the HTTP layer
+// because we need to assert exactly when the WebAuthn session is deleted
 func TestValidateLogin_UpdatesCredentialSignCount(t *testing.T) {
 	t.Parallel()
 
@@ -120,39 +200,4 @@ func TestValidateLogin_UpdatesCredentialSignCount(t *testing.T) {
 	signCountAfter := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID).Credential.Authenticator.SignCount
 	require.Greater(t, signCountAfter, signCountBefore)
 	require.Equal(t, uint32(42), signCountAfter)
-}
-
-func TestValidateLogin_UnknownUser(t *testing.T) {
-	t.Parallel()
-
-	db := testcommon.CreateDB(t)
-	dbClient := db.Client()
-	webAuthnApp := auth.NewWebAuthnApp(testcommon.DefaultEnv())
-	tempKV := newMinimalTempKeyValueService(t)
-
-	userOb := createUser(t, dbClient)
-	_, credential, vAuthenticator := registerPasskey(t, webAuthnApp, userOb, "login-passkey", false, false, db)
-	dbClient.User.DeleteOneID(userOb.ID).ExecX(t.Context())
-
-	sessionID, options, wrappedErr := auth.StartLogin(webAuthnApp, tempKV)
-	require.NoError(t, wrappedErr)
-	parsedAssertionResp := createAssertion(
-		t,
-		options,
-		vAuthenticator,
-		credential,
-		// ^ This WebAuthn credential is no longer valid because the passkey on the server was cascade deleted
-	)
-
-	tx := testcommon.StartWriteTx(t, db)
-	_, _, _, wrappedErr = auth.ValidateLogin(
-		sessionID,
-		parsedAssertionResp,
-		t.Context(),
-		webAuthnApp,
-		tx,
-		tempKV,
-		testcommon.NewTestLogger(),
-	)
-	require.ErrorIs(t, wrappedErr, auth.ErrWebAuthnUserNotFound)
 }

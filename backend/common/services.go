@@ -209,7 +209,7 @@ type AuthService interface {
 	) WrappedError
 	MovePasskeyGroup(
 		targetPasskeyID uuid.UUID,
-		userID uuid.UUID,
+		targetUserID uuid.UUID,
 		sessionPasskeyID uuid.UUID,
 		sessionElevationPasskeyID *uuid.UUID,
 		newIsSecondGroup bool,

@@ -196,7 +196,7 @@ func demoteInvalidSudoSessions(
 // When hasExistingSecondGroup is true: can't move a passkey used by the session
 func MovePasskeyGroup(
 	targetPasskeyID uuid.UUID,
-	userID uuid.UUID,
+	targetUserID uuid.UUID,
 	sessionPasskeyID uuid.UUID,
 	sessionElevationPasskeyID *uuid.UUID,
 	newIsSecondGroup bool,
@@ -205,11 +205,11 @@ func MovePasskeyGroup(
 	ctx context.Context,
 	logger common.Logger,
 ) common.WrappedError {
-	if actor.UserID != uuid.Nil && actor.UserID != userID {
+	if actor.UserID != uuid.Nil && actor.UserID != targetUserID {
 		return ErrWrapperMovePasskeyGroup.Wrap(ErrUnauthorizedToModifyUser)
 	}
 	hasExistingSecondGroup, stdErr := tx.Passkey.Query().
-		Where(passkey.UserID(userID), passkey.IsSecondGroup(true)).
+		Where(passkey.UserID(targetUserID), passkey.IsSecondGroup(true)).
 		Exist(ctx)
 	if stdErr != nil {
 		return ErrWrapperMovePasskeyGroup.Wrap(ErrWrapperDatabase.Wrap(stdErr))
@@ -245,7 +245,7 @@ func MovePasskeyGroup(
 		return ErrWrapperMovePasskeyGroup.Wrap(ErrPasskeyNotFound)
 	}
 
-	demotedCount, wrappedErr := demoteInvalidSudoSessions(userID, tx, ctx)
+	demotedCount, wrappedErr := demoteInvalidSudoSessions(targetUserID, tx, ctx)
 	if wrappedErr != nil {
 		return ErrWrapperMovePasskeyGroup.Wrap(wrappedErr)
 	}
@@ -256,7 +256,7 @@ func MovePasskeyGroup(
 	logger.Info(
 		message,
 		"sessionDemotionCount", demotedCount,
-		"userID", userID,
+		"userID", targetUserID,
 		"targetPasskeyID", targetPasskeyID,
 		"newIsSecondGroup", newIsSecondGroup,
 		"sessionPasskeyID", sessionPasskeyID,
@@ -309,7 +309,8 @@ func DeletePasskey(
 		if stdErr != nil {
 			wrappedErr := ErrWrapperDeletePasskey.Wrap(ErrWrapperDatabase.Wrap(stdErr))
 			wrappedErr.AddDebugValuesMut(common.DebugValue{
-				Message: "error originated from diagnosing a passkey deletion that affected zero rows",
+				Name:    "error origin",
+				Message: "originated from diagnosing a passkey deletion that affected zero rows",
 				Value:   passkeyID,
 			})
 			return wrappedErr
