@@ -109,6 +109,7 @@ func TestCreateSession_NonNilActorUserID_Panics(t *testing.T) {
 			t.Context(),
 		)
 	})
+	require.NoError(t, tx.Rollback())
 }
 
 func TestCreateSession_UnknownUser_ReturnsDBConstraintError(t *testing.T) {
@@ -132,6 +133,7 @@ func TestCreateSession_UnknownUser_ReturnsDBConstraintError(t *testing.T) {
 	require.True(t, ent.IsConstraintError(wrappedErr))
 	innerErr := wrappedErr.Unwrap()
 	require.Equal(t, "ent: constraint failed: constraint failed: FOREIGN KEY constraint failed (787)", innerErr.Error())
+	require.NoError(t, tx.Rollback())
 }
 
 func TestValidateSession(t *testing.T) {
@@ -202,6 +204,7 @@ func TestValidateSession_RejectsExpiredSession(t *testing.T) {
 	tx2 := testcommon.StartWriteTx(t, db)
 	_, wrappedErr = auth.ValidateSession(sessionToken, tx2, t.Context())
 	require.ErrorIs(t, wrappedErr, auth.ErrInvalidSession)
+	require.NoError(t, tx2.Rollback())
 }
 
 func TestValidateSession_RejectsUnknownToken(t *testing.T) {
@@ -212,4 +215,5 @@ func TestValidateSession_RejectsUnknownToken(t *testing.T) {
 
 	_, wrappedErr := auth.ValidateSession(common.CryptoRandomBytes(32), tx, t.Context())
 	require.ErrorIs(t, wrappedErr, auth.ErrInvalidSession)
+	require.NoError(t, tx.Rollback())
 }

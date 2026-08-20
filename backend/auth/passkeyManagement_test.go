@@ -40,8 +40,9 @@ func TestRenamePasskey_CannotModifyOtherUserPasskey(t *testing.T) {
 		t.Context(),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrPasskeyNotFound)
+	require.NoError(t, tx.Rollback())
 
-	updatedPasskey := tx.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
+	updatedPasskey := dbClient.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
 	require.Equal(t, "original-name", updatedPasskey.Name)
 }
 
@@ -68,8 +69,9 @@ func TestSetPasskeyAllowSudo_CannotModifyOtherUserPasskey(t *testing.T) {
 		testcommon.NewTestLogger(),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrPasskeyNotFound)
+	require.NoError(t, tx.Rollback())
 
-	updatedPasskey := tx.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
+	updatedPasskey := dbClient.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
 	require.True(t, updatedPasskey.AllowSudo) // Unchanged
 }
 
@@ -97,8 +99,9 @@ func TestMovePasskeyGroup_TargetUserMustMatchActor(t *testing.T) {
 		testcommon.NewTestLogger(),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrUnauthorizedToModifyUser)
+	require.NoError(t, tx.Rollback())
 
-	updatedPasskey := tx.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
+	updatedPasskey := dbClient.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
 	require.False(t, updatedPasskey.IsSecondGroup) // Unchanged
 }
 
@@ -128,8 +131,9 @@ func TestMovePasskeyGroup_CannotModifyOtherUserPasskey(t *testing.T) {
 		testcommon.NewTestLogger(),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrPasskeyNotFound)
+	require.NoError(t, tx.Rollback())
 
-	reloaded := tx.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
+	reloaded := dbClient.Passkey.GetX(t.Context(), ownerPasskeyOb.ID)
 	require.False(t, reloaded.IsSecondGroup) // Unchanged
 }
 
@@ -153,8 +157,9 @@ func TestDeletePasskey_CannotDeleteOtherUserPasskey(t *testing.T) {
 		t.Context(),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrPasskeyNotFound)
+	require.NoError(t, tx.Rollback())
 
-	exists, stdErr := tx.Passkey.Query().
+	exists, stdErr := dbClient.Passkey.Query().
 		Where(passkey.ID(ownerPasskeyOb.ID)).
 		Exist(t.Context())
 	require.NoError(t, stdErr)

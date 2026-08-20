@@ -75,6 +75,7 @@ func TestFinishRegisterPasskey_GivenExpiredWebAuthnSession_ReturnsExpiredError(t
 		},
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrWebAuthnSessionExpired)
+	require.NoError(t, tx.Rollback())
 }
 
 func TestFinishRegisterPasskey_GetUserCallbackError_ReturnsWrappedError(t *testing.T) {
@@ -106,6 +107,7 @@ func TestFinishRegisterPasskey_GetUserCallbackError_ReturnsWrappedError(t *testi
 	require.ErrorIs(t, wrappedErr, baseError)
 	require.True(t, auth.ErrWrapperFinishRegisterPasskey.HasWrapped(wrappedErr))
 	require.True(t, auth.ErrWrapperGetUserCallback.HasWrapped(wrappedErr))
+	require.NoError(t, tx.Rollback())
 }
 
 func TestFinishRegisterPasskey_RejectsInvalidSessionUserID(t *testing.T) {
@@ -138,4 +140,5 @@ func TestFinishRegisterPasskey_RejectsInvalidSessionUserID(t *testing.T) {
 	// The UUID package doesn't use sentinel errors, but in the future,
 	// FinishRegisterPasskey might remap this to its own sentinel
 	require.Contains(t, uuidErr.Error(), "invalid UUID")
+	require.NoError(t, tx.Rollback())
 }

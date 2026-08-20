@@ -140,6 +140,8 @@ require.NoError(t, tx.Commit())
 // ^ You should commit the transaction before asserting DB state unless you need some atomicity with another operation
 ```
 
+Every started transaction must be terminated deliberately: commit before asserting persisted state (query via `dbClient`, not the same `tx`), or roll back when the code under test errored or panicked and nothing should persist (this also avoids firing any `OnCommit` hooks registered mid-flight).
+
 ## HTTP Test Helpers
 
 From `common/testcommon/requests.go`:

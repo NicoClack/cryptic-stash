@@ -75,6 +75,7 @@ func TestValidateLogin_RejectsUnknownWebAuthnSessionID(t *testing.T) {
 		testcommon.NewTestLogger(),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrInvalidWebAuthnSessionID)
+	require.NoError(t, tx.Rollback())
 }
 
 func TestValidateLogin_UnknownUser(t *testing.T) {
@@ -103,6 +104,7 @@ func TestValidateLogin_UnknownUser(t *testing.T) {
 		testcommon.NewTestLogger(),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrWebAuthnUserNotFound)
+	require.NoError(t, tx.Rollback())
 }
 
 // Loads a pregenerated passkey to test that the format hasn't changed and so previously created passkeys still work
@@ -153,6 +155,7 @@ func TestValidateLogin_ExistingPasskey(t *testing.T) {
 	require.NoError(t, wrappedErr)
 	require.Equal(t, userOb.ID, returnedUser.ID)
 	require.Equal(t, passkeyOb.ID, returnedPasskey.ID)
+	require.NoError(t, tx.Commit())
 }
 
 // This integration test can't go at the HTTP layer

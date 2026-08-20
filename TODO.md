@@ -1,6 +1,5 @@
 # TODO
 
-- Make CreateSession create more realistic sudo sessions
 - Create an invite service
 -   - Delete expired invites that are unused, should be called by the cleanup task
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:

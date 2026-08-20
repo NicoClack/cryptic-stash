@@ -141,7 +141,9 @@ func StartWriteTx(t *testing.T, db *TestDatabase) *ent.Tx {
 
 	tx, stdErr := db.WriteTx(t.Context())
 	require.NoError(t, stdErr)
-	// The in-memory SQLite databases are deleted at the end of each test run so the transaction should be committed
-	// instead of rolled back with a t.Cleanup()
+	// The in-memory SQLite databases are deleted at the end of each test run, so there's no need to
+	// register a t.Cleanup() to roll back. Callers must still terminate the transaction deliberately:
+	// commit before asserting persisted state, or roll back when the code under test errored or panicked
+	// (rolling back also avoids firing any OnCommit hooks registered mid-flight).
 	return tx
 }
