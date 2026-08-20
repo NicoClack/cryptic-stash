@@ -15,7 +15,7 @@ func TestShutdown_HandlesConcurrentCalls(t *testing.T) {
 
 	app := &common.App{
 		Clock:  clockwork.NewRealClock(),
-		Logger: testcommon.NewTestLogger(),
+		Logger: testcommon.NewTestLogger(t),
 	}
 	shutdownService := services.NewShutdown(
 		app,
@@ -37,7 +37,7 @@ func TestShutdown_NoOpWhenNotStarted(t *testing.T) {
 
 	app := &common.App{
 		Clock:  clockwork.NewRealClock(),
-		Logger: testcommon.NewTestLogger(),
+		Logger: testcommon.NewTestLogger(t),
 	}
 	shutdownService := services.NewShutdown(app)
 	app.ShutdownService = shutdownService

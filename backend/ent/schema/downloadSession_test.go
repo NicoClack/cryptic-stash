@@ -16,7 +16,6 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 	t.Run("userAgent + ip can be read back", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -43,7 +42,6 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 	t.Run("string fields (userAgent + ip) are encrypted directly, not JSON-encoded", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -78,7 +76,6 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 	t.Run("min length constraint", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -101,7 +98,6 @@ func TestDownloadSession_EncryptedFields(t *testing.T) {
 	t.Run("max length constraint on ip", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 

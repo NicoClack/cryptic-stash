@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log/slog"
+	"sync"
 	"testing"
 	"time"
 
@@ -24,13 +24,28 @@ type TestDatabase struct {
 	client       *ent.Client
 	logger       common.Logger
 	startTxHooks []func(tx *ent.Tx) error
+	shutdownOnce sync.Once
 }
 
 var (
 	dbCounter = int64(0)
 )
 
+type CreateDBOptions struct {
+	Logger common.Logger
+	// By default, the database is automatically shutdown using t.Cleanup().
+	// If you need more control (like testhelpers.NewApp does), enable this option and call db.Shutdown yourself
+	SkipCleanup bool
+}
+
+// CreateDB creates a test database using the default options.
 func CreateDB(t *testing.T) *TestDatabase {
+	t.Helper()
+
+	return CreateDBWithOptions(t, CreateDBOptions{})
+}
+
+func CreateDBWithOptions(t *testing.T, options CreateDBOptions) *TestDatabase {
 	t.Helper()
 
 	globals.MigrateMu.Lock()
@@ -65,15 +80,23 @@ func CreateDB(t *testing.T) *TestDatabase {
 		t.Fatalf("migration failed: %v", stdErr)
 	}
 
-	// TODO: take logger as argument?
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	logger := options.Logger
+	if logger == nil {
+		// Unlike at runtime, the slog default logger could be pretty much anything,
+		// so we'll use the basic test logger and it can be overridden if necessary.
+		logger = NewTestLogger(t)
+	}
 
-	return &TestDatabase{
+	testDB := &TestDatabase{
 		db:           db,
 		client:       client,
-		logger:       common.GetLogger(context.Background(), nil),
+		logger:       logger,
 		startTxHooks: []func(tx *ent.Tx) error{},
 	}
+	if !options.SkipCleanup {
+		t.Cleanup(testDB.Shutdown)
+	}
+	return testDB
 }
 
 func (db *TestDatabase) Start() {
@@ -112,10 +135,15 @@ func (db *TestDatabase) WriteTx(ctx context.Context) (*ent.Tx, error) {
 	return tx, nil
 }
 func (db *TestDatabase) Shutdown() {
-	stdErr := db.client.Close()
-	if stdErr != nil {
-		db.logger.Warn("an error occurred while shutting down a test database", "error", stdErr)
-	}
+	db.shutdownOnce.Do(func() {
+		if db.client == nil {
+			return
+		}
+		stdErr := db.client.Close()
+		if stdErr != nil {
+			db.logger.Warn("an error occurred while shutting down a test database", "error", stdErr)
+		}
+	})
 }
 func (db *TestDatabase) DefaultLogger() common.Logger {
 	return db.logger

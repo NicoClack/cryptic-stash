@@ -34,7 +34,6 @@ func TestWithReadTx_ReadsConcurrently(t *testing.T) {
 	const READ_COUNT = int32(100)
 	const CALLBACK_SLEEP = 10 * time.Millisecond
 	db := testcommon.CreateDB(t)
-	t.Cleanup(db.Shutdown)
 
 	now := time.Now()
 	jobOb, stdErr := db.Client().Job.Create().
@@ -104,7 +103,6 @@ func TestWithWriteTx_NestedTransactions_ReturnsError(t *testing.T) {
 	t.Parallel()
 
 	db := testcommon.CreateDB(t)
-	t.Cleanup(db.Shutdown)
 
 	stdErr := dbcommon.WithWriteTx(
 		t.Context(), db,
@@ -128,7 +126,6 @@ func TestWithWriteTx_Supports50ConcurrentWrites(t *testing.T) {
 
 	JOB_COUNT := 50
 	db := testcommon.CreateDB(t) // TODO: use a disk database to more accurately measure performance
-	t.Cleanup(db.Shutdown)
 
 	var wg sync.WaitGroup
 	createJob := func() {
@@ -175,7 +172,6 @@ func TestWithWriteTx_supports25CollidingIncrements(t *testing.T) {
 
 	INCREMENT_COUNT := int32(25)
 	db := testcommon.CreateDB(t)
-	t.Cleanup(db.Shutdown)
 
 	var startTxAttemptCount atomic.Int32
 	var callbackCallCount atomic.Int32

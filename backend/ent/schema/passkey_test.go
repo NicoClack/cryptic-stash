@@ -16,7 +16,6 @@ func TestPasskey_EncryptedFields(t *testing.T) {
 	t.Run("credential can be read back", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -35,7 +34,6 @@ func TestPasskey_EncryptedFields(t *testing.T) {
 	t.Run("credential is JSON encoded, then encrypted in database", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 

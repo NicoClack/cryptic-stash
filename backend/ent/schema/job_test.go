@@ -15,7 +15,6 @@ func TestJob_EncryptedFields(t *testing.T) {
 	t.Run("body can be read back", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -40,7 +39,6 @@ func TestJob_EncryptedFields(t *testing.T) {
 	t.Run("json.RawMessage (body) is encrypted as raw JSON bytes, not double-encoded", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 
 		body := json.RawMessage(`{"secret":"hidden-value"}`)

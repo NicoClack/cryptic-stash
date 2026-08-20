@@ -72,7 +72,7 @@ func TestValidateLogin_RejectsUnknownWebAuthnSessionID(t *testing.T) {
 		auth.NewWebAuthnApp(testcommon.DefaultEnv()),
 		tx,
 		newMinimalTempKeyValueService(t),
-		testcommon.NewTestLogger(),
+		testcommon.NewTestLogger(t),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrInvalidWebAuthnSessionID)
 	require.NoError(t, tx.Rollback())
@@ -101,7 +101,7 @@ func TestValidateLogin_UnknownUser(t *testing.T) {
 		webAuthnApp,
 		tx,
 		tempKV,
-		testcommon.NewTestLogger(),
+		testcommon.NewTestLogger(t),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrWebAuthnUserNotFound)
 	require.NoError(t, tx.Rollback())
@@ -150,7 +150,7 @@ func TestValidateLogin_ExistingPasskey(t *testing.T) {
 		webAuthnApp,
 		tx,
 		tempKV,
-		testcommon.NewTestLogger(),
+		testcommon.NewTestLogger(t),
 	)
 	require.NoError(t, wrappedErr)
 	require.Equal(t, userOb.ID, returnedUser.ID)
@@ -187,7 +187,7 @@ func TestValidateLogin_UpdatesCredentialSignCount(t *testing.T) {
 		webAuthnApp,
 		tx,
 		tempKV,
-		testcommon.NewTestLogger(),
+		testcommon.NewTestLogger(t),
 	)
 	require.NoError(t, wrappedErr)
 	require.Equal(t, userOb.ID, returnedUser.ID)

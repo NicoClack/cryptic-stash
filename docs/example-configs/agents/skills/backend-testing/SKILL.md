@@ -20,7 +20,7 @@ app := &common.App{
     Database: testcommon.CreateDB(t),
     Env:      testcommon.DefaultEnv(),
     Clock:    clockwork.NewFakeClock(), // Note: use a real clock unless you need to control time
-    Logger:   testcommon.NewTestLogger(),
+    Logger:   testcommon.NewTestLogger(t),
 }
 ```
 

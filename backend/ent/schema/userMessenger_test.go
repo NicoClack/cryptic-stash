@@ -15,7 +15,6 @@ func TestUserMessenger_EncryptedFields(t *testing.T) {
 	t.Run("options can be read back", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -38,7 +37,6 @@ func TestUserMessenger_EncryptedFields(t *testing.T) {
 	t.Run("nil options are stored as NULL", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -59,7 +57,6 @@ func TestUserMessenger_EncryptedFields(t *testing.T) {
 	t.Run("json.RawMessage (options) are encrypted as raw JSON bytes, not double-encoded", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 

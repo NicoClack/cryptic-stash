@@ -66,7 +66,7 @@ func TestSetPasskeyAllowSudo_CannotModifyOtherUserPasskey(t *testing.T) {
 		getActor(otherUserOb.ID),
 		tx,
 		t.Context(),
-		testcommon.NewTestLogger(),
+		testcommon.NewTestLogger(t),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrPasskeyNotFound)
 	require.NoError(t, tx.Rollback())
@@ -96,7 +96,7 @@ func TestMovePasskeyGroup_TargetUserMustMatchActor(t *testing.T) {
 		getActor(otherUserOb.ID),
 		tx,
 		t.Context(),
-		testcommon.NewTestLogger(),
+		testcommon.NewTestLogger(t),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrUnauthorizedToModifyUser)
 	require.NoError(t, tx.Rollback())
@@ -128,7 +128,7 @@ func TestMovePasskeyGroup_CannotModifyOtherUserPasskey(t *testing.T) {
 		getActor(otherUserOb.ID),
 		tx,
 		t.Context(),
-		testcommon.NewTestLogger(),
+		testcommon.NewTestLogger(t),
 	)
 	require.ErrorIs(t, wrappedErr, auth.ErrPasskeyNotFound)
 	require.NoError(t, tx.Rollback())

@@ -97,7 +97,10 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 	}
 	app.RateLimiter = services.NewRateLimiter(app)
 	app.Core = services.NewCore(app)
-	db := testcommon.CreateDB(t)
+	db := testcommon.CreateDBWithOptions(t, testcommon.CreateDBOptions{
+		Logger:      app.Logger,
+		SkipCleanup: true, // Managed by the shutdown service instead
+	})
 	app.Database = db
 	app.KeyValue = services.NewKeyValue(app)
 	app.TempKeyValue = services.NewTempKeyValue(app)

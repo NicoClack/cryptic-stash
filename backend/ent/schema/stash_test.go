@@ -15,7 +15,6 @@ func TestStash_EncryptedFields(t *testing.T) {
 	t.Run("encryptionDataKey can be read back", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -44,7 +43,6 @@ func TestStash_EncryptedFields(t *testing.T) {
 	t.Run("bytes field (encryptionDataKey) is encrypted directly, not JSON-encoded", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 

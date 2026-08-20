@@ -18,7 +18,6 @@ func TestIsUniqueConstraintError_DuplicateUser(t *testing.T) {
 	t.Parallel()
 
 	db := testcommon.CreateDB(t)
-	t.Cleanup(db.Shutdown)
 	ctx := t.Context()
 	clock := clockwork.NewRealClock()
 	testcommon.NewDummyUser(1, db.Client(), ctx, clock)
@@ -55,7 +54,6 @@ func TestIsUniqueConstraintError_UnwrapsTxCallbackError(t *testing.T) {
 	t.Parallel()
 
 	db := testcommon.CreateDB(t)
-	t.Cleanup(db.Shutdown)
 	ctx := t.Context()
 	clock := clockwork.NewRealClock()
 	testcommon.NewDummyUser(1, db.Client(), ctx, clock)
@@ -84,7 +82,6 @@ func TestIsUniqueConstraintError_ForeignKeyViolation_ReturnsFalse(t *testing.T) 
 	t.Parallel()
 
 	db := testcommon.CreateDB(t)
-	t.Cleanup(db.Shutdown)
 	ctx := t.Context()
 	clock := clockwork.NewRealClock()
 

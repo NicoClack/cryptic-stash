@@ -18,7 +18,6 @@ func TestInvite_EncryptedFields(t *testing.T) {
 	t.Run("non-nil userAgent + ip + webAuthnSession can be read back", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -53,7 +52,6 @@ func TestInvite_EncryptedFields(t *testing.T) {
 	t.Run("nil optional fields (userAgent + ip + webAuthnSession) are stored as NULL", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 		dbClient := db.Client()
 
@@ -75,7 +73,6 @@ func TestInvite_EncryptedFields(t *testing.T) {
 	t.Run("optional string fields (userAgent + ip) are encrypted directly, not JSON-encoded", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 
 		now := time.Now()
@@ -107,7 +104,6 @@ func TestInvite_EncryptedFields(t *testing.T) {
 	t.Run("webAuthnSession is JSON-encoded before encryption", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 
 		now := time.Now()
@@ -135,7 +131,6 @@ func TestInvite_EncryptedFields(t *testing.T) {
 	t.Run("min length constraint on optional string (userAgent + ip)", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 
 		now := time.Now()
@@ -155,7 +150,6 @@ func TestInvite_EncryptedFields(t *testing.T) {
 	t.Run("max length constraint on optional string", func(t *testing.T) {
 		t.Parallel()
 		db := testcommon.CreateDB(t)
-		t.Cleanup(db.Shutdown)
 		ctx := t.Context()
 
 		now := time.Now()
