@@ -129,20 +129,18 @@ func (service *Auth) FinishRegisterPasskey(
 }
 
 func (service *Auth) CreateSession(
-	isSudo bool,
 	userID uuid.UUID,
 	passkeyID uuid.UUID,
-	userAgent string,
-	ip string,
+	elevationPasskeyID *uuid.UUID,
+	actor *common.Actor,
 	tx *ent.Tx,
 	ctx context.Context,
 ) (*ent.Session, []byte, common.WrappedError) {
 	return auth.CreateSession(
-		isSudo,
 		userID,
 		passkeyID,
-		userAgent,
-		ip,
+		elevationPasskeyID,
+		actor,
 		tx,
 		service.app.Env.SESSION_DURATION,
 		ctx,

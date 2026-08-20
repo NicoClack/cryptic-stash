@@ -40,7 +40,7 @@ go generate ./ent
 ```
 
 - **Always check `ent/schema/`** for the source of truth - never analyse generated code in `ent/` directly.
-- Transactions: Use `dbcommon.WithReadTx(app, ctx, fn)` / `dbcommon.WithWriteTx(app, ctx, fn)` — these extract `*ent.Tx` from `*common.App` and inject into context
+- Transactions: In production code and integration tests use `dbcommon.WithReadTx` / `dbcommon.WithWriteTx` / `dbcommon.WithReadWriteTx` — these extract `*ent.Tx` from `*common.App`, inject it into the context, and auto-retry on temporary errors (e.g. SQLite busy). In unit tests use `testcommon.StartWriteTx(t, db)` instead — it returns a `*ent.Tx` with no retry logic so you can assert there are no temporary errors.
 - **Encrypted fields**: Custom `ValueScanner` in schema encrypts at DB driver level. Key slots defined via HKDF from `BASE_ENCRYPTION_KEY`
 - **Migrations**: goose-based. Scripts in `scripts/migrations/`. Single global mutex (`globals.MigrateMu`) serializes all migrations
 

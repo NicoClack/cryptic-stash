@@ -1,15 +1,11 @@
 package passkeys_test
 
 import (
-	"context"
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"testing"
 
-	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
-	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/self/passkeys"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
@@ -27,29 +23,7 @@ func TestRegisterFinish_SessionNotSudo_SendsForbidden(t *testing.T) {
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "Test passkey", false, false, userOb.ID, dbClient)
-
-	sessionToken, stdErr := dbcommon.WithReadWriteTx(
-		t.Context(),
-		app.Database,
-		func(tx *ent.Tx, ctx context.Context) (string, error) {
-			sessionOb, token, wrappedErr := app.Auth.CreateSession(
-				false, // Not sudo
-				userOb.ID,
-				passkeyOb.ID,
-				"Mozilla/5.0",
-				"127.0.0.1",
-				tx,
-				ctx,
-			)
-			if wrappedErr != nil {
-				return "", wrappedErr
-			}
-			require.NotNil(t, sessionOb)
-
-			return base64.RawURLEncoding.EncodeToString(token), nil
-		},
-	)
-	require.NoError(t, stdErr)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, nil, app)
 
 	finishResp := testcommon.Post(
 		t, app.Server,
@@ -84,7 +58,7 @@ func TestRegisterFinish_InvalidWebAuthnSession_SendsBadRequest(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	userOb := testcommon.NewDummyUser(1, app.Database.Client(), t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "Test passkey", false, false, userOb.ID, app.Database.Client())
-	sessionToken := createSession(t, true, passkeyOb.UserID, passkeyOb.ID, app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
 
 	vAuthenticator := virtualwebauthn.NewAuthenticator()
 	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)

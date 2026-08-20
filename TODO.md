@@ -147,6 +147,8 @@
 
 - When messengers are changed, send a message to all of the previous messengers
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks
+- Extend sessions while the user is logged in, but maybe not sudo ones?
+- Prompt user to remove other sessions when they log in?
 - Move from gin, its maintenance isn't great
 - Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
 - Research github.com/awnumar/memguard

@@ -96,7 +96,7 @@ passkeyOb := dbClient.Passkey.Create().
 
 ### When to Use Transactions
 
-Use `dbcommon.WithWriteTx` / `dbcommon.WithReadWriteTx` when:
+**Integration tests and production code** use the `dbcommon` tx helpers — `dbcommon.WithWriteTx` / `dbcommon.WithReadWriteTx` / `dbcommon.WithReadTx` — which auto-retry on temporary errors (e.g. SQLite busy). Use them when:
 
 1. **The method you're calling requires a transaction** — e.g., `app.Auth.CreateSession` takes `*ent.Tx` and returns errors rather than panicking
 2. **Goroutines may interfere** — transactions auto-retry on SQLite busy errors
@@ -123,6 +123,21 @@ stdErr := dbcommon.WithWriteTx(t.Context(), app.Database,
     },
 )
 require.NoError(t, stdErr)
+```
+
+**Unit tests** use `testcommon.StartWriteTx(t, db)` instead. It starts a transaction with **no retry logic**, so if the code under test hits a temporary error the test fails. That's the point — you want to assert there are no temporary errors, not have them silently retried:
+
+```go
+db := testcommon.CreateDB(t)
+tx := testcommon.StartWriteTx(t, db)
+wrappedErr := auth.RenamePasskey(
+    passkeyOb.ID, "new-name", actor,
+    tx, t.Context(),
+)
+require.NoError(t, wrappedErr)
+// ...
+require.NoError(t, tx.Commit())
+// ^ You should commit the transaction before asserting DB state unless you need some atomicity with another operation
 ```
 
 ## HTTP Test Helpers

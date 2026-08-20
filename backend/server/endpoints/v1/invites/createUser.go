@@ -125,11 +125,13 @@ func CreateUser(app *servercommon.ServerApp) gin.HandlerFunc {
 				}
 
 				sessionOb, token, wrappedErr := app.Auth.CreateSession(
-					true, // TODO: this session is unrealistic
 					passkeyOb.UserID,
 					passkeyOb.ID,
-					ginCtx.Request.UserAgent(),
-					ginCtx.ClientIP(),
+					new(passkeyOb.ID), // Elevate the session to sudo using the passkey that was just registered
+					&common.Actor{
+						IP:        ginCtx.ClientIP(),
+						UserAgent: ginCtx.Request.UserAgent(),
+					},
 					tx,
 					ctx,
 				)

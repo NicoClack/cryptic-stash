@@ -92,7 +92,7 @@ type Env struct {
 }
 
 type Actor struct {
-	// Should be used by services to validate ownership
+	// The ID of the currently logged in user. Should be used by services to validate ownership
 	UserID    uuid.UUID
 	IP        string
 	UserAgent string
@@ -179,11 +179,10 @@ type AuthService interface {
 	) (*ent.Passkey, WrappedError)
 
 	CreateSession(
-		isSudo bool,
 		userID uuid.UUID,
 		passkeyID uuid.UUID,
-		userAgent string,
-		ip string,
+		elevationPasskeyID *uuid.UUID,
+		actor *Actor,
 		tx *ent.Tx,
 		ctx context.Context,
 	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)

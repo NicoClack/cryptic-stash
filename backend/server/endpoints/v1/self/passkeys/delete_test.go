@@ -21,15 +21,15 @@ func TestDelete(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	loginPasskey := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
 	passkeyToDelete := createPasskey(t, "deleting-key", true, false, userOb.ID, dbClient)
-	requestSessionToken := createSessionWithElevationPasskey(
+	requestSessionToken := createSession(
 		t,
 		userOb.ID,
 		loginPasskey.ID,
-		loginPasskey.ID,
+		new(loginPasskey.ID),
 		app,
 	)
-	sessionTokenToDelete := createSessionWithElevationPasskey(t, userOb.ID, passkeyToDelete.ID, passkeyToDelete.ID, app)
-	sessionTokenToDemote := createSessionWithElevationPasskey(t, userOb.ID, passkeyToDelete.ID, loginPasskey.ID, app)
+	sessionTokenToDelete := createSession(t, userOb.ID, passkeyToDelete.ID, new(passkeyToDelete.ID), app)
+	sessionTokenToDemote := createSession(t, userOb.ID, passkeyToDelete.ID, new(loginPasskey.ID), app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -80,12 +80,13 @@ func TestDelete_SessionPasskey_SendsConflictError(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
-	passkeyOb := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, true, passkeyOb.UserID, passkeyOb.ID, app)
+	loginPasskey := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
+	elevationPasskey := createPasskey(t, "elevation-key", true, false, userOb.ID, dbClient)
+	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, new(elevationPasskey.ID), app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
-		"/api/v1/self/passkeys/"+passkeyOb.ID.String()+"/delete/",
+		"/api/v1/self/passkeys/"+loginPasskey.ID.String()+"/delete/",
 		nil,
 		testcommon.WithBearerToken(sessionToken),
 	)

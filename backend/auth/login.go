@@ -157,11 +157,13 @@ func FinishLogin(
 	}
 
 	sessionOb, sessionToken, wrappedErr := CreateSession(
-		false,
 		userOb.ID,
 		passkeyOb.ID,
-		ginCtx.Request.UserAgent(),
-		ginCtx.ClientIP(),
+		nil,
+		&common.Actor{
+			IP:        ginCtx.ClientIP(),
+			UserAgent: ginCtx.Request.UserAgent(),
+		},
 		tx,
 		sessionDuration,
 		ginCtx.Request.Context(),

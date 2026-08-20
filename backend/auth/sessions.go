@@ -12,15 +12,22 @@ import (
 )
 
 func CreateSession(
-	isSudo bool,
 	userID uuid.UUID,
 	passkeyID uuid.UUID,
-	userAgent string,
-	ip string,
+	elevationPasskeyID *uuid.UUID,
+	actor *common.Actor,
 	tx *ent.Tx,
 	sessionDuration time.Duration,
 	ctx context.Context,
 ) (*ent.Session, []byte, common.WrappedError) {
+	// Instead of allowing an admin to log in as another user,
+	// create an admin endpoint to enable the admin to make the changes themself
+	if actor.UserID != uuid.Nil {
+		panic(
+			"CreateSession: actor.UserID must be uuid.Nil, sessions should never be created on behalf of another user",
+		)
+	}
+
 	sessionToken := common.CryptoRandomBytes(SessionTokenLength)
 	hashedToken := sha256.Sum256(sessionToken)
 	now := time.Now()
@@ -31,11 +38,12 @@ func CreateSession(
 		SetUpdatedAt(now).
 		SetUserID(userID).
 		SetPasskeyID(passkeyID).
-		SetIsSudo(isSudo).
+		SetNillableElevationPasskeyID(elevationPasskeyID).
+		SetIsSudo(elevationPasskeyID != nil).
 		SetHashedToken(hashedToken[:]).
 		SetExpiresAt(expiresAt).
-		SetUserAgent(userAgent).
-		SetIP(ip).
+		SetUserAgent(actor.UserAgent).
+		SetIP(actor.IP).
 		Save(ctx)
 	if stdErr != nil {
 		return nil, nil, ErrWrapperCreateSession.Wrap(ErrWrapperDatabase.Wrap(stdErr))

@@ -23,11 +23,13 @@ func TestCreateSession(t *testing.T) {
 
 	tx := testcommon.StartWriteTx(t, db)
 	sessionOb, sessionToken, wrappedErr := auth.CreateSession(
-		false,
 		userOb.ID,
 		passkeyOb.ID,
-		"test-agent",
-		"127.0.0.1",
+		nil,
+		&common.Actor{
+			IP:        "127.0.0.1",
+			UserAgent: "test-agent",
+		},
 		tx,
 		time.Hour,
 		t.Context(),
@@ -45,6 +47,7 @@ func TestCreateSession(t *testing.T) {
 	require.Equal(t, userOb.ID, storedSessionOb.UserID)
 	require.Equal(t, passkeyOb.ID, storedSessionOb.PasskeyID)
 	require.False(t, storedSessionOb.IsSudo)
+	require.Nil(t, storedSessionOb.ElevationPasskeyID)
 	require.Equal(t, "test-agent", storedSessionOb.UserAgent)
 	require.Equal(t, "127.0.0.1", storedSessionOb.IP)
 	require.WithinDuration(t, time.Now().Add(time.Hour), storedSessionOb.ExpiresAt, 2*time.Second)
@@ -57,14 +60,17 @@ func TestCreateSession_Sudo(t *testing.T) {
 	dbClient := db.Client()
 	userOb := createUser(t, dbClient)
 	passkeyOb := createDummyPasskey(t, dbClient, userOb.ID, "login-passkey", false, false)
+	elevationPasskeyOb := createDummyPasskey(t, dbClient, userOb.ID, "elevation-passkey", true, false)
 
 	tx := testcommon.StartWriteTx(t, db)
 	sessionOb, _, wrappedErr := auth.CreateSession(
-		true,
 		userOb.ID,
 		passkeyOb.ID,
-		"test-agent",
-		"127.0.0.1",
+		new(elevationPasskeyOb.ID),
+		&common.Actor{
+			IP:        "127.0.0.1",
+			UserAgent: "test-agent",
+		},
 		tx,
 		time.Hour,
 		t.Context(),
@@ -74,10 +80,35 @@ func TestCreateSession_Sudo(t *testing.T) {
 
 	storedSessionOb := dbClient.Session.GetX(t.Context(), sessionOb.ID)
 	require.True(t, storedSessionOb.IsSudo)
+	require.Equal(t, passkeyOb.ID, storedSessionOb.PasskeyID)
+	require.NotNil(t, storedSessionOb.ElevationPasskeyID)
+	require.Equal(t, elevationPasskeyOb.ID, *storedSessionOb.ElevationPasskeyID)
+}
 
-	// The behaviour of immediately created sudo sessions is currently a bit undefined.
-	// In the future, auth.CreateSession will probably be updated to take an ElevationPasskeyID arg
-	require.Nil(t, storedSessionOb.ElevationPasskeyID)
+func TestCreateSession_NonNilActorUserID_Panics(t *testing.T) {
+	t.Parallel()
+
+	db := testcommon.CreateDB(t)
+	dbClient := db.Client()
+	userOb := createUser(t, dbClient)
+	passkeyOb := createDummyPasskey(t, dbClient, userOb.ID, "login-passkey", false, false)
+
+	tx := testcommon.StartWriteTx(t, db)
+	require.Panics(t, func() {
+		_, _, _ = auth.CreateSession(
+			userOb.ID,
+			passkeyOb.ID,
+			nil,
+			&common.Actor{
+				UserID:    userOb.ID,
+				IP:        "127.0.0.1",
+				UserAgent: "test-agent",
+			},
+			tx,
+			time.Hour,
+			t.Context(),
+		)
+	})
 }
 
 func TestCreateSession_UnknownUser_ReturnsDBConstraintError(t *testing.T) {
@@ -87,11 +118,13 @@ func TestCreateSession_UnknownUser_ReturnsDBConstraintError(t *testing.T) {
 	tx := testcommon.StartWriteTx(t, db)
 
 	_, _, wrappedErr := auth.CreateSession(
-		false,
 		uuid.New(),
 		uuid.New(),
-		"test-agent",
-		"127.0.0.1",
+		nil,
+		&common.Actor{
+			IP:        "127.0.0.1",
+			UserAgent: "test-agent",
+		},
 		tx,
 		time.Hour,
 		t.Context(),
@@ -111,11 +144,13 @@ func TestValidateSession(t *testing.T) {
 
 	tx := testcommon.StartWriteTx(t, db)
 	_, sessionToken, wrappedErr := auth.CreateSession(
-		false,
 		userOb.ID,
 		passkeyOb.ID,
-		"test-agent",
-		"127.0.0.1",
+		nil,
+		&common.Actor{
+			IP:        "127.0.0.1",
+			UserAgent: "test-agent",
+		},
 		tx,
 		time.Hour,
 		t.Context(),
@@ -146,11 +181,13 @@ func TestValidateSession_RejectsExpiredSession(t *testing.T) {
 
 	tx := testcommon.StartWriteTx(t, db)
 	sessionOb, sessionToken, wrappedErr := auth.CreateSession(
-		false,
 		userOb.ID,
 		passkeyOb.ID,
-		"test-agent",
-		"127.0.0.1",
+		nil,
+		&common.Actor{
+			IP:        "127.0.0.1",
+			UserAgent: "test-agent",
+		},
 		tx,
 		time.Hour,
 		t.Context(),

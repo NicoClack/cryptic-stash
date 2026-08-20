@@ -23,11 +23,7 @@ func TestList(t *testing.T) {
 	firstGroupPasskey := createPasskey(t, "first-group-key", false, false, userOb.ID, dbClient)
 	secondGroupPasskey := createPasskey(t, "second-group-key", true, true, userOb.ID, dbClient)
 	_ = createPasskey(t, "other-first-group-key", false, false, userOb.ID, dbClient)
-	sessionToken := createSessionWithElevationPasskey(
-		t,
-		userOb.ID, firstGroupPasskey.ID, secondGroupPasskey.ID,
-		app,
-	)
+	sessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, new(secondGroupPasskey.ID), app)
 
 	respRecorder := testcommon.Get(
 		t, app.Server,
@@ -68,7 +64,7 @@ func TestList_RequiresSudo(t *testing.T) {
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "test-key", false, false, userOb.ID, dbClient)
-	nonSudoToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
+	nonSudoToken := createSession(t, userOb.ID, passkeyOb.ID, nil, app)
 
 	respRecorder := testcommon.Get(
 		t, app.Server,

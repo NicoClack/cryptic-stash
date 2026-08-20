@@ -70,15 +70,22 @@ func createSession(
 ) string {
 	t.Helper()
 
+	var elevationPasskeyID *uuid.UUID
+	if isSudo {
+		elevationPasskeyID = new(passkeyID)
+	}
+
 	sessionToken, stdErr := dbcommon.WithReadWriteTx(
 		t.Context(), app.Database,
 		func(tx *ent.Tx, ctx context.Context) ([]byte, error) {
 			_, sessionToken, stdErr := app.Auth.CreateSession(
-				isSudo,
 				userID,
 				passkeyID,
-				"test-agent",
-				"127.0.0.1",
+				elevationPasskeyID,
+				&common.Actor{
+					IP:        "127.0.0.1",
+					UserAgent: "test-agent",
+				},
 				tx,
 				ctx,
 			)
