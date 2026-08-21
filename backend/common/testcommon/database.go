@@ -100,7 +100,7 @@ func CreateDBWithOptions(t *testing.T, options CreateDBOptions) *TestDatabase {
 }
 
 func (db *TestDatabase) Start() {
-	// TODO: move initialisation logic into here like the real DB service?
+	panic("not implemented, TestDatabase is already started when created")
 }
 func (db *TestDatabase) DB() *sql.DB {
 	return db.db

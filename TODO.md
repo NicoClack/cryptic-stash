@@ -1,5 +1,6 @@
 # TODO
 
+- Replace PANIC_ON_ERROR with a callback that testhelpers.NewApp provides to the logger
 - Create an invite service
 -   - Delete expired invites that are unused, should be called by the cleanup task
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
@@ -80,6 +81,7 @@
 - Send warning message when a login uses the correct password but the account is locked
 - Implement more messengers:
 -   - ntfy.sh
+-   - Webhooks?
 -   - Matrix?
 -   - Slack
 - CSRF?
@@ -143,6 +145,8 @@
 - Improve validation for messenger options
 - If a credential is cloned, block sudo mode for it. Allow regular login to block downloads
 - Should FinishRegisterPasskey demote existing sessions when a second group passkey is added for the first time?
+- Improve service shutdowns, do any start the service first if it isn't already running like the scheduler used to do? The job engine might
+- Is the commit system necessary for periodic tasks? Can't the number of calls just be counted and the time of the first call be recorded so it knows when next to run?
 
 - When messengers are changed, send a message to all of the previous messengers
 - Research step-security/harden-runner used by go-webauthn, could help against supply chain attacks

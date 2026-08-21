@@ -26,7 +26,6 @@ func TestSchedulerShutdown_HandlesConcurrentCalls(t *testing.T) {
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
 		Invites:          mocks.NewEmptyInviteService(),
 	}
-	app.Database.Start()
 	app.Scheduler = services.NewScheduler(app)
 	app.Scheduler.Start()
 
@@ -51,8 +50,8 @@ func TestSchedulerShutdown_NoOpWhenNotStarted(t *testing.T) {
 		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
+		Invites:          mocks.NewEmptyInviteService(),
 	}
-	app.Database.Start()
 
 	app.Scheduler = services.NewScheduler(app)
 
@@ -71,8 +70,8 @@ func TestSchedulerStart_SubsequentCallsAreNoOp(t *testing.T) {
 		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
+		Invites:          mocks.NewEmptyInviteService(),
 	}
-	app.Database.Start()
 
 	app.Scheduler = services.NewScheduler(app)
 	t.Cleanup(app.Scheduler.Shutdown)

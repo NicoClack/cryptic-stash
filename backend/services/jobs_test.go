@@ -17,7 +17,6 @@ func TestJobsShutdown_HandlesConcurrentCalls(t *testing.T) {
 		Database: testcommon.CreateDB(t),
 		Logger:   testcommon.NewTestLogger(t),
 	}
-	app.Database.Start()
 	jobService := services.NewJobs(app)
 	jobService.Start()
 
@@ -36,7 +35,6 @@ func TestJobsShutdown_NoOpWhenNotStarted(t *testing.T) {
 		Database: testcommon.CreateDB(t),
 		Logger:   testcommon.NewTestLogger(t),
 	}
-	app.Database.Start()
 
 	jobService := services.NewJobs(app)
 
@@ -51,7 +49,6 @@ func TestJobsStart_SubsequentCallsAreNoOp(t *testing.T) {
 		Database: testcommon.CreateDB(t),
 		Logger:   testcommon.NewTestLogger(t),
 	}
-	app.Database.Start()
 
 	jobService := services.NewJobs(app)
 	t.Cleanup(jobService.Shutdown)

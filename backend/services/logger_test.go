@@ -16,7 +16,6 @@ func TestLoggerShutdown_HandlesConcurrentCalls(t *testing.T) {
 		Env:      testcommon.DefaultEnv(),
 		Database: testcommon.CreateDB(t),
 	}
-	app.Database.Start()
 	app.Logger = services.NewLogger(app)
 	app.Logger.Start()
 

@@ -106,7 +106,7 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 	app.TempKeyValue = services.NewTempKeyValue(app)
 	app.Auth = services.NewAuth(app)
 	app.Invites = services.NewInvites(app)
-	app.Database.Start()
+	// The database would be started here, but it's not necessary for a test database
 	app.KeyValue.Init()
 	app.Logger.Start()
 	// TODO: TwoFactorActions
