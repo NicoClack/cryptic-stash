@@ -29,7 +29,10 @@ type Logger struct {
 }
 
 func NewLogger(app *common.App) *Logger {
-	handler := loggers.NewHandler(slog.LevelDebug, true, true, app)
+	handler := loggers.NewHandler(app, loggers.HandlerOptions{
+		Level:          slog.LevelDebug,
+		SaveToDatabase: true,
+	})
 	return NewLoggerWithHandler(handler, app)
 }
 func NewLoggerWithHandler(handler *loggers.Handler, app *common.App) *Logger {
@@ -105,7 +108,6 @@ func TestLogger_SavesToDatabase(t *testing.T) {
 		Clock:           clockwork.NewRealClock(),
 		ShutdownService: mocks.NewShutdownService(),
 	}
-	app.Env.PANIC_ON_ERROR = false
 	app.KeyValue = services.NewKeyValue(app)
 	logger := NewLogger(app)
 	app.Logger = logger
@@ -526,7 +528,6 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 			Clock:           clock,
 			ShutdownService: shutdownService,
 		}
-		app.Env.PANIC_ON_ERROR = false
 		app.Env.MESSAGE_ADMIN_ON_ERROR = true // The admin user exists but doesn't have any messengers, so we'll fall back
 		app.Env.MIN_CRASH_SIGNAL_GAP = minCrashSignalGap
 		logger := NewLogger(app)
@@ -586,4 +587,66 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 
 	clock.Advance(time.Millisecond)
 	runProgram(true, clock.Now().UTC())
+}
+
+func TestLogger_OnLogCalledForAllLevels(t *testing.T) {
+	t.Parallel()
+	db := testcommon.CreateDB(t)
+	app := &common.App{
+		Database: db,
+		Env:      testcommon.DefaultEnv(),
+		Clock:    clockwork.NewRealClock(),
+	}
+
+	levels := []slog.Level{}
+	handler := loggers.NewHandler(app, loggers.HandlerOptions{
+		Level: slog.LevelDebug,
+		OnLog: func(record slog.Record) {
+			// Safe because this function should be called synchronously for each log call
+			levels = append(levels, record.Level)
+		},
+	})
+	logger := NewLoggerWithHandler(handler, app)
+	app.Logger = logger
+	logger.Start()
+
+	logger.Debug("debug")
+	logger.Info("info")
+	logger.Warn("warning")
+	logger.Error("error")
+
+	logger.Shutdown()
+
+	require.Equal(t, []slog.Level{
+		slog.LevelDebug,
+		slog.LevelInfo,
+		slog.LevelWarn,
+		slog.LevelError,
+	}, levels)
+}
+
+func TestLogger_NoSaveToDatabase_DoesNotWrite(t *testing.T) {
+	t.Parallel()
+	db := testcommon.CreateDB(t)
+	app := &common.App{
+		Database: db,
+		Env:      testcommon.DefaultEnv(),
+		Clock:    clockwork.NewRealClock(),
+	}
+
+	handler := loggers.NewHandler(app, loggers.HandlerOptions{
+		Level: slog.LevelDebug,
+		// SaveToDatabase is false
+	})
+	logger := NewLoggerWithHandler(handler, app)
+	app.Logger = logger
+	logger.Start()
+
+	logger.Info("info")
+	logger.Error("error")
+
+	logger.Shutdown()
+
+	count := app.Database.Client().LogEntry.Query().CountX(t.Context())
+	require.Zero(t, count)
 }

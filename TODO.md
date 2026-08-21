@@ -1,6 +1,5 @@
 # TODO
 
-- Replace PANIC_ON_ERROR with a callback that testhelpers.NewApp provides to the logger
 - Create an invite service
 -   - Delete expired invites that are unused, should be called by the cleanup task
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
@@ -190,3 +189,7 @@ Can I wake up a sleeping railway app by just having a separate cron service send
 - Endpoints
 -   - Do they cancel their work if a request times out?
 - Invalid payloads for each endpoint, missing fields etc
+
+# Test optimisations
+
+- Don't save logs to database except for specific tests? Might make them a bit more realistic though

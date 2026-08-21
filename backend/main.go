@@ -45,7 +45,7 @@ func main() {
 	app.ShutdownService = shutdownService
 
 	{
-		logger := services.NewLogger(app)
+		logger := services.NewLogger(app, nil)
 		app.Logger = logger
 		slog.SetDefault(logger.Logger)
 	}

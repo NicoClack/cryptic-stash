@@ -58,10 +58,10 @@ go generate ./ent
 
 - Uses `log/slog` with custom `loggers.Handler` (async channel-based, batched DB writes)
 - Always use a logger instance rather than the top level slog methods, get this from:
-- - `app.Logger`
-- - An explicit logger argument (if the function is part of the service, the service will provide it)
-- - `common.GetLogger(ctx, service)` for some niche cases where you want to depend on another service's logger or use an override in the context (e.g dbcommon does this)
-- Tests have `PANIC_ON_ERROR` env var enabled by default so that logged errors cause tests to fail
+-   - `app.Logger`
+-   - An explicit logger argument (if the function is part of the service, the service will provide it)
+-   - `common.GetLogger(ctx, service)` for some niche cases where you want to depend on another service's logger or use an override in the context (e.g dbcommon does this)
+- Logs are always printed. Whether they're persisted is controlled by `LOG_STORE_INTERVAL` (a non-positive value disables saving). Unit tests fail when errors are logged using the custom `testcommon.NewTestLogger` while integration tests fail later (using Errorf not Failf) through the `OnLog` option of `testhelpers.NewApp`.
 
 ### Testing
 
@@ -71,22 +71,22 @@ go generate ./ent
 
 ## Key Packages Quick Reference
 
-| Package | Role |
-|---------|------|
-| `common/` | Shared types, error system, retries, crypto helpers, the `App` struct |
-| `auth/` | WebAuthn login/registration/sessions (pure logic) |
-| `core/` | Business logic: stashes, users, hashing (Argon2id), encryption (AES-256-GCM) |
-| `ent/` | Database schema + generated ORM code |
-| `entps/` | SQLite driver patch (pragmas, vendored) |
-| `services/` | Service layer wiring domain packages into `*common.App` |
-| `server/` | HTTP routes, middleware, endpoint handlers |
-| `jobs/` | Async job engine with retries and weight limits |
-| `schedulers/` | Periodic task engine with persistent intervals |
-| `messengers/` | Notification dispatch (Discord, SMTP, etc.) |
-| `ratelimiting/` | In-memory rate limiter |
-| `keyvalue/` | Persistent typed key-value store |
-| `tempkeyvalue/` | In-memory TTL store (WebAuthn session data) |
-| `loggers/` | Custom slog handler with async DB writes |
+| Package         | Role                                                                         |
+| --------------- | ---------------------------------------------------------------------------- |
+| `common/`       | Shared types, error system, retries, crypto helpers, the `App` struct        |
+| `auth/`         | WebAuthn login/registration/sessions (pure logic)                            |
+| `core/`         | Business logic: stashes, users, hashing (Argon2id), encryption (AES-256-GCM) |
+| `ent/`          | Database schema + generated ORM code                                         |
+| `entps/`        | SQLite driver patch (pragmas, vendored)                                      |
+| `services/`     | Service layer wiring domain packages into `*common.App`                      |
+| `server/`       | HTTP routes, middleware, endpoint handlers                                   |
+| `jobs/`         | Async job engine with retries and weight limits                              |
+| `schedulers/`   | Periodic task engine with persistent intervals                               |
+| `messengers/`   | Notification dispatch (Discord, SMTP, etc.)                                  |
+| `ratelimiting/` | In-memory rate limiter                                                       |
+| `keyvalue/`     | Persistent typed key-value store                                             |
+| `tempkeyvalue/` | In-memory TTL store (WebAuthn session data)                                  |
+| `loggers/`      | Custom slog handler with async DB writes                                     |
 
 ## Adding Environment Variables
 
@@ -107,14 +107,14 @@ Encrypted fields use `ValueScanner(EncryptedField[T]{KeyName: "slot_name"})`. Ke
 
 ## Utility Package Boundaries
 
-| Package | For | Used By |
-|---------|-----|---------|
-| `common/` | Shared types, interfaces, error system, helpers with no domain-specific knowledge | Every package except ent/**, including tests |
-| `common/dbcommon/` | Transaction helpers (`WithReadTx`, `WithWriteTx`), DB error wrappers | Every package except ent/**, including many tests |
-| `server/servercommon/` | HTTP-specific: `ServerApp`, `*Error`, handler wrappers, auth parsing | `server/` endpoints and middleware |
-| `common/testcommon/` | Test fixtures: `DefaultEnv()`, `CreateDB()`, HTTP request builders, assertion helpers | Test files across all packages |
-| `testhelpers/` | Full integration test harness: `NewApp()` with mock messengers | Endpoint tests, high-level integration tests |
-| `common/globals/` | `MigrateMu` — single global mutex for migration serialization | Avoid unless absolutely necessary |
+| Package                | For                                                                                   | Used By                                             |
+| ---------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `common/`              | Shared types, interfaces, error system, helpers with no domain-specific knowledge     | Every package except ent/\*\*, including tests      |
+| `common/dbcommon/`     | Transaction helpers (`WithReadTx`, `WithWriteTx`), DB error wrappers                  | Every package except ent/\*\*, including many tests |
+| `server/servercommon/` | HTTP-specific: `ServerApp`, `*Error`, handler wrappers, auth parsing                  | `server/` endpoints and middleware                  |
+| `common/testcommon/`   | Test fixtures: `DefaultEnv()`, `CreateDB()`, HTTP request builders, assertion helpers | Test files across all packages                      |
+| `testhelpers/`         | Full integration test harness: `NewApp()` with mock messengers                        | Endpoint tests, high-level integration tests        |
+| `common/globals/`      | `MigrateMu` — single global mutex for migration serialization                         | Avoid unless absolutely necessary                   |
 
 ## Build & Test Commands
 
@@ -135,7 +135,7 @@ bash scripts/lint.sh
 - ❌ `fmt.Errorf` for errors that should carry categories/retry config
 - ❌ Direct SQL queries - always use the ent query builder
 - ❌ Skipping transaction helpers (`dbcommon.WithReadTx`/`WithWriteTx`/`WithReadWriteTx`)
-- - ❌ Returning `struct{}` from transaction callbacks. Use `WithWriteTx` if you don't need to return any data
+-   - ❌ Returning `struct{}` from transaction callbacks. Use `WithWriteTx` if you don't need to return any data
 - ❌ Hardcoding credentials or keys
 - ❌ Adding CGo dependencies — the project targets pure-Go SQLite
 - ❌ Analysing generated code in `ent/` directly — always check `ent/schema/` for the source of truth

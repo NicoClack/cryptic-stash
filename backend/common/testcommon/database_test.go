@@ -1,7 +1,6 @@
 package testcommon_test
 
 import (
-	"io"
 	"log/slog"
 	"testing"
 
@@ -15,12 +14,13 @@ func TestTestDatabaseShutdown_IsIdempotent(t *testing.T) {
 	db := testcommon.CreateDB(t)
 	db.Shutdown()
 	db.Shutdown() // The test will fail if any errors are logged
+	// Also called by the t.Cleanup in CreateDB
 }
 
 func TestCreateDBWithOptions_LoggerOverride(t *testing.T) {
 	t.Parallel()
 
-	override := slog.New(slog.NewTextHandler(io.Discard, nil))
+	override := slog.New(slog.DiscardHandler)
 	db := testcommon.CreateDBWithOptions(t, testcommon.CreateDBOptions{
 		Logger: override,
 	})

@@ -28,6 +28,7 @@ func (m *EmptyTwoFactorActionService) Confirm(
 	code string,
 	ctx context.Context,
 ) (*ent.Job, common.WrappedError) {
+	//nolint:nilnil // this is a limited mock
 	return nil, nil
 }
 func (m *EmptyTwoFactorActionService) DeleteExpiredActions(ctx context.Context) common.WrappedError {

@@ -68,7 +68,6 @@ func LoadEnvironmentVariables() *common.Env {
 		ADMIN_MESSAGE_TIMEOUT:  common.RequireSecondsEnv("ADMIN_MESSAGE_TIMEOUT"),
 		MIN_ADMIN_MESSAGE_GAP:  common.RequireSecondsEnv("MIN_ADMIN_MESSAGE_GAP"),
 		MIN_CRASH_SIGNAL_GAP:   common.RequireSecondsEnv("MIN_CRASH_SIGNAL_GAP"),
-		PANIC_ON_ERROR:         common.OptionalBoolEnv("PANIC_ON_ERROR", false),
 		MESSAGE_ADMIN_ON_ERROR: common.OptionalBoolEnv("MESSAGE_ADMIN_ON_ERROR", true),
 
 		EMAIL_MESSENGER_TYPE:     common.RequireEnv("EMAIL_MESSENGER_TYPE"),

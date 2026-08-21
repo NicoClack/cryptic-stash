@@ -18,10 +18,14 @@ type TestLoggerOptions struct {
 }
 
 func NewTestLogger(t *testing.T) *TestLogger {
+	t.Helper()
+
 	return NewTestLoggerWithOptions(t, TestLoggerOptions{})
 }
 
 func NewTestLoggerWithOptions(t *testing.T, options TestLoggerOptions) *TestLogger {
+	t.Helper()
+
 	tintHandler := tint.NewTextHandler(os.Stderr, &tint.Options{
 		Level:      slog.LevelDebug,
 		TimeFormat: "15:04:05.000",
@@ -53,8 +57,7 @@ func (handler *TestHandler) Handle(ctx context.Context, record slog.Record) erro
 	if !handler.options.DisableFailOnError && record.Level >= slog.LevelError {
 		handler.t.Helper()
 		handler.t.Errorf(
-			"testcommon.TestLogger (often used by testcommon services by default): an error was logged: %s",
-			record.Message,
+			"testcommon.TestLogger (often used by testcommon services by default): test failed because an error was logged",
 		)
 	}
 	return handler.tintHandler.Handle(ctx, record)

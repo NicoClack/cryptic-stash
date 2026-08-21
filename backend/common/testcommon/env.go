@@ -59,7 +59,6 @@ func DefaultEnv() *common.Env {
 		ADMIN_MESSAGE_TIMEOUT:  time.Minute,
 		MIN_ADMIN_MESSAGE_GAP:  time.Minute * 5,
 		MIN_CRASH_SIGNAL_GAP:   -1,
-		PANIC_ON_ERROR:         true,
 		MESSAGE_ADMIN_ON_ERROR: false,
 
 		ENABLE_DEVELOP_MESSENGER: false,

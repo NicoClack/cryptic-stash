@@ -33,12 +33,19 @@ const (
 
 type disableErrorLoggingKey = struct{} // Used to prevent infinite loops
 
+type HandlerOptions struct {
+	Level          slog.Level
+	SaveToDatabase bool
+	// Runs synchronously, avoid doing anything slow-ish like a database write.
+	OnLog func(record slog.Record)
+}
+
 //nolint:recvcheck // has to use some value receivers to implement slog.Handler
 type Handler struct {
 	App              *common.App
 	Level            slog.Level
 	SaveToDatabase   bool
-	ShouldPrint      bool
+	OnLog            func(record slog.Record) // TODO: include common.App?
 	tintHandler      slog.Handler
 	baseAttrs        map[string]any
 	baseSpecialProps specialProperties
@@ -75,17 +82,14 @@ type entry struct {
 
 // Note: global time is mostly used instead of app.Clock because slog doesn't provide a way to override it
 // Except for more application specific systems like crash signals
-func NewHandler(
-	level slog.Level, saveToDatabase bool, shouldPrint bool,
-	app *common.App,
-) *Handler {
+func NewHandler(app *common.App, options HandlerOptions) *Handler {
 	return &Handler{
 		App:            app,
-		Level:          level,
-		SaveToDatabase: saveToDatabase,
-		ShouldPrint:    shouldPrint,
+		Level:          options.Level,
+		SaveToDatabase: options.SaveToDatabase,
+		OnLog:          options.OnLog,
 		tintHandler: tint.NewTextHandler(os.Stdout, &tint.Options{
-			Level:      level,
+			Level:      options.Level,
 			AddSource:  true,
 			TimeFormat: time.TimeOnly,
 		}),
@@ -134,23 +138,25 @@ func (handler *Handler) Listen() {
 			}
 
 			if len(entries) > 0 {
-				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-				var bulkWriteErr error
-				func() {
-					defer cancel()
-					bulkWriteErr = handler.bulkWrite(entries, ctx)
-				}()
-				if bulkWriteErr != nil {
-					ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-					var selfLoggedNow bool
+				if handler.SaveToDatabase {
+					ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+					var bulkWriteErr error
 					func() {
 						defer cancel()
-						selfLoggedNow = handler.individualWriteFallback(
-							entries, bulkWriteErr, &loggedBulkWarning, ctx,
-						)
+						bulkWriteErr = handler.bulkWrite(entries, ctx)
 					}()
-					if selfLoggedNow {
-						shouldReEnableSelfLogging = false
+					if bulkWriteErr != nil {
+						ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+						var selfLoggedNow bool
+						func() {
+							defer cancel()
+							selfLoggedNow = handler.individualWriteFallback(
+								entries, bulkWriteErr, &loggedBulkWarning, ctx,
+							)
+						}()
+						if selfLoggedNow {
+							shouldReEnableSelfLogging = false
+						}
 					}
 				}
 				if handler.maybeNotifyAdmin(entries, &loggedAdminNotificationError) {
@@ -184,12 +190,14 @@ func (handler *Handler) Listen() {
 				}
 			}
 			if len(entries) > 0 {
-				bulkWriteErr := handler.bulkWrite(entries, shutdownCtx)
-				if bulkWriteErr != nil {
-					if handler.individualWriteFallback(
-						entries, bulkWriteErr, &loggedBulkWarning, shutdownCtx,
-					) {
-						selfLogged = true
+				if handler.SaveToDatabase {
+					bulkWriteErr := handler.bulkWrite(entries, shutdownCtx)
+					if bulkWriteErr != nil {
+						if handler.individualWriteFallback(
+							entries, bulkWriteErr, &loggedBulkWarning, shutdownCtx,
+						) {
+							selfLogged = true
+						}
 					}
 				}
 				if handler.maybeNotifyAdmin(entries, &loggedAdminNotificationError) {
@@ -394,86 +402,13 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 			useFallback = true
 		}
 	}
-	if shouldNotifyAdmin {
-		if useFallback {
-			baseCtx := context.Background()
-			handler.topHandler.mu.RLock()
-			if handler.topHandler.shutdownCtx != nil {
-				baseCtx = handler.topHandler.shutdownCtx
-			}
-			handler.topHandler.mu.RUnlock()
-			ctx, cancel := context.WithTimeout(baseCtx, 2*time.Second)
-			defer cancel()
-			shouldCrash, stdErr := dbcommon.WithReadWriteTx(
-				ctx, handler.App.Database,
-				func(tx *ent.Tx, ctx context.Context) (bool, error) {
-					lastCrashSignal := time.Time{}
-					wrappedErr := handler.App.KeyValue.Get("LAST_CRASH_SIGNAL", &lastCrashSignal, ctx)
-					if wrappedErr != nil {
-						return false, wrappedErr
-					}
-					now := handler.App.Clock.Now()
-					if handler.App.Env.MIN_CRASH_SIGNAL_GAP <= 0 ||
-						now.Before(lastCrashSignal.Add(handler.App.Env.MIN_CRASH_SIGNAL_GAP)) {
-						return false, nil
-					}
-
-					wrappedErr = handler.App.KeyValue.Set("LAST_CRASH_SIGNAL", now.UTC(), ctx)
-					if wrappedErr != nil {
-						return false, wrappedErr
-					}
-					return true, nil
-				},
-			)
-			if stdErr != nil {
-				pc, _, _, _ := runtime.Caller(0)
-				record := slog.NewRecord(
-					time.Now(),
-					slog.LevelError,
-					"failed to check LAST_CRASH_SIGNAL in key/value storage. in order to be cautious, the server won't crash",
-					pc,
-				)
-				record.AddAttrs(slog.Any("error", stdErr))
-
-				_ = handler.Handle(
-					context.WithValue(context.Background(), common.DisableAdminNotificationKey{}, true),
-					record,
-				)
-				return true
-			}
-
-			if shouldCrash {
-				handler.App.Shutdown("crashing to notify admin because messengers failed")
-			}
-			// Set here rather than at the fallback error logs to ensure the logger loops back around to here
-			*loggedAdminNotificationErrorPtr = true
+	if !shouldNotifyAdmin {
+		return selfLogged
+	}
+	if useFallback {
+		if handler.App.Env.MIN_CRASH_SIGNAL_GAP <= 0 {
 			return selfLogged
 		}
-
-		session, wrappedErr := handler.App.RateLimiter.RequestSession(
-			"admin-error-message", 1, "",
-		)
-		if wrappedErr != nil {
-			if errors.Is(wrappedErr, ratelimiting.ErrGlobalRateLimitExceeded) {
-				return selfLogged
-			}
-			pc, _, _, _ := runtime.Caller(0)
-			record := slog.NewRecord(
-				time.Now(),
-				slog.LevelError,
-				"failed to check admin-error-message rate limit",
-				pc,
-			)
-			record.AddAttrs(slog.Any("error", wrappedErr))
-
-			_ = handler.Handle(
-				context.WithValue(context.Background(), common.AdminNotificationFallbackKey{}, true),
-				record,
-			)
-			return true
-		}
-
-		// TODO: reserve a bit of time for this in case the database writing times out during a shutdown
 		baseCtx := context.Background()
 		handler.topHandler.mu.RLock()
 		if handler.topHandler.shutdownCtx != nil {
@@ -482,77 +417,153 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 		handler.topHandler.mu.RUnlock()
 		ctx, cancel := context.WithTimeout(baseCtx, 2*time.Second)
 		defer cancel()
-		var queuedCount int
-		var errs map[string]common.WrappedError
-		stdErr := dbcommon.WithWriteTx(
+		shouldCrash, stdErr := dbcommon.WithReadWriteTx(
 			ctx, handler.App.Database,
-			func(tx *ent.Tx, ctx context.Context) error {
-				userOb, stdErr := tx.User.Query().
-					Where(user.Username(common.AdminUsername)).
-					WithMessengers().
-					Only(ctx)
-				if stdErr != nil {
-					return stdErr
+			func(tx *ent.Tx, ctx context.Context) (bool, error) {
+				lastCrashSignal := time.Time{}
+				wrappedErr := handler.App.KeyValue.Get("LAST_CRASH_SIGNAL", &lastCrashSignal, ctx)
+				if wrappedErr != nil {
+					return false, wrappedErr
 				}
-				var wrappedErr common.WrappedError
-				queuedCount, errs, wrappedErr = handler.App.Messengers.SendUsingAll(
-					&common.Message{
-						Type: common.MessageAdminError,
-						User: userOb,
-					},
-					ctx,
-				)
-				return wrappedErr
+				now := handler.App.Clock.Now()
+				if now.Before(lastCrashSignal.Add(handler.App.Env.MIN_CRASH_SIGNAL_GAP)) {
+					return false, nil
+				}
+
+				wrappedErr = handler.App.KeyValue.Set("LAST_CRASH_SIGNAL", now.UTC(), ctx)
+				if wrappedErr != nil {
+					return false, wrappedErr
+				}
+				return true, nil
 			},
 		)
-		cancel()
 		if stdErr != nil {
-			session.Cancel()
 			pc, _, _, _ := runtime.Caller(0)
 			record := slog.NewRecord(
 				time.Now(),
 				slog.LevelError,
-				"failed to message admin about an error",
+				"failed to check LAST_CRASH_SIGNAL in key/value storage. in order to be cautious, the server won't crash",
 				pc,
 			)
 			record.AddAttrs(slog.Any("error", stdErr))
 
 			_ = handler.Handle(
-				context.WithValue(context.Background(), common.AdminNotificationFallbackKey{}, true),
+				context.WithValue(context.Background(), common.DisableAdminNotificationKey{}, true),
 				record,
 			)
 			return true
 		}
 
-		if len(errs) > 0 { // SendUsingAll will have logged
-			selfLogged = true
-			// Don't count this as logging the admin notification error since we want to loop around
-			// and use the fallback crash signal
+		if shouldCrash {
+			handler.App.Shutdown("crashing to notify admin because messengers failed")
 		}
-		if queuedCount == 0 {
-			session.Cancel()
-			message := "admin user has no contacts so couldn't notify them about an error"
-			for _, wrappedErr := range errs {
-				// TODO: this error should be moved to common (or common/errors?) to avoid circular imports in the future
-				if !errors.Is(wrappedErr, messengers.ErrMessengerDisabledForUser) {
-					message = "unable to prepare messages to notify admin about an error, see the errors before"
-				}
+		// Set here rather than at the fallback error logs to ensure the logger loops back around to here
+		*loggedAdminNotificationErrorPtr = true
+		return selfLogged
+	}
+
+	session, wrappedErr := handler.App.RateLimiter.RequestSession(
+		"admin-error-message", 1, "",
+	)
+	if wrappedErr != nil {
+		if errors.Is(wrappedErr, ratelimiting.ErrGlobalRateLimitExceeded) {
+			return selfLogged
+		}
+		pc, _, _, _ := runtime.Caller(0)
+		record := slog.NewRecord(
+			time.Now(),
+			slog.LevelError,
+			"failed to check admin-error-message rate limit",
+			pc,
+		)
+		record.AddAttrs(slog.Any("error", wrappedErr))
+
+		_ = handler.Handle(
+			context.WithValue(context.Background(), common.AdminNotificationFallbackKey{}, true),
+			record,
+		)
+		return true
+	}
+
+	// TODO: reserve a bit of time for this in case the database writing times out during a shutdown
+	baseCtx := context.Background()
+	handler.topHandler.mu.RLock()
+	if handler.topHandler.shutdownCtx != nil {
+		baseCtx = handler.topHandler.shutdownCtx
+	}
+	handler.topHandler.mu.RUnlock()
+	ctx, cancel := context.WithTimeout(baseCtx, 2*time.Second)
+	defer cancel()
+	var queuedCount int
+	var errs map[string]common.WrappedError
+	stdErr := dbcommon.WithWriteTx(
+		ctx, handler.App.Database,
+		func(tx *ent.Tx, ctx context.Context) error {
+			userOb, stdErr := tx.User.Query().
+				Where(user.Username(common.AdminUsername)).
+				WithMessengers().
+				Only(ctx)
+			if stdErr != nil {
+				return stdErr
 			}
-
-			pc, _, _, _ := runtime.Caller(0)
-			record := slog.NewRecord(
-				time.Now(),
-				slog.LevelError,
-				message,
-				pc,
+			var wrappedErr common.WrappedError
+			queuedCount, errs, wrappedErr = handler.App.Messengers.SendUsingAll(
+				&common.Message{
+					Type: common.MessageAdminError,
+					User: userOb,
+				},
+				ctx,
 			)
+			return wrappedErr
+		},
+	)
+	cancel()
+	if stdErr != nil {
+		session.Cancel()
+		pc, _, _, _ := runtime.Caller(0)
+		record := slog.NewRecord(
+			time.Now(),
+			slog.LevelError,
+			"failed to message admin about an error",
+			pc,
+		)
+		record.AddAttrs(slog.Any("error", stdErr))
 
-			_ = handler.Handle(
-				context.WithValue(context.Background(), common.AdminNotificationFallbackKey{}, true),
-				record,
-			)
-			selfLogged = true
+		_ = handler.Handle(
+			context.WithValue(context.Background(), common.AdminNotificationFallbackKey{}, true),
+			record,
+		)
+		return true
+	}
+
+	if len(errs) > 0 { // SendUsingAll will have logged
+		selfLogged = true
+		// Don't count this as logging the admin notification error since we want to loop around
+		// and use the fallback crash signal
+	}
+	if queuedCount == 0 {
+		session.Cancel()
+		message := "admin user has no contacts so couldn't notify them about an error"
+		for _, wrappedErr := range errs {
+			// TODO: this error should be moved to common (or common/errors?) to avoid circular imports in the future
+			if !errors.Is(wrappedErr, messengers.ErrMessengerDisabledForUser) {
+				message = "unable to prepare messages to notify admin about an error, see the errors before"
+			}
 		}
+
+		pc, _, _, _ := runtime.Caller(0)
+		record := slog.NewRecord(
+			time.Now(),
+			slog.LevelError,
+			message,
+			pc,
+		)
+
+		_ = handler.Handle(
+			context.WithValue(context.Background(), common.AdminNotificationFallbackKey{}, true),
+			record,
+		)
+		selfLogged = true
 	}
 	return selfLogged
 }
@@ -639,8 +650,8 @@ func (handler Handler) Handle(ctx context.Context, record slog.Record) error {
 		)
 	}
 
-	if record.Level >= slog.LevelError && handler.App.Env.PANIC_ON_ERROR {
-		panic("an error was logged")
+	if handler.OnLog != nil {
+		handler.OnLog(record)
 	}
 	return nil
 }
