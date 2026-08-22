@@ -9,7 +9,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
-	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -134,17 +133,18 @@ func ValidateLogin(
 func FinishLogin(
 	webAuthnSessionID uuid.UUID,
 	parsedResponse *protocol.ParsedCredentialAssertionData,
-	ginCtx *gin.Context,
+	actor *common.Actor,
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
 	tempKV common.TempKeyValueService,
 	logger common.Logger,
 	sessionDuration time.Duration,
+	ctx context.Context,
 ) (*ent.User, *ent.Passkey, *ent.Session, []byte, common.WrappedError) {
 	userOb, passkeyOb, _, wrappedErr := ValidateLogin(
 		webAuthnSessionID,
 		parsedResponse,
-		ginCtx.Request.Context(),
+		ctx,
 		webAuthnApp,
 		tx,
 		tempKV,
@@ -160,13 +160,10 @@ func FinishLogin(
 		userOb.ID,
 		passkeyOb.ID,
 		nil,
-		&common.Actor{
-			IP:        ginCtx.ClientIP(),
-			UserAgent: ginCtx.Request.UserAgent(),
-		},
+		actor,
 		tx,
 		sessionDuration,
-		ginCtx.Request.Context(),
+		ctx,
 	)
 	if wrappedErr != nil {
 		return nil, nil, nil, nil, ErrWrapperFinishLogin.Wrap(

@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -135,8 +134,9 @@ type AuthService interface {
 	FinishLogin(
 		sessionID uuid.UUID,
 		parsedResponse *protocol.ParsedCredentialAssertionData,
-		ginCtx *gin.Context,
+		actor *Actor,
 		tx *ent.Tx,
+		ctx context.Context,
 	) (userOb *ent.User, passkeyOb *ent.Passkey, sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
 
 	GetEligiblePasskeysForSudo(sessionOb *ent.Session, userOb *ent.User) (
@@ -151,8 +151,9 @@ type AuthService interface {
 		webAuthnSessionID uuid.UUID,
 		parsedResponse *protocol.ParsedCredentialAssertionData,
 		sessionOb *ent.Session, // Must have passkeys loaded
-		ginCtx *gin.Context,
+		actor *Actor,
 		tx *ent.Tx,
+		ctx context.Context,
 	) WrappedError
 
 	StartRegisterPasskey(

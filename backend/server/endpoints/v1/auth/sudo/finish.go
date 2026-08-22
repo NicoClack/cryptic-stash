@@ -29,6 +29,7 @@ type FinishElevationResponse struct {
 func FinishElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
 		sessionID := ginCtx.MustGet("session").(*ent.Session).ID
+		actor := ginCtx.MustGet("actor").(*common.Actor)
 
 		body := FinishElevationPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
@@ -60,8 +61,9 @@ func FinishElevation(app *servercommon.ServerApp) gin.HandlerFunc {
 					body.WebAuthnSessionID,
 					parsedResponse,
 					sessionOb,
-					ginCtx,
+					actor,
 					tx,
+					ctx,
 				)
 				if wrappedErr != nil {
 					return nil, wrappedErr

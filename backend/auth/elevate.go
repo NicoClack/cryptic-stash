@@ -7,7 +7,6 @@ import (
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -64,17 +63,17 @@ func FinishElevation(
 	webAuthnSessionID uuid.UUID,
 	parsedResponse *protocol.ParsedCredentialAssertionData,
 	sessionOb *ent.Session, // Must have passkeys loaded
-	ginCtx *gin.Context,
 	webAuthnApp *webauthn.WebAuthn,
 	tx *ent.Tx,
 	tempKV common.TempKeyValueService,
 	logger common.Logger,
 	sessionDuration time.Duration,
+	ctx context.Context,
 ) common.WrappedError {
 	userOb, passkeyOb, cloneWarning, wrappedErr := ValidateLogin(
 		webAuthnSessionID,
 		parsedResponse,
-		ginCtx.Request.Context(),
+		ctx,
 		webAuthnApp,
 		tx,
 		tempKV,
@@ -117,7 +116,7 @@ func FinishElevation(
 		passkeyOb.ID,
 		time.Now().Add(sessionDuration),
 		tx,
-		ginCtx.Request.Context(),
+		ctx,
 	)
 	if wrappedErr != nil {
 		return ErrWrapperFinishElevation.Wrap(

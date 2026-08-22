@@ -43,6 +43,11 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 	// 2. Malware gets credential IDs from a password manager that doesn't secure metadata
 	//    -> Probably also has browsing history, can session steal.
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
+		actor := &common.Actor{
+			IP:        ginCtx.ClientIP(),
+			UserAgent: ginCtx.Request.UserAgent(),
+		}
+
 		body := FinishLoginPayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
@@ -64,8 +69,9 @@ func FinishLogin(app *servercommon.ServerApp) gin.HandlerFunc {
 				userOb, passkeyOb, sessionOb, token, wrappedErr := app.Auth.FinishLogin(
 					body.WebAuthnSessionID,
 					parsedResponse,
-					ginCtx,
+					actor,
 					tx,
+					ctx,
 				)
 				if wrappedErr != nil {
 					return nil, wrappedErr

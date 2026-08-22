@@ -7,7 +7,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/auth"
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -39,19 +38,36 @@ func (service *Auth) StartLogin(
 func (service *Auth) FinishLogin(
 	sessionID uuid.UUID,
 	parsedResponse *protocol.ParsedCredentialAssertionData,
-	ginCtx *gin.Context,
+	actor *common.Actor,
 	tx *ent.Tx,
+	ctx context.Context,
 ) (*ent.User, *ent.Passkey, *ent.Session, []byte, common.WrappedError) {
-	return auth.FinishLogin(
+	userOb, passkeyOb, sessionOb, sessionToken, wrappedErr := auth.FinishLogin(
 		sessionID,
 		parsedResponse,
-		ginCtx,
+		actor,
 		service.webAuthnApp,
 		tx,
 		service.app.TempKeyValue,
 		service.app.Logger,
 		service.app.Env.SESSION_DURATION,
+		ctx,
 	)
+	if wrappedErr != nil {
+		return nil, nil, nil, nil, wrappedErr
+	}
+
+	service.app.Logger.Info(
+		"finished login",
+		"userID", userOb.ID,
+		"passkeyID", passkeyOb.ID,
+		"sessionID", sessionOb.ID,
+		"actorID", actor.UserID,
+		"actorIP", actor.IP,
+		"actorUserAgent", actor.UserAgent,
+	)
+
+	return userOb, passkeyOb, sessionOb, sessionToken, nil
 }
 
 func (service *Auth) GetEligiblePasskeysForSudo(sessionOb *ent.Session, userOb *ent.User) (
@@ -76,20 +92,34 @@ func (service *Auth) FinishElevation(
 	webAuthnSessionID uuid.UUID,
 	parsedResponse *protocol.ParsedCredentialAssertionData,
 	sessionOb *ent.Session, // Must have Passkey preloaded
-	ginCtx *gin.Context,
+	actor *common.Actor,
 	tx *ent.Tx,
+	ctx context.Context,
 ) common.WrappedError {
-	return auth.FinishElevation(
+	wrappedErr := auth.FinishElevation(
 		webAuthnSessionID,
 		parsedResponse,
 		sessionOb,
-		ginCtx,
 		service.webAuthnApp,
 		tx,
 		service.app.TempKeyValue,
 		service.app.Logger,
 		service.app.Env.SESSION_DURATION,
+		ctx,
 	)
+	if wrappedErr != nil {
+		return wrappedErr
+	}
+
+	service.app.Logger.Info(
+		"finished elevation",
+		"sessionID", sessionOb.ID,
+		"actorID", actor.UserID,
+		"actorIP", actor.IP,
+		"actorUserAgent", actor.UserAgent,
+	)
+
+	return nil
 }
 
 func (service *Auth) StartRegisterPasskey(
