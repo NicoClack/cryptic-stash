@@ -14,6 +14,14 @@ func NewEmptyCoreService() *EmptyCoreService {
 	return &EmptyCoreService{}
 }
 
+func (m *EmptyCoreService) Init() {
+}
+
+func (m *EmptyCoreService) AdminID() uuid.UUID {
+	panic("EmptyCoreService.AdminID: not implemented")
+	// Returning nil would probably cascade badly
+}
+
 func (m *EmptyCoreService) CheckAdminCode(givenCode string) bool {
 	return false
 }

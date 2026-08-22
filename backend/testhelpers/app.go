@@ -117,6 +117,7 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 	// The database would be started here, but it's not necessary for a test database
 	app.KeyValue.Init()
 	app.Logger.Start()
+	app.Core.Init()
 	// TODO: TwoFactorActions
 	{
 		registerFuncs := make([]func(registry *messengers.Registry), 0, len(mockMessengers))

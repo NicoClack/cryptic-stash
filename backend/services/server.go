@@ -47,7 +47,10 @@ func NewServer(app *common.App) *Server {
 	router.Use(middleware.NewRateLimiting("api", app.RateLimiter))
 	router.Use(middleware.NewError())
 
-	adminMiddleware := middleware.NewAdminProtected(app.Core) // TODO: replace with config of NewSessionAuth
+	adminMiddleware := middleware.NewAdminProtected(
+		app.Core,
+		app.Database,
+	) // TODO: replace with config of NewSessionAuth
 	defaultAuthMiddleware := middleware.NewSessionAuth(app.Auth, app.Database, nil)
 	sudoModeMiddleware := middleware.NewSessionAuth(app.Auth, app.Database, &middleware.SessionAuthOptions{
 		RequireSudo: true,

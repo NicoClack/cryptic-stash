@@ -44,8 +44,7 @@ type Env struct {
 	ADMIN_PASSWORD_SALT          []byte
 	ADMIN_TOTP_SECRET            string
 
-	INVITE_DEFAULT_EXPIRY time.Duration
-	INVITE_MAX_EXPIRY     time.Duration
+	INVITE_MAX_EXPIRY time.Duration
 
 	SESSION_DURATION         time.Duration
 	WEBAUTHN_SESSION_TIMEOUT time.Duration
@@ -377,8 +376,12 @@ type ServerService interface {
 	Start()      // Should fatalf rather than returning an error
 	Shutdown()   // Should log warning rather than return an error
 }
+
+// TODO: split into separate services
 type CoreService interface {
 	// TODO: split this service up? Maybe should only be for functions that need db access?
+	Init()
+	AdminID() uuid.UUID
 	CheckAdminCode(givenCode string) bool
 	CheckAdminCredentials(password string, totpCode string) bool
 	GetAdminCode(password string, totpCode string) (string, bool)
@@ -426,8 +429,45 @@ type JobService interface {
 	Encode(versionedType string, body any) (json.RawMessage, WrappedError)
 }
 
-// TODO: move more of the invite logic from endpoints into this service (e.g creating users)
 type InviteService interface {
+	CreateInvite(
+		email string,
+		inviteMessage string,
+		expiresIn time.Duration, // Capped at env.INVITE_MAX_EXPIRY
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (*ent.Invite, string, WrappedError)
+
+	// Gets an invite by ID, validating the code and expiry.
+	//
+	// Note: returns an error if already used
+	GetInvite(
+		id uuid.UUID,
+		code []byte,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (*ent.Invite, WrappedError)
+
+	// Generates the WebAuthn options and saves the session to the invite
+	GenerateOptions(
+		id uuid.UUID,
+		code []byte,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (protocol.PublicKeyCredentialCreationOptions, WrappedError)
+
+	CreateUser(
+		id uuid.UUID,
+		code []byte,
+		credentialName string,
+		parsedCredential *protocol.ParsedCredentialCreationData,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (*ent.User, *ent.Passkey, *ent.Session, []byte, WrappedError)
+
 	DeleteExpiredInvites(tx *ent.Tx, ctx context.Context) WrappedError
 }
 

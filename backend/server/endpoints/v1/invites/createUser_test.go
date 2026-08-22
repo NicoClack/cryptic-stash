@@ -53,7 +53,7 @@ func TestCreateUser_NoWebAuthnSession_SendsBadRequest(t *testing.T) {
 		gin.H{
 			"errors": []servercommon.ErrorDetail{
 				{
-					Message: "credential: no active WebAuthn session, please refresh the page",
+					Message: "WebAuthn session expired, please refresh the page",
 					Code:    "NO_WEBAUTHN_SESSION",
 				},
 			},

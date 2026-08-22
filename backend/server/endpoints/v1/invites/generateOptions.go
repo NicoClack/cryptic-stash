@@ -4,8 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/NicoClack/cryptic-stash/backend/auth"
+	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/invites"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -18,28 +20,27 @@ type GenerateOptionsResponse struct {
 }
 
 func GenerateOptions(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
-		resp, stdErr := useInvite(
-			id, ginCtx, app,
-			func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*GenerateOptionsResponse, error) {
-				pendingUserID := uuid.New()
-				options, sessionData, wrappedErr := app.Auth.StartRegisterPasskey(
-					&auth.TempWebAuthnUser{
-						ID:          pendingUserID[:],
-						Name:        inviteOb.Email,
-						DisplayName: inviteOb.Email,
-					},
-					ctx,
-				)
-				if wrappedErr != nil {
-					return nil, wrappedErr
-				}
+	return newInviteTokenHandler(func(id uuid.UUID, code []byte, ginCtx *gin.Context) error {
+		actor := &common.Actor{
+			IP:        ginCtx.ClientIP(),
+			UserAgent: ginCtx.Request.UserAgent(),
+		}
 
-				_, stdErr := tx.Invite.UpdateOneID(inviteOb.ID).
-					SetWebAuthnSession(sessionData).
-					Save(ctx)
-				if stdErr != nil {
-					return nil, stdErr
+		resp, stdErr := dbcommon.WithReadWriteTx(
+			ginCtx.Request.Context(), app.Database,
+			func(tx *ent.Tx, ctx context.Context) (*GenerateOptionsResponse, error) {
+				options, wrappedErr := app.Invites.GenerateOptions(id, code, actor, tx, ctx)
+				if wrappedErr != nil {
+					return nil, servercommon.ExpectAnyOfErrors(
+						wrappedErr,
+						[]error{
+							invites.ErrInviteNotFound,
+							invites.ErrInviteUsed,
+							invites.ErrInviteExpired,
+						},
+						http.StatusUnauthorized,
+						nil,
+					)
 				}
 
 				return &GenerateOptionsResponse{

@@ -2,19 +2,14 @@ package invites
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
-	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/NicoClack/cryptic-stash/backend/invites"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,7 +18,7 @@ import (
 type CreatePayload struct {
 	Email         string `binding:"required,email"         json:"email"`
 	InviteMessage string `binding:"required,min=1,max=500" json:"inviteMessage"`
-	ExpiresIn     int64  `binding:"omitempty"              json:"expiresIn"`
+	ExpiresIn     int64  `binding:"required,gt=0"          json:"expiresIn"`
 }
 type CreateResponse struct {
 	Errors    []servercommon.ErrorDetail `binding:"required" json:"errors"`
@@ -33,10 +28,9 @@ type CreateResponse struct {
 }
 
 func Create(app *servercommon.ServerApp) gin.HandlerFunc {
-	clock := app.Clock
-	emailMessengerType, emailMessengerVersion, _ := common.ParseVersionedType(app.Env.EMAIL_MESSENGER_TYPE)
-
 	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
+		actor := ginCtx.MustGet("actor").(*common.Actor)
+
 		body := CreatePayload{}
 		if serverErr := servercommon.ParseBody(&body, ginCtx); serverErr != nil {
 			return serverErr
@@ -53,72 +47,33 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 			)
 		}
 
-		expiresIn := app.Env.INVITE_DEFAULT_EXPIRY
-		if body.ExpiresIn > 0 {
-			expiresIn = time.Duration(body.ExpiresIn) * time.Second
-		}
-		expiresIn = min(expiresIn, app.Env.INVITE_MAX_EXPIRY)
-
 		resp, stdErr := dbcommon.WithReadWriteTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*CreateResponse, error) {
-				code := app.Core.RandomAuthCode()
-				hashed := sha256.Sum256(code)
-				encodedCode := base64.RawURLEncoding.EncodeToString(code)
-				now := clock.Now()
-				expiresAt := now.Add(expiresIn)
-
-				exists, stdErr := tx.User.Query().Where(user.Username(body.Email)).Exist(ctx)
-				if stdErr != nil {
-					return nil, stdErr
-				}
-				if exists {
-					return nil, servercommon.NewBadRequestError(
-						"email",
-						"username already taken",
-						"USERNAME_TAKEN",
-					)
-				}
-
-				inviteOb, stdErr := tx.Invite.Create().
-					SetCreatedAt(now).
-					SetUpdatedAt(now).
-					SetEmail(body.Email).
-					SetHashedCode(hashed[:]).
-					SetExpiresAt(expiresAt).
-					Save(ctx)
-				if stdErr != nil {
-					return nil, stdErr
-				}
-
-				inMemoryUser, stdErr := newInMemoryUser(body.Email, emailMessengerType, emailMessengerVersion)
-				if stdErr != nil {
-					return nil, stdErr
-				}
-
-				wrappedErr := app.Messengers.Send(
-					app.Env.EMAIL_MESSENGER_TYPE,
-					&common.Message{
-						Type:          common.MessageInvite,
-						User:          inMemoryUser,
-						InviteMessage: inviteMessage,
-						URL: getInviteURL(
-							inviteOb.ID,
-							encodedCode,
-							app.Env.FRONTEND_BASE_URL,
-						),
-					},
+				inviteOb, encodedCode, wrappedErr := app.Invites.CreateInvite(
+					body.Email,
+					inviteMessage,
+					time.Duration(body.ExpiresIn)*time.Second,
+					actor,
+					tx,
 					ctx,
 				)
 				if wrappedErr != nil {
-					return nil, wrappedErr
+					return nil, servercommon.ExpectError(
+						wrappedErr, invites.ErrUsernameTaken,
+						http.StatusBadRequest,
+						&servercommon.ErrorDetail{
+							Message: "email: username already taken",
+							Code:    "USERNAME_TAKEN",
+						},
+					)
 				}
 
 				return &CreateResponse{
 					Errors:    []servercommon.ErrorDetail{},
 					ID:        inviteOb.ID,
 					Code:      encodedCode,
-					ExpiresAt: expiresAt,
+					ExpiresAt: inviteOb.ExpiresAt,
 				}, nil
 			},
 		)
@@ -129,47 +84,4 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 		ginCtx.JSON(http.StatusCreated, resp)
 		return nil
 	})
-}
-
-func newInMemoryUser(
-	email string,
-	emailMessengerType string, emailMessengerVersion int,
-) (*ent.User, error) {
-	encodedOptions := json.RawMessage("{}")
-	if emailMessengerType != "develop" {
-		var stdErr error
-		encodedOptions, stdErr = json.Marshal(map[string]string{
-			"email": email,
-		})
-		if stdErr != nil {
-			return nil, stdErr
-		}
-	}
-	// TODO: validate options
-
-	return &ent.User{
-		Username: email,
-		Edges: ent.UserEdges{
-			Messengers: []*ent.UserMessenger{
-				{
-					Type:      emailMessengerType,
-					Version:   emailMessengerVersion,
-					IsEnabled: true,
-					Options:   encodedOptions,
-				},
-			},
-		},
-	}, nil
-}
-
-func getInviteURL(
-	inviteID uuid.UUID,
-	code string,
-	frontendBaseURL *url.URL,
-) string {
-	rel := &url.URL{
-		Path:     fmt.Sprintf("/invites/%s/", inviteID.String()),
-		Fragment: code,
-	}
-	return frontendBaseURL.ResolveReference(rel).String()
 }

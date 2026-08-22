@@ -59,6 +59,7 @@ func main() {
 	app.Database.Start()
 	app.KeyValue.Init()
 	app.Logger.Start()
+	app.Core.Init()
 	app.TwoFactorActions = services.NewTwoFactorActions(app)
 	app.Invites = services.NewInvites(app)
 	{

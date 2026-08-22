@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/invites"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -18,10 +20,23 @@ type GetInviteResponse struct {
 }
 
 func GetInvite(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
-		resp, stdErr := useInvite(
-			id, ginCtx, app,
-			func(inviteOb *ent.Invite, tx *ent.Tx, ctx context.Context) (*GetInviteResponse, error) {
+	return newInviteTokenHandler(func(id uuid.UUID, code []byte, ginCtx *gin.Context) error {
+		resp, stdErr := dbcommon.WithReadTx(
+			ginCtx.Request.Context(), app.Database,
+			func(tx *ent.Tx, ctx context.Context) (*GetInviteResponse, error) {
+				inviteOb, wrappedErr := app.Invites.GetInvite(id, code, tx, ctx)
+				if wrappedErr != nil {
+					return nil, servercommon.ExpectAnyOfErrors(
+						wrappedErr,
+						[]error{
+							invites.ErrInviteNotFound,
+							invites.ErrInviteUsed,
+							invites.ErrInviteExpired,
+						},
+						http.StatusUnauthorized,
+						nil,
+					)
+				}
 				return &GetInviteResponse{
 					Errors:    []servercommon.ErrorDetail{},
 					Email:     inviteOb.Email,

@@ -34,8 +34,7 @@ func DefaultEnv() *common.Env {
 		JOB_POLL_INTERVAL:    time.Hour * 999,
 		MAX_TOTAL_JOB_WEIGHT: 100,
 
-		INVITE_DEFAULT_EXPIRY: time.Hour * 24 * 2,
-		INVITE_MAX_EXPIRY:     time.Hour * 24 * 7,
+		INVITE_MAX_EXPIRY: time.Hour * 24 * 7,
 
 		SESSION_DURATION:                          time.Minute * 15,
 		WEBAUTHN_SESSION_TIMEOUT:                  time.Minute * 2,

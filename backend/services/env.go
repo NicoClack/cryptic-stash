@@ -44,8 +44,7 @@ func LoadEnvironmentVariables() *common.Env {
 		ADMIN_PASSWORD_SALT:          common.OptionalBase64Env("ADMIN_PASSWORD_SALT", []byte{}),
 		ADMIN_TOTP_SECRET:            common.OptionalEnv("ADMIN_TOTP_SECRET", ""),
 
-		INVITE_DEFAULT_EXPIRY: common.RequireSecondsEnv("INVITE_DEFAULT_EXPIRY"),
-		INVITE_MAX_EXPIRY:     common.RequireSecondsEnv("INVITE_MAX_EXPIRY"),
+		INVITE_MAX_EXPIRY: common.RequireSecondsEnv("INVITE_MAX_EXPIRY"),
 
 		SESSION_DURATION:         common.RequireSecondsEnv("SESSION_DURATION"),
 		WEBAUTHN_SESSION_TIMEOUT: common.RequireSecondsEnv("WEBAUTHN_SESSION_TIMEOUT"),

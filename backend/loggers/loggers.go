@@ -500,7 +500,7 @@ func (handler *Handler) maybeNotifyAdmin(entries []*entry, loggedAdminNotificati
 		ctx, handler.App.Database,
 		func(tx *ent.Tx, ctx context.Context) error {
 			userOb, stdErr := tx.User.Query().
-				Where(user.Username(common.AdminUsername)).
+				Where(user.ID(handler.App.Core.AdminID())).
 				WithMessengers().
 				Only(ctx)
 			if stdErr != nil {

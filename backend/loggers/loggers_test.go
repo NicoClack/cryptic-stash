@@ -535,6 +535,8 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		logger.DeleteWrittenLogs(t) // The database is preserved between program runs, so the logs will be too
 		app.RateLimiter = services.NewRateLimiter(app)
 		app.KeyValue = services.NewKeyValue(app)
+		app.Core = services.NewCore(app)
+		app.Core.Init()
 		logger.Start()
 		app.KeyValue.Init()
 		mockMessenger := testhelpers.NewMockMessenger("MOCK_MESSENGER")

@@ -1,7 +1,6 @@
 # TODO
 
-- Create an invite service
--   - Delete expired invites that are unused, should be called by the cleanup task
+- Replace ginCtx in auth service with ctx + actor. Add logging at the service level
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
 -   - Consistently limit ceremonies to single use? e.g when there are unexpected errors
 -   - Display the last used times for each passkey, as well as distinguishing between hardware and software keys
@@ -11,8 +10,9 @@
 - Create development Docker Compose setup
 -   - Switch to Deno and limit postinstall scripts (locally and in CI)
 - Create AccountAlert system:
--   - Should be viewable
--   - Admin should be CC'd
+-   - Should be viewable when you log in
+-   - Include logins, passkey changes, stash downloads etc
+-   - Admin should be CC'd for some levels
 - Create AccountAlert when passkey is cloned and demote the passkey
 - Replace adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
@@ -31,6 +31,7 @@
 - Remove old endpoints
 - Rate limit auth endpoints
 -   - No need to rate limit per endpoint, WebAuthn is unguessable so the main concern is DoS due to SQLite locks
+- Use actors more consistently, should the invite functions enforce ownership? Currently the actor is only passed to the service, which uses it for logging
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than \*common.App
 - Remove admin auth code logic
 - Remove 2FA actions
