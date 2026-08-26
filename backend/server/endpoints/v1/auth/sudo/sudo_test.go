@@ -205,6 +205,7 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 		allowSudo: true,
 		name:      "Test Passkey",
 	})
+	require.Zero(t, passkeyOb.LastUsedAt)
 	sessionToken := createSession(t, false, userOb.ID, passkeyOb.ID, app)
 	hashedToken := testcommon.HashSessionToken(t, sessionToken)
 
@@ -280,6 +281,9 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 		sessionOb.ExpiresAt,
 		elevationStartedAt, // The session expiry should have been extended
 	)
+
+	updatedElevationPasskey := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID)
+	require.WithinDuration(t, time.Now(), updatedElevationPasskey.LastUsedAt, time.Second)
 }
 func TestElevationFlow_SingleGroup_TwoSudo(t *testing.T) {
 	t.Parallel()

@@ -60,53 +60,6 @@ func TestStartLogin_StoresUniqueWebAuthnSessions(t *testing.T) {
 	require.True(t, tempKV.Get(auth.WebAuthnSessionStoreName, sessionID2.String(), &sessionData))
 }
 
-func TestValidateLogin_RejectsUnknownWebAuthnSessionID(t *testing.T) {
-	t.Parallel()
-
-	db := testcommon.CreateDB(t)
-	tx := testcommon.StartWriteTx(t, db)
-	_, _, _, wrappedErr := auth.ValidateLogin(
-		uuid.New(),
-		nil,
-		t.Context(),
-		auth.NewWebAuthnApp(testcommon.DefaultEnv()),
-		tx,
-		newMinimalTempKeyValueService(t),
-		testcommon.NewTestLogger(t),
-	)
-	require.ErrorIs(t, wrappedErr, auth.ErrInvalidWebAuthnSessionID)
-	require.NoError(t, tx.Rollback())
-}
-
-func TestValidateLogin_UnknownUser(t *testing.T) {
-	t.Parallel()
-
-	db := testcommon.CreateDB(t)
-	webAuthnApp := auth.NewWebAuthnApp(testcommon.DefaultEnv())
-	tempKV := newMinimalTempKeyValueService(t)
-
-	vAuthenticator, credential := newVirtualAuthenticator(
-		uuid.New(), // Unknown user
-	)
-
-	sessionID, options, wrappedErr := auth.StartLogin(webAuthnApp, tempKV)
-	require.NoError(t, wrappedErr)
-	parsedAssertionResp := createAssertion(t, options, vAuthenticator, credential)
-
-	tx := testcommon.StartWriteTx(t, db)
-	_, _, _, wrappedErr = auth.ValidateLogin(
-		sessionID,
-		parsedAssertionResp,
-		t.Context(),
-		webAuthnApp,
-		tx,
-		tempKV,
-		testcommon.NewTestLogger(t),
-	)
-	require.ErrorIs(t, wrappedErr, auth.ErrWebAuthnUserNotFound)
-	require.NoError(t, tx.Rollback())
-}
-
 // Loads a pregenerated passkey to test that the format hasn't changed and so previously created passkeys still work
 func TestValidateLogin_ExistingPasskey(t *testing.T) {
 	t.Parallel()
@@ -156,11 +109,14 @@ func TestValidateLogin_ExistingPasskey(t *testing.T) {
 	require.Equal(t, userOb.ID, returnedUser.ID)
 	require.Equal(t, passkeyOb.ID, returnedPasskey.ID)
 	require.NoError(t, tx.Commit())
+
+	reloadedPasskey := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID)
+	require.WithinDuration(t, time.Now(), reloadedPasskey.LastUsedAt, time.Second)
 }
 
 // This integration test can't go at the HTTP layer
 // because we need to assert exactly when the WebAuthn session is deleted
-func TestValidateLogin_UpdatesCredentialSignCount(t *testing.T) {
+func TestValidateLogin_UpdatesCredentialSignCountAndLastUsed(t *testing.T) {
 	t.Parallel()
 
 	db := testcommon.CreateDB(t)
@@ -200,7 +156,136 @@ func TestValidateLogin_UpdatesCredentialSignCount(t *testing.T) {
 	require.NoError(t, tx.Commit())
 	require.False(t, tempKV.Get(auth.WebAuthnSessionStoreName, sessionID.String(), &sessionData))
 
-	signCountAfter := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID).Credential.Authenticator.SignCount
-	require.Greater(t, signCountAfter, signCountBefore)
-	require.Equal(t, uint32(42), signCountAfter)
+	updatedPasskey := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID)
+	require.Greater(t, updatedPasskey.Credential.Authenticator.SignCount, signCountBefore)
+	require.Equal(t, uint32(42), updatedPasskey.Credential.Authenticator.SignCount)
+	require.WithinDuration(t, time.Now(), updatedPasskey.LastUsedAt, time.Second)
+}
+
+func TestValidateLogin_RejectsUnknownWebAuthnSessionID(t *testing.T) {
+	t.Parallel()
+
+	db := testcommon.CreateDB(t)
+	tx := testcommon.StartWriteTx(t, db)
+	_, _, _, wrappedErr := auth.ValidateLogin(
+		uuid.New(),
+		nil,
+		t.Context(),
+		auth.NewWebAuthnApp(testcommon.DefaultEnv()),
+		tx,
+		newMinimalTempKeyValueService(t),
+		testcommon.NewTestLogger(t),
+	)
+	require.ErrorIs(t, wrappedErr, auth.ErrInvalidWebAuthnSessionID)
+	require.NoError(t, tx.Rollback())
+}
+
+func TestValidateLogin_UnknownUser(t *testing.T) {
+	t.Parallel()
+
+	db := testcommon.CreateDB(t)
+	webAuthnApp := auth.NewWebAuthnApp(testcommon.DefaultEnv())
+	tempKV := newMinimalTempKeyValueService(t)
+
+	vAuthenticator, credential := newVirtualAuthenticator(
+		uuid.New(), // Unknown user
+	)
+
+	sessionID, options, wrappedErr := auth.StartLogin(webAuthnApp, tempKV)
+	require.NoError(t, wrappedErr)
+	parsedAssertionResp := createAssertion(t, options, vAuthenticator, credential)
+
+	tx := testcommon.StartWriteTx(t, db)
+	_, _, _, wrappedErr = auth.ValidateLogin(
+		sessionID,
+		parsedAssertionResp,
+		t.Context(),
+		webAuthnApp,
+		tx,
+		tempKV,
+		testcommon.NewTestLogger(t),
+	)
+	require.ErrorIs(t, wrappedErr, auth.ErrWebAuthnUserNotFound)
+	require.NoError(t, tx.Rollback())
+}
+
+func getRandomCOSEPublicKey(t *testing.T) []byte {
+	t.Helper()
+
+	creation, _, stdErr := auth.NewWebAuthnApp(testcommon.DefaultEnv()).BeginDiscoverableLogin()
+	require.NoError(t, stdErr)
+	vAuthenticator, credential := newVirtualAuthenticator(uuid.New())
+	createAssertion(t, creation.Response, vAuthenticator, credential)
+
+	credentialJSON := virtualwebauthn.CreateAttestationResponse(
+		testcommon.NewWebAuthnRelyingParty(testcommon.DefaultEnv()),
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AttestationOptions{
+			Challenge: creation.Response.Challenge,
+		},
+	)
+
+	var credentialResponse protocol.CredentialCreationResponse
+	stdErr = json.Unmarshal([]byte(credentialJSON), &credentialResponse)
+	require.NoError(t, stdErr)
+
+	return credentialResponse.AttestationResponse.PublicKey
+}
+
+func TestValidateLogin_RejectsSignatureMismatch(t *testing.T) {
+	t.Parallel()
+
+	db := testcommon.CreateDB(t)
+	dbClient := db.Client()
+	webAuthnApp := auth.NewWebAuthnApp(testcommon.DefaultEnv())
+	tempKV := newMinimalTempKeyValueService(t)
+
+	var clientCredential virtualwebauthn.Credential
+	require.NoError(t, json.Unmarshal([]byte(testdata.ExistingClientCredentialJSON), &clientCredential))
+
+	var serverCredential webauthn.Credential
+	require.NoError(t, json.Unmarshal([]byte(testdata.ExistingServerCredentialJSON), &serverCredential))
+	serverCredential.PublicKey = getRandomCOSEPublicKey(t) // Cause the signature checks to fail
+
+	userOb := createUser(t, dbClient)
+	passkeyOb := dbClient.Passkey.Create().
+		SetCreatedAt(time.Now()).
+		SetUpdatedAt(time.Now()).
+		SetName("existing-passkey").
+		SetAllowSudo(true).
+		SetCredentialID(serverCredential.ID).
+		SetCredential(serverCredential).
+		SetIsSecondGroup(false).
+		SetUserID(userOb.ID).
+		SaveX(t.Context())
+
+	vAuthenticator := virtualwebauthn.NewAuthenticator()
+	vAuthenticator.Options.UserHandle = userOb.ID[:]
+	vAuthenticator.AddCredential(clientCredential)
+
+	sessionID, options, wrappedErr := auth.StartLogin(webAuthnApp, tempKV)
+	require.NoError(t, wrappedErr)
+	parsedAssertionResp := createAssertion(t, options, vAuthenticator, clientCredential)
+
+	tx := testcommon.StartWriteTx(t, db)
+	_, _, _, wrappedErr = auth.ValidateLogin(
+		sessionID,
+		parsedAssertionResp,
+		t.Context(),
+		webAuthnApp,
+		tx,
+		tempKV,
+		testcommon.NewTestLogger(t),
+	)
+	require.Error(t, wrappedErr)
+
+	reloadedPasskey := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID)
+	require.Zero(
+		t,
+		reloadedPasskey.LastUsedAt,
+		// ^ Would be rolled back anyway, but this should only have been set if the login was successful
+	)
+
+	require.NoError(t, tx.Rollback())
 }

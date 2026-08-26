@@ -134,6 +134,7 @@ func ValidateLogin(
 	// TODO: race condition?
 	stdErr = tx.Passkey.UpdateOne(passkeyOb).
 		SetUpdatedAt(time.Now()).
+		SetLastUsedAt(time.Now()).
 		SetCredential(passkeyOb.Credential).
 		Exec(ctx)
 	if stdErr != nil {
