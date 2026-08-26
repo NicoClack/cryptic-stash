@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
@@ -70,7 +69,8 @@ func FinishElevation(
 	sessionDuration time.Duration,
 	ctx context.Context,
 ) common.WrappedError {
-	userOb, passkeyOb, cloneWarning, wrappedErr := ValidateLogin(
+	// Clone warnings are allowed for now, see the comments in ValidateLogin
+	userOb, passkeyOb, _, wrappedErr := ValidateLogin(
 		webAuthnSessionID,
 		parsedResponse,
 		ctx,
@@ -82,11 +82,6 @@ func FinishElevation(
 	if wrappedErr != nil {
 		return ErrWrapperFinishElevation.Wrap(
 			wrappedErr,
-		)
-	}
-	if cloneWarning {
-		return ErrWrapperFinishElevation.Wrap(
-			errors.New("TODO: rework when proper clone warning handling is implemented"),
 		)
 	}
 
