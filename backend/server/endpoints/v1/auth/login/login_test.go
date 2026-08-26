@@ -461,5 +461,146 @@ func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
 	)
 }
 
+func TestLoginFlow_RejectsReplayedAssertion_SameCeremony(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
+
+	var startResp login.StartLoginResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startResp.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	payload := login.FinishLoginPayload{
+		CredentialAssertionResponse: parsedAssertion,
+		WebAuthnSessionID:           startResp.WebAuthnSessionID,
+	}
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		payload,
+	)
+	require.Equal(t, http.StatusOK, finishRecorder.Code)
+
+	// And again...
+	replayRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		payload,
+	)
+	testcommon.AssertJSONResponse(
+		t, replayRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "WebAuthn session missing or expired",
+					Code:    "INVALID_WEBAUTHN_SESSION",
+				},
+			},
+		},
+	)
+}
+
+func TestLoginFlow_RejectsReplayedAssertion_NewCeremony(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+
+	startRecorderA := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorderA.Code)
+
+	var startRespA login.StartLoginResponse
+	stdErr := json.Unmarshal(startRecorderA.Body.Bytes(), &startRespA)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startRespA.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertionA protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertionA)
+	require.NoError(t, stdErr)
+
+	startRecorderB := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorderB.Code)
+
+	var startRespB login.StartLoginResponse
+	stdErr = json.Unmarshal(startRecorderB.Body.Bytes(), &startRespB)
+	require.NoError(t, stdErr)
+
+	require.NotEqual(t, startRespA.PublicKey.Challenge, startRespB.PublicKey.Challenge)
+
+	// Should be able to use assertion A on ceremony A
+	successfulRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertionA,
+			WebAuthnSessionID:           startRespA.WebAuthnSessionID,
+		},
+	)
+	require.Equal(t, http.StatusOK, successfulRecorder.Code)
+
+	// Shouldn't be able to use assertion A on ceremony B
+	replayRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertionA,
+			WebAuthnSessionID:           startRespB.WebAuthnSessionID,
+		},
+	)
+	testcommon.AssertJSONResponse(
+		t, replayRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "invalid credential",
+					Code:    "INVALID_CREDENTIAL",
+				},
+			},
+		},
+	)
+}
+
 // No tests for username enumeration because it's impossible with this setup,
 // see the comments in the start and finish endpoint implementations

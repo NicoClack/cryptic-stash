@@ -90,7 +90,7 @@ func TestList_UnusedPasskey(t *testing.T) {
 	require.NoError(t, stdErr)
 	require.Empty(t, resp.Errors)
 	require.Len(t, resp.FirstGroupPasskeys, 1)
-	require.Len(t, resp.SecondGroupPasskeys, 0)
+	require.Empty(t, resp.SecondGroupPasskeys)
 
 	passkeyInfo := resp.FirstGroupPasskeys[0]
 	require.Equal(t, passkeyOb.ID, passkeyInfo.ID)

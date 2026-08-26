@@ -1,11 +1,10 @@
 # TODO
 
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
+-   - Write test for credential signature replay
 -   - Consistently limit ceremonies to single use? e.g when there are unexpected errors
--   - Display the last used times for each passkey, as well as distinguishing between hardware and software keys
+-   - Fix race conditions when using a WebAuthn session or creating one (it's currently created before the tx commits). Maybe store them in the database instead?
 -   - Auto name passkeys based on AAGUID
--   - Finish integration tests, including credential replay
--   - Implement and add test for clone warning handling
 - Create development Docker Compose setup
 -   - Switch to Deno and limit postinstall scripts (locally and in CI)
 - Create AccountAlert system:
