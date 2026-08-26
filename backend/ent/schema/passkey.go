@@ -29,6 +29,7 @@ func (Passkey) Fields() []ent.Field {
 			GoType(webauthn.Credential{}).
 			ValueScanner(EncryptedField[webauthn.Credential]{KeyName: "auth_1"}),
 		field.Bool("isSecondGroup").Default(false),
+		field.Time("lastUsedAt").Optional(),
 		field.UUID("userID", uuid.Nil),
 	}
 }

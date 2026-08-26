@@ -31,6 +31,8 @@ const (
 	FieldCredential = "credential"
 	// FieldIsSecondGroup holds the string denoting the issecondgroup field in the database.
 	FieldIsSecondGroup = "is_second_group"
+	// FieldLastUsedAt holds the string denoting the lastusedat field in the database.
+	FieldLastUsedAt = "last_used_at"
 	// FieldUserID holds the string denoting the userid field in the database.
 	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -74,6 +76,7 @@ var Columns = []string{
 	FieldCredentialID,
 	FieldCredential,
 	FieldIsSecondGroup,
+	FieldLastUsedAt,
 	FieldUserID,
 }
 
@@ -135,6 +138,11 @@ func ByAllowSudo(opts ...sql.OrderTermOption) OrderOption {
 // ByIsSecondGroup orders the results by the isSecondGroup field.
 func ByIsSecondGroup(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsSecondGroup, opts...).ToFunc()
+}
+
+// ByLastUsedAt orders the results by the lastUsedAt field.
+func ByLastUsedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUsedAt, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the userID field.

@@ -86,6 +86,11 @@ func IsSecondGroup(v bool) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldIsSecondGroup, v))
 }
 
+// LastUsedAt applies equality check predicate on the "lastUsedAt" field. It's identical to LastUsedAtEQ.
+func LastUsedAt(v time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldLastUsedAt, v))
+}
+
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.Passkey {
 	return predicate.Passkey(sql.FieldEQ(FieldUserID, v))
@@ -294,6 +299,56 @@ func IsSecondGroupEQ(v bool) predicate.Passkey {
 // IsSecondGroupNEQ applies the NEQ predicate on the "isSecondGroup" field.
 func IsSecondGroupNEQ(v bool) predicate.Passkey {
 	return predicate.Passkey(sql.FieldNEQ(FieldIsSecondGroup, v))
+}
+
+// LastUsedAtEQ applies the EQ predicate on the "lastUsedAt" field.
+func LastUsedAtEQ(v time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldEQ(FieldLastUsedAt, v))
+}
+
+// LastUsedAtNEQ applies the NEQ predicate on the "lastUsedAt" field.
+func LastUsedAtNEQ(v time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldNEQ(FieldLastUsedAt, v))
+}
+
+// LastUsedAtIn applies the In predicate on the "lastUsedAt" field.
+func LastUsedAtIn(vs ...time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldIn(FieldLastUsedAt, vs...))
+}
+
+// LastUsedAtNotIn applies the NotIn predicate on the "lastUsedAt" field.
+func LastUsedAtNotIn(vs ...time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldNotIn(FieldLastUsedAt, vs...))
+}
+
+// LastUsedAtGT applies the GT predicate on the "lastUsedAt" field.
+func LastUsedAtGT(v time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldGT(FieldLastUsedAt, v))
+}
+
+// LastUsedAtGTE applies the GTE predicate on the "lastUsedAt" field.
+func LastUsedAtGTE(v time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldGTE(FieldLastUsedAt, v))
+}
+
+// LastUsedAtLT applies the LT predicate on the "lastUsedAt" field.
+func LastUsedAtLT(v time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldLT(FieldLastUsedAt, v))
+}
+
+// LastUsedAtLTE applies the LTE predicate on the "lastUsedAt" field.
+func LastUsedAtLTE(v time.Time) predicate.Passkey {
+	return predicate.Passkey(sql.FieldLTE(FieldLastUsedAt, v))
+}
+
+// LastUsedAtIsNil applies the IsNil predicate on the "lastUsedAt" field.
+func LastUsedAtIsNil() predicate.Passkey {
+	return predicate.Passkey(sql.FieldIsNull(FieldLastUsedAt))
+}
+
+// LastUsedAtNotNil applies the NotNil predicate on the "lastUsedAt" field.
+func LastUsedAtNotNil() predicate.Passkey {
+	return predicate.Passkey(sql.FieldNotNull(FieldLastUsedAt))
 }
 
 // UserIDEQ applies the EQ predicate on the "userID" field.

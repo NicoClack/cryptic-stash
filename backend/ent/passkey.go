@@ -34,6 +34,8 @@ type Passkey struct {
 	Credential webauthn.Credential `json:"credential,omitempty"`
 	// IsSecondGroup holds the value of the "isSecondGroup" field.
 	IsSecondGroup bool `json:"isSecondGroup,omitempty"`
+	// LastUsedAt holds the value of the "lastUsedAt" field.
+	LastUsedAt time.Time `json:"lastUsedAt,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -95,7 +97,7 @@ func (*Passkey) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case passkey.FieldName:
 			values[i] = new(sql.NullString)
-		case passkey.FieldCreatedAt, passkey.FieldUpdatedAt:
+		case passkey.FieldCreatedAt, passkey.FieldUpdatedAt, passkey.FieldLastUsedAt:
 			values[i] = new(sql.NullTime)
 		case passkey.FieldID, passkey.FieldUserID:
 			values[i] = new(uuid.UUID)
@@ -163,6 +165,12 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field isSecondGroup", values[i])
 			} else if value.Valid {
 				_m.IsSecondGroup = value.Bool
+			}
+		case passkey.FieldLastUsedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUsedAt", values[i])
+			} else if value.Valid {
+				_m.LastUsedAt = value.Time
 			}
 		case passkey.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -241,6 +249,9 @@ func (_m *Passkey) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("isSecondGroup=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsSecondGroup))
+	builder.WriteString(", ")
+	builder.WriteString("lastUsedAt=")
+	builder.WriteString(_m.LastUsedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

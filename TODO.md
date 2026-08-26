@@ -1,6 +1,5 @@
 # TODO
 
-- Replace ginCtx in auth service with ctx + actor. Add logging at the service level
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
 -   - Consistently limit ceremonies to single use? e.g when there are unexpected errors
 -   - Display the last used times for each passkey, as well as distinguishing between hardware and software keys
@@ -12,10 +11,11 @@
 - Create AccountAlert system:
 -   - Should be viewable when you log in
 -   - Include logins, passkey changes, stash downloads etc
+-   - Also create one when passkey is cloned, but don't demote for now
 -   - Admin should be CC'd for some levels
-- Create AccountAlert when passkey is cloned and demote the passkey
 - Replace adminCode
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
+- Enable SQLite's secure_delete pragma
 - Replace entity struct arguments to services with IDs? Like passkeyManagement.go does
 - Rework stash system
 -   - Users should be able to manage their own stashes but maybe can't download them while logged in for now
@@ -27,6 +27,7 @@
 -   -   - Makes the server practical to deploy on a small VM rather than just platforms like Railway
 -   -   - Removes the main DDoS method, the only other likely one is SQLite locks
 -   -   - Create hashing benchmark as the first env setup step. Remove old Go one
+-   - Allow user to configure waiting period
 - Replace non-standard Authorization headers with Bearer scheme
 - Remove old endpoints
 - Rate limit auth endpoints
@@ -35,7 +36,6 @@
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than \*common.App
 - Remove admin auth code logic
 - Remove 2FA actions
-- Should Auth.CreateSession take a second passkey ID rather than a sudo mode bool? Its sudo sessions don't have an elevation passkey which is unrealistic, although it should probably be a handled edge case throughout the codebase
 - Prevent disabling main email messenger
 - Allow general API and static asset rate limits to be set independently
 -   - Maybe 180 requests per 2 minutes for API? 1.5 req/s
@@ -43,6 +43,7 @@
 -   - If using a WAF, it's probably better to let it handle these, to minimise in-memory locks
 - Block IPs who get passwords wrong too often. Use exponential backoff
 - Send message when a stash password is correctly entered while it's locked
+- Move package logging to the service layer, return result structs with the information needed to determine what to log
 - Add password strength requirements, maybe using https://github.com/dropbox/zxcvbn or https://github.com/zxcvbn-ts/zxcvbn ? Use matcher-pwned
 -   - Could a cost estimate be displayed instead? Similar to the experiments 1Password did
 - Add /.well-known/change-password redirect
@@ -153,7 +154,10 @@
 - Extend sessions while the user is logged in, but maybe not sudo ones?
 - Prompt user to remove other sessions when they log in?
 - Move from gin, its maintenance isn't great
-- Allow user to increase waiting period, users could create a second account for a digital legacy. Although would that require some kind of split password system?
+- Add sudo recovery codes
+-   - When a passkey clone is detected, demote the passkey to non-sudo and send a sudo recovery code
+-   - When users log in, they can use the code to promote their active passkey to sudo
+-   - Admin should also be able to send it in the event of partial lockouts, provided they verify the user's identity
 - Research github.com/awnumar/memguard
 - Refactor the logger
 -   - Mostly to improve the self logging

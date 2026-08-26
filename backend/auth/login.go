@@ -102,16 +102,31 @@ func ValidateLogin(
 	}
 
 	if credential.Authenticator.CloneWarning {
+		// TODO: change this to a warning once AccountAlerts are implemented
+		// TODO: eventually these passkeys will be demoted and a sudo recovery code will be sent, but until the
+		// latter is implemented, demoting isn't worth the sudo lockout risk.
+		// This is a pretty low risk signal since it can have some false positives and only really tells you that
+		// you've been hacked after the fact (an attacker can just increase the sign count by 1,000
+		// and only the original passkey will trigger the warning). Since this is a recovery site,
+		// that could be a while, so the attacker has likely moved on by the time this is detected.
+		//
+		// Note: once this is implemented, ensure ValidateLogin wasn't called as part of an elevation.
+		// Don't allow a sudo session when the passkey is now non-sudo.
+		// And maybe prevent sudo + cloned (non-sudo) from being sudo eligible.
 		logger.Error(
 			"Security warning: authenticator may have been cloned",
 			"userID",
 			userOb.ID,
+			"passkeyID",
+			passkeyOb.ID,
 			"credentialID",
 			credential.ID,
-			// Backed up keys might be more likely to trigger this warning?
-			// Although most seem to leave the counter at 0
+			// Synced passkeys should have the counter hardcoded to zero, but maybe there are some weird implementations
+			// that don't do this and can have synchronisation issues with the counter.
 			"credentialBackupState",
 			credential.Flags.BackupState,
+			"credentialAAGUID",
+			credential.Authenticator.AAGUID,
 		)
 	}
 
