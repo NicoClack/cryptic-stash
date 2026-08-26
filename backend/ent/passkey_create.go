@@ -39,6 +39,20 @@ func (_c *PasskeyCreate) SetUpdatedAt(v time.Time) *PasskeyCreate {
 	return _c
 }
 
+// SetLastUsedAt sets the "lastUsedAt" field.
+func (_c *PasskeyCreate) SetLastUsedAt(v time.Time) *PasskeyCreate {
+	_c.mutation.SetLastUsedAt(v)
+	return _c
+}
+
+// SetNillableLastUsedAt sets the "lastUsedAt" field if the given value is not nil.
+func (_c *PasskeyCreate) SetNillableLastUsedAt(v *time.Time) *PasskeyCreate {
+	if v != nil {
+		_c.SetLastUsedAt(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *PasskeyCreate) SetName(v string) *PasskeyCreate {
 	_c.mutation.SetName(v)
@@ -73,20 +87,6 @@ func (_c *PasskeyCreate) SetIsSecondGroup(v bool) *PasskeyCreate {
 func (_c *PasskeyCreate) SetNillableIsSecondGroup(v *bool) *PasskeyCreate {
 	if v != nil {
 		_c.SetIsSecondGroup(*v)
-	}
-	return _c
-}
-
-// SetLastUsedAt sets the "lastUsedAt" field.
-func (_c *PasskeyCreate) SetLastUsedAt(v time.Time) *PasskeyCreate {
-	_c.mutation.SetLastUsedAt(v)
-	return _c
-}
-
-// SetNillableLastUsedAt sets the "lastUsedAt" field if the given value is not nil.
-func (_c *PasskeyCreate) SetNillableLastUsedAt(v *time.Time) *PasskeyCreate {
-	if v != nil {
-		_c.SetLastUsedAt(*v)
 	}
 	return _c
 }
@@ -277,6 +277,10 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec, error) {
 		_spec.SetField(passkey.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.LastUsedAt(); ok {
+		_spec.SetField(passkey.FieldLastUsedAt, field.TypeTime, value)
+		_node.LastUsedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -300,10 +304,6 @@ func (_c *PasskeyCreate) createSpec() (*Passkey, *sqlgraph.CreateSpec, error) {
 	if value, ok := _c.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
 		_node.IsSecondGroup = value
-	}
-	if value, ok := _c.mutation.LastUsedAt(); ok {
-		_spec.SetField(passkey.FieldLastUsedAt, field.TypeTime, value)
-		_node.LastUsedAt = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -430,6 +430,24 @@ func (u *PasskeyUpsert) UpdateUpdatedAt() *PasskeyUpsert {
 	return u
 }
 
+// SetLastUsedAt sets the "lastUsedAt" field.
+func (u *PasskeyUpsert) SetLastUsedAt(v time.Time) *PasskeyUpsert {
+	u.Set(passkey.FieldLastUsedAt, v)
+	return u
+}
+
+// UpdateLastUsedAt sets the "lastUsedAt" field to the value that was provided on create.
+func (u *PasskeyUpsert) UpdateLastUsedAt() *PasskeyUpsert {
+	u.SetExcluded(passkey.FieldLastUsedAt)
+	return u
+}
+
+// ClearLastUsedAt clears the value of the "lastUsedAt" field.
+func (u *PasskeyUpsert) ClearLastUsedAt() *PasskeyUpsert {
+	u.SetNull(passkey.FieldLastUsedAt)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *PasskeyUpsert) SetName(v string) *PasskeyUpsert {
 	u.Set(passkey.FieldName, v)
@@ -487,24 +505,6 @@ func (u *PasskeyUpsert) SetIsSecondGroup(v bool) *PasskeyUpsert {
 // UpdateIsSecondGroup sets the "isSecondGroup" field to the value that was provided on create.
 func (u *PasskeyUpsert) UpdateIsSecondGroup() *PasskeyUpsert {
 	u.SetExcluded(passkey.FieldIsSecondGroup)
-	return u
-}
-
-// SetLastUsedAt sets the "lastUsedAt" field.
-func (u *PasskeyUpsert) SetLastUsedAt(v time.Time) *PasskeyUpsert {
-	u.Set(passkey.FieldLastUsedAt, v)
-	return u
-}
-
-// UpdateLastUsedAt sets the "lastUsedAt" field to the value that was provided on create.
-func (u *PasskeyUpsert) UpdateLastUsedAt() *PasskeyUpsert {
-	u.SetExcluded(passkey.FieldLastUsedAt)
-	return u
-}
-
-// ClearLastUsedAt clears the value of the "lastUsedAt" field.
-func (u *PasskeyUpsert) ClearLastUsedAt() *PasskeyUpsert {
-	u.SetNull(passkey.FieldLastUsedAt)
 	return u
 }
 
@@ -596,6 +596,27 @@ func (u *PasskeyUpsertOne) UpdateUpdatedAt() *PasskeyUpsertOne {
 	})
 }
 
+// SetLastUsedAt sets the "lastUsedAt" field.
+func (u *PasskeyUpsertOne) SetLastUsedAt(v time.Time) *PasskeyUpsertOne {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.SetLastUsedAt(v)
+	})
+}
+
+// UpdateLastUsedAt sets the "lastUsedAt" field to the value that was provided on create.
+func (u *PasskeyUpsertOne) UpdateLastUsedAt() *PasskeyUpsertOne {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.UpdateLastUsedAt()
+	})
+}
+
+// ClearLastUsedAt clears the value of the "lastUsedAt" field.
+func (u *PasskeyUpsertOne) ClearLastUsedAt() *PasskeyUpsertOne {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.ClearLastUsedAt()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *PasskeyUpsertOne) SetName(v string) *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
@@ -663,27 +684,6 @@ func (u *PasskeyUpsertOne) SetIsSecondGroup(v bool) *PasskeyUpsertOne {
 func (u *PasskeyUpsertOne) UpdateIsSecondGroup() *PasskeyUpsertOne {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.UpdateIsSecondGroup()
-	})
-}
-
-// SetLastUsedAt sets the "lastUsedAt" field.
-func (u *PasskeyUpsertOne) SetLastUsedAt(v time.Time) *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.SetLastUsedAt(v)
-	})
-}
-
-// UpdateLastUsedAt sets the "lastUsedAt" field to the value that was provided on create.
-func (u *PasskeyUpsertOne) UpdateLastUsedAt() *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateLastUsedAt()
-	})
-}
-
-// ClearLastUsedAt clears the value of the "lastUsedAt" field.
-func (u *PasskeyUpsertOne) ClearLastUsedAt() *PasskeyUpsertOne {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.ClearLastUsedAt()
 	})
 }
 
@@ -947,6 +947,27 @@ func (u *PasskeyUpsertBulk) UpdateUpdatedAt() *PasskeyUpsertBulk {
 	})
 }
 
+// SetLastUsedAt sets the "lastUsedAt" field.
+func (u *PasskeyUpsertBulk) SetLastUsedAt(v time.Time) *PasskeyUpsertBulk {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.SetLastUsedAt(v)
+	})
+}
+
+// UpdateLastUsedAt sets the "lastUsedAt" field to the value that was provided on create.
+func (u *PasskeyUpsertBulk) UpdateLastUsedAt() *PasskeyUpsertBulk {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.UpdateLastUsedAt()
+	})
+}
+
+// ClearLastUsedAt clears the value of the "lastUsedAt" field.
+func (u *PasskeyUpsertBulk) ClearLastUsedAt() *PasskeyUpsertBulk {
+	return u.Update(func(s *PasskeyUpsert) {
+		s.ClearLastUsedAt()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *PasskeyUpsertBulk) SetName(v string) *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
@@ -1014,27 +1035,6 @@ func (u *PasskeyUpsertBulk) SetIsSecondGroup(v bool) *PasskeyUpsertBulk {
 func (u *PasskeyUpsertBulk) UpdateIsSecondGroup() *PasskeyUpsertBulk {
 	return u.Update(func(s *PasskeyUpsert) {
 		s.UpdateIsSecondGroup()
-	})
-}
-
-// SetLastUsedAt sets the "lastUsedAt" field.
-func (u *PasskeyUpsertBulk) SetLastUsedAt(v time.Time) *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.SetLastUsedAt(v)
-	})
-}
-
-// UpdateLastUsedAt sets the "lastUsedAt" field to the value that was provided on create.
-func (u *PasskeyUpsertBulk) UpdateLastUsedAt() *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.UpdateLastUsedAt()
-	})
-}
-
-// ClearLastUsedAt clears the value of the "lastUsedAt" field.
-func (u *PasskeyUpsertBulk) ClearLastUsedAt() *PasskeyUpsertBulk {
-	return u.Update(func(s *PasskeyUpsert) {
-		s.ClearLastUsedAt()
 	})
 }
 

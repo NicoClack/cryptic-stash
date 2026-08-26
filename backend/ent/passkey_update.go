@@ -52,6 +52,26 @@ func (_u *PasskeyUpdate) SetUpdatedAt(v time.Time) *PasskeyUpdate {
 	return _u
 }
 
+// SetLastUsedAt sets the "lastUsedAt" field.
+func (_u *PasskeyUpdate) SetLastUsedAt(v time.Time) *PasskeyUpdate {
+	_u.mutation.SetLastUsedAt(v)
+	return _u
+}
+
+// SetNillableLastUsedAt sets the "lastUsedAt" field if the given value is not nil.
+func (_u *PasskeyUpdate) SetNillableLastUsedAt(v *time.Time) *PasskeyUpdate {
+	if v != nil {
+		_u.SetLastUsedAt(*v)
+	}
+	return _u
+}
+
+// ClearLastUsedAt clears the value of the "lastUsedAt" field.
+func (_u *PasskeyUpdate) ClearLastUsedAt() *PasskeyUpdate {
+	_u.mutation.ClearLastUsedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *PasskeyUpdate) SetName(v string) *PasskeyUpdate {
 	_u.mutation.SetName(v)
@@ -111,26 +131,6 @@ func (_u *PasskeyUpdate) SetNillableIsSecondGroup(v *bool) *PasskeyUpdate {
 	if v != nil {
 		_u.SetIsSecondGroup(*v)
 	}
-	return _u
-}
-
-// SetLastUsedAt sets the "lastUsedAt" field.
-func (_u *PasskeyUpdate) SetLastUsedAt(v time.Time) *PasskeyUpdate {
-	_u.mutation.SetLastUsedAt(v)
-	return _u
-}
-
-// SetNillableLastUsedAt sets the "lastUsedAt" field if the given value is not nil.
-func (_u *PasskeyUpdate) SetNillableLastUsedAt(v *time.Time) *PasskeyUpdate {
-	if v != nil {
-		_u.SetLastUsedAt(*v)
-	}
-	return _u
-}
-
-// ClearLastUsedAt clears the value of the "lastUsedAt" field.
-func (_u *PasskeyUpdate) ClearLastUsedAt() *PasskeyUpdate {
-	_u.mutation.ClearLastUsedAt()
 	return _u
 }
 
@@ -308,6 +308,12 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(passkey.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.LastUsedAt(); ok {
+		_spec.SetField(passkey.FieldLastUsedAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastUsedAtCleared() {
+		_spec.ClearField(passkey.FieldLastUsedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 	}
@@ -326,12 +332,6 @@ func (_u *PasskeyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.LastUsedAt(); ok {
-		_spec.SetField(passkey.FieldLastUsedAt, field.TypeTime, value)
-	}
-	if _u.mutation.LastUsedAtCleared() {
-		_spec.ClearField(passkey.FieldLastUsedAt, field.TypeTime)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -492,6 +492,26 @@ func (_u *PasskeyUpdateOne) SetUpdatedAt(v time.Time) *PasskeyUpdateOne {
 	return _u
 }
 
+// SetLastUsedAt sets the "lastUsedAt" field.
+func (_u *PasskeyUpdateOne) SetLastUsedAt(v time.Time) *PasskeyUpdateOne {
+	_u.mutation.SetLastUsedAt(v)
+	return _u
+}
+
+// SetNillableLastUsedAt sets the "lastUsedAt" field if the given value is not nil.
+func (_u *PasskeyUpdateOne) SetNillableLastUsedAt(v *time.Time) *PasskeyUpdateOne {
+	if v != nil {
+		_u.SetLastUsedAt(*v)
+	}
+	return _u
+}
+
+// ClearLastUsedAt clears the value of the "lastUsedAt" field.
+func (_u *PasskeyUpdateOne) ClearLastUsedAt() *PasskeyUpdateOne {
+	_u.mutation.ClearLastUsedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *PasskeyUpdateOne) SetName(v string) *PasskeyUpdateOne {
 	_u.mutation.SetName(v)
@@ -551,26 +571,6 @@ func (_u *PasskeyUpdateOne) SetNillableIsSecondGroup(v *bool) *PasskeyUpdateOne 
 	if v != nil {
 		_u.SetIsSecondGroup(*v)
 	}
-	return _u
-}
-
-// SetLastUsedAt sets the "lastUsedAt" field.
-func (_u *PasskeyUpdateOne) SetLastUsedAt(v time.Time) *PasskeyUpdateOne {
-	_u.mutation.SetLastUsedAt(v)
-	return _u
-}
-
-// SetNillableLastUsedAt sets the "lastUsedAt" field if the given value is not nil.
-func (_u *PasskeyUpdateOne) SetNillableLastUsedAt(v *time.Time) *PasskeyUpdateOne {
-	if v != nil {
-		_u.SetLastUsedAt(*v)
-	}
-	return _u
-}
-
-// ClearLastUsedAt clears the value of the "lastUsedAt" field.
-func (_u *PasskeyUpdateOne) ClearLastUsedAt() *PasskeyUpdateOne {
-	_u.mutation.ClearLastUsedAt()
 	return _u
 }
 
@@ -778,6 +778,12 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(passkey.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.LastUsedAt(); ok {
+		_spec.SetField(passkey.FieldLastUsedAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastUsedAtCleared() {
+		_spec.ClearField(passkey.FieldLastUsedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(passkey.FieldName, field.TypeString, value)
 	}
@@ -796,12 +802,6 @@ func (_u *PasskeyUpdateOne) sqlSave(ctx context.Context) (_node *Passkey, err er
 	}
 	if value, ok := _u.mutation.IsSecondGroup(); ok {
 		_spec.SetField(passkey.FieldIsSecondGroup, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.LastUsedAt(); ok {
-		_spec.SetField(passkey.FieldLastUsedAt, field.TypeTime, value)
-	}
-	if _u.mutation.LastUsedAtCleared() {
-		_spec.ClearField(passkey.FieldLastUsedAt, field.TypeTime)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

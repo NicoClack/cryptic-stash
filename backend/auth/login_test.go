@@ -111,7 +111,8 @@ func TestValidateLogin_ExistingPasskey(t *testing.T) {
 	require.NoError(t, tx.Commit())
 
 	reloadedPasskey := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID)
-	require.WithinDuration(t, time.Now(), reloadedPasskey.LastUsedAt, time.Second)
+	require.NotNil(t, reloadedPasskey.LastUsedAt)
+	require.WithinDuration(t, time.Now(), *reloadedPasskey.LastUsedAt, time.Second)
 }
 
 // This integration test can't go at the HTTP layer
@@ -159,7 +160,8 @@ func TestValidateLogin_UpdatesCredentialSignCountAndLastUsed(t *testing.T) {
 	updatedPasskey := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID)
 	require.Greater(t, updatedPasskey.Credential.Authenticator.SignCount, signCountBefore)
 	require.Equal(t, uint32(42), updatedPasskey.Credential.Authenticator.SignCount)
-	require.WithinDuration(t, time.Now(), updatedPasskey.LastUsedAt, time.Second)
+	require.NotNil(t, updatedPasskey.LastUsedAt)
+	require.WithinDuration(t, time.Now(), *updatedPasskey.LastUsedAt, time.Second)
 }
 
 func TestValidateLogin_RejectsUnknownWebAuthnSessionID(t *testing.T) {

@@ -5388,12 +5388,12 @@ type PasskeyMutation struct {
 	id                      *uuid.UUID
 	createdAt               *time.Time
 	updatedAt               *time.Time
+	lastUsedAt              *time.Time
 	name                    *string
 	allowSudo               *bool
 	credentialID            *[]byte
 	credential              *webauthn.Credential
 	isSecondGroup           *bool
-	lastUsedAt              *time.Time
 	clearedFields           map[string]struct{}
 	user                    *uuid.UUID
 	cleareduser             bool
@@ -5584,6 +5584,55 @@ func (m *PasskeyMutation) ResetUpdatedAt() {
 	m.updatedAt = nil
 }
 
+// SetLastUsedAt sets the "lastUsedAt" field.
+func (m *PasskeyMutation) SetLastUsedAt(t time.Time) {
+	m.lastUsedAt = &t
+}
+
+// LastUsedAt returns the value of the "lastUsedAt" field in the mutation.
+func (m *PasskeyMutation) LastUsedAt() (r time.Time, exists bool) {
+	v := m.lastUsedAt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUsedAt returns the old "lastUsedAt" field's value of the Passkey entity.
+// If the Passkey object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PasskeyMutation) OldLastUsedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUsedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUsedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUsedAt: %w", err)
+	}
+	return oldValue.LastUsedAt, nil
+}
+
+// ClearLastUsedAt clears the value of the "lastUsedAt" field.
+func (m *PasskeyMutation) ClearLastUsedAt() {
+	m.lastUsedAt = nil
+	m.clearedFields[passkey.FieldLastUsedAt] = struct{}{}
+}
+
+// LastUsedAtCleared returns if the "lastUsedAt" field was cleared in this mutation.
+func (m *PasskeyMutation) LastUsedAtCleared() bool {
+	_, ok := m.clearedFields[passkey.FieldLastUsedAt]
+	return ok
+}
+
+// ResetLastUsedAt resets all changes to the "lastUsedAt" field.
+func (m *PasskeyMutation) ResetLastUsedAt() {
+	m.lastUsedAt = nil
+	delete(m.clearedFields, passkey.FieldLastUsedAt)
+}
+
 // SetName sets the "name" field.
 func (m *PasskeyMutation) SetName(s string) {
 	m.name = &s
@@ -5762,55 +5811,6 @@ func (m *PasskeyMutation) OldIsSecondGroup(ctx context.Context) (v bool, err err
 // ResetIsSecondGroup resets all changes to the "isSecondGroup" field.
 func (m *PasskeyMutation) ResetIsSecondGroup() {
 	m.isSecondGroup = nil
-}
-
-// SetLastUsedAt sets the "lastUsedAt" field.
-func (m *PasskeyMutation) SetLastUsedAt(t time.Time) {
-	m.lastUsedAt = &t
-}
-
-// LastUsedAt returns the value of the "lastUsedAt" field in the mutation.
-func (m *PasskeyMutation) LastUsedAt() (r time.Time, exists bool) {
-	v := m.lastUsedAt
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLastUsedAt returns the old "lastUsedAt" field's value of the Passkey entity.
-// If the Passkey object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PasskeyMutation) OldLastUsedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLastUsedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLastUsedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLastUsedAt: %w", err)
-	}
-	return oldValue.LastUsedAt, nil
-}
-
-// ClearLastUsedAt clears the value of the "lastUsedAt" field.
-func (m *PasskeyMutation) ClearLastUsedAt() {
-	m.lastUsedAt = nil
-	m.clearedFields[passkey.FieldLastUsedAt] = struct{}{}
-}
-
-// LastUsedAtCleared returns if the "lastUsedAt" field was cleared in this mutation.
-func (m *PasskeyMutation) LastUsedAtCleared() bool {
-	_, ok := m.clearedFields[passkey.FieldLastUsedAt]
-	return ok
-}
-
-// ResetLastUsedAt resets all changes to the "lastUsedAt" field.
-func (m *PasskeyMutation) ResetLastUsedAt() {
-	m.lastUsedAt = nil
-	delete(m.clearedFields, passkey.FieldLastUsedAt)
 }
 
 // SetUserID sets the "userID" field.
@@ -6025,6 +6025,9 @@ func (m *PasskeyMutation) Fields() []string {
 	if m.updatedAt != nil {
 		fields = append(fields, passkey.FieldUpdatedAt)
 	}
+	if m.lastUsedAt != nil {
+		fields = append(fields, passkey.FieldLastUsedAt)
+	}
 	if m.name != nil {
 		fields = append(fields, passkey.FieldName)
 	}
@@ -6039,9 +6042,6 @@ func (m *PasskeyMutation) Fields() []string {
 	}
 	if m.isSecondGroup != nil {
 		fields = append(fields, passkey.FieldIsSecondGroup)
-	}
-	if m.lastUsedAt != nil {
-		fields = append(fields, passkey.FieldLastUsedAt)
 	}
 	if m.user != nil {
 		fields = append(fields, passkey.FieldUserID)
@@ -6058,6 +6058,8 @@ func (m *PasskeyMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case passkey.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case passkey.FieldLastUsedAt:
+		return m.LastUsedAt()
 	case passkey.FieldName:
 		return m.Name()
 	case passkey.FieldAllowSudo:
@@ -6068,8 +6070,6 @@ func (m *PasskeyMutation) Field(name string) (ent.Value, bool) {
 		return m.Credential()
 	case passkey.FieldIsSecondGroup:
 		return m.IsSecondGroup()
-	case passkey.FieldLastUsedAt:
-		return m.LastUsedAt()
 	case passkey.FieldUserID:
 		return m.UserID()
 	}
@@ -6085,6 +6085,8 @@ func (m *PasskeyMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCreatedAt(ctx)
 	case passkey.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case passkey.FieldLastUsedAt:
+		return m.OldLastUsedAt(ctx)
 	case passkey.FieldName:
 		return m.OldName(ctx)
 	case passkey.FieldAllowSudo:
@@ -6095,8 +6097,6 @@ func (m *PasskeyMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCredential(ctx)
 	case passkey.FieldIsSecondGroup:
 		return m.OldIsSecondGroup(ctx)
-	case passkey.FieldLastUsedAt:
-		return m.OldLastUsedAt(ctx)
 	case passkey.FieldUserID:
 		return m.OldUserID(ctx)
 	}
@@ -6121,6 +6121,13 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
+		return nil
+	case passkey.FieldLastUsedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUsedAt(v)
 		return nil
 	case passkey.FieldName:
 		v, ok := value.(string)
@@ -6156,13 +6163,6 @@ func (m *PasskeyMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsSecondGroup(v)
-		return nil
-	case passkey.FieldLastUsedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLastUsedAt(v)
 		return nil
 	case passkey.FieldUserID:
 		v, ok := value.(uuid.UUID)
@@ -6235,6 +6235,9 @@ func (m *PasskeyMutation) ResetField(name string) error {
 	case passkey.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
+	case passkey.FieldLastUsedAt:
+		m.ResetLastUsedAt()
+		return nil
 	case passkey.FieldName:
 		m.ResetName()
 		return nil
@@ -6249,9 +6252,6 @@ func (m *PasskeyMutation) ResetField(name string) error {
 		return nil
 	case passkey.FieldIsSecondGroup:
 		m.ResetIsSecondGroup()
-		return nil
-	case passkey.FieldLastUsedAt:
-		m.ResetLastUsedAt()
 		return nil
 	case passkey.FieldUserID:
 		m.ResetUserID()

@@ -21,6 +21,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updatedat field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldLastUsedAt holds the string denoting the lastusedat field in the database.
+	FieldLastUsedAt = "last_used_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldAllowSudo holds the string denoting the allowsudo field in the database.
@@ -31,8 +33,6 @@ const (
 	FieldCredential = "credential"
 	// FieldIsSecondGroup holds the string denoting the issecondgroup field in the database.
 	FieldIsSecondGroup = "is_second_group"
-	// FieldLastUsedAt holds the string denoting the lastusedat field in the database.
-	FieldLastUsedAt = "last_used_at"
 	// FieldUserID holds the string denoting the userid field in the database.
 	FieldUserID = "user_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -71,12 +71,12 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldLastUsedAt,
 	FieldName,
 	FieldAllowSudo,
 	FieldCredentialID,
 	FieldCredential,
 	FieldIsSecondGroup,
-	FieldLastUsedAt,
 	FieldUserID,
 }
 
@@ -125,6 +125,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByLastUsedAt orders the results by the lastUsedAt field.
+func ByLastUsedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUsedAt, opts...).ToFunc()
+}
+
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
@@ -138,11 +143,6 @@ func ByAllowSudo(opts ...sql.OrderTermOption) OrderOption {
 // ByIsSecondGroup orders the results by the isSecondGroup field.
 func ByIsSecondGroup(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsSecondGroup, opts...).ToFunc()
-}
-
-// ByLastUsedAt orders the results by the lastUsedAt field.
-func ByLastUsedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLastUsedAt, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the userID field.

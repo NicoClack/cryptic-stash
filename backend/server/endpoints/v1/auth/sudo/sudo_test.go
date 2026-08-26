@@ -283,7 +283,8 @@ func TestElevationFlow_SingleGroup_PasskeyUsedTwice(t *testing.T) {
 	)
 
 	updatedElevationPasskey := dbClient.Passkey.GetX(t.Context(), passkeyOb.ID)
-	require.WithinDuration(t, time.Now(), updatedElevationPasskey.LastUsedAt, time.Second)
+	require.NotNil(t, updatedElevationPasskey.LastUsedAt)
+	require.WithinDuration(t, time.Now(), *updatedElevationPasskey.LastUsedAt, time.Second)
 }
 func TestElevationFlow_SingleGroup_TwoSudo(t *testing.T) {
 	t.Parallel()

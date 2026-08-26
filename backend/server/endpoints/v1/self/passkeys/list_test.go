@@ -53,6 +53,7 @@ func TestList(t *testing.T) {
 			require.True(t, passkeyInfo.IsSessionFirst)
 			require.False(t, passkeyInfo.IsSessionSecond)
 			require.WithinDuration(t, firstGroupPasskey.CreatedAt, passkeyInfo.CreatedAt, 0)
+			require.NotNil(t, passkeyInfo.LastUsedAt)
 			require.WithinDuration(t, lastUsedAt, *passkeyInfo.LastUsedAt, time.Second)
 		}
 	}

@@ -22,6 +22,7 @@ func (Passkey) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
+		field.Time("lastUsedAt").Optional().Nillable(),
 		field.String("name").MinLen(1).MaxLen(64),
 		field.Bool("allowSudo"),
 		field.Bytes("credentialID").Unique().MinLen(16).MaxLen(1023),
@@ -29,7 +30,6 @@ func (Passkey) Fields() []ent.Field {
 			GoType(webauthn.Credential{}).
 			ValueScanner(EncryptedField[webauthn.Credential]{KeyName: "auth_1"}),
 		field.Bool("isSecondGroup").Default(false),
-		field.Time("lastUsedAt").Optional(),
 		field.UUID("userID", uuid.Nil),
 	}
 }

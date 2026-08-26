@@ -210,12 +210,12 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Size: 64},
 		{Name: "allow_sudo", Type: field.TypeBool},
 		{Name: "credential_id", Type: field.TypeBytes, Unique: true, Size: 1023},
 		{Name: "credential", Type: field.TypeBytes},
 		{Name: "is_second_group", Type: field.TypeBool, Default: false},
-		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// PasskeysTable holds the schema information for the "passkeys" table.
@@ -235,12 +235,12 @@ var (
 			{
 				Name:    "passkey_user_id_credential_id",
 				Unique:  false,
-				Columns: []*schema.Column{PasskeysColumns[9], PasskeysColumns[5]},
+				Columns: []*schema.Column{PasskeysColumns[9], PasskeysColumns[6]},
 			},
 			{
 				Name:    "passkey_user_id_name",
 				Unique:  true,
-				Columns: []*schema.Column{PasskeysColumns[9], PasskeysColumns[3]},
+				Columns: []*schema.Column{PasskeysColumns[9], PasskeysColumns[4]},
 			},
 		},
 	}

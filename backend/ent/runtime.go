@@ -217,7 +217,7 @@ func init() {
 	// passkey.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
 	passkey.UpdateDefaultUpdatedAt = passkeyDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// passkeyDescName is the schema descriptor for name field.
-	passkeyDescName := passkeyFields[3].Descriptor()
+	passkeyDescName := passkeyFields[4].Descriptor()
 	// passkey.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	passkey.NameValidator = func() func(string) error {
 		validators := passkeyDescName.Validators
@@ -235,7 +235,7 @@ func init() {
 		}
 	}()
 	// passkeyDescCredentialID is the schema descriptor for credentialID field.
-	passkeyDescCredentialID := passkeyFields[5].Descriptor()
+	passkeyDescCredentialID := passkeyFields[6].Descriptor()
 	// passkey.CredentialIDValidator is a validator for the "credentialID" field. It is called by the builders before save.
 	passkey.CredentialIDValidator = func() func([]byte) error {
 		validators := passkeyDescCredentialID.Validators
@@ -253,10 +253,10 @@ func init() {
 		}
 	}()
 	// passkeyDescCredential is the schema descriptor for credential field.
-	passkeyDescCredential := passkeyFields[6].Descriptor()
+	passkeyDescCredential := passkeyFields[7].Descriptor()
 	passkey.ValueScanner.Credential = passkeyDescCredential.ValueScanner.(field.TypeValueScanner[webauthn.Credential])
 	// passkeyDescIsSecondGroup is the schema descriptor for isSecondGroup field.
-	passkeyDescIsSecondGroup := passkeyFields[7].Descriptor()
+	passkeyDescIsSecondGroup := passkeyFields[8].Descriptor()
 	// passkey.DefaultIsSecondGroup holds the default value on creation for the isSecondGroup field.
 	passkey.DefaultIsSecondGroup = passkeyDescIsSecondGroup.Default.(bool)
 	// passkeyDescID is the schema descriptor for id field.

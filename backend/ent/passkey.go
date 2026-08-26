@@ -24,6 +24,8 @@ type Passkey struct {
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// UpdatedAt holds the value of the "updatedAt" field.
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// LastUsedAt holds the value of the "lastUsedAt" field.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// AllowSudo holds the value of the "allowSudo" field.
@@ -34,8 +36,6 @@ type Passkey struct {
 	Credential webauthn.Credential `json:"credential,omitempty"`
 	// IsSecondGroup holds the value of the "isSecondGroup" field.
 	IsSecondGroup bool `json:"isSecondGroup,omitempty"`
-	// LastUsedAt holds the value of the "lastUsedAt" field.
-	LastUsedAt time.Time `json:"lastUsedAt,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -136,6 +136,13 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case passkey.FieldLastUsedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUsedAt", values[i])
+			} else if value.Valid {
+				_m.LastUsedAt = new(time.Time)
+				*_m.LastUsedAt = value.Time
+			}
 		case passkey.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -165,12 +172,6 @@ func (_m *Passkey) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field isSecondGroup", values[i])
 			} else if value.Valid {
 				_m.IsSecondGroup = value.Bool
-			}
-		case passkey.FieldLastUsedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field lastUsedAt", values[i])
-			} else if value.Valid {
-				_m.LastUsedAt = value.Time
 			}
 		case passkey.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -235,6 +236,11 @@ func (_m *Passkey) String() string {
 	builder.WriteString("updatedAt=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	if v := _m.LastUsedAt; v != nil {
+		builder.WriteString("lastUsedAt=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
@@ -249,9 +255,6 @@ func (_m *Passkey) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("isSecondGroup=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsSecondGroup))
-	builder.WriteString(", ")
-	builder.WriteString("lastUsedAt=")
-	builder.WriteString(_m.LastUsedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("userID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

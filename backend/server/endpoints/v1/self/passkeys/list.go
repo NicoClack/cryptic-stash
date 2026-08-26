@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
@@ -60,7 +59,7 @@ func List(app *servercommon.ServerApp) gin.HandlerFunc {
 						items = append(items, ListInfo{
 							ID:             passkeyOb.ID,
 							CreatedAt:      passkeyOb.CreatedAt,
-							LastUsedAt:     common.ZeroToPtr(passkeyOb.LastUsedAt),
+							LastUsedAt:     passkeyOb.LastUsedAt,
 							Name:           passkeyOb.Name,
 							AllowSudo:      passkeyOb.AllowSudo,
 							IsSessionFirst: sessionOb.PasskeyID == passkeyOb.ID,
