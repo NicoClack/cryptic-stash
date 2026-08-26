@@ -1,18 +1,27 @@
 # TODO
 
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
--   - Write test for credential signature replay
 -   - Consistently limit ceremonies to single use? e.g when there are unexpected errors
 -   - Fix race conditions when using a WebAuthn session or creating one (it's currently created before the tx commits). Maybe store them in the database instead?
 -   - Auto name passkeys based on AAGUID
 - Create development Docker Compose setup
 -   - Switch to Deno and limit postinstall scripts (locally and in CI)
+- Add logout button and username in the top right
 - Create AccountAlert system:
 -   - Should be viewable when you log in
 -   - Include logins, passkey changes, stash downloads etc
 -   - Also create one when passkey is cloned, but don't demote for now
 -   - Admin should be CC'd for some levels
 - Replace adminCode
+-   - Store admin passkeys in the database for easier management and to avoid maintaining two paths for the auth system
+-   - Completing env setup should generate a 32 byte base64 encoded setup code. The generated environment variables include a `HASHED_ADMIN_SETUP_TOKEN` and `SETUP_MODE="admin-passkey"` (from `"env"`).
+-   - When the server restarts, the page calls a setup endpoint with the token (saved in session storage) to register the first passkey
+-   - The admin sets `SETUP_MODE` to `"completed"` and is required to remove the `HASHED_ADMIN_SETUP_TOKEN` env var
+-   - The usual endpoints register and the admin is prompted to log in and then modify their passkeys as they want (I guess just track that state client side?)
+-   - The admin messenger setup can remain unchanged
+-   - Admin should still have sudo and non-sudo sessions, sudo sessions should get demoted after 5 minutes. Synced passkeys should be fine for non sensitive actions like reading logs, it also means the sessions can be shorter than they'd have to be for hardware keys
+-   - ^ Need to implement sidevation for this to be secure though and enforce that the elevation passkey is sudo, rather than allowing sudo then non-sudo
+-   - Remove dual group support? Does the threat model actually make sense? It only kind of works for regular users because the site is rarely accessed, but surely the admin shouldn't have less security than users?
 - Enable WAL and update SQLite, there was a recent bug with it that could corrupt databases
 - Enable SQLite's secure_delete pragma
 - Replace entity struct arguments to services with IDs? Like passkeyManagement.go does
@@ -28,9 +37,8 @@
 -   -   - Create hashing benchmark as the first env setup step. Remove old Go one
 -   - Allow user to configure waiting period
 - Replace non-standard Authorization headers with Bearer scheme
+- Implement per user rate limits for guessing passwords, notify user once there's been enough. Global rate limit for all authentication done by an IP should be fine for passkey endpoints
 - Remove old endpoints
-- Rate limit auth endpoints
--   - No need to rate limit per endpoint, WebAuthn is unguessable so the main concern is DoS due to SQLite locks
 - Use actors more consistently, should the invite functions enforce ownership? Currently the actor is only passed to the service, which uses it for logging
 - Pass explicit dependencies to keyvalue, tempkeyvalue and ratelimiting packages rather than \*common.App
 - Remove admin auth code logic
