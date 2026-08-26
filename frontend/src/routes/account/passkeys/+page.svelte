@@ -5,10 +5,13 @@
 	import RegisterPasskey from "$lib/components/RegisterPasskey.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
+	import { formatTime } from "$lib/utils";
 	import { onMount } from "svelte";
 
 	interface PasskeyInfo {
 		id: string;
+		createdAt: string;
+		lastUsedAt?: string;
 		name: string;
 		allowSudo: boolean;
 		isSessionFirst: boolean;
@@ -231,6 +234,10 @@
 													{:else if passkey.isSessionSecond}
 														· Was used to elevate your session
 													{/if}
+												</p>
+												<p class="text-xs text-muted-foreground">
+													Created: {formatTime(passkey.createdAt)} · Last used:
+													{passkey.lastUsedAt ? formatTime(passkey.lastUsedAt) : "Never"}
 												</p>
 											</div>
 											<div class="flex flex-wrap gap-2">
