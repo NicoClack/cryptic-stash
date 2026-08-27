@@ -19,10 +19,10 @@ import (
 type RegisterFinishPayload struct {
 	protocol.CredentialCreationResponse
 
-	WebAuthnSessionID uuid.UUID `binding:"required" json:"webAuthnSessionId"`
-	Name              string    `binding:"required" json:"name"`
-	AllowSudo         bool      `                   json:"allowSudo"`
-	IsSecondGroup     bool      `                   json:"isSecondGroup"`
+	WebAuthnSessionID uuid.UUID `binding:"required"              json:"webAuthnSessionId"`
+	Name              string    `binding:"required,min=1,max=64" json:"name"`
+	AllowSudo         bool      `                                json:"allowSudo"`
+	IsSecondGroup     bool      `                                json:"isSecondGroup"`
 }
 
 type RegisterFinishResponse struct {

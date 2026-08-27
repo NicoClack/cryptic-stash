@@ -16,7 +16,7 @@ import (
 )
 
 type CreatePayload struct {
-	Email         string `binding:"required,email"         json:"email"`
+	Email         string `binding:"required,email,max=128" json:"email"`
 	InviteMessage string `binding:"required,min=1,max=500" json:"inviteMessage"`
 	ExpiresIn     int64  `binding:"required,gt=0"          json:"expiresIn"`
 }

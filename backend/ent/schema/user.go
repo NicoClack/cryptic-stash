@@ -22,7 +22,7 @@ func (User) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
-		field.String("username").Unique().NotEmpty(),
+		field.String("username").Unique().MinLen(3).MaxLen(128),
 	}
 }
 

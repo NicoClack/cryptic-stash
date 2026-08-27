@@ -14,7 +14,7 @@ import (
 )
 
 type RenamePayload struct {
-	Name string `binding:"required" json:"name"`
+	Name string `binding:"required,min=1,max=64" json:"name"`
 }
 type RenameResponse struct {
 	Errors []servercommon.ErrorDetail `json:"errors"`

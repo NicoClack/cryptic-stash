@@ -20,7 +20,7 @@ type GetInviteResponse struct {
 	Email     string                     `                   json:"email"`
 	CreatedAt time.Time                  `                   json:"createdAt"`
 	ExpiresAt time.Time                  `                   json:"expiresAt"`
-	UserID    uuid.UUID                  `                   json:"userId,omitempty"`
+	UserID    uuid.UUID                  `                   json:"userId"`
 	IP        *string                    `                   json:"ip"`
 	UserAgent *string                    `                   json:"userAgent"`
 }
