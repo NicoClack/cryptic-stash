@@ -4,10 +4,13 @@
 -   - Switch to Deno and limit postinstall scripts (locally and in CI)
 - Update deprecated linters
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
--   - Consistently limit ceremonies to single use? e.g when there are unexpected errors
 -   - Fix race conditions when using a WebAuthn session or creating one (it's currently created before the tx commits). Maybe store them in the database instead?
+-   - Consistently limit ceremonies to single use even if there's an unexpected error?
 -   - Auto name passkeys based on AAGUID
 - Add logout button and username in the top right
+-   - Update frontend logout to call endpoint to delete the session server-side too
+- Delete expired sessions
+- Passkey management endpoints currently use both SudoModeMiddleware and DefaultAuthMiddleware due to the hierarchy
 - Create AccountAlert system:
 -   - Should be viewable when you log in
 -   - Include logins, passkey changes, stash downloads etc

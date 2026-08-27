@@ -106,6 +106,9 @@ class UserAuthState {
 		sessionStorage.removeItem(USER_USER_ID_STORAGE_KEY);
 		sessionStorage.removeItem(USER_USERNAME_STORAGE_KEY);
 		sessionStorage.removeItem(USER_SUDO_MODE_STORAGE_KEY);
+
+		throw new Error("TODO: server side logout not implemented");
+		// Although if this was caused by a 401, that's not necessary
 	}
 }
 

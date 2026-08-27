@@ -7,6 +7,6 @@ import (
 
 func ConfigureEndpoints(group *servercommon.Group) {
 	passkeyGroup := group.Group("/passkeys")
-	passkeyGroup.Use(group.App.SudoModeMiddleware)
+	passkeyGroup.Use(group.App.SudoModeMiddleware) // TODO: this is running in addition to the default auth middleware
 	passkeys.ConfigureEndpoints(passkeyGroup)
 }
