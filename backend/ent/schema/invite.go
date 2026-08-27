@@ -59,7 +59,7 @@ func (Invite) Fields() []ent.Field {
 			}).
 			Optional().Nillable(),
 
-		field.UUID("userID", uuid.Nil).Optional(), // The user that was created by this invite, if any
+		field.UUID("userID", uuid.Nil).Optional().Nillable(), // The user that was created by this invite, if any
 	}
 }
 

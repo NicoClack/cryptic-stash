@@ -125,7 +125,8 @@ func TestInviteFlow(t *testing.T) {
 	require.NotNil(t, userOb.Edges.Stashes)
 	require.Empty(t, userOb.Edges.Stashes)
 
-	require.Equal(t, userID, userOb.Edges.Invite.UserID)
+	require.NotNil(t, userOb.Edges.Invite.UserID)
+	require.Equal(t, userID, *userOb.Edges.Invite.UserID)
 	require.Empty(t, userOb.Edges.Invite.ExpiredReason)
 	require.Nil(t, userOb.Edges.Invite.WebAuthnSession) // This data isn't needed anymore
 

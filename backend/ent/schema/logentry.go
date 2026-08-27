@@ -31,7 +31,7 @@ func (LogEntry) Fields() []ent.Field {
 		field.String("sourceFunction"),
 		field.Int("sourceLine"),
 		field.String("publicMessage"),
-		field.UUID("userID", uuid.Nil).Optional(),
+		field.UUID("userID", uuid.Nil).Optional().Nillable(),
 	}
 }
 

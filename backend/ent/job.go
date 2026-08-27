@@ -28,7 +28,7 @@ type Job struct {
 	// OriginallyDueAt holds the value of the "originallyDueAt" field.
 	OriginallyDueAt time.Time `json:"originallyDueAt,omitempty"`
 	// StartedAt holds the value of the "startedAt" field.
-	StartedAt time.Time `json:"startedAt,omitempty"`
+	StartedAt *time.Time `json:"startedAt,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Version holds the value of the "version" field.
@@ -118,7 +118,8 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field startedAt", values[i])
 			} else if value.Valid {
-				_m.StartedAt = value.Time
+				_m.StartedAt = new(time.Time)
+				*_m.StartedAt = value.Time
 			}
 		case job.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -222,8 +223,10 @@ func (_m *Job) String() string {
 	builder.WriteString("originallyDueAt=")
 	builder.WriteString(_m.OriginallyDueAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("startedAt=")
-	builder.WriteString(_m.StartedAt.Format(time.ANSIC))
+	if v := _m.StartedAt; v != nil {
+		builder.WriteString("startedAt=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(_m.Type)

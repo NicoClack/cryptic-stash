@@ -29,7 +29,7 @@ func (UserMessenger) Fields() []ent.Field {
 		field.Bytes("options").
 			GoType(json.RawMessage{}).
 			ValueScanner(EncryptedField[json.RawMessage]{KeyName: "user_messenger_1"}).
-			Optional(),
+			Optional(), // No .Nillable because []byte is already nillable
 		field.UUID("userID", uuid.Nil),
 	}
 }

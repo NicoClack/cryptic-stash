@@ -39,7 +39,7 @@ type Invite struct {
 	// IP holds the value of the "ip" field.
 	IP *string `json:"ip,omitempty"`
 	// UserID holds the value of the "userID" field.
-	UserID uuid.UUID `json:"userID,omitempty"`
+	UserID *uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InviteQuery when eager-loading is set.
 	Edges        InviteEdges `json:"edges"`
@@ -71,13 +71,15 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case invite.FieldUserID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case invite.FieldHashedCode:
 			values[i] = new([]byte)
 		case invite.FieldEmail, invite.FieldExpiredReason:
 			values[i] = new(sql.NullString)
 		case invite.FieldCreatedAt, invite.FieldUpdatedAt, invite.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
-		case invite.FieldID, invite.FieldUserID:
+		case invite.FieldID:
 			values[i] = new(uuid.UUID)
 		case invite.FieldWebAuthnSession:
 			values[i] = invite.ValueScanner.WebAuthnSession.ScanValue()
@@ -162,10 +164,11 @@ func (_m *Invite) assignValues(columns []string, values []any) error {
 				_m.IP = value
 			}
 		case invite.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field userID", values[i])
-			} else if value != nil {
-				_m.UserID = *value
+			} else if value.Valid {
+				_m.UserID = new(uuid.UUID)
+				*_m.UserID = *value.S.(*uuid.UUID)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -243,8 +246,10 @@ func (_m *Invite) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("userID=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	if v := _m.UserID; v != nil {
+		builder.WriteString("userID=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

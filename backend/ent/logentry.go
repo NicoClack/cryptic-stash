@@ -43,7 +43,7 @@ type LogEntry struct {
 	// PublicMessage holds the value of the "publicMessage" field.
 	PublicMessage string `json:"publicMessage,omitempty"`
 	// UserID holds the value of the "userID" field.
-	UserID uuid.UUID `json:"userID,omitempty"`
+	UserID *uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LogEntryQuery when eager-loading is set.
 	Edges        LogEntryEdges `json:"edges"`
@@ -75,6 +75,8 @@ func (*LogEntry) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case logentry.FieldUserID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case logentry.FieldAttributes:
 			values[i] = new([]byte)
 		case logentry.FieldLoggedAtKnown:
@@ -85,7 +87,7 @@ func (*LogEntry) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case logentry.FieldCreatedAt, logentry.FieldUpdatedAt, logentry.FieldLoggedAt:
 			values[i] = new(sql.NullTime)
-		case logentry.FieldID, logentry.FieldUserID:
+		case logentry.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -177,10 +179,11 @@ func (_m *LogEntry) assignValues(columns []string, values []any) error {
 				_m.PublicMessage = value.String
 			}
 		case logentry.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field userID", values[i])
-			} else if value != nil {
-				_m.UserID = *value
+			} else if value.Valid {
+				_m.UserID = new(uuid.UUID)
+				*_m.UserID = *value.S.(*uuid.UUID)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -256,8 +259,10 @@ func (_m *LogEntry) String() string {
 	builder.WriteString("publicMessage=")
 	builder.WriteString(_m.PublicMessage)
 	builder.WriteString(", ")
-	builder.WriteString("userID=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	if v := _m.UserID; v != nil {
+		builder.WriteString("userID=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

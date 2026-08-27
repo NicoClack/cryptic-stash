@@ -73,7 +73,7 @@ func (service *Logger) AssertWritten(t *testing.T, expectedEntries []ExpectedEnt
 		require.Equal(t, expected.PublicMessage, entry.PublicMessage,
 			"%v \"PublicMessage\" properties should match", prefix,
 		)
-		require.Equal(t, expected.UserID, entry.UserID,
+		require.Equal(t, expected.UserID, common.Deref(entry.UserID, uuid.Nil),
 			"%v \"UserID\" properties should match", prefix,
 		)
 		require.Equal(t, expected.Level, entry.Level,

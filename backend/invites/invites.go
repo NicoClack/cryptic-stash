@@ -124,7 +124,7 @@ func GetInvite(
 		return nil, ErrWrapperGetInvite.Wrap(ErrWrapperDatabase.Wrap(stdErr))
 	}
 
-	if inviteOb.UserID != uuid.Nil || inviteOb.ExpiredReason != nil {
+	if inviteOb.UserID != nil || inviteOb.ExpiredReason != nil {
 		return nil, ErrWrapperGetInvite.Wrap(ErrInviteUsed)
 	}
 	if clock.Now().After(inviteOb.ExpiresAt) {

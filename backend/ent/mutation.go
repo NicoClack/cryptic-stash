@@ -1423,7 +1423,7 @@ func (m *InviteMutation) UserID() (r uuid.UUID, exists bool) {
 // OldUserID returns the old "userID" field's value of the Invite entity.
 // If the Invite object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InviteMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *InviteMutation) OldUserID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -2169,7 +2169,7 @@ func (m *JobMutation) StartedAt() (r time.Time, exists bool) {
 // OldStartedAt returns the old "startedAt" field's value of the Job entity.
 // If the Job object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *JobMutation) OldStartedAt(ctx context.Context) (v time.Time, err error) {
+func (m *JobMutation) OldStartedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStartedAt is only allowed on UpdateOne operations")
 	}
@@ -4191,7 +4191,7 @@ func (m *LogEntryMutation) UserID() (r uuid.UUID, exists bool) {
 // OldUserID returns the old "userID" field's value of the LogEntry entity.
 // If the LogEntry object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LogEntryMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *LogEntryMutation) OldUserID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -6633,7 +6633,7 @@ func (m *PeriodicTaskMutation) LastRanAt() (r time.Time, exists bool) {
 // OldLastRanAt returns the old "lastRanAt" field's value of the PeriodicTask entity.
 // If the PeriodicTask object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PeriodicTaskMutation) OldLastRanAt(ctx context.Context) (v time.Time, err error) {
+func (m *PeriodicTaskMutation) OldLastRanAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldLastRanAt is only allowed on UpdateOne operations")
 	}

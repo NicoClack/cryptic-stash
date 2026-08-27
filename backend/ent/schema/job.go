@@ -24,7 +24,7 @@ func (Job) Fields() []ent.Field {
 		field.Time("dueAt"),
 		// TODO: create new jobs for retries?
 		field.Time("originallyDueAt"), // Due is updated for retries
-		field.Time("startedAt").Optional(),
+		field.Time("startedAt").Optional().Nillable(),
 		field.String("type").MinLen(1).MaxLen(128),
 		field.Int("version"),
 		field.Int8(

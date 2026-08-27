@@ -22,7 +22,7 @@ func (PeriodicTask) Fields() []ent.Field {
 		field.String("name").MinLen(1).MaxLen(128).Unique(),
 		// Note: there's no version because we should just be able to upgrade to new versions
 		// when the server restarts since there's no request body
-		field.Time("lastRanAt").Optional(),
+		field.Time("lastRanAt").Optional().Nillable(),
 	}
 }
 

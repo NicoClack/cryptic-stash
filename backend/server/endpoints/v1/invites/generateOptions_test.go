@@ -13,7 +13,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/jonboulle/clockwork"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +23,7 @@ func TestGenerateOptions(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	email := "test@example.com"
 	inviteOb, code := createInvite(t, app, email, app.Clock.Now().Add(time.Hour))
-	require.Equal(t, uuid.Nil, inviteOb.UserID)
+	require.Nil(t, inviteOb.UserID)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -45,7 +44,7 @@ func TestGenerateOptions(t *testing.T) {
 	updatedInvite := app.Database.Client().Invite.GetX(t.Context(), inviteOb.ID)
 	require.NotNil(t, updatedInvite.WebAuthnSession)
 	require.Equal(t, resp.PublicKey.Challenge.String(), updatedInvite.WebAuthnSession.Challenge)
-	require.Equal(t, uuid.Nil, updatedInvite.UserID)
+	require.Nil(t, updatedInvite.UserID)
 }
 
 func TestGenerateOptions_InvalidToken(t *testing.T) {

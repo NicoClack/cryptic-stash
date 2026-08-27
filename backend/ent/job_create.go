@@ -328,7 +328,7 @@ func (_c *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec, error) {
 	}
 	if value, ok := _c.mutation.StartedAt(); ok {
 		_spec.SetField(job.FieldStartedAt, field.TypeTime, value)
-		_node.StartedAt = value
+		_node.StartedAt = &value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(job.FieldType, field.TypeString, value)

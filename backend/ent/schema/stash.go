@@ -22,7 +22,7 @@ func (Stash) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
-		field.Time("lastDownloadAt").Optional(),
+		field.Time("lastDownloadAt").Optional(), // TODO: this should be made nillable once this object is reworked
 		field.String("publicName").NotEmpty().MaxLen(256),
 		// Encrypted with encryptionDataKey and prefixed with the nonce
 		field.Bytes("content").NotEmpty().MaxLen(10_000_000), // 10MB
