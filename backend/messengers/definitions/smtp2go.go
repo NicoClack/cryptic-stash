@@ -10,7 +10,6 @@ import (
 	"net"
 	"net/http"
 	stdmail "net/mail"
-	"net/url"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
@@ -153,9 +152,7 @@ func SMTP2GO1(app *common.App) *messengers.Definition {
 			req, stdErr := http.NewRequestWithContext(
 				messengerCtx.Context,
 				http.MethodPost,
-				app.Env.SMTP2GO_BASE_URL.ResolveReference(&url.URL{
-					Path: "/email/send",
-				}).String(),
+				app.Env.SMTP2GO_BASE_URL.JoinPath("v3/email/send").String(),
 				bytes.NewReader(requestBody),
 			)
 			if stdErr != nil {

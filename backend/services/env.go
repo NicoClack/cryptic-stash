@@ -82,7 +82,7 @@ func LoadEnvironmentVariables() *common.Env {
 		SMTP_REQUIRE_TLS:   common.OptionalBoolEnv("SMTP_REQUIRE_TLS", true),
 		SMTP_IMPLICIT_TLS:  common.OptionalBoolEnv("SMTP_IMPLICIT_TLS", true),
 		SMTP2GO_API_KEY:    common.OptionalEnv("SMTP2GO_API_KEY", ""),
-		SMTP2GO_BASE_URL:   common.OptionalURLEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/v3"),
+		SMTP2GO_BASE_URL:   common.OptionalURLEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/"),
 		SMTP2GO_FROM_EMAIL: common.OptionalEnv("SMTP2GO_FROM_EMAIL", ""),
 		SMTP2GO_FROM_NAME:  common.OptionalEnv("SMTP2GO_FROM_NAME", "Cryptic Stash"),
 	}
