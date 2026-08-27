@@ -186,8 +186,11 @@ func SMTP1(app *common.App) *messengers.Definition {
 
 			// Dev SMTP servers like Mailpit don't use authentication
 			// This is safe because TLS is established above
-			ok, _ := client.Extension("AUTH")
-			if ok {
+			if app.Env.SMTP_PASSWORD != "" {
+				ok, _ := client.Extension("AUTH")
+				if !ok {
+					return errors.New("SMTP server doesn't support authentication but SMTP_PASSWORD is set")
+				}
 				stdErr = client.Auth(smtp.PlainAuth(
 					"",
 					app.Env.SMTP_USERNAME,
