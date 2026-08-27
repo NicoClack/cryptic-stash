@@ -22,7 +22,7 @@ func (d sqlite3Driver) Open(name string) (conn driver.Conn, stdErr error) {
 	if stdErr != nil {
 		return
 	}
-	_, stdErr = conn.(sqlite3DriverConn).Exec("PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 100;", nil)
+	_, stdErr = conn.(sqlite3DriverConn).Exec("PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 500;", nil)
 	if stdErr != nil {
 		_ = conn.Close()
 		return

@@ -37,6 +37,7 @@ func withRetryingTx[T any](
 	fn func(tx *ent.Tx, ctx context.Context) (T, error),
 ) (T, error) {
 	var returnValue T
+	// TODO: reduce deadline by 500ms to account for busy_timeout
 	wrappedErr := common.WithRetries(ctx, common.GetLogger(ctx, db), func() error {
 		return withTx(ctx, db, txCallback, func(tx *ent.Tx, ctx context.Context) error {
 			var stdErr error
