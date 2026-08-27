@@ -27,8 +27,8 @@ var ErrWrapperSMTP2GO = common.NewDynamicErrorWrapper(func(err error) common.Wra
 		return nil
 	}
 
-	var netErr net.Error
-	if errors.As(err, &netErr) {
+	_, ok := errors.AsType[net.Error](err)
+	if ok {
 		wrappedErr.ConfigureRetriesMut(10, 5*time.Second, 1.5)
 		wrappedErr.AddDebugValuesMut(common.DebugValue{
 			Name: "retried net.Error",
@@ -37,8 +37,8 @@ var ErrWrapperSMTP2GO = common.NewDynamicErrorWrapper(func(err error) common.Wra
 	}
 
 	// TODO: review
-	var restErr *common.RESTError
-	if errors.As(err, &restErr) {
+	restErr, ok := errors.AsType[*common.RESTError](err)
+	if ok {
 		statusCode := restErr.Response.StatusCode
 		// TODO: only retry specific statuses?
 		if statusCode == http.StatusTooManyRequests {

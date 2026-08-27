@@ -46,8 +46,8 @@ var ErrWrapperDiscord = common.NewDynamicErrorWrapper(func(err error) common.Wra
 		}
 	}
 
-	var rateLimitErr *discordgo.RateLimitError
-	if errors.As(err, &rateLimitErr) {
+	rateLimitErr, ok := errors.AsType[*discordgo.RateLimitError](err)
+	if ok {
 		wrappedErr.ConfigureRetriesMut(3, max(rateLimitErr.RetryAfter, 5*time.Second), 1)
 		wrappedErr.AddDebugValuesMut(common.DebugValue{
 			Name:    "retried discordgo.RateLimitError",

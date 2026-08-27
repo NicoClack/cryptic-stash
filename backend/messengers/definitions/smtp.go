@@ -28,8 +28,8 @@ var ErrWrapperSMTP = common.NewDynamicErrorWrapper(func(err error) common.Wrappe
 		return nil
 	}
 
-	var netErr net.Error
-	if errors.As(err, &netErr) {
+	_, ok := errors.AsType[net.Error](err)
+	if ok {
 		wrappedErr.ConfigureRetriesMut(10, 5*time.Second, 1.5)
 		wrappedErr.AddDebugValuesMut(common.DebugValue{
 			Name: "retried net.Error",
@@ -37,8 +37,8 @@ var ErrWrapperSMTP = common.NewDynamicErrorWrapper(func(err error) common.Wrappe
 		return wrappedErr
 	}
 
-	var protocolErr *textproto.Error
-	if errors.As(err, &protocolErr) {
+	protocolErr, ok := errors.AsType[*textproto.Error](err)
+	if ok {
 		// Note: SMTP statuses work slightly differently to HTTP
 		if protocolErr.Code >= 400 && protocolErr.Code < 500 {
 			wrappedErr.ConfigureRetriesMut(10, 5*time.Second, 2)

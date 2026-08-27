@@ -53,7 +53,7 @@ func TestAuthTest_AllowsValidSession(t *testing.T) {
 		SetIP("127.0.0.1").
 		SaveX(t.Context())
 
-	request := httptest.NewRequest(http.MethodGet, "/api/v1/users/auth-test/", nil)
+	request := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/v1/users/auth-test/", nil)
 	request.Header.Set("Authorization", "Bearer "+base64.RawURLEncoding.EncodeToString([]byte(sessionToken)))
 	respRecorder := httptest.NewRecorder()
 	app.Server.ServeHTTP(respRecorder, request)

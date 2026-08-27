@@ -1,11 +1,12 @@
 # TODO
 
+- Create development Docker Compose setup
+-   - Switch to Deno and limit postinstall scripts (locally and in CI)
+- Update deprecated linters
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
 -   - Consistently limit ceremonies to single use? e.g when there are unexpected errors
 -   - Fix race conditions when using a WebAuthn session or creating one (it's currently created before the tx commits). Maybe store them in the database instead?
 -   - Auto name passkeys based on AAGUID
-- Create development Docker Compose setup
--   - Switch to Deno and limit postinstall scripts (locally and in CI)
 - Add logout button and username in the top right
 - Create AccountAlert system:
 -   - Should be viewable when you log in

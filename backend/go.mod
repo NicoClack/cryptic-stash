@@ -1,6 +1,6 @@
 module github.com/NicoClack/cryptic-stash/backend
 
-go 1.26
+go 1.27
 
 require (
 	entgo.io/ent v0.14.6
