@@ -3,7 +3,7 @@
 package usermessenger
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -83,7 +83,7 @@ func IsEnabled(v bool) predicate.UserMessenger {
 }
 
 // Options applies equality check predicate on the "options" field. It's identical to OptionsEQ.
-func Options(v json.RawMessage) predicate.UserMessenger {
+func Options(v jsontext.Value) predicate.UserMessenger {
 	vc, err := ValueScanner.Options.Value(v)
 	return predicate.UserMessengerOrErr(sql.FieldEQ(FieldOptions, vc), err)
 }
@@ -289,19 +289,19 @@ func IsEnabledNEQ(v bool) predicate.UserMessenger {
 }
 
 // OptionsEQ applies the EQ predicate on the "options" field.
-func OptionsEQ(v json.RawMessage) predicate.UserMessenger {
+func OptionsEQ(v jsontext.Value) predicate.UserMessenger {
 	vc, err := ValueScanner.Options.Value(v)
 	return predicate.UserMessengerOrErr(sql.FieldEQ(FieldOptions, vc), err)
 }
 
 // OptionsNEQ applies the NEQ predicate on the "options" field.
-func OptionsNEQ(v json.RawMessage) predicate.UserMessenger {
+func OptionsNEQ(v jsontext.Value) predicate.UserMessenger {
 	vc, err := ValueScanner.Options.Value(v)
 	return predicate.UserMessengerOrErr(sql.FieldNEQ(FieldOptions, vc), err)
 }
 
 // OptionsIn applies the In predicate on the "options" field.
-func OptionsIn(vs ...json.RawMessage) predicate.UserMessenger {
+func OptionsIn(vs ...jsontext.Value) predicate.UserMessenger {
 	var (
 		err error
 		v   = make([]any, len(vs))
@@ -315,7 +315,7 @@ func OptionsIn(vs ...json.RawMessage) predicate.UserMessenger {
 }
 
 // OptionsNotIn applies the NotIn predicate on the "options" field.
-func OptionsNotIn(vs ...json.RawMessage) predicate.UserMessenger {
+func OptionsNotIn(vs ...jsontext.Value) predicate.UserMessenger {
 	var (
 		err error
 		v   = make([]any, len(vs))
@@ -329,25 +329,25 @@ func OptionsNotIn(vs ...json.RawMessage) predicate.UserMessenger {
 }
 
 // OptionsGT applies the GT predicate on the "options" field.
-func OptionsGT(v json.RawMessage) predicate.UserMessenger {
+func OptionsGT(v jsontext.Value) predicate.UserMessenger {
 	vc, err := ValueScanner.Options.Value(v)
 	return predicate.UserMessengerOrErr(sql.FieldGT(FieldOptions, vc), err)
 }
 
 // OptionsGTE applies the GTE predicate on the "options" field.
-func OptionsGTE(v json.RawMessage) predicate.UserMessenger {
+func OptionsGTE(v jsontext.Value) predicate.UserMessenger {
 	vc, err := ValueScanner.Options.Value(v)
 	return predicate.UserMessengerOrErr(sql.FieldGTE(FieldOptions, vc), err)
 }
 
 // OptionsLT applies the LT predicate on the "options" field.
-func OptionsLT(v json.RawMessage) predicate.UserMessenger {
+func OptionsLT(v jsontext.Value) predicate.UserMessenger {
 	vc, err := ValueScanner.Options.Value(v)
 	return predicate.UserMessengerOrErr(sql.FieldLT(FieldOptions, vc), err)
 }
 
 // OptionsLTE applies the LTE predicate on the "options" field.
-func OptionsLTE(v json.RawMessage) predicate.UserMessenger {
+func OptionsLTE(v jsontext.Value) predicate.UserMessenger {
 	vc, err := ValueScanner.Options.Value(v)
 	return predicate.UserMessengerOrErr(sql.FieldLTE(FieldOptions, vc), err)
 }

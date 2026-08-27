@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -66,7 +66,7 @@ func (_c *UserMessengerCreate) SetNillableIsEnabled(v *bool) *UserMessengerCreat
 }
 
 // SetOptions sets the "options" field.
-func (_c *UserMessengerCreate) SetOptions(v json.RawMessage) *UserMessengerCreate {
+func (_c *UserMessengerCreate) SetOptions(v jsontext.Value) *UserMessengerCreate {
 	_c.mutation.SetOptions(v)
 	return _c
 }
@@ -403,7 +403,7 @@ func (u *UserMessengerUpsert) UpdateIsEnabled() *UserMessengerUpsert {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsert) SetOptions(v json.RawMessage) *UserMessengerUpsert {
+func (u *UserMessengerUpsert) SetOptions(v jsontext.Value) *UserMessengerUpsert {
 	u.Set(usermessenger.FieldOptions, v)
 	return u
 }
@@ -558,7 +558,7 @@ func (u *UserMessengerUpsertOne) UpdateIsEnabled() *UserMessengerUpsertOne {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertOne) SetOptions(v json.RawMessage) *UserMessengerUpsertOne {
+func (u *UserMessengerUpsertOne) SetOptions(v jsontext.Value) *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})
@@ -888,7 +888,7 @@ func (u *UserMessengerUpsertBulk) UpdateIsEnabled() *UserMessengerUpsertBulk {
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertBulk) SetOptions(v json.RawMessage) *UserMessengerUpsertBulk {
+func (u *UserMessengerUpsertBulk) SetOptions(v jsontext.Value) *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})

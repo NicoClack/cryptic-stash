@@ -3,7 +3,7 @@
 package ent
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 	"time"
@@ -31,7 +31,7 @@ type UserMessenger struct {
 	// IsEnabled holds the value of the "isEnabled" field.
 	IsEnabled bool `json:"isEnabled,omitempty"`
 	// Options holds the value of the "options" field.
-	Options json.RawMessage `json:"options,omitempty"`
+	Options jsontext.Value `json:"options,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.

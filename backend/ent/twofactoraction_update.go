@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -86,13 +86,13 @@ func (_u *TwoFactorActionUpdate) AddVersion(v int) *TwoFactorActionUpdate {
 }
 
 // SetBody sets the "body" field.
-func (_u *TwoFactorActionUpdate) SetBody(v json.RawMessage) *TwoFactorActionUpdate {
+func (_u *TwoFactorActionUpdate) SetBody(v jsontext.Value) *TwoFactorActionUpdate {
 	_u.mutation.SetBody(v)
 	return _u
 }
 
 // AppendBody appends value to the "body" field.
-func (_u *TwoFactorActionUpdate) AppendBody(v json.RawMessage) *TwoFactorActionUpdate {
+func (_u *TwoFactorActionUpdate) AppendBody(v jsontext.Value) *TwoFactorActionUpdate {
 	_u.mutation.AppendBody(v)
 	return _u
 }
@@ -298,13 +298,13 @@ func (_u *TwoFactorActionUpdateOne) AddVersion(v int) *TwoFactorActionUpdateOne 
 }
 
 // SetBody sets the "body" field.
-func (_u *TwoFactorActionUpdateOne) SetBody(v json.RawMessage) *TwoFactorActionUpdateOne {
+func (_u *TwoFactorActionUpdateOne) SetBody(v jsontext.Value) *TwoFactorActionUpdateOne {
 	_u.mutation.SetBody(v)
 	return _u
 }
 
 // AppendBody appends value to the "body" field.
-func (_u *TwoFactorActionUpdateOne) AppendBody(v json.RawMessage) *TwoFactorActionUpdateOne {
+func (_u *TwoFactorActionUpdateOne) AppendBody(v jsontext.Value) *TwoFactorActionUpdateOne {
 	_u.mutation.AppendBody(v)
 	return _u
 }

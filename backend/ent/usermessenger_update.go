@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -102,7 +102,7 @@ func (_u *UserMessengerUpdate) SetNillableIsEnabled(v *bool) *UserMessengerUpdat
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdate) SetOptions(v json.RawMessage) *UserMessengerUpdate {
+func (_u *UserMessengerUpdate) SetOptions(v jsontext.Value) *UserMessengerUpdate {
 	_u.mutation.SetOptions(v)
 	return _u
 }
@@ -432,7 +432,7 @@ func (_u *UserMessengerUpdateOne) SetNillableIsEnabled(v *bool) *UserMessengerUp
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdateOne) SetOptions(v json.RawMessage) *UserMessengerUpdateOne {
+func (_u *UserMessengerUpdateOne) SetOptions(v jsontext.Value) *UserMessengerUpdateOne {
 	_u.mutation.SetOptions(v)
 	return _u
 }

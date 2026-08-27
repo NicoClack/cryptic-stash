@@ -3,7 +3,7 @@
 package ent
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 	"time"
@@ -38,7 +38,7 @@ type Job struct {
 	// Weight holds the value of the "weight" field.
 	Weight int `json:"weight,omitempty"`
 	// Body holds the value of the "body" field.
-	Body json.RawMessage `json:"body,omitempty"`
+	Body jsontext.Value `json:"body,omitempty"`
 	// Status holds the value of the "status" field.
 	Status job.Status `json:"status,omitempty"`
 	// Retries holds the value of the "retries" field.

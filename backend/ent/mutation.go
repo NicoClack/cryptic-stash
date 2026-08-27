@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"sync"
@@ -1891,7 +1891,7 @@ type JobMutation struct {
 	addpriority           *int8
 	weight                *int
 	addweight             *int
-	body                  *json.RawMessage
+	body                  *jsontext.Value
 	status                *job.Status
 	retries               *int
 	addretries            *int
@@ -2406,12 +2406,12 @@ func (m *JobMutation) ResetWeight() {
 }
 
 // SetBody sets the "body" field.
-func (m *JobMutation) SetBody(jm json.RawMessage) {
-	m.body = &jm
+func (m *JobMutation) SetBody(j jsontext.Value) {
+	m.body = &j
 }
 
 // Body returns the value of the "body" field in the mutation.
-func (m *JobMutation) Body() (r json.RawMessage, exists bool) {
+func (m *JobMutation) Body() (r jsontext.Value, exists bool) {
 	v := m.body
 	if v == nil {
 		return
@@ -2422,7 +2422,7 @@ func (m *JobMutation) Body() (r json.RawMessage, exists bool) {
 // OldBody returns the old "body" field's value of the Job entity.
 // If the Job object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *JobMutation) OldBody(ctx context.Context) (v json.RawMessage, err error) {
+func (m *JobMutation) OldBody(ctx context.Context) (v jsontext.Value, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBody is only allowed on UpdateOne operations")
 	}
@@ -2848,7 +2848,7 @@ func (m *JobMutation) SetField(name string, value ent.Value) error {
 		m.SetWeight(v)
 		return nil
 	case job.FieldBody:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(jsontext.Value)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3106,8 +3106,8 @@ type KeyValueMutation struct {
 	createdAt     *time.Time
 	updatedAt     *time.Time
 	key           *string
-	value         *json.RawMessage
-	appendvalue   json.RawMessage
+	value         *jsontext.Value
+	appendvalue   jsontext.Value
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*KeyValue, error)
@@ -3327,13 +3327,13 @@ func (m *KeyValueMutation) ResetKey() {
 }
 
 // SetValue sets the "value" field.
-func (m *KeyValueMutation) SetValue(jm json.RawMessage) {
-	m.value = &jm
+func (m *KeyValueMutation) SetValue(j jsontext.Value) {
+	m.value = &j
 	m.appendvalue = nil
 }
 
 // Value returns the value of the "value" field in the mutation.
-func (m *KeyValueMutation) Value() (r json.RawMessage, exists bool) {
+func (m *KeyValueMutation) Value() (r jsontext.Value, exists bool) {
 	v := m.value
 	if v == nil {
 		return
@@ -3344,7 +3344,7 @@ func (m *KeyValueMutation) Value() (r json.RawMessage, exists bool) {
 // OldValue returns the old "value" field's value of the KeyValue entity.
 // If the KeyValue object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *KeyValueMutation) OldValue(ctx context.Context) (v json.RawMessage, err error) {
+func (m *KeyValueMutation) OldValue(ctx context.Context) (v jsontext.Value, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldValue is only allowed on UpdateOne operations")
 	}
@@ -3358,13 +3358,13 @@ func (m *KeyValueMutation) OldValue(ctx context.Context) (v json.RawMessage, err
 	return oldValue.Value, nil
 }
 
-// AppendValue adds jm to the "value" field.
-func (m *KeyValueMutation) AppendValue(jm json.RawMessage) {
-	m.appendvalue = append(m.appendvalue, jm...)
+// AppendValue adds j to the "value" field.
+func (m *KeyValueMutation) AppendValue(j jsontext.Value) {
+	m.appendvalue = append(m.appendvalue, j...)
 }
 
 // AppendedValue returns the list of values that were appended to the "value" field in this mutation.
-func (m *KeyValueMutation) AppendedValue() (json.RawMessage, bool) {
+func (m *KeyValueMutation) AppendedValue() (jsontext.Value, bool) {
 	if len(m.appendvalue) == 0 {
 		return nil, false
 	}
@@ -3488,7 +3488,7 @@ func (m *KeyValueMutation) SetField(name string, value ent.Value) error {
 		m.SetKey(v)
 		return nil
 	case keyvalue.FieldValue:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(jsontext.Value)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -9325,8 +9325,8 @@ type TwoFactorActionMutation struct {
 	_type         *string
 	version       *int
 	addversion    *int
-	body          *json.RawMessage
-	appendbody    json.RawMessage
+	body          *jsontext.Value
+	appendbody    jsontext.Value
 	expiresAt     *time.Time
 	code          *string
 	clearedFields map[string]struct{}
@@ -9604,13 +9604,13 @@ func (m *TwoFactorActionMutation) ResetVersion() {
 }
 
 // SetBody sets the "body" field.
-func (m *TwoFactorActionMutation) SetBody(jm json.RawMessage) {
-	m.body = &jm
+func (m *TwoFactorActionMutation) SetBody(j jsontext.Value) {
+	m.body = &j
 	m.appendbody = nil
 }
 
 // Body returns the value of the "body" field in the mutation.
-func (m *TwoFactorActionMutation) Body() (r json.RawMessage, exists bool) {
+func (m *TwoFactorActionMutation) Body() (r jsontext.Value, exists bool) {
 	v := m.body
 	if v == nil {
 		return
@@ -9621,7 +9621,7 @@ func (m *TwoFactorActionMutation) Body() (r json.RawMessage, exists bool) {
 // OldBody returns the old "body" field's value of the TwoFactorAction entity.
 // If the TwoFactorAction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TwoFactorActionMutation) OldBody(ctx context.Context) (v json.RawMessage, err error) {
+func (m *TwoFactorActionMutation) OldBody(ctx context.Context) (v jsontext.Value, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBody is only allowed on UpdateOne operations")
 	}
@@ -9635,13 +9635,13 @@ func (m *TwoFactorActionMutation) OldBody(ctx context.Context) (v json.RawMessag
 	return oldValue.Body, nil
 }
 
-// AppendBody adds jm to the "body" field.
-func (m *TwoFactorActionMutation) AppendBody(jm json.RawMessage) {
-	m.appendbody = append(m.appendbody, jm...)
+// AppendBody adds j to the "body" field.
+func (m *TwoFactorActionMutation) AppendBody(j jsontext.Value) {
+	m.appendbody = append(m.appendbody, j...)
 }
 
 // AppendedBody returns the list of values that were appended to the "body" field in this mutation.
-func (m *TwoFactorActionMutation) AppendedBody() (json.RawMessage, bool) {
+func (m *TwoFactorActionMutation) AppendedBody() (jsontext.Value, bool) {
 	if len(m.appendbody) == 0 {
 		return nil, false
 	}
@@ -9865,7 +9865,7 @@ func (m *TwoFactorActionMutation) SetField(name string, value ent.Value) error {
 		m.SetVersion(v)
 		return nil
 	case twofactoraction.FieldBody:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(jsontext.Value)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -10958,7 +10958,7 @@ type UserMessengerMutation struct {
 	version            *int
 	addversion         *int
 	isEnabled          *bool
-	options            *json.RawMessage
+	options            *jsontext.Value
 	clearedFields      map[string]struct{}
 	user               *uuid.UUID
 	cleareduser        bool
@@ -11275,12 +11275,12 @@ func (m *UserMessengerMutation) ResetIsEnabled() {
 }
 
 // SetOptions sets the "options" field.
-func (m *UserMessengerMutation) SetOptions(jm json.RawMessage) {
-	m.options = &jm
+func (m *UserMessengerMutation) SetOptions(j jsontext.Value) {
+	m.options = &j
 }
 
 // Options returns the value of the "options" field in the mutation.
-func (m *UserMessengerMutation) Options() (r json.RawMessage, exists bool) {
+func (m *UserMessengerMutation) Options() (r jsontext.Value, exists bool) {
 	v := m.options
 	if v == nil {
 		return
@@ -11291,7 +11291,7 @@ func (m *UserMessengerMutation) Options() (r json.RawMessage, exists bool) {
 // OldOptions returns the old "options" field's value of the UserMessenger entity.
 // If the UserMessenger object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v json.RawMessage, err error) {
+func (m *UserMessengerMutation) OldOptions(ctx context.Context) (v jsontext.Value, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldOptions is only allowed on UpdateOne operations")
 	}
@@ -11586,7 +11586,7 @@ func (m *UserMessengerMutation) SetField(name string, value ent.Value) error {
 		m.SetIsEnabled(v)
 		return nil
 	case usermessenger.FieldOptions:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(jsontext.Value)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

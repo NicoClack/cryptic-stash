@@ -3,7 +3,7 @@
 package job
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -102,7 +102,7 @@ func Weight(v int) predicate.Job {
 }
 
 // Body applies equality check predicate on the "body" field. It's identical to BodyEQ.
-func Body(v json.RawMessage) predicate.Job {
+func Body(v jsontext.Value) predicate.Job {
 	vc, err := ValueScanner.Body.Value(v)
 	return predicate.JobOrErr(sql.FieldEQ(FieldBody, vc), err)
 }
@@ -518,19 +518,19 @@ func WeightLTE(v int) predicate.Job {
 }
 
 // BodyEQ applies the EQ predicate on the "body" field.
-func BodyEQ(v json.RawMessage) predicate.Job {
+func BodyEQ(v jsontext.Value) predicate.Job {
 	vc, err := ValueScanner.Body.Value(v)
 	return predicate.JobOrErr(sql.FieldEQ(FieldBody, vc), err)
 }
 
 // BodyNEQ applies the NEQ predicate on the "body" field.
-func BodyNEQ(v json.RawMessage) predicate.Job {
+func BodyNEQ(v jsontext.Value) predicate.Job {
 	vc, err := ValueScanner.Body.Value(v)
 	return predicate.JobOrErr(sql.FieldNEQ(FieldBody, vc), err)
 }
 
 // BodyIn applies the In predicate on the "body" field.
-func BodyIn(vs ...json.RawMessage) predicate.Job {
+func BodyIn(vs ...jsontext.Value) predicate.Job {
 	var (
 		err error
 		v   = make([]any, len(vs))
@@ -544,7 +544,7 @@ func BodyIn(vs ...json.RawMessage) predicate.Job {
 }
 
 // BodyNotIn applies the NotIn predicate on the "body" field.
-func BodyNotIn(vs ...json.RawMessage) predicate.Job {
+func BodyNotIn(vs ...jsontext.Value) predicate.Job {
 	var (
 		err error
 		v   = make([]any, len(vs))
@@ -558,25 +558,25 @@ func BodyNotIn(vs ...json.RawMessage) predicate.Job {
 }
 
 // BodyGT applies the GT predicate on the "body" field.
-func BodyGT(v json.RawMessage) predicate.Job {
+func BodyGT(v jsontext.Value) predicate.Job {
 	vc, err := ValueScanner.Body.Value(v)
 	return predicate.JobOrErr(sql.FieldGT(FieldBody, vc), err)
 }
 
 // BodyGTE applies the GTE predicate on the "body" field.
-func BodyGTE(v json.RawMessage) predicate.Job {
+func BodyGTE(v jsontext.Value) predicate.Job {
 	vc, err := ValueScanner.Body.Value(v)
 	return predicate.JobOrErr(sql.FieldGTE(FieldBody, vc), err)
 }
 
 // BodyLT applies the LT predicate on the "body" field.
-func BodyLT(v json.RawMessage) predicate.Job {
+func BodyLT(v jsontext.Value) predicate.Job {
 	vc, err := ValueScanner.Body.Value(v)
 	return predicate.JobOrErr(sql.FieldLT(FieldBody, vc), err)
 }
 
 // BodyLTE applies the LTE predicate on the "body" field.
-func BodyLTE(v json.RawMessage) predicate.Job {
+func BodyLTE(v jsontext.Value) predicate.Job {
 	vc, err := ValueScanner.Body.Value(v)
 	return predicate.JobOrErr(sql.FieldLTE(FieldBody, vc), err)
 }

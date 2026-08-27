@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -88,7 +88,7 @@ func (_c *JobCreate) SetWeight(v int) *JobCreate {
 }
 
 // SetBody sets the "body" field.
-func (_c *JobCreate) SetBody(v json.RawMessage) *JobCreate {
+func (_c *JobCreate) SetBody(v jsontext.Value) *JobCreate {
 	_c.mutation.SetBody(v)
 	return _c
 }
@@ -555,7 +555,7 @@ func (u *JobUpsert) AddWeight(v int) *JobUpsert {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsert) SetBody(v json.RawMessage) *JobUpsert {
+func (u *JobUpsert) SetBody(v jsontext.Value) *JobUpsert {
 	u.Set(job.FieldBody, v)
 	return u
 }
@@ -829,7 +829,7 @@ func (u *JobUpsertOne) UpdateWeight() *JobUpsertOne {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsertOne) SetBody(v json.RawMessage) *JobUpsertOne {
+func (u *JobUpsertOne) SetBody(v jsontext.Value) *JobUpsertOne {
 	return u.Update(func(s *JobUpsert) {
 		s.SetBody(v)
 	})
@@ -1285,7 +1285,7 @@ func (u *JobUpsertBulk) UpdateWeight() *JobUpsertBulk {
 }
 
 // SetBody sets the "body" field.
-func (u *JobUpsertBulk) SetBody(v json.RawMessage) *JobUpsertBulk {
+func (u *JobUpsertBulk) SetBody(v jsontext.Value) *JobUpsertBulk {
 	return u.Update(func(s *JobUpsert) {
 		s.SetBody(v)
 	})

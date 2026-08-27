@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -175,7 +175,7 @@ func (_u *JobUpdate) AddWeight(v int) *JobUpdate {
 }
 
 // SetBody sets the "body" field.
-func (_u *JobUpdate) SetBody(v json.RawMessage) *JobUpdate {
+func (_u *JobUpdate) SetBody(v jsontext.Value) *JobUpdate {
 	_u.mutation.SetBody(v)
 	return _u
 }
@@ -548,7 +548,7 @@ func (_u *JobUpdateOne) AddWeight(v int) *JobUpdateOne {
 }
 
 // SetBody sets the "body" field.
-func (_u *JobUpdateOne) SetBody(v json.RawMessage) *JobUpdateOne {
+func (_u *JobUpdateOne) SetBody(v jsontext.Value) *JobUpdateOne {
 	_u.mutation.SetBody(v)
 	return _u
 }

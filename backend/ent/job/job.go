@@ -3,7 +3,7 @@
 package job
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"time"
 
@@ -93,7 +93,7 @@ var (
 	DefaultID func() uuid.UUID
 	// ValueScanner of all Job fields.
 	ValueScanner struct {
-		Body field.TypeValueScanner[json.RawMessage]
+		Body field.TypeValueScanner[jsontext.Value]
 	}
 )
 

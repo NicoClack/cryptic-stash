@@ -3,7 +3,7 @@
 package ent
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
@@ -145,7 +145,7 @@ func init() {
 	}()
 	// jobDescBody is the schema descriptor for body field.
 	jobDescBody := jobFields[10].Descriptor()
-	job.ValueScanner.Body = jobDescBody.ValueScanner.(field.TypeValueScanner[json.RawMessage])
+	job.ValueScanner.Body = jobDescBody.ValueScanner.(field.TypeValueScanner[jsontext.Value])
 	// jobDescRetries is the schema descriptor for retries field.
 	jobDescRetries := jobFields[12].Descriptor()
 	// job.DefaultRetries holds the default value on creation for the retries field.
@@ -498,7 +498,7 @@ func init() {
 	usermessenger.DefaultIsEnabled = usermessengerDescIsEnabled.Default.(bool)
 	// usermessengerDescOptions is the schema descriptor for options field.
 	usermessengerDescOptions := usermessengerFields[6].Descriptor()
-	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[json.RawMessage])
+	usermessenger.ValueScanner.Options = usermessengerDescOptions.ValueScanner.(field.TypeValueScanner[jsontext.Value])
 	// usermessengerDescID is the schema descriptor for id field.
 	usermessengerDescID := usermessengerFields[0].Descriptor()
 	// usermessenger.DefaultID holds the default value on creation for the id field.
