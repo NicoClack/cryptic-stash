@@ -135,7 +135,10 @@ func ValidateEnvironmentVariables(env *common.Env) {
 		)
 	}
 	if !env.SMTP_REQUIRE_TLS && !env.IS_DEV {
-		slog.Warn("SMTP_REQUIRE_TLS should be set to true for production environments")
+		log.Fatal("SMTP_REQUIRE_TLS must be true for production environments")
+	}
+	if env.SMTP_IMPLICIT_TLS && env.SMTP_PORT != 465 {
+		slog.Warn("SMTP_IMPLICIT_TLS is true but SMTP_PORT is not 465, emails might not send")
 	}
 
 	if !common.AllOrNone(

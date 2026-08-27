@@ -5,6 +5,7 @@
 - Update deprecated linters
 - Check passkey implementation against https://developers.yubico.com/WebAuthn/WebAuthn_Developer_Guide/ . Recommendations:
 -   - Fix race conditions when using a WebAuthn session or creating one (it's currently created before the tx commits). Maybe store them in the database instead?
+-   -   - Also TempKeyValue has a race condition with how Get deletes expired keys, if something tries to write a new non-expired replacement at the same time
 -   - Consistently limit ceremonies to single use even if there's an unexpected error?
 -   - Auto name passkeys based on AAGUID
 - Add logout button and username in the top right
@@ -53,6 +54,7 @@
 -   - Maybe 400 requests per 2 minutes for static assets
 -   - If using a WAF, it's probably better to let it handle these, to minimise in-memory locks
 - Block IPs who get passwords wrong too often. Use exponential backoff
+- Review the security settings for each messenger, particularly SMTP
 - Send message when a stash password is correctly entered while it's locked
 - Move package logging to the service layer, return result structs with the information needed to determine what to log
 - Add password strength requirements, maybe using https://github.com/dropbox/zxcvbn or https://github.com/zxcvbn-ts/zxcvbn ? Use matcher-pwned
@@ -75,7 +77,8 @@
 - Improve frontend security: CSP/HSTS/X-Frame-Options/X-Content-Type-Options/Referrer-Policy
 - Generally improve the frontend
 - Remove userID and publicMessage from logger, it's not worth the complexity and risks
--   - Maybe LoginAlerts should be used to display security messages when you log in?
+-   - AccountAlerts will be used instead
+-   - Attributes should be encrypted as they might contain limited PII like IP addresses and user agents
 - Fix elevation softlocks, see the StartElevation endpoint
 - Can cancelling requests make views non-atomic if a view uses multiple transactions? Are there any security risks with this?
 - Standardise returning errors and using gin.H vs the endpoint specific download struct. That struct applies defaults which the other 2 approaches don't, so it could leak information

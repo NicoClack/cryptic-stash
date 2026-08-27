@@ -53,7 +53,8 @@ func Create(app *servercommon.ServerApp) gin.HandlerFunc {
 				inviteOb, encodedCode, wrappedErr := app.Invites.CreateInvite(
 					body.Email,
 					inviteMessage,
-					time.Duration(body.ExpiresIn)*time.Second,
+					// Prevent overflows
+					time.Duration(min(body.ExpiresIn, int64(app.Env.INVITE_MAX_EXPIRY/time.Second)))*time.Second,
 					actor,
 					tx,
 					ctx,

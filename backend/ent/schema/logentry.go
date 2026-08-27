@@ -26,7 +26,7 @@ func (LogEntry) Fields() []ent.Field {
 		field.Bool("loggedAtKnown"), // Some logs don't have a time, so an inaccurate time is added during processing
 		field.Int("level"),
 		field.String("message"),
-		field.JSON("attributes", map[string]any{}),
+		field.JSON("attributes", map[string]any{}), // TODO: encrypt
 		field.String("sourceFile"),
 		field.String("sourceFunction"),
 		field.Int("sourceLine"),

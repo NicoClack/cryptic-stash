@@ -185,7 +185,7 @@ func SMTP1(app *common.App) *messengers.Definition {
 			}
 
 			// Dev SMTP servers like Mailpit don't use authentication
-			// This is safe because TLS is established above
+			// It's safe to send credentials because either we've established TLS or we're in dev mode
 			if app.Env.SMTP_PASSWORD != "" {
 				ok, _ := client.Extension("AUTH")
 				if !ok {

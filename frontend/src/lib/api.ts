@@ -98,6 +98,7 @@ async function handleAuthRedirects(
 			return true;
 		} else if (authHeader?.startsWith("Bearer ")) {
 			// TODO: ^ how do I distinguish between user and admin auth if they both use Bearer tokens?
+			// Also what about other kinds of auth like invite codes?
 			userAuth.logout();
 			goToLogin();
 			return true;
