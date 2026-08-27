@@ -90,6 +90,13 @@ func Encrypt(data []byte, encryptionKey []byte) ([]byte, error) {
 	return slices.Concat(nonce, encrypted), nil
 }
 func Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, error) {
+	if len(encrypted) < GCMNonceSize {
+		return nil, fmt.Errorf(
+			"schema.Decrypt: encrypted value is shorter than GCMNonceSize. length: %d",
+			len(encrypted),
+		)
+	}
+
 	keyCipher, stdErr := aes.NewCipher(encryptionKey)
 	if stdErr != nil {
 		return nil, stdErr
