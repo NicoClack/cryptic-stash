@@ -154,9 +154,20 @@ func ValidateEnvironmentVariables(env *common.Env) {
 		)
 	}
 
-	if env.EMAIL_MESSENGER_TYPE != "smtp_1" &&
-		env.EMAIL_MESSENGER_TYPE != "smtp2go_1" &&
-		env.EMAIL_MESSENGER_TYPE != "develop_1" {
+	switch env.EMAIL_MESSENGER_TYPE {
+	case "smtp_1":
+		if env.SMTP_HOST == "" {
+			log.Fatal("EMAIL_MESSENGER_TYPE is set to smtp_1 but that messenger is not configured")
+		}
+	case "smtp2go_1":
+		if env.SMTP2GO_API_KEY == "" {
+			log.Fatal("EMAIL_MESSENGER_TYPE is set to smtp2go_1 but that messenger is not configured")
+		}
+	case "develop_1":
+		if !env.ENABLE_DEVELOP_MESSENGER {
+			log.Fatal("EMAIL_MESSENGER_TYPE is set to develop_1 but ENABLE_DEVELOP_MESSENGER is false")
+		}
+	default:
 		log.Fatal("EMAIL_MESSENGER_TYPE must be one of: smtp_1, smtp2go_1, develop_1")
 	}
 }
