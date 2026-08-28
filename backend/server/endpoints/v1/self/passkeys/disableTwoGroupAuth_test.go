@@ -21,7 +21,7 @@ func TestDisableTwoGroupAuth(t *testing.T) {
 	firstGroupPasskey := createPasskey(t, "first-group-key", true, false, userOb.ID, dbClient)
 	secondGroupPasskey := createPasskey(t, "second-group-key", true, true, userOb.ID, dbClient)
 	createPasskey(t, "another-second-group-key", true, true, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, new(secondGroupPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, &secondGroupPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -51,7 +51,7 @@ func TestDisableTwoGroupAuth_NoSecondGroupPasskeys_NoOp(t *testing.T) {
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,

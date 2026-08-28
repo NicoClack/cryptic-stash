@@ -72,7 +72,7 @@ func SetPasskeyAllowSudo(
 	if !newAllowSudo && (isTargetUsedAsSessionFirst || isTargetUsedAsSessionElevation) {
 		var nonTargetPasskeyID *uuid.UUID
 		if !isTargetUsedAsSessionFirst {
-			nonTargetPasskeyID = new(sessionPasskeyID)
+			nonTargetPasskeyID = &sessionPasskeyID
 		} else if !isTargetUsedAsSessionElevation {
 			nonTargetPasskeyID = sessionElevationPasskeyID
 		}

@@ -113,7 +113,7 @@ func TestDemoteInvalidSudoSessions(t *testing.T) {
 		dbClient,
 		userOb.ID,
 		sudoFirstGroupPasskey.ID,
-		new(sudoSecondGroupPasskey.ID),
+		&sudoSecondGroupPasskey.ID,
 		true,
 	)
 	nonSudoCrossGroupSession := createDummySession( // Invalid state
@@ -121,7 +121,7 @@ func TestDemoteInvalidSudoSessions(t *testing.T) {
 		dbClient,
 		userOb.ID,
 		sudoFirstGroupPasskey.ID,
-		new(sudoSecondGroupPasskey.ID),
+		&sudoSecondGroupPasskey.ID,
 		false,
 	)
 	// To demote
@@ -130,7 +130,7 @@ func TestDemoteInvalidSudoSessions(t *testing.T) {
 		dbClient,
 		userOb.ID,
 		sudoFirstGroupPasskey.ID,
-		new(nonSudoFirstGroupPasskey.ID),
+		&nonSudoFirstGroupPasskey.ID,
 		true,
 	)
 	noElevationSudoSession := createDummySession(t, dbClient, userOb.ID, sudoFirstGroupPasskey.ID, nil, true)
@@ -168,7 +168,7 @@ func TestDemoteInvalidSudoSessions_NoInvalidSessions_ReturnsZero(t *testing.T) {
 	userOb := createUser(t, dbClient, "user1")
 	group1Passkey := createDummyPasskey(t, dbClient, userOb.ID, "group-1-passkey", true, false)
 	group2Passkey := createDummyPasskey(t, dbClient, userOb.ID, "group-2-passkey", true, true)
-	createDummySession(t, dbClient, userOb.ID, group1Passkey.ID, new(group2Passkey.ID), true)
+	createDummySession(t, dbClient, userOb.ID, group1Passkey.ID, &group2Passkey.ID, true)
 
 	tx := testcommon.StartWriteTx(t, db)
 	count, wrappedErr := demoteInvalidSudoSessions(userOb.ID, tx, t.Context())

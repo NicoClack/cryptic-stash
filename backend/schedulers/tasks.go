@@ -59,7 +59,7 @@ func NewTask(callback TaskCallback, delayFunc DelayFunc) Task {
 				defer cancel()
 				nextRun, commit = delayFunc(&DelayFuncContext{
 					App:     engine.App,
-					LastRan: new(nextRun),
+					LastRan: &nextRun,
 					Context: ctx,
 				})
 			}

@@ -35,8 +35,8 @@ func TestInvite_EncryptedFields(t *testing.T) {
 			SetHashedCode(common.CryptoRandomBytes(32)).
 			SetExpiresAt(now.Add(24 * time.Hour)).
 			SetWebAuthnSession(webAuthnSession).
-			SetUserAgent(new(userAgent)).
-			SetIP(new(ip)).
+			SetUserAgent(&userAgent).
+			SetIP(&ip).
 			SaveX(ctx)
 
 		inviteOb = dbClient.Invite.GetX(ctx, inviteOb.ID)
@@ -84,8 +84,8 @@ func TestInvite_EncryptedFields(t *testing.T) {
 			SetEmail("encrypt-test@example.com").
 			SetHashedCode(common.CryptoRandomBytes(32)).
 			SetExpiresAt(now.Add(24 * time.Hour)).
-			SetUserAgent(new(userAgent)).
-			SetIP(new(ip)).
+			SetUserAgent(&userAgent).
+			SetIP(&ip).
 			SaveX(ctx)
 
 		idStr := inviteOb.ID.String()

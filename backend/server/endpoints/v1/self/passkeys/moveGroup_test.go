@@ -22,14 +22,14 @@ func TestMoveGroup_CreateSecondGroup(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	firstGroupPasskey := createPasskey(t, "first-group-key", true, false, userOb.ID, dbClient)
 	passkeyToMove := createPasskey(t, "moving-key", true, false, userOb.ID, dbClient)
-	requestSessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, new(passkeyToMove.ID), app)
+	requestSessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, &passkeyToMove.ID, app)
 	otherFirstGroupLoginPasskey := createPasskey(t, "other-login", true, false, userOb.ID, dbClient)
 	otherFirstGroupElevationPasskey := createPasskey(t, "other-elevation", true, false, userOb.ID, dbClient)
 	sessionTokenToDemote := createSession(
 		t,
 		userOb.ID,
 		otherFirstGroupLoginPasskey.ID,
-		new(otherFirstGroupElevationPasskey.ID),
+		&otherFirstGroupElevationPasskey.ID,
 		app,
 	)
 
@@ -82,7 +82,7 @@ func TestMoveGroup_CreateSecondGroup_MoveLoginPasskey(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	loginPasskey := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
 	elevationPasskey := createPasskey(t, "elevation-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, new(elevationPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, &elevationPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -122,8 +122,8 @@ func TestMoveGroup_ExistingSecondGroup(t *testing.T) {
 	firstGroupPasskey := createPasskey(t, "first-group-key", true, false, userOb.ID, dbClient)
 	existingSecondGroupPasskey := createPasskey(t, "existing-second-group-key", true, true, userOb.ID, dbClient)
 	passkeyToMove := createPasskey(t, "moving-key", true, false, userOb.ID, dbClient)
-	requestSessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, new(existingSecondGroupPasskey.ID), app)
-	sessionTokenToDemote := createSession(t, userOb.ID, existingSecondGroupPasskey.ID, new(passkeyToMove.ID), app)
+	requestSessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, &existingSecondGroupPasskey.ID, app)
+	sessionTokenToDemote := createSession(t, userOb.ID, existingSecondGroupPasskey.ID, &passkeyToMove.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -175,7 +175,7 @@ func TestMoveGroup_NoSecondGroup_CantMoveNonSessionPasskey(t *testing.T) {
 	loginPasskey := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
 	elevationPasskey := createPasskey(t, "elevation-key", true, false, userOb.ID, dbClient)
 	nonSessionPasskey := createPasskey(t, "unused-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, new(elevationPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, &elevationPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -209,7 +209,7 @@ func TestMoveGroup_SamePasskeyUsedTwice_SendsConflictError(t *testing.T) {
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -283,7 +283,7 @@ func TestMoveGroup_ExistingSecondGroup_TargetIsLoginPasskey_SendsConflictError(t
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	loginPasskey := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
 	elevationPasskey := createPasskey(t, "elevation-key", true, true, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, new(elevationPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, &elevationPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -318,7 +318,7 @@ func TestMoveGroup_ExistingSecondGroup_TargetIsElevationPasskey_SendsConflictErr
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	loginPasskey := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
 	elevationPasskey := createPasskey(t, "elevation-key", true, true, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, new(elevationPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, &elevationPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,

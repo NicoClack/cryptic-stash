@@ -22,7 +22,7 @@ func TestUpdateSudo_Enable(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	sudoPasskey := createPasskey(t, "sudo-key", true, false, userOb.ID, dbClient)
 	nonSudoPasskey := createPasskey(t, "non-sudo-key", false, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, sudoPasskey.ID, new(sudoPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, sudoPasskey.ID, &sudoPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -54,7 +54,7 @@ func TestUpdateSudo_Enable_PasskeyUsedBySession(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	loginPasskey := createPasskey(t, "login-key", false, false, userOb.ID, dbClient)
 	elevationPasskey := createPasskey(t, "elevation-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, new(elevationPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, &elevationPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -92,9 +92,9 @@ func TestUpdateSudo_Disable_WithOtherSudoPasskey(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyToDemote := createPasskey(t, "demoting-passkey", true, false, userOb.ID, dbClient)
 	otherSudoPasskey := createPasskey(t, "sudo-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyToDemote.ID, new(otherSudoPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyToDemote.ID, &otherSudoPasskey.ID, app)
 	nonSudoPasskey := createPasskey(t, "non-sudo-key", false, false, userOb.ID, dbClient)
-	sessionTokenToDemote := createSession(t, userOb.ID, passkeyToDemote.ID, new(nonSudoPasskey.ID), app)
+	sessionTokenToDemote := createSession(t, userOb.ID, passkeyToDemote.ID, &nonSudoPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -147,7 +147,7 @@ func TestUpdateSudo_Disable_TargetIsOnlySudoInSession_SendsConflictError(t *test
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	nonSudoPasskey := createPasskey(t, "non-sudo-key", false, false, userOb.ID, dbClient)
 	sudoPasskeyToDemote := createPasskey(t, "sudo-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, nonSudoPasskey.ID, new(sudoPasskeyToDemote.ID), app)
+	sessionToken := createSession(t, userOb.ID, nonSudoPasskey.ID, &sudoPasskeyToDemote.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -179,7 +179,7 @@ func TestUpdateSudo_Disable_SamePasskeyUsedTwice_RejectsSessionPasskeyAsTarget(t
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,

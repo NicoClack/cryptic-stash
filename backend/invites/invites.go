@@ -233,8 +233,8 @@ func CreateUser(
 				SetUser(createdUserOb).
 				SetWebAuthnSession(nil).
 				// ^ We don't need this anymore and the user edge prevents the invite being used twice
-				SetUserAgent(new(actor.UserAgent)).
-				SetIP(new(actor.IP)).
+				SetUserAgent(&actor.UserAgent).
+				SetIP(&actor.IP).
 				Save(ctx)
 			if stdErr != nil {
 				return nil, stdErr
@@ -249,7 +249,7 @@ func CreateUser(
 	sessionOb, token, wrappedErr := authService.CreateSession(
 		passkeyOb.UserID,
 		passkeyOb.ID,
-		new(passkeyOb.ID), // Elevate the session to sudo using the passkey that was just registered
+		&passkeyOb.ID, // Elevate the session to sudo using the passkey that was just registered
 		actor,
 		tx,
 		ctx,

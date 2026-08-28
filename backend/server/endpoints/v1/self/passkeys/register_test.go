@@ -26,7 +26,7 @@ func TestRegisterFlow(t *testing.T) {
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "Test passkey", false, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	startResp := testcommon.Post(
 		t, app.Server,
@@ -102,7 +102,7 @@ func TestRegisterFlow_DuplicateName(t *testing.T) {
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "Test passkey", false, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	startResp := testcommon.Post(
 		t, app.Server,

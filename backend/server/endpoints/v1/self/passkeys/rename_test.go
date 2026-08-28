@@ -22,7 +22,7 @@ func TestRename(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "old-name", true, false, userOb.ID, dbClient)
 	// Any passkey can be renamed, including ones used by the session like here
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -54,7 +54,7 @@ func TestRename_DuplicateName(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	redPasskeyOb := createPasskey(t, "red", true, false, userOb.ID, dbClient)
 	bluePasskeyOb := createPasskey(t, "blue", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, redPasskeyOb.ID, new(redPasskeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, redPasskeyOb.ID, &redPasskeyOb.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -86,7 +86,7 @@ func TestRename_NotFound(t *testing.T) {
 	dbClient := app.Database.Client()
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "old-name", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,

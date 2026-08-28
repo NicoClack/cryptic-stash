@@ -29,7 +29,7 @@ func TestList(t *testing.T) {
 		SetLastUsedAt(lastUsedAt).
 		Save(t.Context())
 	require.NoError(t, stdErr)
-	sessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, new(secondGroupPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, firstGroupPasskey.ID, &secondGroupPasskey.ID, app)
 
 	respRecorder := testcommon.Get(
 		t, app.Server,
@@ -75,7 +75,7 @@ func TestList_UnusedPasskey(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 
 	passkeyOb := createPasskey(t, "passkey", false, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	respRecorder := testcommon.Get(
 		t, app.Server,

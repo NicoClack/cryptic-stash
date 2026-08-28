@@ -19,5 +19,5 @@ func ZeroToPtr[T comparable](value T) *T {
 	if value == defaultValue {
 		return nil
 	}
-	return new(value)
+	return &value
 }

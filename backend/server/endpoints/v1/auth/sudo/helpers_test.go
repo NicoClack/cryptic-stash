@@ -72,7 +72,7 @@ func createSession(
 
 	var elevationPasskeyID *uuid.UUID
 	if isSudo {
-		elevationPasskeyID = new(passkeyID)
+		elevationPasskeyID = &passkeyID
 	}
 
 	sessionToken, stdErr := dbcommon.WithReadWriteTx(

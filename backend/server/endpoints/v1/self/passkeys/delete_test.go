@@ -25,11 +25,11 @@ func TestDelete(t *testing.T) {
 		t,
 		userOb.ID,
 		loginPasskey.ID,
-		new(loginPasskey.ID),
+		&loginPasskey.ID,
 		app,
 	)
-	sessionTokenToDelete := createSession(t, userOb.ID, passkeyToDelete.ID, new(passkeyToDelete.ID), app)
-	sessionTokenToDemote := createSession(t, userOb.ID, passkeyToDelete.ID, new(loginPasskey.ID), app)
+	sessionTokenToDelete := createSession(t, userOb.ID, passkeyToDelete.ID, &passkeyToDelete.ID, app)
+	sessionTokenToDemote := createSession(t, userOb.ID, passkeyToDelete.ID, &loginPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,
@@ -82,7 +82,7 @@ func TestDelete_SessionPasskey_SendsConflictError(t *testing.T) {
 	userOb := testcommon.NewDummyUser(1, dbClient, t.Context(), app.Clock)
 	loginPasskey := createPasskey(t, "login-key", true, false, userOb.ID, dbClient)
 	elevationPasskey := createPasskey(t, "elevation-key", true, false, userOb.ID, dbClient)
-	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, new(elevationPasskey.ID), app)
+	sessionToken := createSession(t, userOb.ID, loginPasskey.ID, &elevationPasskey.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,

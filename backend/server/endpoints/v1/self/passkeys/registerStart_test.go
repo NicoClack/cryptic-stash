@@ -21,7 +21,7 @@ func TestRegisterStart(t *testing.T) {
 	app := testhelpers.NewApp(t, nil)
 	userOb := testcommon.NewDummyUser(1, app.Database.Client(), t.Context(), app.Clock)
 	passkeyOb := createPasskey(t, "Test passkey", false, false, userOb.ID, app.Database.Client())
-	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, new(passkeyOb.ID), app)
+	sessionToken := createSession(t, userOb.ID, passkeyOb.ID, &passkeyOb.ID, app)
 
 	respRecorder := testcommon.Post(
 		t, app.Server,

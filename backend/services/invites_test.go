@@ -63,7 +63,7 @@ func TestInvitesService_DeleteExpiredInvites(t *testing.T) {
 		SetCreatedAt(now.Add(-2 * time.Hour)).
 		SetUpdatedAt(now.Add(-2 * time.Hour)).
 		SaveX(t.Context())
-	createInvite(t, dbClient, formatEmail("used"), getHash("used"), now.Add(-time.Hour), new(userOb.ID))
+	createInvite(t, dbClient, formatEmail("used"), getHash("used"), now.Add(-time.Hour), &userOb.ID)
 
 	// Another expired
 	createInvite(t, dbClient, formatEmail("expired-2"), getHash("expired-2"), now.Add(-30*time.Minute), nil)

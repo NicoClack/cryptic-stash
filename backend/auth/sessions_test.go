@@ -66,7 +66,7 @@ func TestCreateSession_Sudo(t *testing.T) {
 	sessionOb, _, wrappedErr := auth.CreateSession(
 		userOb.ID,
 		passkeyOb.ID,
-		new(elevationPasskeyOb.ID),
+		&elevationPasskeyOb.ID,
 		&common.Actor{
 			IP:        "127.0.0.1",
 			UserAgent: "test-agent",
