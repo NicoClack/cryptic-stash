@@ -4,14 +4,13 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
@@ -88,29 +87,29 @@ func (_u *UserMessengerUpdate) AddVersion(v int) *UserMessengerUpdate {
 	return _u
 }
 
-// SetEnabled sets the "enabled" field.
-func (_u *UserMessengerUpdate) SetEnabled(v bool) *UserMessengerUpdate {
-	_u.mutation.SetEnabled(v)
+// SetIsEnabled sets the "isEnabled" field.
+func (_u *UserMessengerUpdate) SetIsEnabled(v bool) *UserMessengerUpdate {
+	_u.mutation.SetIsEnabled(v)
 	return _u
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *UserMessengerUpdate) SetNillableEnabled(v *bool) *UserMessengerUpdate {
+// SetNillableIsEnabled sets the "isEnabled" field if the given value is not nil.
+func (_u *UserMessengerUpdate) SetNillableIsEnabled(v *bool) *UserMessengerUpdate {
 	if v != nil {
-		_u.SetEnabled(*v)
+		_u.SetIsEnabled(*v)
 	}
 	return _u
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdate) SetOptions(v json.RawMessage) *UserMessengerUpdate {
+func (_u *UserMessengerUpdate) SetOptions(v jsontext.Value) *UserMessengerUpdate {
 	_u.mutation.SetOptions(v)
 	return _u
 }
 
-// AppendOptions appends value to the "options" field.
-func (_u *UserMessengerUpdate) AppendOptions(v json.RawMessage) *UserMessengerUpdate {
-	_u.mutation.AppendOptions(v)
+// ClearOptions clears the value of the "options" field.
+func (_u *UserMessengerUpdate) ClearOptions() *UserMessengerUpdate {
+	_u.mutation.ClearOptions()
 	return _u
 }
 
@@ -256,16 +255,18 @@ func (_u *UserMessengerUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.AddedVersion(); ok {
 		_spec.AddField(usermessenger.FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
+	if value, ok := _u.mutation.IsEnabled(); ok {
+		_spec.SetField(usermessenger.FieldIsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeJSON, value)
+		vv, err := usermessenger.ValueScanner.Options.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
 	}
-	if value, ok := _u.mutation.AppendedOptions(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, usermessenger.FieldOptions, value)
-		})
+	if _u.mutation.OptionsCleared() {
+		_spec.ClearField(usermessenger.FieldOptions, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -416,29 +417,29 @@ func (_u *UserMessengerUpdateOne) AddVersion(v int) *UserMessengerUpdateOne {
 	return _u
 }
 
-// SetEnabled sets the "enabled" field.
-func (_u *UserMessengerUpdateOne) SetEnabled(v bool) *UserMessengerUpdateOne {
-	_u.mutation.SetEnabled(v)
+// SetIsEnabled sets the "isEnabled" field.
+func (_u *UserMessengerUpdateOne) SetIsEnabled(v bool) *UserMessengerUpdateOne {
+	_u.mutation.SetIsEnabled(v)
 	return _u
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *UserMessengerUpdateOne) SetNillableEnabled(v *bool) *UserMessengerUpdateOne {
+// SetNillableIsEnabled sets the "isEnabled" field if the given value is not nil.
+func (_u *UserMessengerUpdateOne) SetNillableIsEnabled(v *bool) *UserMessengerUpdateOne {
 	if v != nil {
-		_u.SetEnabled(*v)
+		_u.SetIsEnabled(*v)
 	}
 	return _u
 }
 
 // SetOptions sets the "options" field.
-func (_u *UserMessengerUpdateOne) SetOptions(v json.RawMessage) *UserMessengerUpdateOne {
+func (_u *UserMessengerUpdateOne) SetOptions(v jsontext.Value) *UserMessengerUpdateOne {
 	_u.mutation.SetOptions(v)
 	return _u
 }
 
-// AppendOptions appends value to the "options" field.
-func (_u *UserMessengerUpdateOne) AppendOptions(v json.RawMessage) *UserMessengerUpdateOne {
-	_u.mutation.AppendOptions(v)
+// ClearOptions clears the value of the "options" field.
+func (_u *UserMessengerUpdateOne) ClearOptions() *UserMessengerUpdateOne {
+	_u.mutation.ClearOptions()
 	return _u
 }
 
@@ -614,16 +615,18 @@ func (_u *UserMessengerUpdateOne) sqlSave(ctx context.Context) (_node *UserMesse
 	if value, ok := _u.mutation.AddedVersion(); ok {
 		_spec.AddField(usermessenger.FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
+	if value, ok := _u.mutation.IsEnabled(); ok {
+		_spec.SetField(usermessenger.FieldIsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeJSON, value)
+		vv, err := usermessenger.ValueScanner.Options.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
 	}
-	if value, ok := _u.mutation.AppendedOptions(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, usermessenger.FieldOptions, value)
-		})
+	if _u.mutation.OptionsCleared() {
+		_spec.ClearField(usermessenger.FieldOptions, field.TypeBytes)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

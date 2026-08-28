@@ -4,8 +4,10 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -20,19 +22,29 @@ func (Stash) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
-		field.Time("lastDownloadAt").Optional(),
+		field.Time("lastDownloadAt").Optional(), // TODO: this should be made nillable once this object is reworked
+		field.String("publicName").NotEmpty().MaxLen(256),
 		// Encrypted with encryptionDataKey and prefixed with the nonce
 		field.Bytes("content").NotEmpty().MaxLen(10_000_000), // 10MB
 		field.Bytes("fileName").NotEmpty().MaxLen(256),
 
-		// Encrypted with a key derived from the user's password, then env.STASH_ENCRYPTION_KEY.
-		// GCM and nonce prefixes on both layers so the 32 unencrypted length becomes closer to 128 bytes
-		field.Bytes("encryptionDataKey").MinLen(32).MaxLen(128),
+		// Encrypted with a key derived from the user's password, then again by the ValueScanner
+		// There's also encryption at the service level.
+		// The whole stash system will be reworked soon as part of the E2E OPAQUE system
+		field.Bytes("encryptionDataKey").
+			ValueScanner(EncryptedField[[]byte]{KeyName: "stash_1"}),
 		field.Bytes("passwordSalt").NotEmpty(),
 
 		field.Uint32("hashTime"),
 		field.Uint32("hashMemory"),
 		field.Uint8("hashThreads"),
+
+		field.Bool("isSelfLocked").Default(false),
+		field.Bool("isAdminLocked").Default(false),
+		// Creating a temporary lock won't update isSelfLocked
+		field.Time("selfLockedUntil").Nillable().Optional(),
+		field.Time("downloadSessionsValidFrom"),
+
 		field.UUID("userID", uuid.Nil),
 	}
 }
@@ -40,7 +52,16 @@ func (Stash) Fields() []ent.Field {
 // Edges of the Stash.
 func (Stash) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("stash").
+		edge.From("user", User.Type).Ref("stashes").
 			Field("userID").Unique().Required(),
+		edge.To("downloadSessions", DownloadSession.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
+	}
+}
+
+// Indexes of the Stash.
+func (Stash) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("userID", "publicName").Unique(),
 	}
 }

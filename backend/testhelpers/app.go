@@ -22,6 +22,8 @@ type AppOptions struct {
 	Env            *common.Env
 	Clock          clockwork.Clock
 	MockMessengers []*MockMessenger
+	// Overrides the callback given to the logger. The default callback fails the test when an error is logged.
+	OnLog func(record slog.Record)
 }
 
 // Mainly intended for integration tests, e.g endpoints and jobs
@@ -91,18 +93,31 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 	})
 
 	{
-		logger := services.NewLogger(app)
+		loggerOptions := &services.LoggerOptions{}
+		if options.OnLog == nil {
+			loggerOptions.OnLog = NewDefaultOnLogCallback(t.Errorf)
+		} else {
+			loggerOptions.OnLog = options.OnLog
+		}
+		logger := services.NewLogger(app, loggerOptions)
 		app.Logger = logger
 		slog.SetDefault(logger.Logger)
 	}
 	app.RateLimiter = services.NewRateLimiter(app)
 	app.Core = services.NewCore(app)
-	db := testcommon.CreateDB(t)
+	db := testcommon.CreateDBWithOptions(t, testcommon.CreateDBOptions{
+		Logger:      app.Logger,
+		SkipCleanup: true, // Managed by the shutdown service instead
+	})
 	app.Database = db
 	app.KeyValue = services.NewKeyValue(app)
-	app.Database.Start()
+	app.TempKeyValue = services.NewTempKeyValue(app)
+	app.Auth = services.NewAuth(app)
+	app.Invites = services.NewInvites(app)
+	// The database would be started here, but it's not necessary for a test database
 	app.KeyValue.Init()
 	app.Logger.Start()
+	app.Core.Init()
 	// TODO: TwoFactorActions
 	{
 		registerFuncs := make([]func(registry *messengers.Registry), 0, len(mockMessengers))
@@ -123,5 +138,14 @@ func NewApp(t *testing.T, options *AppOptions) *App {
 		App:           app,
 		MockMessenger: mockMessenger,
 		TestDatabase:  db,
+	}
+}
+
+func NewDefaultOnLogCallback(errorf func(format string, args ...any)) func(record slog.Record) {
+	return func(record slog.Record) {
+		if record.Level >= slog.LevelError {
+			// TODO: call t.Helper() ?
+			errorf("testhelpers.NewApp: test failed because an error was logged")
+		}
 	}
 }

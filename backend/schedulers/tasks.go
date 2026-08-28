@@ -28,14 +28,14 @@ type TaskContext struct {
 
 func NewTask(callback TaskCallback, delayFunc DelayFunc) Task {
 	var commit CommitDelayFunc
-	nextRun := time.Time{}
+	var nextRun time.Time
 	return Task{
 		Init: func(engine *Engine) {
 			ctx, cancel := context.WithTimeout(context.Background(), DelayFuncTimeout)
 			defer cancel()
 			nextRun, commit = delayFunc(&DelayFuncContext{
 				App:     engine.App,
-				LastRan: time.Time{},
+				LastRan: nil,
 				Context: ctx,
 			})
 		},
@@ -59,7 +59,7 @@ func NewTask(callback TaskCallback, delayFunc DelayFunc) Task {
 				defer cancel()
 				nextRun, commit = delayFunc(&DelayFuncContext{
 					App:     engine.App,
-					LastRan: nextRun,
+					LastRan: &nextRun,
 					Context: ctx,
 				})
 			}

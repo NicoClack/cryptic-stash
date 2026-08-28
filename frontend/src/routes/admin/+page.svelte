@@ -10,7 +10,7 @@
 	<Card>
 		<CardHeader>
 			<CardTitle>
-				<a href={resolve("/admin/signup-links")}>Signup Links</a></CardTitle
+				<a href={resolve("/admin/invites")}>Invites</a></CardTitle
 			>
 		</CardHeader>
 	</Card>

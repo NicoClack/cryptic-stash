@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log/slog"
+	"sync"
 	"testing"
 	"time"
 
@@ -13,29 +13,46 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/globals"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/migrate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	_ "github.com/NicoClack/cryptic-stash/backend/entps"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/require"
 )
 
 type TestDatabase struct {
+	db           *sql.DB
 	client       *ent.Client
 	logger       common.Logger
 	startTxHooks []func(tx *ent.Tx) error
+	shutdownOnce sync.Once
 }
 
 var (
 	dbCounter = int64(0)
 )
 
+type CreateDBOptions struct {
+	Logger common.Logger
+	// By default, the database is automatically shutdown using t.Cleanup().
+	// If you need more control (like testhelpers.NewApp does), enable this option and call db.Shutdown yourself
+	SkipCleanup bool
+}
+
+// CreateDB creates a test database using the default options.
 func CreateDB(t *testing.T) *TestDatabase {
+	t.Helper()
+
+	return CreateDBWithOptions(t, CreateDBOptions{})
+}
+
+func CreateDBWithOptions(t *testing.T, options CreateDBOptions) *TestDatabase {
 	t.Helper()
 
 	globals.MigrateMu.Lock()
 	defer globals.MigrateMu.Unlock()
 	dbCounter++
 	db, stdErr := sql.Open("sqlite3", fmt.Sprintf(
-		"file:temp%v?mode=memory&cache=shared",
+		"file:temp%v?mode=memory&cache=shared&_txlock=immediate",
 		dbCounter,
 	))
 	require.NoError(t, stdErr)
@@ -43,6 +60,10 @@ func CreateDB(t *testing.T) *TestDatabase {
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(100)
 	db.SetConnMaxLifetime(time.Hour)
+
+	// This matches the hardcoded key in testcommon.DefaultEnv(),
+	// it can't be changed per test because it's a global variable
+	schema.Init(make([]byte, 32))
 	driver := ent.Driver(entsql.OpenDB("sqlite3", db))
 	client := ent.NewClient(driver)
 
@@ -59,18 +80,30 @@ func CreateDB(t *testing.T) *TestDatabase {
 		t.Fatalf("migration failed: %v", stdErr)
 	}
 
-	// TODO: take logger as argument?
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	logger := options.Logger
+	if logger == nil {
+		// Unlike at runtime, the slog default logger could be pretty much anything,
+		// so we'll use the basic test logger and it can be overridden if necessary.
+		logger = NewTestLogger(t)
+	}
 
-	return &TestDatabase{
+	testDB := &TestDatabase{
+		db:           db,
 		client:       client,
-		logger:       common.GetLogger(context.Background(), nil),
+		logger:       logger,
 		startTxHooks: []func(tx *ent.Tx) error{},
 	}
+	if !options.SkipCleanup {
+		t.Cleanup(testDB.Shutdown)
+	}
+	return testDB
 }
 
 func (db *TestDatabase) Start() {
-	// TODO: move initialisation logic into here like the real DB service?
+	panic("not implemented, TestDatabase is already started when created")
+}
+func (db *TestDatabase) DB() *sql.DB {
+	return db.db
 }
 func (db *TestDatabase) Client() *ent.Client {
 	return db.client
@@ -102,10 +135,15 @@ func (db *TestDatabase) WriteTx(ctx context.Context) (*ent.Tx, error) {
 	return tx, nil
 }
 func (db *TestDatabase) Shutdown() {
-	stdErr := db.client.Close()
-	if stdErr != nil {
-		db.logger.Warn("an error occurred while shutting down a test database", "error", stdErr)
-	}
+	db.shutdownOnce.Do(func() {
+		if db.client == nil {
+			return
+		}
+		stdErr := db.client.Close()
+		if stdErr != nil {
+			db.logger.Warn("an error occurred while shutting down a test database", "error", stdErr)
+		}
+	})
 }
 func (db *TestDatabase) DefaultLogger() common.Logger {
 	return db.logger
@@ -122,4 +160,18 @@ func (db *TestDatabase) runStartTxHooks(tx *ent.Tx) error {
 		}
 	}
 	return nil
+}
+
+// Note: this should mostly be used in unit tests where you don't want the retries that
+// the dbcommon WithWriteTx() function provides
+func StartWriteTx(t *testing.T, db *TestDatabase) *ent.Tx {
+	t.Helper()
+
+	tx, stdErr := db.WriteTx(t.Context())
+	require.NoError(t, stdErr)
+	// The in-memory SQLite databases are deleted at the end of each test run, so there's no need to
+	// register a t.Cleanup() to roll back. Callers must still terminate the transaction deliberately:
+	// commit before asserting persisted state, or roll back when the code under test errored or panicked
+	// (rolling back also avoids firing any OnCommit hooks registered mid-flight).
+	return tx
 }

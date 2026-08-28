@@ -25,8 +25,11 @@ func (UserMessenger) Fields() []ent.Field {
 		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.String("type").MinLen(1).MaxLen(128),
 		field.Int("version"),
-		field.Bool("enabled").Default(true),
-		field.JSON("options", json.RawMessage{}),
+		field.Bool("isEnabled").Default(true),
+		field.Bytes("options").
+			GoType(json.RawMessage{}).
+			ValueScanner(EncryptedField[json.RawMessage]{KeyName: "user_messenger_1"}).
+			Optional(), // No .Nillable because []byte is already nillable
 		field.UUID("userID", uuid.Nil),
 	}
 }

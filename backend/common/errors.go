@@ -37,15 +37,17 @@ const (
 	ErrTypeTwoFactorAction = "two factor action [package]"
 	ErrTypeMessengers      = "messengers [package]"
 	ErrTypeRateLimiting    = "rate limiting [package]"
+	ErrTypeAuth            = "auth [package]"
 	ErrTypeDbCommon        = "db common [package]"
 	ErrTypeServerCommon    = "server common [package]"
+	ErrTypeInvites         = "invites [package]"
 	ErrTypeServices        = "services [package]"
 	// Similar idea here if it's unknown
 )
 
 func HasErrors(errs []error) bool {
-	for _, err := range errs {
-		if err != nil {
+	for _, stdErr := range errs {
+		if stdErr != nil {
 			return true
 		}
 	}
@@ -56,8 +58,8 @@ func GetSuccessfulActionIDs(actionIDs []string, errs []*ErrWithStrId) []string {
 	successfulActionIDs := make([]string, len(actionIDs))
 	copy(successfulActionIDs, actionIDs)
 
-	for _, err := range errs {
-		index := slices.Index(successfulActionIDs, err.Id)
+	for _, stdErr := range errs {
+		index := slices.Index(successfulActionIDs, stdErr.Id)
 		if index != -1 {
 			successfulActionIDs = slices.Delete(successfulActionIDs, index, index+1)
 		}
@@ -414,6 +416,13 @@ func WrapErrorWithCategories(stdErr error, categories ...string) WrappedError {
 			errType:    reflect.TypeOf(stdErr),
 			categories: []string{},
 		}
+		if IsErrorType[WrappedError](stdErr) {
+			wrappedErr.AddDebugValuesMut(DebugValue{
+				Name: "double wrapped error",
+				Message: "This error contained a nested common.WrappedError, " +
+					"which was wrapped again to preserve details from the outer error",
+			})
+		}
 	}
 
 	wrappedErr.AddCategoriesMut(categories...)
@@ -490,7 +499,7 @@ type ErrorWrapper interface {
 	Wrap(err error) WrappedError
 }
 
-//nolint:recvcheck
+//nolint:recvcheck // cloning uses value receiver
 type ConstantErrorWrapper struct {
 	Categories []string
 	Child      ErrorWrapper

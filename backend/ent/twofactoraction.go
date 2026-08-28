@@ -4,6 +4,7 @@ package ent
 
 import (
 	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 	"time"
@@ -28,7 +29,7 @@ type TwoFactorAction struct {
 	// Version holds the value of the "version" field.
 	Version int `json:"version,omitempty"`
 	// Body holds the value of the "body" field.
-	Body json.RawMessage `json:"body,omitempty"`
+	Body jsontext.Value `json:"body,omitempty"`
 	// ExpiresAt holds the value of the "expiresAt" field.
 	ExpiresAt time.Time `json:"expiresAt,omitempty"`
 	// Code holds the value of the "code" field.

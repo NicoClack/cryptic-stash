@@ -15,7 +15,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/loginalert"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
-	"github.com/NicoClack/cryptic-stash/backend/ent/user"
+	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/google/uuid"
 )
 
@@ -26,7 +26,7 @@ type DownloadSessionQuery struct {
 	order           []downloadsession.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.DownloadSession
-	withUser        *UserQuery
+	withStash       *StashQuery
 	withLoginAlerts *LoginAlertQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -64,9 +64,9 @@ func (_q *DownloadSessionQuery) Order(o ...downloadsession.OrderOption) *Downloa
 	return _q
 }
 
-// QueryUser chains the current query on the "user" edge.
-func (_q *DownloadSessionQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+// QueryStash chains the current query on the "stash" edge.
+func (_q *DownloadSessionQuery) QueryStash() *StashQuery {
+	query := (&StashClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,8 +77,8 @@ func (_q *DownloadSessionQuery) QueryUser() *UserQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(downloadsession.Table, downloadsession.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, downloadsession.UserTable, downloadsession.UserColumn),
+			sqlgraph.To(stash.Table, stash.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, downloadsession.StashTable, downloadsession.StashColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -300,7 +300,7 @@ func (_q *DownloadSessionQuery) Clone() *DownloadSessionQuery {
 		order:           append([]downloadsession.OrderOption{}, _q.order...),
 		inters:          append([]Interceptor{}, _q.inters...),
 		predicates:      append([]predicate.DownloadSession{}, _q.predicates...),
-		withUser:        _q.withUser.Clone(),
+		withStash:       _q.withStash.Clone(),
 		withLoginAlerts: _q.withLoginAlerts.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -308,14 +308,14 @@ func (_q *DownloadSessionQuery) Clone() *DownloadSessionQuery {
 	}
 }
 
-// WithUser tells the query-builder to eager-load the nodes that are connected to
-// the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *DownloadSessionQuery) WithUser(opts ...func(*UserQuery)) *DownloadSessionQuery {
-	query := (&UserClient{config: _q.config}).Query()
+// WithStash tells the query-builder to eager-load the nodes that are connected to
+// the "stash" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DownloadSessionQuery) WithStash(opts ...func(*StashQuery)) *DownloadSessionQuery {
+	query := (&StashClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withUser = query
+	_q.withStash = query
 	return _q
 }
 
@@ -409,7 +409,7 @@ func (_q *DownloadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		nodes       = []*DownloadSession{}
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			_q.withUser != nil,
+			_q.withStash != nil,
 			_q.withLoginAlerts != nil,
 		}
 	)
@@ -431,9 +431,9 @@ func (_q *DownloadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withUser; query != nil {
-		if err := _q.loadUser(ctx, query, nodes, nil,
-			func(n *DownloadSession, e *User) { n.Edges.User = e }); err != nil {
+	if query := _q.withStash; query != nil {
+		if err := _q.loadStash(ctx, query, nodes, nil,
+			func(n *DownloadSession, e *Stash) { n.Edges.Stash = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -447,11 +447,11 @@ func (_q *DownloadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	return nodes, nil
 }
 
-func (_q *DownloadSessionQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*DownloadSession, init func(*DownloadSession), assign func(*DownloadSession, *User)) error {
+func (_q *DownloadSessionQuery) loadStash(ctx context.Context, query *StashQuery, nodes []*DownloadSession, init func(*DownloadSession), assign func(*DownloadSession, *Stash)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*DownloadSession)
 	for i := range nodes {
-		fk := nodes[i].UserID
+		fk := nodes[i].StashID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -460,7 +460,7 @@ func (_q *DownloadSessionQuery) loadUser(ctx context.Context, query *UserQuery, 
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(stash.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -468,7 +468,7 @@ func (_q *DownloadSessionQuery) loadUser(ctx context.Context, query *UserQuery, 
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "userID" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "stashID" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -532,8 +532,8 @@ func (_q *DownloadSessionQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withUser != nil {
-			_spec.Node.AddColumnOnce(downloadsession.FieldUserID)
+		if _q.withStash != nil {
+			_spec.Node.AddColumnOnce(downloadsession.FieldStashID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

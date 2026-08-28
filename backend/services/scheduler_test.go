@@ -19,13 +19,13 @@ func TestSchedulerShutdown_HandlesConcurrentCalls(t *testing.T) {
 		Clock:            clockwork.NewRealClock(),
 		Env:              testcommon.DefaultEnv(),
 		Database:         testcommon.CreateDB(t),
-		Logger:           testcommon.NewTestLogger(),
+		Logger:           testcommon.NewTestLogger(t),
 		Core:             mocks.NewEmptyCoreService(),
+		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
+		Invites:          mocks.NewEmptyInviteService(),
 	}
-	app.Database.Start()
-	t.Cleanup(app.Database.Shutdown)
 	app.Scheduler = services.NewScheduler(app)
 	app.Scheduler.Start()
 
@@ -45,13 +45,13 @@ func TestSchedulerShutdown_NoOpWhenNotStarted(t *testing.T) {
 		Clock:            clockwork.NewRealClock(),
 		Env:              testcommon.DefaultEnv(),
 		Database:         testcommon.CreateDB(t),
-		Logger:           testcommon.NewTestLogger(),
+		Logger:           testcommon.NewTestLogger(t),
 		Core:             mocks.NewEmptyCoreService(),
+		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
+		Invites:          mocks.NewEmptyInviteService(),
 	}
-	app.Database.Start()
-	t.Cleanup(app.Database.Shutdown)
 
 	app.Scheduler = services.NewScheduler(app)
 
@@ -65,13 +65,13 @@ func TestSchedulerStart_SubsequentCallsAreNoOp(t *testing.T) {
 		Clock:            clockwork.NewRealClock(),
 		Env:              testcommon.DefaultEnv(),
 		Database:         testcommon.CreateDB(t),
-		Logger:           testcommon.NewTestLogger(),
+		Logger:           testcommon.NewTestLogger(t),
 		Core:             mocks.NewEmptyCoreService(),
+		TempKeyValue:     mocks.NewEmptyTempKeyValueService(),
 		TwoFactorActions: mocks.NewEmptyTwoFactorActionService(),
 		RateLimiter:      mocks.NewEmptyRateLimiterService(),
+		Invites:          mocks.NewEmptyInviteService(),
 	}
-	app.Database.Start()
-	t.Cleanup(app.Database.Shutdown)
 
 	app.Scheduler = services.NewScheduler(app)
 	t.Cleanup(app.Scheduler.Shutdown)

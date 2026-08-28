@@ -22,19 +22,27 @@ func (Job) Fields() []ent.Field {
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.Time("dueAt"),
+		// TODO: create new jobs for retries?
 		field.Time("originallyDueAt"), // Due is updated for retries
-		field.Time("startedAt").Optional(),
+		field.Time("startedAt").Optional().Nillable(),
 		field.String("type").MinLen(1).MaxLen(128),
 		field.Int("version"),
 		field.Int8(
 			"priority",
 		), // Currently duplicates the definition but needed for sorting and might want to make it dynamic in the future
-		field.Int("weight"), // Currently duplicates the definition but might make it dynamic in the future
-		field.JSON("body", json.RawMessage{}),
-		field.Enum("status").Values("pending", "running", "failed").Default("pending"), // Completed jobs are deleted
+		field.Int(
+			"weight",
+		), // Currently duplicates the definition but might make it dynamic in the future
+		field.Bytes("body").
+			GoType(json.RawMessage{}).
+			ValueScanner(EncryptedField[json.RawMessage]{KeyName: "job_1"}),
+		field.Enum("status").
+			// TODO: update completed jobs to "completed" and store for a few days
+			Values("pending", "running", "completed", "failed").
+			Default("pending"),
 		field.Int("retries").Default(0),
 		field.Float("retriedFraction").Default(0),
-		field.Bool("loggedStallWarning").Default(false),
+		field.Bool("hasLoggedStallWarning").Default(false),
 	}
 }
 

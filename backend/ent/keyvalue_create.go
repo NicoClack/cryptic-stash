@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -44,7 +44,7 @@ func (_c *KeyValueCreate) SetKey(v string) *KeyValueCreate {
 }
 
 // SetValue sets the "value" field.
-func (_c *KeyValueCreate) SetValue(v json.RawMessage) *KeyValueCreate {
+func (_c *KeyValueCreate) SetValue(v jsontext.Value) *KeyValueCreate {
 	_c.mutation.SetValue(v)
 	return _c
 }
@@ -264,7 +264,7 @@ func (u *KeyValueUpsert) UpdateKey() *KeyValueUpsert {
 }
 
 // SetValue sets the "value" field.
-func (u *KeyValueUpsert) SetValue(v json.RawMessage) *KeyValueUpsert {
+func (u *KeyValueUpsert) SetValue(v jsontext.Value) *KeyValueUpsert {
 	u.Set(keyvalue.FieldValue, v)
 	return u
 }
@@ -366,7 +366,7 @@ func (u *KeyValueUpsertOne) UpdateKey() *KeyValueUpsertOne {
 }
 
 // SetValue sets the "value" field.
-func (u *KeyValueUpsertOne) SetValue(v json.RawMessage) *KeyValueUpsertOne {
+func (u *KeyValueUpsertOne) SetValue(v jsontext.Value) *KeyValueUpsertOne {
 	return u.Update(func(s *KeyValueUpsert) {
 		s.SetValue(v)
 	})
@@ -637,7 +637,7 @@ func (u *KeyValueUpsertBulk) UpdateKey() *KeyValueUpsertBulk {
 }
 
 // SetValue sets the "value" field.
-func (u *KeyValueUpsertBulk) SetValue(v json.RawMessage) *KeyValueUpsertBulk {
+func (u *KeyValueUpsertBulk) SetValue(v jsontext.Value) *KeyValueUpsertBulk {
 	return u.Update(func(s *KeyValueUpsert) {
 		s.SetValue(v)
 	})

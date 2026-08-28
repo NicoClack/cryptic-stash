@@ -10,6 +10,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ListUsersResponse struct {
@@ -17,7 +18,7 @@ type ListUsersResponse struct {
 	Users  []*User                    `binding:"required" json:"users"`
 }
 type User struct {
-	ID        string    `binding:"required" json:"id"`
+	ID        uuid.UUID `binding:"required" json:"id"`
 	Username  string    `binding:"required" json:"username"`
 	CreatedAt time.Time `binding:"required" json:"createdAt"`
 	UpdatedAt time.Time `binding:"required" json:"updatedAt"`
@@ -43,7 +44,7 @@ func ListUsers(app *servercommon.ServerApp) gin.HandlerFunc {
 		responseUsers := make([]*User, 0, len(userObs))
 		for _, userOb := range userObs {
 			responseUsers = append(responseUsers, &User{
-				ID:        userOb.ID.String(),
+				ID:        userOb.ID,
 				Username:  userOb.Username,
 				CreatedAt: userOb.CreatedAt,
 				UpdatedAt: userOb.UpdatedAt,

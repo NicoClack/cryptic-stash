@@ -1,3 +1,6 @@
 .DS_Store
 Thumbs.db
 .github/copilot-instructions.md
+AGENTS.MD
+!docs/example-configs/agents/**/AGENTS.md
+/.github/skills

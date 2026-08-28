@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/google/uuid"
 )
 
 func GetStatus(
 	ctx context.Context,
+	adminID uuid.UUID,
 	messengers common.MessengerService,
 	env *common.Env,
 ) (*common.SetupStatus, common.WrappedError) {
@@ -17,7 +19,7 @@ func GetStatus(
 	}
 	status.IsEnvComplete = true
 
-	hasMessengers, wrappedErr := CheckAdminHasMessengers(ctx, messengers)
+	hasMessengers, wrappedErr := CheckAdminHasMessengers(ctx, adminID, messengers)
 	if wrappedErr != nil {
 		return status, ErrWrapperGetStatus.Wrap(
 			wrappedErr,

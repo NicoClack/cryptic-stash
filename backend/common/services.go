@@ -1,7 +1,7 @@
 package common
 
 /*
-The core principal is to abstract just enough that:
+The core principle is to abstract just enough that:
 * The service can be mocked to some extent (although I don't think this is really necessary for the database)
 * The service can be used in simplified ways for testing.
 e.g a test can use a different job registry with a real implementation
@@ -12,9 +12,12 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
 	"github.com/jonboulle/clockwork"
 )
@@ -25,6 +28,7 @@ type Env struct {
 	MOUNT_PATH                    string
 	PROXY_ORIGINAL_IP_HEADER_NAME string
 	ALLOWED_ORIGINS               []string
+	FRONTEND_BASE_URL             *url.URL
 	// Things like deleting expired login download sessions
 	CLEAN_UP_INTERVAL time.Duration
 	FULL_GC_INTERVAL  time.Duration
@@ -39,17 +43,19 @@ type Env struct {
 	ADMIN_PASSWORD_SALT          []byte
 	ADMIN_TOTP_SECRET            string
 
-	SIGNUP_LINK_DEFAULT_EXPIRY time.Duration
-	SIGNUP_LINK_MAX_EXPIRY     time.Duration
+	INVITE_MAX_EXPIRY time.Duration
 
-	UNLOCK_TIME         time.Duration
-	AUTH_CODE_VALID_FOR time.Duration
+	SESSION_DURATION         time.Duration
+	WEBAUTHN_SESSION_TIMEOUT time.Duration
+	UNLOCK_TIME              time.Duration
+	AUTH_CODE_VALID_FOR      time.Duration
 	// Once used, how much longer the auth code remains valid for
 	USED_AUTH_CODE_VALID_FOR                  time.Duration
 	ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL time.Duration
 	MIN_SUCCESSFUL_MESSAGE_COUNT              int
 	PASSWORD_HASH_SETTINGS                    *PasswordHashSettings
 	STASH_ENCRYPTION_KEY                      []byte
+	BASE_ENCRYPTION_KEY                       []byte
 
 	LOG_STORE_INTERVAL time.Duration
 	// How long the server should wait for messengers to succeed before crashing the server to send the message
@@ -59,16 +65,35 @@ type Env struct {
 	ADMIN_MESSAGE_TIMEOUT time.Duration
 	// If it's been less than this amount of time since the last admin message,
 	// other errors won't send a message to avoid spamming the admin
-	MIN_ADMIN_MESSAGE_GAP time.Duration
-	MIN_CRASH_SIGNAL_GAP  time.Duration
-	// Used for testing, not recommended when running the server
-	PANIC_ON_ERROR         bool
+	MIN_ADMIN_MESSAGE_GAP  time.Duration
+	MIN_CRASH_SIGNAL_GAP   time.Duration
 	MESSAGE_ADMIN_ON_ERROR bool
 
+	EMAIL_MESSENGER_TYPE     string
 	ENABLE_DEVELOP_MESSENGER bool
-	DISCORD_TOKEN            string
-	SENDGRID_TOKEN           string // TODO: implement
+
+	DISCORD_TOKEN      string
+	SMTP_HOST          string
+	SMTP_PORT          int
+	SMTP_USERNAME      string
+	SMTP_PASSWORD      string
+	SMTP_FROM_EMAIL    string
+	SMTP_FROM_NAME     string
+	SMTP_REQUIRE_TLS   bool
+	SMTP_IMPLICIT_TLS  bool
+	SMTP2GO_API_KEY    string
+	SMTP2GO_BASE_URL   *url.URL
+	SMTP2GO_FROM_EMAIL string
+	SMTP2GO_FROM_NAME  string
 }
+
+type Actor struct {
+	// The ID of the currently logged in user. Should be used by services to validate ownership
+	UserID    uuid.UUID
+	IP        string
+	UserAgent string
+}
+
 type PasswordHashSettings struct {
 	Time   uint32
 	Memory uint32
@@ -84,13 +109,119 @@ type App struct {
 	ShutdownService  ShutdownService
 	Database         DatabaseService
 	KeyValue         KeyValueService
+	TempKeyValue     TempKeyValueService
 	TwoFactorActions TwoFactorActionService
+	Invites          InviteService
 	Messengers       MessengerService
 	Server           ServerService
 	Core             CoreService
 	Setup            SetupService
 	Jobs             JobService
 	Scheduler        SchedulerService
+	Auth             AuthService
+}
+
+// Note: this service will misbehave if mocked time is used because the real time will be used by it due to
+// the go-webauthn dependency while the TempKeyValueService will use the mocked time.
+// A real clock can be injected into the TempKeyValueService using a custom service wrapper
+type AuthService interface {
+	// TODO: standardise parsing data from gin Context vs passing it in
+	StartLogin(ctx context.Context) (
+		sessionID uuid.UUID,
+		options protocol.PublicKeyCredentialRequestOptions,
+		wrappedErr WrappedError,
+	)
+	FinishLogin(
+		sessionID uuid.UUID,
+		parsedResponse *protocol.ParsedCredentialAssertionData,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (userOb *ent.User, passkeyOb *ent.Passkey, sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
+
+	GetEligiblePasskeysForSudo(sessionOb *ent.Session, userOb *ent.User) (
+		[]*ent.Passkey,
+		WrappedError,
+	)
+	StartElevation(
+		sessionOb *ent.Session, // Must have Passkey preloaded
+		userOb *ent.User, // Must have Passkeys preloaded
+	) (uuid.UUID, protocol.PublicKeyCredentialRequestOptions, WrappedError)
+	FinishElevation(
+		webAuthnSessionID uuid.UUID,
+		parsedResponse *protocol.ParsedCredentialAssertionData,
+		sessionOb *ent.Session, // Must have passkeys loaded
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+
+	StartRegisterPasskey(
+		user webauthn.User,
+		ctx context.Context,
+	) (
+		options protocol.PublicKeyCredentialCreationOptions,
+		sessionData *webauthn.SessionData,
+		wrappedErr WrappedError,
+	)
+	FinishRegisterPasskey(
+		credentialName string,
+		allowSudo bool,
+		isSecondGroup bool,
+		username string,
+		session *webauthn.SessionData,
+		parsedCredential *protocol.ParsedCredentialCreationData,
+		tx *ent.Tx,
+		ctx context.Context,
+		getUser func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error),
+	) (*ent.Passkey, WrappedError)
+
+	CreateSession(
+		userID uuid.UUID,
+		passkeyID uuid.UUID,
+		elevationPasskeyID *uuid.UUID,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (sessionOb *ent.Session, sessionToken []byte, wrappedErr WrappedError)
+	ElevateSession(sessionOb *ent.Session, elevationPasskeyID uuid.UUID, tx *ent.Tx, ctx context.Context) WrappedError
+	// Note: must load user edge
+	ValidateSession(token []byte, tx *ent.Tx, ctx context.Context) (*ent.Session, WrappedError)
+
+	RenamePasskey(
+		passkeyID uuid.UUID,
+		newName string,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	SetPasskeyAllowSudo(
+		targetPasskeyID uuid.UUID,
+		sessionPasskeyID uuid.UUID,
+		sessionElevationPasskeyID *uuid.UUID,
+		newAllowSudo bool,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	MovePasskeyGroup(
+		targetPasskeyID uuid.UUID,
+		targetUserID uuid.UUID,
+		sessionPasskeyID uuid.UUID,
+		sessionElevationPasskeyID *uuid.UUID,
+		newIsSecondGroup bool,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	DeletePasskey(
+		passkeyID uuid.UUID,
+		sessionID uuid.UUID,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) WrappedError
+	DisableTwoGroupAuth(userID uuid.UUID, actor *Actor, tx *ent.Tx, ctx context.Context) WrappedError
 }
 
 // If reason is "", the server will exit with a 0 exit code
@@ -146,6 +277,7 @@ type MessengerService interface {
 type MessageType string
 
 const (
+	MessageInvite                                    = "invite"
 	MessageTest                          MessageType = "test"
 	MessageAdminError                    MessageType = "adminError"
 	MessageRegular                       MessageType = "regular"
@@ -163,6 +295,9 @@ const (
 type Message struct {
 	Type               MessageType
 	User               *ent.User
+	InviteMessage      string
+	URL                string
+	StashName          string
 	Code               string
 	Time               time.Time
 	DownloadSessionIDs []uuid.UUID
@@ -229,13 +364,25 @@ type KeyValueService interface {
 	Get(name string, ptr any, ctx context.Context) WrappedError
 	Set(name string, value any, ctx context.Context) WrappedError
 }
+type TempKeyValueService interface {
+	Get(storeName string, key string, ptr any) bool
+	Set(storeName string, key string, value any, expiresAt time.Time)
+	Delete(storeName string, key string)
+	Prune(storeName string)
+	PruneAll()
+}
 
 type ServerService interface {
 	http.Handler // Mainly used for testing
 	Start()      // Should fatalf rather than returning an error
 	Shutdown()   // Should log warning rather than return an error
 }
+
+// TODO: split into separate services
 type CoreService interface {
+	// TODO: split this service up? Maybe should only be for functions that need db access?
+	Init()
+	AdminID() uuid.UUID
 	CheckAdminCode(givenCode string) bool
 	CheckAdminCredentials(password string, totpCode string) bool
 	GetAdminCode(password string, totpCode string) (string, bool)
@@ -243,9 +390,9 @@ type CoreService interface {
 
 	SendActiveDownloadSessionReminders(ctx context.Context) WrappedError
 	DeleteExpiredDownloadSessions(ctx context.Context) WrappedError
-	InvalidateUserDownloadSessions(userID uuid.UUID, ctx context.Context) WrappedError
+	InvalidateDownloadSessionsForStash(stashID uuid.UUID, ctx context.Context) WrappedError
 	IsUserSufficientlyNotified(downloadSessionOb *ent.DownloadSession) bool
-	IsUserLocked(userOb *ent.User) bool
+	IsStashLocked(stashOb *ent.Stash) bool
 
 	Encrypt(data []byte, encryptionKey []byte) ([]byte, WrappedError)
 	Decrypt(encrypted []byte, encryptionKey []byte) ([]byte, WrappedError)
@@ -282,6 +429,49 @@ type JobService interface {
 	WaitForJobs()
 	Encode(versionedType string, body any) (json.RawMessage, WrappedError)
 }
+
+type InviteService interface {
+	CreateInvite(
+		email string,
+		inviteMessage string,
+		expiresIn time.Duration, // Capped at env.INVITE_MAX_EXPIRY
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (*ent.Invite, string, WrappedError)
+
+	// Gets an invite by ID, validating the code and expiry.
+	//
+	// Note: returns an error if already used
+	GetInvite(
+		id uuid.UUID,
+		code []byte,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (*ent.Invite, WrappedError)
+
+	// Generates the WebAuthn options and saves the session to the invite
+	GenerateOptions(
+		id uuid.UUID,
+		code []byte,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (protocol.PublicKeyCredentialCreationOptions, WrappedError)
+
+	CreateUser(
+		id uuid.UUID,
+		code []byte,
+		credentialName string,
+		parsedCredential *protocol.ParsedCredentialCreationData,
+		actor *Actor,
+		tx *ent.Tx,
+		ctx context.Context,
+	) (*ent.User, *ent.Passkey, *ent.Session, []byte, WrappedError)
+
+	DeleteExpiredInvites(tx *ent.Tx, ctx context.Context) WrappedError
+}
+
 type TwoFactorActionService interface {
 	Create(
 		versionedType string,
@@ -299,7 +489,9 @@ type SchedulerService interface {
 }
 
 type LimiterService interface {
-	RequestSession(eventName string, amount int, user string) (LimiterSession, WrappedError)
+	// identifier is usually an IP but is sometimes a constant if the limit
+	// is used internally
+	RequestSession(eventName string, amount int, identifier string) (LimiterSession, WrappedError)
 	DeleteInactiveUsers()
 }
 type LimiterSession interface {
@@ -328,4 +520,6 @@ type AdminAuthEnvVars struct {
 	AdminTotpSecret string `json:"ADMIN_TOTP_SECRET"`
 	//nolint:tagliatelle
 	StashEncryptionKey string `json:"STASH_ENCRYPTION_KEY"`
+	//nolint:tagliatelle
+	BaseEncryptionKey string `json:"BASE_ENCRYPTION_KEY"`
 }

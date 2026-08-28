@@ -17,11 +17,10 @@ import (
 func TestEngine_runsJob(t *testing.T) {
 	t.Parallel()
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 	app := &common.App{
 		Database: db,
 		Env:      testcommon.DefaultEnv(),
-		Logger:   testcommon.NewTestLogger(),
+		Logger:   testcommon.NewTestLogger(t),
 		Clock:    clockwork.NewRealClock(),
 	}
 	type body = struct{}
@@ -58,12 +57,11 @@ func TestEngine_runsJob(t *testing.T) {
 func TestEngine_retriesJob(t *testing.T) {
 	t.Parallel()
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 	app := &common.App{
 		Clock:    clockwork.NewRealClock(),
 		Database: db,
 		Env:      testcommon.DefaultEnv(),
-		Logger:   testcommon.NewTestLogger(),
+		Logger:   testcommon.NewTestLogger(t),
 	}
 	type body = struct{}
 	completeJobChan := make(chan struct{})

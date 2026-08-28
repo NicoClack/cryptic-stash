@@ -16,7 +16,6 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/NicoClack/cryptic-stash/backend/jobs"
-	"github.com/bytedance/gopkg/util/logger"
 	"github.com/google/uuid"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -62,15 +61,15 @@ type bodyWrapperType struct {
 	MessageType            common.MessageType
 	VersionedMessengerType string
 	DownloadSessionIDs     []uuid.UUID
-	Inner                  string
+	Inner                  json.RawMessage
 }
 type Context struct {
 	*JobContext
-	confirmedSent bool
+	isConfirmedSent bool
 }
 
 func (ctx *Context) ConfirmSent() {
-	ctx.confirmedSent = true
+	ctx.isConfirmedSent = true
 }
 
 func NewRegistry(app *common.App) *Registry {
@@ -109,10 +108,10 @@ func (registry *Registry) Register(definition *Definition) {
 			}
 
 			newJobCtx := *jobCtx
-			newJobCtx.Body = json.RawMessage(body.Inner)
+			newJobCtx.Body = body.Inner
 			messengerCtx := &Context{
-				JobContext:    &newJobCtx,
-				confirmedSent: false,
+				JobContext:      &newJobCtx,
+				isConfirmedSent: false,
 			}
 			stdErr := definition.Handler(messengerCtx)
 			if stdErr != nil {
@@ -152,7 +151,7 @@ func (registry *Registry) Register(definition *Definition) {
 							func(alertCreate *ent.LoginAlertCreate, i int) {
 								alertCreate.
 									SetSentAt(registry.App.Clock.Now()).
-									SetConfirmed(messengerCtx.confirmedSent).
+									SetIsConfirmed(messengerCtx.isConfirmedSent).
 									SetDownloadSessionID(body.DownloadSessionIDs[i])
 							},
 						).Exec(ctx)
@@ -270,7 +269,7 @@ func (registry *Registry) Send(
 			MessageType:            message.Type,
 			VersionedMessengerType: versionedType,
 			DownloadSessionIDs:     message.DownloadSessionIDs,
-			Inner:                  string(encoded),
+			Inner:                  encoded,
 		},
 		func(jobCreate *ent.JobCreate) {
 			jobCreate.SetDueAt(sendTime)
@@ -281,7 +280,7 @@ func (registry *Registry) Send(
 		return ErrWrapperSend.Wrap(ErrWrapperEnqueueJob.Wrap(wrappedErr))
 	}
 
-	logger.Info(
+	registry.App.Logger.Info(
 		"sending message to user",
 		"userID", message.User.ID,
 		"messageType", message.Type,
@@ -299,7 +298,7 @@ func newPrepareContext(
 		return nil, ErrMessengerDisabledForUser.Clone()
 	}
 	userMessengerOb := message.User.Edges.Messengers[index]
-	if !userMessengerOb.Enabled {
+	if !userMessengerOb.IsEnabled {
 		return nil, ErrMessengerDisabledForUser.Clone()
 	}
 	return &PrepareContext{
@@ -451,12 +450,12 @@ func (registry *Registry) EnableMessenger(
 		SetVersion(definition.Version).
 		SetUserID(userOb.ID).
 		SetOptions(options).
-		SetEnabled(true).
+		SetIsEnabled(true).
 		SetUpdatedAt(now).
 		OnConflictColumns(usermessenger.FieldType, usermessenger.FieldVersion, usermessenger.FieldUserID).
 		UpdateUpdatedAt().
 		UpdateOptions().
-		UpdateEnabled().
+		UpdateIsEnabled().
 		Exec(ctx)
 	if stdErr != nil {
 		return ErrWrapperEnableMessenger.Wrap(stdErr)
@@ -487,7 +486,7 @@ func (registry *Registry) DisableMessenger(
 			usermessenger.UserID(userOb.ID),
 		).
 		SetUpdatedAt(registry.App.Clock.Now()).
-		SetEnabled(false).
+		SetIsEnabled(false).
 		Exec(ctx)
 	if stdErr != nil {
 		return ErrWrapperDisableMessenger.Wrap(stdErr)

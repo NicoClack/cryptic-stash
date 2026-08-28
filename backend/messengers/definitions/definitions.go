@@ -26,7 +26,10 @@ func Register(registry *messengers.Registry) {
 	if env.DISCORD_TOKEN != "" {
 		registry.Register(Discord1(registry.App))
 	}
-	// if env.SENDGRID_TOKEN != "" {
-	// 	// TODO
-	// }
+	if env.SMTP_HOST != "" {
+		registry.Register(SMTP1(registry.App))
+	}
+	if env.SMTP2GO_API_KEY != "" {
+		registry.Register(SMTP2GO1(registry.App))
+	}
 }

@@ -26,8 +26,8 @@ type LoginAlert struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// SentAt holds the value of the "sentAt" field.
 	SentAt time.Time `json:"sentAt,omitempty"`
-	// Confirmed holds the value of the "confirmed" field.
-	Confirmed bool `json:"confirmed,omitempty"`
+	// IsConfirmed holds the value of the "isConfirmed" field.
+	IsConfirmed bool `json:"isConfirmed,omitempty"`
 	// DownloadSessionID holds the value of the "downloadSessionID" field.
 	DownloadSessionID uuid.UUID `json:"downloadSessionID,omitempty"`
 	// UserMessengerID holds the value of the "userMessengerID" field.
@@ -76,7 +76,7 @@ func (*LoginAlert) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case loginalert.FieldConfirmed:
+		case loginalert.FieldIsConfirmed:
 			values[i] = new(sql.NullBool)
 		case loginalert.FieldCreatedAt, loginalert.FieldUpdatedAt, loginalert.FieldSentAt:
 			values[i] = new(sql.NullTime)
@@ -121,11 +121,11 @@ func (_m *LoginAlert) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.SentAt = value.Time
 			}
-		case loginalert.FieldConfirmed:
+		case loginalert.FieldIsConfirmed:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field confirmed", values[i])
+				return fmt.Errorf("unexpected type %T for field isConfirmed", values[i])
 			} else if value.Valid {
-				_m.Confirmed = value.Bool
+				_m.IsConfirmed = value.Bool
 			}
 		case loginalert.FieldDownloadSessionID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -194,8 +194,8 @@ func (_m *LoginAlert) String() string {
 	builder.WriteString("sentAt=")
 	builder.WriteString(_m.SentAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("confirmed=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Confirmed))
+	builder.WriteString("isConfirmed=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsConfirmed))
 	builder.WriteString(", ")
 	builder.WriteString("downloadSessionID=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DownloadSessionID))

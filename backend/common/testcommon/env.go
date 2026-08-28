@@ -1,9 +1,11 @@
 package testcommon
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/descope/virtualwebauthn"
 )
 
 func DefaultEnv() *common.Env {
@@ -14,6 +16,7 @@ func DefaultEnv() *common.Env {
 		MOUNT_PATH:                    "temp-test-storage",
 		PROXY_ORIGINAL_IP_HEADER_NAME: "test-proxy-original-ip",
 		ALLOWED_ORIGINS:               []string{},
+		FRONTEND_BASE_URL:             mustParseURL("https://frontend.example.com"),
 		CLEAN_UP_INTERVAL:             time.Hour,
 		FULL_GC_INTERVAL:              0,
 
@@ -31,15 +34,19 @@ func DefaultEnv() *common.Env {
 		JOB_POLL_INTERVAL:    time.Hour * 999,
 		MAX_TOTAL_JOB_WEIGHT: 100,
 
-		SIGNUP_LINK_DEFAULT_EXPIRY: time.Hour * 24 * 2,
-		SIGNUP_LINK_MAX_EXPIRY:     time.Hour * 24 * 7,
+		INVITE_MAX_EXPIRY: time.Hour * 24 * 7,
 
+		SESSION_DURATION:                          time.Minute * 15,
+		WEBAUTHN_SESSION_TIMEOUT:                  time.Minute * 2,
 		UNLOCK_TIME:                               time.Hour * 24 * 7,
 		AUTH_CODE_VALID_FOR:                       time.Hour * 24 * 3,
 		USED_AUTH_CODE_VALID_FOR:                  time.Hour,
 		ACTIVE_DOWNLOAD_SESSION_REMINDER_INTERVAL: time.Hour * 24,
 		MIN_SUCCESSFUL_MESSAGE_COUNT:              1,
 		STASH_ENCRYPTION_KEY:                      []byte{},
+		// Has to be static because this is injected into Ent using a global variable, so each test has the same value
+		// This will still encrypt the data but obviously it won't be secure because it's just hardcoded
+		BASE_ENCRYPTION_KEY: make([]byte, 32),
 
 		PASSWORD_HASH_SETTINGS: &common.PasswordHashSettings{
 			Time:    1,
@@ -51,11 +58,38 @@ func DefaultEnv() *common.Env {
 		ADMIN_MESSAGE_TIMEOUT:  time.Minute,
 		MIN_ADMIN_MESSAGE_GAP:  time.Minute * 5,
 		MIN_CRASH_SIGNAL_GAP:   -1,
-		PANIC_ON_ERROR:         true,
 		MESSAGE_ADMIN_ON_ERROR: false,
 
 		ENABLE_DEVELOP_MESSENGER: false,
 		DISCORD_TOKEN:            "",
-		SENDGRID_TOKEN:           "",
+		SMTP_HOST:                "",
+		SMTP_PORT:                0,
+		SMTP_USERNAME:            "",
+		SMTP_PASSWORD:            "",
+		SMTP_FROM_EMAIL:          "",
+		SMTP_FROM_NAME:           "Cryptic Stash",
+		SMTP_REQUIRE_TLS:         false,
+		SMTP_IMPLICIT_TLS:        false,
+		SMTP2GO_API_KEY:          "",
+		SMTP2GO_BASE_URL:         nil,
+		SMTP2GO_FROM_EMAIL:       "",
+		SMTP2GO_FROM_NAME:        "",
+		EMAIL_MESSENGER_TYPE:     "",
+	}
+}
+
+func mustParseURL(raw string) *url.URL {
+	parsed, stdErr := url.ParseRequestURI(raw)
+	if stdErr != nil {
+		panic("failed to parse URL: " + stdErr.Error())
+	}
+	return parsed
+}
+
+func NewWebAuthnRelyingParty(env *common.Env) virtualwebauthn.RelyingParty {
+	return virtualwebauthn.RelyingParty{
+		ID:     env.FRONTEND_BASE_URL.Hostname(),
+		Name:   "Cryptic Stash",
+		Origin: common.GetOrigin(env.FRONTEND_BASE_URL),
 	}
 }

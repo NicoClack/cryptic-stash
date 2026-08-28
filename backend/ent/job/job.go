@@ -3,10 +3,12 @@
 package job
 
 import (
+	"encoding/json/jsontext"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -41,8 +43,8 @@ const (
 	FieldRetries = "retries"
 	// FieldRetriedFraction holds the string denoting the retriedfraction field in the database.
 	FieldRetriedFraction = "retried_fraction"
-	// FieldLoggedStallWarning holds the string denoting the loggedstallwarning field in the database.
-	FieldLoggedStallWarning = "logged_stall_warning"
+	// FieldHasLoggedStallWarning holds the string denoting the hasloggedstallwarning field in the database.
+	FieldHasLoggedStallWarning = "has_logged_stall_warning"
 	// Table holds the table name of the job in the database.
 	Table = "jobs"
 )
@@ -63,7 +65,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldRetries,
 	FieldRetriedFraction,
-	FieldLoggedStallWarning,
+	FieldHasLoggedStallWarning,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -85,10 +87,14 @@ var (
 	DefaultRetries int
 	// DefaultRetriedFraction holds the default value on creation for the "retriedFraction" field.
 	DefaultRetriedFraction float64
-	// DefaultLoggedStallWarning holds the default value on creation for the "loggedStallWarning" field.
-	DefaultLoggedStallWarning bool
+	// DefaultHasLoggedStallWarning holds the default value on creation for the "hasLoggedStallWarning" field.
+	DefaultHasLoggedStallWarning bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all Job fields.
+	ValueScanner struct {
+		Body field.TypeValueScanner[jsontext.Value]
+	}
 )
 
 // Status defines the type for the "status" enum field.
@@ -99,9 +105,10 @@ const DefaultStatus = StatusPending
 
 // Status values.
 const (
-	StatusPending Status = "pending"
-	StatusRunning Status = "running"
-	StatusFailed  Status = "failed"
+	StatusPending   Status = "pending"
+	StatusRunning   Status = "running"
+	StatusCompleted Status = "completed"
+	StatusFailed    Status = "failed"
 )
 
 func (s Status) String() string {
@@ -111,7 +118,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPending, StatusRunning, StatusFailed:
+	case StatusPending, StatusRunning, StatusCompleted, StatusFailed:
 		return nil
 	default:
 		return fmt.Errorf("job: invalid enum value for status field: %q", s)
@@ -186,7 +193,7 @@ func ByRetriedFraction(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRetriedFraction, opts...).ToFunc()
 }
 
-// ByLoggedStallWarning orders the results by the loggedStallWarning field.
-func ByLoggedStallWarning(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLoggedStallWarning, opts...).ToFunc()
+// ByHasLoggedStallWarning orders the results by the hasLoggedStallWarning field.
+func ByHasLoggedStallWarning(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHasLoggedStallWarning, opts...).ToFunc()
 }

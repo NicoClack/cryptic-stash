@@ -26,6 +26,7 @@ func LoadEnvironmentVariables() *common.Env {
 		MOUNT_PATH:                    common.RequireEnv("MOUNT_PATH"),
 		PROXY_ORIGINAL_IP_HEADER_NAME: common.RequireEnv("PROXY_ORIGINAL_IP_HEADER_NAME"),
 		ALLOWED_ORIGINS:               common.RequireStrArrEnv("ALLOWED_ORIGINS"),
+		FRONTEND_BASE_URL:             common.RequireURLEnv("FRONTEND_BASE_URL"),
 		CLEAN_UP_INTERVAL:             common.RequireSecondsEnv("CLEAN_UP_INTERVAL"),
 		FULL_GC_INTERVAL:              common.RequireSecondsEnv("FULL_GC_INTERVAL"),
 
@@ -43,9 +44,10 @@ func LoadEnvironmentVariables() *common.Env {
 		ADMIN_PASSWORD_SALT:          common.OptionalBase64Env("ADMIN_PASSWORD_SALT", []byte{}),
 		ADMIN_TOTP_SECRET:            common.OptionalEnv("ADMIN_TOTP_SECRET", ""),
 
-		SIGNUP_LINK_DEFAULT_EXPIRY: common.RequireSecondsEnv("SIGNUP_LINK_DEFAULT_EXPIRY"),
-		SIGNUP_LINK_MAX_EXPIRY:     common.RequireSecondsEnv("SIGNUP_LINK_MAX_EXPIRY"),
+		INVITE_MAX_EXPIRY: common.RequireSecondsEnv("INVITE_MAX_EXPIRY"),
 
+		SESSION_DURATION:         common.RequireSecondsEnv("SESSION_DURATION"),
+		WEBAUTHN_SESSION_TIMEOUT: common.RequireSecondsEnv("WEBAUTHN_SESSION_TIMEOUT"),
 		UNLOCK_TIME:              common.RequireSecondsEnv("UNLOCK_TIME"),
 		AUTH_CODE_VALID_FOR:      common.RequireSecondsEnv("AUTH_CODE_VALID_FOR"),
 		USED_AUTH_CODE_VALID_FOR: common.RequireSecondsEnv("USED_AUTH_CODE_VALID_FOR"),
@@ -59,22 +61,47 @@ func LoadEnvironmentVariables() *common.Env {
 			Threads: common.RequireUint8Env("PASSWORD_HASH_THREADS"),
 		},
 		STASH_ENCRYPTION_KEY: common.RequireBase64Env("STASH_ENCRYPTION_KEY"),
+		BASE_ENCRYPTION_KEY:  common.OptionalBase64Env("BASE_ENCRYPTION_KEY", []byte{}),
 
 		LOG_STORE_INTERVAL:     common.RequireMillisecondsEnv("LOG_STORE_INTERVAL"),
 		ADMIN_MESSAGE_TIMEOUT:  common.RequireSecondsEnv("ADMIN_MESSAGE_TIMEOUT"),
 		MIN_ADMIN_MESSAGE_GAP:  common.RequireSecondsEnv("MIN_ADMIN_MESSAGE_GAP"),
 		MIN_CRASH_SIGNAL_GAP:   common.RequireSecondsEnv("MIN_CRASH_SIGNAL_GAP"),
-		PANIC_ON_ERROR:         common.OptionalBoolEnv("PANIC_ON_ERROR", false),
 		MESSAGE_ADMIN_ON_ERROR: common.OptionalBoolEnv("MESSAGE_ADMIN_ON_ERROR", true),
 
+		EMAIL_MESSENGER_TYPE:     common.RequireEnv("EMAIL_MESSENGER_TYPE"),
 		ENABLE_DEVELOP_MESSENGER: common.OptionalBoolEnv("ENABLE_DEVELOP_MESSENGER", false),
-		DISCORD_TOKEN:            common.OptionalEnv("DISCORD_TOKEN", ""),
-		SENDGRID_TOKEN:           common.OptionalEnv("SENDGRID_TOKEN", ""),
+
+		DISCORD_TOKEN:      common.OptionalEnv("DISCORD_TOKEN", ""),
+		SMTP_HOST:          common.OptionalEnv("SMTP_HOST", ""),
+		SMTP_PORT:          common.OptionalIntEnv("SMTP_PORT", 0),
+		SMTP_USERNAME:      common.OptionalEnv("SMTP_USERNAME", ""),
+		SMTP_PASSWORD:      common.OptionalEnv("SMTP_PASSWORD", ""),
+		SMTP_FROM_EMAIL:    common.OptionalEnv("SMTP_FROM_EMAIL", ""),
+		SMTP_FROM_NAME:     common.OptionalEnv("SMTP_FROM_NAME", "Cryptic Stash"),
+		SMTP_REQUIRE_TLS:   common.OptionalBoolEnv("SMTP_REQUIRE_TLS", true),
+		SMTP_IMPLICIT_TLS:  common.OptionalBoolEnv("SMTP_IMPLICIT_TLS", true),
+		SMTP2GO_API_KEY:    common.OptionalEnv("SMTP2GO_API_KEY", ""),
+		SMTP2GO_BASE_URL:   common.OptionalURLEnv("SMTP2GO_BASE_URL", "https://api.smtp2go.com/"),
+		SMTP2GO_FROM_EMAIL: common.OptionalEnv("SMTP2GO_FROM_EMAIL", ""),
+		SMTP2GO_FROM_NAME:  common.OptionalEnv("SMTP2GO_FROM_NAME", "Cryptic Stash"),
 	}
+	NormalizeEnvironmentVariables(env)
 	ValidateEnvironmentVariables(env)
 	return env
 }
+func NormalizeEnvironmentVariables(env *common.Env) {
+	env.FRONTEND_BASE_URL = common.NormalizeBaseURL(env.FRONTEND_BASE_URL)
+	env.SMTP2GO_BASE_URL = common.NormalizeBaseURL(env.SMTP2GO_BASE_URL)
+}
 func ValidateEnvironmentVariables(env *common.Env) {
+	if len(env.BASE_ENCRYPTION_KEY) != 0 && len(env.BASE_ENCRYPTION_KEY) != common.EncryptionKeyLength {
+		log.Fatalf("BASE_ENCRYPTION_KEY must decode to exactly %d bytes", common.EncryptionKeyLength)
+	}
+	if !env.ENABLE_ENV_SETUP && len(env.BASE_ENCRYPTION_KEY) == 0 {
+		log.Fatal("BASE_ENCRYPTION_KEY must be set when environment setup is disabled")
+	}
+
 	if !common.AllOrNone(
 		len(env.ADMIN_PASSWORD_HASH) == 0,
 		len(env.ADMIN_PASSWORD_SALT) == 0,
@@ -96,5 +123,54 @@ func ValidateEnvironmentVariables(env *common.Env) {
 
 	if env.ENABLE_ENV_SETUP {
 		slog.Warn("setup mode is enabled. please complete the setup in the app and avoid leaving it in this state.")
+	}
+
+	if !common.AllOrNone(
+		env.SMTP_HOST == "",
+		env.SMTP_PORT == 0,
+		env.SMTP_FROM_EMAIL == "",
+	) {
+		log.Fatal(
+			"SMTP_HOST, SMTP_PORT, SMTP_FROM_EMAIL must either all be set or all be unset.",
+		)
+	}
+	if !env.SMTP_REQUIRE_TLS && !env.IS_DEV {
+		log.Fatal("SMTP_REQUIRE_TLS must be true for production environments")
+	}
+	if env.SMTP_IMPLICIT_TLS && env.SMTP_PORT != 465 {
+		slog.Warn("SMTP_IMPLICIT_TLS is true but SMTP_PORT is not 465, emails might not send")
+	}
+
+	if !common.AllOrNone(
+		env.SMTP2GO_API_KEY == "",
+		env.SMTP2GO_FROM_EMAIL == "",
+	) {
+		log.Fatal(
+			"SMTP2GO_API_KEY and SMTP2GO_FROM_EMAIL must either both be set or both be unset.",
+		)
+	}
+
+	if env.SMTP_HOST != "" && env.SMTP2GO_API_KEY != "" {
+		slog.Warn(
+			"You have both SMTP and SMTP2GO email options configured, which can be confusing for users. You might want to " +
+				"migrate your users to one and disable the other.",
+		)
+	}
+
+	switch env.EMAIL_MESSENGER_TYPE {
+	case "smtp_1":
+		if env.SMTP_HOST == "" {
+			log.Fatal("EMAIL_MESSENGER_TYPE is set to smtp_1 but that messenger is not configured")
+		}
+	case "smtp2go_1":
+		if env.SMTP2GO_API_KEY == "" {
+			log.Fatal("EMAIL_MESSENGER_TYPE is set to smtp2go_1 but that messenger is not configured")
+		}
+	case "develop_1":
+		if !env.ENABLE_DEVELOP_MESSENGER {
+			log.Fatal("EMAIL_MESSENGER_TYPE is set to develop_1 but ENABLE_DEVELOP_MESSENGER is false")
+		}
+	default:
+		log.Fatal("EMAIL_MESSENGER_TYPE must be one of: smtp_1, smtp2go_1, develop_1")
 	}
 }

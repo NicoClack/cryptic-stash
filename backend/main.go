@@ -45,10 +45,12 @@ func main() {
 	app.ShutdownService = shutdownService
 
 	{
-		logger := services.NewLogger(app)
+		logger := services.NewLogger(app, nil)
 		app.Logger = logger
 		slog.SetDefault(logger.Logger)
 	}
+	app.TempKeyValue = services.NewTempKeyValue(app)
+	app.Auth = services.NewAuth(app)
 	app.RateLimiter = services.NewRateLimiter(app)
 	app.Core = services.NewCore(app)
 	app.Setup = services.NewSetupService(app)
@@ -57,19 +59,26 @@ func main() {
 	app.Database.Start()
 	app.KeyValue.Init()
 	app.Logger.Start()
+	app.Core.Init()
 	app.TwoFactorActions = services.NewTwoFactorActions(app)
+	app.Invites = services.NewInvites(app)
 	{
 		messengerService := services.NewMessengers(app)
 		app.Messengers = messengerService
-		app.Jobs = services.NewJobs(app, messengerService.RegisterJobs)
-		// TODO: check for stalled jobs and mark them as failed before the scheduler starts
+		if !app.Env.ENABLE_ENV_SETUP {
+			app.Jobs = services.NewJobs(app, messengerService.RegisterJobs)
+			// TODO: check for stalled jobs and mark them as failed before the scheduler starts
+		}
 	}
 	app.Server = services.NewServer(app)
-	app.Scheduler = services.NewScheduler(app)
-
-	app.Scheduler.Start() // Note: initialises some state, e.g the rotating admin code
+	if !app.Env.ENABLE_ENV_SETUP {
+		app.Scheduler = services.NewScheduler(app)
+		app.Scheduler.Start() // Note: initialises some state, e.g the rotating admin code
+	}
 	app.Server.Start()
-	app.Jobs.Start()
+	if app.Jobs != nil {
+		app.Jobs.Start()
+	}
 
 	shutdownService.Listen()
 }

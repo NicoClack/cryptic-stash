@@ -2,13 +2,7 @@
 	import { adminAuth } from "$lib/admin/AdminAuth.svelte";
 	import MessengersList from "$lib/admin/messengers/MessengersList.svelte";
 	import PageMain from "$lib/components/PageMain.svelte";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 </script>
 
 <PageMain>
@@ -16,8 +10,8 @@
 		<CardHeader>
 			<CardTitle>Admin Messenger Setup</CardTitle>
 			<CardDescription>
-				To ensure we can alert you if there's an error, a download session is created or a few other
-				things happen, please set up at least one messenger for your admin user.
+				To ensure we can alert you if there's an error, a download session is created or a few other things
+				happen, please set up at least one messenger for your admin user.
 			</CardDescription>
 		</CardHeader>
 		<CardContent>

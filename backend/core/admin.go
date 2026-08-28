@@ -13,6 +13,8 @@ import (
 // Doubled because the bytes are represented as base64
 const AdminCodeByteLength = 128
 
+// TODO: mutex?
+//
 //nolint:recvcheck
 type AdminCode struct {
 	Current       []byte

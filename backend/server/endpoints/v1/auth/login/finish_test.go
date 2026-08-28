@@ -1,0 +1,147 @@
+package login_test
+
+// Tests that span both endpoints should go in login_test.go
+
+import (
+	"encoding/json"
+	"net/http"
+	"strings"
+	"testing"
+
+	"github.com/NicoClack/cryptic-stash/backend/common"
+	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/login"
+	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
+	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
+	"github.com/descope/virtualwebauthn"
+	"github.com/gin-gonic/gin"
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+)
+
+func TestFinishLogin_MissingWebAuthnSessionID_SendsBadRequest(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{},
+	)
+
+	testcommon.AssertJSONResponse(
+		t, finishRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "WebAuthnSessionID: condition failed: required",
+					Code:    "MALFORMED_BODY_JSON",
+				},
+			},
+		},
+	)
+}
+
+func TestFinishLogin_InvalidWebAuthnSessionID_SendsBadRequest(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		gin.H{
+			"webAuthnSessionId": strings.Repeat("a", 36), // Right length but not the format of a UUID
+		},
+	)
+
+	testcommon.AssertJSONResponse(
+		t, finishRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				// For now, the error from unmarshalling the UUID is just an error string,
+				// so we don't have a good way to know what the field is.
+				// This error is slightly more helpful than UNKNOWN_JSON_BODY_ERROR though
+				{
+					Message: "malformed UUID in JSON body",
+					Code:    "MALFORMED_BODY_JSON_UUID",
+				},
+			},
+		},
+	)
+}
+
+func TestFinishLogin_UnknownWebAuthnSessionID_SendsBadRequest(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	{
+		vAuthenticator := virtualwebauthn.NewAuthenticator()
+		credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
+		assertionJSON := virtualwebauthn.CreateAssertionResponse(
+			testcommon.NewWebAuthnRelyingParty(app.Env),
+			vAuthenticator,
+			credential,
+			virtualwebauthn.AssertionOptions{Challenge: common.CryptoRandomBytes(32)},
+		)
+		stdErr := json.Unmarshal([]byte(assertionJSON), &parsedAssertion)
+		require.NoError(t, stdErr)
+	}
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			WebAuthnSessionID:           uuid.New(),
+			CredentialAssertionResponse: parsedAssertion,
+		},
+	)
+
+	testcommon.AssertJSONResponse(
+		t, finishRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "WebAuthn session missing or expired",
+					Code:    "INVALID_WEBAUTHN_SESSION",
+				},
+			},
+		},
+	)
+}
+
+func TestFinishLogin_MalformedCredentialAssertion_SendsBadRequest(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		gin.H{
+			"webAuthnSessionId": uuid.New(),
+			"id":                "definitely-not-base64",
+			"rawId":             "also-not-base64",
+			"type":              "public-key",
+		},
+	)
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "malformed WebAuthn assertion response",
+					Code:    "MALFORMED_CREDENTIAL_ASSERTION_RESPONSE",
+				},
+			},
+		},
+	)
+}

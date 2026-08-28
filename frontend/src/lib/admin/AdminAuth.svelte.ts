@@ -2,6 +2,7 @@ import { browser } from "$app/environment";
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
+import { goToAdminLogin } from "$lib/api";
 import { SvelteURL } from "svelte/reactivity";
 
 const ADMIN_SESSION_TOKEN_STORAGE_KEY = "adminSessionToken";
@@ -31,9 +32,7 @@ class AdminAuthState {
 	}
 	requireAuth() {
 		if (browser && !this.isAuthenticated() && !page.route.id?.startsWith("/admin/login")) {
-			const urlObj = new SvelteURL(resolve("/admin/login"), location.origin);
-			urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
-			goto(urlObj.toString());
+			goToAdminLogin();
 		}
 	}
 	getAuthHeader(): string | null {

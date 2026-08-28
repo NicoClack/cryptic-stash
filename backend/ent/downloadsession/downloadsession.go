@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -29,21 +30,21 @@ const (
 	FieldUserAgent = "user_agent"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
-	// FieldUserID holds the string denoting the userid field in the database.
-	FieldUserID = "user_id"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
+	// FieldStashID holds the string denoting the stashid field in the database.
+	FieldStashID = "stash_id"
+	// EdgeStash holds the string denoting the stash edge name in mutations.
+	EdgeStash = "stash"
 	// EdgeLoginAlerts holds the string denoting the loginalerts edge name in mutations.
 	EdgeLoginAlerts = "loginAlerts"
 	// Table holds the table name of the downloadsession in the database.
 	Table = "download_sessions"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "download_sessions"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_id"
+	// StashTable is the table that holds the stash relation/edge.
+	StashTable = "download_sessions"
+	// StashInverseTable is the table name for the Stash entity.
+	// It exists in this package in order to avoid circular dependency with the "stash" package.
+	StashInverseTable = "stashes"
+	// StashColumn is the table column denoting the stash relation/edge.
+	StashColumn = "stash_id"
 	// LoginAlertsTable is the table that holds the loginAlerts relation/edge.
 	LoginAlertsTable = "login_alerts"
 	// LoginAlertsInverseTable is the table name for the LoginAlert entity.
@@ -63,7 +64,7 @@ var Columns = []string{
 	FieldValidUntil,
 	FieldUserAgent,
 	FieldIP,
-	FieldUserID,
+	FieldStashID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -83,6 +84,11 @@ var (
 	HashedAuthCodeValidator func([]byte) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all DownloadSession fields.
+	ValueScanner struct {
+		UserAgent field.TypeValueScanner[string]
+		IP        field.TypeValueScanner[string]
+	}
 )
 
 // OrderOption defines the ordering options for the DownloadSession queries.
@@ -113,25 +119,15 @@ func ByValidUntil(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValidUntil, opts...).ToFunc()
 }
 
-// ByUserAgent orders the results by the userAgent field.
-func ByUserAgent(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserAgent, opts...).ToFunc()
+// ByStashID orders the results by the stashID field.
+func ByStashID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStashID, opts...).ToFunc()
 }
 
-// ByIP orders the results by the ip field.
-func ByIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIP, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the userID field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
-}
-
-// ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByStashField orders the results by stash field.
+func ByStashField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newStashStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -148,11 +144,11 @@ func ByLoginAlerts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLoginAlertsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newUserStep() *sqlgraph.Step {
+func newStashStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		sqlgraph.To(StashInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, StashTable, StashColumn),
 	)
 }
 func newLoginAlertsStep() *sqlgraph.Step {

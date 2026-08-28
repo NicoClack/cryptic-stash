@@ -4,6 +4,7 @@ package ent
 
 import (
 	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 	"time"
@@ -26,7 +27,7 @@ type KeyValue struct {
 	// Key holds the value of the "key" field.
 	Key string `json:"key,omitempty"`
 	// Value holds the value of the "value" field.
-	Value        json.RawMessage `json:"value,omitempty"`
+	Value        jsontext.Value `json:"value,omitempty"`
 	selectValues sql.SelectValues
 }
 

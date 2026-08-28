@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -50,7 +50,7 @@ func (_c *TwoFactorActionCreate) SetVersion(v int) *TwoFactorActionCreate {
 }
 
 // SetBody sets the "body" field.
-func (_c *TwoFactorActionCreate) SetBody(v json.RawMessage) *TwoFactorActionCreate {
+func (_c *TwoFactorActionCreate) SetBody(v jsontext.Value) *TwoFactorActionCreate {
 	_c.mutation.SetBody(v)
 	return _c
 }
@@ -326,7 +326,7 @@ func (u *TwoFactorActionUpsert) AddVersion(v int) *TwoFactorActionUpsert {
 }
 
 // SetBody sets the "body" field.
-func (u *TwoFactorActionUpsert) SetBody(v json.RawMessage) *TwoFactorActionUpsert {
+func (u *TwoFactorActionUpsert) SetBody(v jsontext.Value) *TwoFactorActionUpsert {
 	u.Set(twofactoraction.FieldBody, v)
 	return u
 }
@@ -473,7 +473,7 @@ func (u *TwoFactorActionUpsertOne) UpdateVersion() *TwoFactorActionUpsertOne {
 }
 
 // SetBody sets the "body" field.
-func (u *TwoFactorActionUpsertOne) SetBody(v json.RawMessage) *TwoFactorActionUpsertOne {
+func (u *TwoFactorActionUpsertOne) SetBody(v jsontext.Value) *TwoFactorActionUpsertOne {
 	return u.Update(func(s *TwoFactorActionUpsert) {
 		s.SetBody(v)
 	})
@@ -793,7 +793,7 @@ func (u *TwoFactorActionUpsertBulk) UpdateVersion() *TwoFactorActionUpsertBulk {
 }
 
 // SetBody sets the "body" field.
-func (u *TwoFactorActionUpsertBulk) SetBody(v json.RawMessage) *TwoFactorActionUpsertBulk {
+func (u *TwoFactorActionUpsertBulk) SetBody(v jsontext.Value) *TwoFactorActionUpsertBulk {
 	return u.Update(func(s *TwoFactorActionUpsert) {
 		s.SetBody(v)
 	})

@@ -3,6 +3,7 @@
 package job
 
 import (
+	"encoding/json/jsontext"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -100,6 +101,12 @@ func Weight(v int) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldWeight, v))
 }
 
+// Body applies equality check predicate on the "body" field. It's identical to BodyEQ.
+func Body(v jsontext.Value) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldEQ(FieldBody, vc), err)
+}
+
 // Retries applies equality check predicate on the "retries" field. It's identical to RetriesEQ.
 func Retries(v int) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldRetries, v))
@@ -110,9 +117,9 @@ func RetriedFraction(v float64) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldRetriedFraction, v))
 }
 
-// LoggedStallWarning applies equality check predicate on the "loggedStallWarning" field. It's identical to LoggedStallWarningEQ.
-func LoggedStallWarning(v bool) predicate.Job {
-	return predicate.Job(sql.FieldEQ(FieldLoggedStallWarning, v))
+// HasLoggedStallWarning applies equality check predicate on the "hasLoggedStallWarning" field. It's identical to HasLoggedStallWarningEQ.
+func HasLoggedStallWarning(v bool) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldHasLoggedStallWarning, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "createdAt" field.
@@ -510,6 +517,70 @@ func WeightLTE(v int) predicate.Job {
 	return predicate.Job(sql.FieldLTE(FieldWeight, v))
 }
 
+// BodyEQ applies the EQ predicate on the "body" field.
+func BodyEQ(v jsontext.Value) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldEQ(FieldBody, vc), err)
+}
+
+// BodyNEQ applies the NEQ predicate on the "body" field.
+func BodyNEQ(v jsontext.Value) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldNEQ(FieldBody, vc), err)
+}
+
+// BodyIn applies the In predicate on the "body" field.
+func BodyIn(vs ...jsontext.Value) predicate.Job {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.Body.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.JobOrErr(sql.FieldIn(FieldBody, v...), err)
+}
+
+// BodyNotIn applies the NotIn predicate on the "body" field.
+func BodyNotIn(vs ...jsontext.Value) predicate.Job {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.Body.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.JobOrErr(sql.FieldNotIn(FieldBody, v...), err)
+}
+
+// BodyGT applies the GT predicate on the "body" field.
+func BodyGT(v jsontext.Value) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldGT(FieldBody, vc), err)
+}
+
+// BodyGTE applies the GTE predicate on the "body" field.
+func BodyGTE(v jsontext.Value) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldGTE(FieldBody, vc), err)
+}
+
+// BodyLT applies the LT predicate on the "body" field.
+func BodyLT(v jsontext.Value) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldLT(FieldBody, vc), err)
+}
+
+// BodyLTE applies the LTE predicate on the "body" field.
+func BodyLTE(v jsontext.Value) predicate.Job {
+	vc, err := ValueScanner.Body.Value(v)
+	return predicate.JobOrErr(sql.FieldLTE(FieldBody, vc), err)
+}
+
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v Status) predicate.Job {
 	return predicate.Job(sql.FieldEQ(FieldStatus, v))
@@ -610,14 +681,14 @@ func RetriedFractionLTE(v float64) predicate.Job {
 	return predicate.Job(sql.FieldLTE(FieldRetriedFraction, v))
 }
 
-// LoggedStallWarningEQ applies the EQ predicate on the "loggedStallWarning" field.
-func LoggedStallWarningEQ(v bool) predicate.Job {
-	return predicate.Job(sql.FieldEQ(FieldLoggedStallWarning, v))
+// HasLoggedStallWarningEQ applies the EQ predicate on the "hasLoggedStallWarning" field.
+func HasLoggedStallWarningEQ(v bool) predicate.Job {
+	return predicate.Job(sql.FieldEQ(FieldHasLoggedStallWarning, v))
 }
 
-// LoggedStallWarningNEQ applies the NEQ predicate on the "loggedStallWarning" field.
-func LoggedStallWarningNEQ(v bool) predicate.Job {
-	return predicate.Job(sql.FieldNEQ(FieldLoggedStallWarning, v))
+// HasLoggedStallWarningNEQ applies the NEQ predicate on the "hasLoggedStallWarning" field.
+func HasLoggedStallWarningNEQ(v bool) predicate.Job {
+	return predicate.Job(sql.FieldNEQ(FieldHasLoggedStallWarning, v))
 }
 
 // And groups predicates with the AND operator between them.

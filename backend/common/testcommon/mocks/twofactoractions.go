@@ -21,15 +21,16 @@ func (m *EmptyTwoFactorActionService) Create(
 	body any,
 	ctx context.Context,
 ) (*ent.TwoFactorAction, string, common.WrappedError) {
-	return nil, "", common.ErrNotImplemented.Clone()
+	return nil, "", nil
 }
 func (m *EmptyTwoFactorActionService) Confirm(
 	actionID uuid.UUID,
 	code string,
 	ctx context.Context,
 ) (*ent.Job, common.WrappedError) {
-	return nil, common.ErrNotImplemented.Clone()
+	//nolint:nilnil // this is a limited mock
+	return nil, nil
 }
 func (m *EmptyTwoFactorActionService) DeleteExpiredActions(ctx context.Context) common.WrappedError {
-	return common.ErrNotImplemented.Clone()
+	return nil
 }

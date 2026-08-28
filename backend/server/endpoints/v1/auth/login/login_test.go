@@ -1,0 +1,606 @@
+package login_test
+
+// Tests that span both endpoints
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
+	"net/http"
+	"testing"
+	"time"
+
+	"github.com/NicoClack/cryptic-stash/backend/auth"
+	"github.com/NicoClack/cryptic-stash/backend/common/dbcommon"
+	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
+	"github.com/NicoClack/cryptic-stash/backend/ent"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/auth/login"
+	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
+	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
+	"github.com/descope/virtualwebauthn"
+	"github.com/gin-gonic/gin"
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+)
+
+func createUserWithCredential(
+	t *testing.T,
+	serverAssociatesWithUser bool,
+	authenticatorAssociatesWithUser bool,
+	app *testhelpers.App,
+	setupAuthenticator func(*virtualwebauthn.Authenticator),
+) (*ent.User, virtualwebauthn.Credential, virtualwebauthn.Authenticator) {
+	t.Helper()
+	userOb := testcommon.NewDummyUser(1, app.TestDatabase.Client(), t.Context(), app.Clock)
+
+	vAuthenticator := virtualwebauthn.NewAuthenticator()
+	if setupAuthenticator != nil {
+		setupAuthenticator(&vAuthenticator)
+	} else {
+		// Simulate a physical security key
+		vAuthenticator.Options.Transports = []virtualwebauthn.Transport{
+			virtualwebauthn.TransportUSB,
+			virtualwebauthn.TransportNFC,
+		}
+	}
+	if authenticatorAssociatesWithUser {
+		vAuthenticator.Options.UserHandle = userOb.ID[:]
+	} else {
+		unknownUserID := uuid.New()
+		vAuthenticator.Options.UserHandle = unknownUserID[:]
+	}
+	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
+	vAuthenticator.AddCredential(credential)
+
+	stdErr := dbcommon.WithWriteTx(
+		t.Context(), app.Database,
+		func(tx *ent.Tx, ctx context.Context) error {
+			options, sessionData, wrappedErr := app.Auth.StartRegisterPasskey(&auth.RealWebAuthnUser{
+				User: userOb,
+			}, ctx)
+			if wrappedErr != nil {
+				return wrappedErr
+			}
+
+			registeredCredential := credential
+			if !serverAssociatesWithUser {
+				registeredCredential = virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
+			}
+			credentialJSON := virtualwebauthn.CreateAttestationResponse(
+				testcommon.NewWebAuthnRelyingParty(app.Env),
+				vAuthenticator,
+				registeredCredential,
+				virtualwebauthn.AttestationOptions{
+					Challenge: options.Challenge,
+				},
+			)
+			parsedCredential, stdErr := protocol.ParseCredentialCreationResponseBytes([]byte(credentialJSON))
+			if stdErr != nil {
+				return stdErr
+			}
+			_, wrappedErr = app.Auth.FinishRegisterPasskey(
+				"Test Passkey",
+				false,
+				false,
+				userOb.Username,
+				sessionData,
+				parsedCredential,
+				tx,
+				ctx,
+				func(userID uuid.UUID, tx *ent.Tx) (*ent.User, error) {
+					return userOb, nil
+				},
+			)
+			if wrappedErr != nil {
+				return wrappedErr
+			}
+			return nil
+		},
+	)
+	require.NoError(t, stdErr)
+	return userOb, credential, vAuthenticator
+}
+
+func TestLoginFlow(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	dbClient := app.Database.Client()
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	userOb, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+	passkeyOb := dbClient.Passkey.Query().
+		Where(passkey.CredentialID(credential.ID)).
+		OnlyX(t.Context())
+
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
+
+	assertionOptions, stdErr := virtualwebauthn.ParseAssertionOptions(startRecorder.Body.String())
+	require.NoError(t, stdErr)
+	require.NotNil(t, assertionOptions)
+	require.Equal(t, relyingParty.ID, assertionOptions.RelyingPartyID)
+	// The ceremony ID isn't part of the WebAuthn spec so virtualwebauthn doesn't parse it,
+	// but the frontend needs to include it in its login/finish request later.
+	var webAuthnSessionID uuid.UUID
+	{
+		var startResp login.StartLoginResponse
+		stdErr = json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+		require.NoError(t, stdErr)
+		webAuthnSessionID = startResp.WebAuthnSessionID
+	}
+
+	// vAuthenticator.FindAllowedCredential doesn't work for discoverable credentials
+	require.Len(t, vAuthenticator.Credentials, 1)
+	foundCredential := vAuthenticator.Credentials[0]
+	require.Equal(t, credential, foundCredential)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		foundCredential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: assertionOptions.Challenge,
+		},
+	)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertion,
+			WebAuthnSessionID:           webAuthnSessionID,
+		},
+	)
+	sessionCreatedAt := time.Now()
+	require.Equal(t, http.StatusOK, finishRecorder.Code)
+
+	var finishResp login.FinishLoginResponse
+	stdErr = json.Unmarshal(finishRecorder.Body.Bytes(), &finishResp)
+	require.NoError(t, stdErr)
+	require.Empty(t, finishResp.Errors)
+	require.Equal(t, userOb.ID, finishResp.UserID)
+	require.Len(t, finishResp.Token, 43) // 32 bytes
+	require.Equal(t, userOb.Username, finishResp.Username)
+	require.False(t, finishResp.IsSudo)
+	require.False(t, finishResp.IsSecondGroup)
+
+	decodedToken, stdErr := base64.RawURLEncoding.DecodeString(finishResp.Token)
+	require.NoError(t, stdErr)
+	require.Len(t, decodedToken, 32)
+	hashedToken := sha256.Sum256(decodedToken)
+
+	sessionCount, stdErr := dbClient.Session.Query().Count(t.Context())
+	require.NoError(t, stdErr)
+	require.Equal(t, 1, sessionCount)
+	sessionOb, stdErr := dbClient.Session.Query().
+		Where(
+			session.HashedToken(hashedToken[:]),
+		).
+		Only(t.Context())
+	require.NoError(t, stdErr)
+	require.Equal(t, userOb.ID, sessionOb.UserID)
+	require.Equal(t, passkeyOb.ID, sessionOb.PasskeyID)
+	require.False(t, sessionOb.IsSudo)
+	require.Equal(t, "test-agent", sessionOb.UserAgent)
+	require.Equal(t, "127.0.0.1", sessionOb.IP)
+	require.WithinDuration(
+		t,
+		sessionCreatedAt.Add(app.Env.SESSION_DURATION),
+		sessionOb.ExpiresAt,
+		100*time.Millisecond,
+	)
+
+	// The WebAuthn ceremony should've been deleted
+	var sessionData *webauthn.SessionData
+	require.False(t, app.TempKeyValue.Get(auth.WebAuthnSessionStoreName, webAuthnSessionID.String(), &sessionData))
+}
+
+func TestLoginFlow_SyncablePasskey(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+
+	userOb, credential, vAuthenticator := createUserWithCredential(
+		t,
+		true,
+		true,
+		app,
+		func(vAuthenticator *virtualwebauthn.Authenticator) {
+			vAuthenticator.Options.BackupEligible = true
+			vAuthenticator.Options.BackupState = true
+			vAuthenticator.Options.Transports = []virtualwebauthn.Transport{virtualwebauthn.TransportInternal}
+		},
+	)
+
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
+
+	var startResp login.StartLoginResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	require.NoError(t, stdErr)
+
+	require.Len(t, vAuthenticator.Credentials, 1)
+	foundCredential := vAuthenticator.Credentials[0]
+	require.Equal(t, credential, foundCredential)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		foundCredential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startResp.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertion,
+			WebAuthnSessionID:           startResp.WebAuthnSessionID,
+		},
+	)
+	require.Equal(t, http.StatusOK, finishRecorder.Code)
+
+	var finishResp login.FinishLoginResponse
+	stdErr = json.Unmarshal(finishRecorder.Body.Bytes(), &finishResp)
+	require.NoError(t, stdErr)
+	require.Equal(t, userOb.ID, finishResp.UserID)
+}
+
+func TestLoginFlow_ClientServerMismatches(t *testing.T) {
+	t.Parallel()
+
+	runTest := func(t *testing.T, serverAssociatesWithUser bool, authenticatorAssociatesWithUser bool) {
+		t.Helper()
+		app := testhelpers.NewApp(t, nil)
+		relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+		_, credential, vAuthenticator := createUserWithCredential(
+			t,
+			serverAssociatesWithUser,
+			authenticatorAssociatesWithUser,
+			app,
+			nil,
+		)
+
+		startRecorder := testcommon.Post(
+			t, app.Server,
+			"/api/v1/auth/login/start/",
+			nil,
+		)
+		require.Equal(t, http.StatusOK, startRecorder.Code)
+		// virtualwebauthn.ParseAssertionOptions isn't used because we need the WebAuthSessionID
+		// and TestLoginFlow already has coverage to ensure it's parsable by authenticators like that
+		var startResp login.StartLoginResponse
+		stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+		require.NoError(t, stdErr)
+
+		// Valid signature but from an unknown credential
+		assertionResponse := virtualwebauthn.CreateAssertionResponse(
+			relyingParty,
+			vAuthenticator,
+			credential,
+			virtualwebauthn.AssertionOptions{
+				Challenge: startResp.PublicKey.Challenge,
+			},
+		)
+
+		var parsedAssertion protocol.CredentialAssertionResponse
+		stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+		require.NoError(t, stdErr)
+
+		finishRecorder := testcommon.Post(
+			t, app.Server,
+			"/api/v1/auth/login/finish/",
+			login.FinishLoginPayload{
+				CredentialAssertionResponse: parsedAssertion,
+				WebAuthnSessionID:           startResp.WebAuthnSessionID,
+			},
+		)
+		testcommon.AssertJSONResponse(
+			t, finishRecorder,
+			http.StatusBadRequest,
+			gin.H{
+				"errors": []servercommon.ErrorDetail{
+					{
+						Message: "invalid credential",
+						Code:    "INVALID_CREDENTIAL",
+					},
+				},
+			},
+		)
+	}
+
+	t.Run("InvalidCredentialForUser", func(t *testing.T) {
+		t.Parallel()
+		runTest(t, false, true)
+	})
+	t.Run("CredentialForNonExistentUser", func(t *testing.T) {
+		t.Parallel()
+		runTest(t, true, false)
+	})
+}
+
+func TestLoginFlow_RejectsTamperedSignature(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
+
+	var startResp login.StartLoginResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startResp.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	// Tamper with the signature
+	require.NotEmpty(t, parsedAssertion.AssertionResponse.Signature)
+	parsedAssertion.AssertionResponse.Signature[0] ^= 0xFF
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertion,
+			WebAuthnSessionID:           startResp.WebAuthnSessionID,
+		},
+	)
+	testcommon.AssertJSONResponse(
+		t, finishRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "invalid credential",
+					Code:    "INVALID_CREDENTIAL",
+				},
+			},
+		},
+	)
+}
+
+func TestLoginFlow_GivenExpiredSession_RejectsValidSignature(t *testing.T) {
+	t.Parallel()
+
+	env := testcommon.DefaultEnv()
+	// go-webauthn doesn't allow us to mock the time
+	env.WEBAUTHN_SESSION_TIMEOUT = 250 * time.Millisecond
+	app := testhelpers.NewApp(t, &testhelpers.AppOptions{
+		Env: env,
+	})
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
+	// virtualwebauthn.ParseAssertionOptions isn't used because we need the WebAuthSessionID
+	// and TestLoginFlow already has coverage to ensure it's parsable by authenticators like that
+	var startResp login.StartLoginResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startResp.PublicKey.Challenge,
+		},
+	)
+
+	time.Sleep(env.WEBAUTHN_SESSION_TIMEOUT)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertion,
+			WebAuthnSessionID:           startResp.WebAuthnSessionID,
+		},
+	)
+	testcommon.AssertJSONResponse(
+		t, finishRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "WebAuthn session missing or expired",
+					Code:    "INVALID_WEBAUTHN_SESSION",
+				},
+			},
+		},
+	)
+}
+
+func TestLoginFlow_RejectsReplayedAssertion_SameCeremony(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+
+	startRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorder.Code)
+
+	var startResp login.StartLoginResponse
+	stdErr := json.Unmarshal(startRecorder.Body.Bytes(), &startResp)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startResp.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertion protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertion)
+	require.NoError(t, stdErr)
+
+	payload := login.FinishLoginPayload{
+		CredentialAssertionResponse: parsedAssertion,
+		WebAuthnSessionID:           startResp.WebAuthnSessionID,
+	}
+
+	finishRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		payload,
+	)
+	require.Equal(t, http.StatusOK, finishRecorder.Code)
+
+	// And again...
+	replayRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		payload,
+	)
+	testcommon.AssertJSONResponse(
+		t, replayRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "WebAuthn session missing or expired",
+					Code:    "INVALID_WEBAUTHN_SESSION",
+				},
+			},
+		},
+	)
+}
+
+func TestLoginFlow_RejectsReplayedAssertion_NewCeremony(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	relyingParty := testcommon.NewWebAuthnRelyingParty(app.Env)
+	_, credential, vAuthenticator := createUserWithCredential(t, true, true, app, nil)
+
+	startRecorderA := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorderA.Code)
+
+	var startRespA login.StartLoginResponse
+	stdErr := json.Unmarshal(startRecorderA.Body.Bytes(), &startRespA)
+	require.NoError(t, stdErr)
+
+	assertionResponse := virtualwebauthn.CreateAssertionResponse(
+		relyingParty,
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AssertionOptions{
+			Challenge: startRespA.PublicKey.Challenge,
+		},
+	)
+
+	var parsedAssertionA protocol.CredentialAssertionResponse
+	stdErr = json.Unmarshal([]byte(assertionResponse), &parsedAssertionA)
+	require.NoError(t, stdErr)
+
+	startRecorderB := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/start/",
+		nil,
+	)
+	require.Equal(t, http.StatusOK, startRecorderB.Code)
+
+	var startRespB login.StartLoginResponse
+	stdErr = json.Unmarshal(startRecorderB.Body.Bytes(), &startRespB)
+	require.NoError(t, stdErr)
+
+	require.NotEqual(t, startRespA.PublicKey.Challenge, startRespB.PublicKey.Challenge)
+
+	// Should be able to use assertion A on ceremony A
+	successfulRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertionA,
+			WebAuthnSessionID:           startRespA.WebAuthnSessionID,
+		},
+	)
+	require.Equal(t, http.StatusOK, successfulRecorder.Code)
+
+	// Shouldn't be able to use assertion A on ceremony B
+	replayRecorder := testcommon.Post(
+		t, app.Server,
+		"/api/v1/auth/login/finish/",
+		login.FinishLoginPayload{
+			CredentialAssertionResponse: parsedAssertionA,
+			WebAuthnSessionID:           startRespB.WebAuthnSessionID,
+		},
+	)
+	testcommon.AssertJSONResponse(
+		t, replayRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "invalid credential",
+					Code:    "INVALID_CREDENTIAL",
+				},
+			},
+		},
+	)
+}
+
+// No tests for username enumeration because it's impossible with this setup,
+// see the comments in the start and finish endpoint implementations

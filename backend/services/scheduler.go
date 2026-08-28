@@ -52,6 +52,10 @@ func NewScheduler(app *common.App) *Scheduler {
 					if wrappedErr != nil {
 						return wrappedErr
 					}
+					wrappedErr = app.Invites.DeleteExpiredInvites(tx, ctx)
+					if wrappedErr != nil {
+						return wrappedErr
+					}
 
 					return nil
 				},
@@ -63,6 +67,7 @@ func NewScheduler(app *common.App) *Scheduler {
 				)
 			}
 			app.RateLimiter.DeleteInactiveUsers()
+			app.TempKeyValue.PruneAll()
 		},
 		schedulers.SimpleFixedInterval(app.Env.CLEAN_UP_INTERVAL),
 	)

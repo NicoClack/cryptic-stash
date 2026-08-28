@@ -34,6 +34,7 @@ var ErrWrapperDiscord = common.NewDynamicErrorWrapper(func(err error) common.Wra
 		}
 		return wrappedErr
 	}
+	// TODO: retry other HTTP errors?
 	var restErr *discordgo.RESTError
 	if errors.As(err, &restErr) && restErr.Message != nil {
 		if restErr.Message.Code == discordgo.ErrCodeOpeningDirectMessagesTooFast {
@@ -45,8 +46,8 @@ var ErrWrapperDiscord = common.NewDynamicErrorWrapper(func(err error) common.Wra
 		}
 	}
 
-	var rateLimitErr *discordgo.RateLimitError
-	if errors.As(err, &rateLimitErr) {
+	rateLimitErr, ok := errors.AsType[*discordgo.RateLimitError](err)
+	if ok {
 		wrappedErr.ConfigureRetriesMut(3, max(rateLimitErr.RetryAfter, 5*time.Second), 1)
 		wrappedErr.AddDebugValuesMut(common.DebugValue{
 			Name:    "retried discordgo.RateLimitError",
@@ -68,9 +69,9 @@ type Discord1Body struct {
 
 func Discord1(app *common.App) *messengers.Definition {
 	getSession := func() (*discordgo.Session, common.WrappedError) {
-		session, err := discordgo.New("Bot " + app.Env.DISCORD_TOKEN)
-		if err != nil {
-			return nil, ErrWrapperDiscord.Wrap(err)
+		session, stdErr := discordgo.New("Bot " + app.Env.DISCORD_TOKEN)
+		if stdErr != nil {
+			return nil, ErrWrapperDiscord.Wrap(stdErr)
 		}
 
 		session.ShouldRetryOnRateLimit = false
@@ -105,7 +106,7 @@ func Discord1(app *common.App) *messengers.Definition {
 
 			return &Discord1Body{
 				Options:          options,
-				FormattedMessage: formattedMessage,
+				FormattedMessage: formattedMessage.Body,
 			}, nil
 		},
 		BodyType: &Discord1Body{},

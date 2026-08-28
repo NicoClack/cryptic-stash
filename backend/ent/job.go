@@ -3,7 +3,7 @@
 package ent
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 	"time"
@@ -28,7 +28,7 @@ type Job struct {
 	// OriginallyDueAt holds the value of the "originallyDueAt" field.
 	OriginallyDueAt time.Time `json:"originallyDueAt,omitempty"`
 	// StartedAt holds the value of the "startedAt" field.
-	StartedAt time.Time `json:"startedAt,omitempty"`
+	StartedAt *time.Time `json:"startedAt,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Version holds the value of the "version" field.
@@ -38,16 +38,16 @@ type Job struct {
 	// Weight holds the value of the "weight" field.
 	Weight int `json:"weight,omitempty"`
 	// Body holds the value of the "body" field.
-	Body json.RawMessage `json:"body,omitempty"`
+	Body jsontext.Value `json:"body,omitempty"`
 	// Status holds the value of the "status" field.
 	Status job.Status `json:"status,omitempty"`
 	// Retries holds the value of the "retries" field.
 	Retries int `json:"retries,omitempty"`
 	// RetriedFraction holds the value of the "retriedFraction" field.
 	RetriedFraction float64 `json:"retriedFraction,omitempty"`
-	// LoggedStallWarning holds the value of the "loggedStallWarning" field.
-	LoggedStallWarning bool `json:"loggedStallWarning,omitempty"`
-	selectValues       sql.SelectValues
+	// HasLoggedStallWarning holds the value of the "hasLoggedStallWarning" field.
+	HasLoggedStallWarning bool `json:"hasLoggedStallWarning,omitempty"`
+	selectValues          sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -55,9 +55,7 @@ func (*Job) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case job.FieldBody:
-			values[i] = new([]byte)
-		case job.FieldLoggedStallWarning:
+		case job.FieldHasLoggedStallWarning:
 			values[i] = new(sql.NullBool)
 		case job.FieldRetriedFraction:
 			values[i] = new(sql.NullFloat64)
@@ -69,6 +67,8 @@ func (*Job) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case job.FieldID:
 			values[i] = new(uuid.UUID)
+		case job.FieldBody:
+			values[i] = job.ValueScanner.Body.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -118,7 +118,8 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field startedAt", values[i])
 			} else if value.Valid {
-				_m.StartedAt = value.Time
+				_m.StartedAt = new(time.Time)
+				*_m.StartedAt = value.Time
 			}
 		case job.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -145,12 +146,10 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 				_m.Weight = int(value.Int64)
 			}
 		case job.FieldBody:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field body", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Body); err != nil {
-					return fmt.Errorf("unmarshal field body: %w", err)
-				}
+			if value, err := job.ValueScanner.Body.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.Body = value
 			}
 		case job.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -170,11 +169,11 @@ func (_m *Job) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RetriedFraction = value.Float64
 			}
-		case job.FieldLoggedStallWarning:
+		case job.FieldHasLoggedStallWarning:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field loggedStallWarning", values[i])
+				return fmt.Errorf("unexpected type %T for field hasLoggedStallWarning", values[i])
 			} else if value.Valid {
-				_m.LoggedStallWarning = value.Bool
+				_m.HasLoggedStallWarning = value.Bool
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -224,8 +223,10 @@ func (_m *Job) String() string {
 	builder.WriteString("originallyDueAt=")
 	builder.WriteString(_m.OriginallyDueAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("startedAt=")
-	builder.WriteString(_m.StartedAt.Format(time.ANSIC))
+	if v := _m.StartedAt; v != nil {
+		builder.WriteString("startedAt=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(_m.Type)
@@ -251,8 +252,8 @@ func (_m *Job) String() string {
 	builder.WriteString("retriedFraction=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RetriedFraction))
 	builder.WriteString(", ")
-	builder.WriteString("loggedStallWarning=")
-	builder.WriteString(fmt.Sprintf("%v", _m.LoggedStallWarning))
+	builder.WriteString("hasLoggedStallWarning=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HasLoggedStallWarning))
 	builder.WriteByte(')')
 	return builder.String()
 }

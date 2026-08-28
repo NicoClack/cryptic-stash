@@ -11,7 +11,7 @@ func CryptoRandomBytes(length int) []byte {
 	salt := make([]byte, length)
 	_, stdErr := rand.Read(salt)
 	if stdErr != nil {
-		panic(fmt.Sprintf("CryptoRandomBytes: couldn't get random byte. error:\n%v", stdErr))
+		panic(fmt.Sprintf("common.CryptoRandomBytes: couldn't get random byte. error:\n%v", stdErr))
 	}
 	return salt
 }

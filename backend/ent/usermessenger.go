@@ -3,7 +3,7 @@
 package ent
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 	"time"
@@ -28,10 +28,10 @@ type UserMessenger struct {
 	Type string `json:"type,omitempty"`
 	// Version holds the value of the "version" field.
 	Version int `json:"version,omitempty"`
-	// Enabled holds the value of the "enabled" field.
-	Enabled bool `json:"enabled,omitempty"`
+	// IsEnabled holds the value of the "isEnabled" field.
+	IsEnabled bool `json:"isEnabled,omitempty"`
 	// Options holds the value of the "options" field.
-	Options json.RawMessage `json:"options,omitempty"`
+	Options jsontext.Value `json:"options,omitempty"`
 	// UserID holds the value of the "userID" field.
 	UserID uuid.UUID `json:"userID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -76,9 +76,7 @@ func (*UserMessenger) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usermessenger.FieldOptions:
-			values[i] = new([]byte)
-		case usermessenger.FieldEnabled:
+		case usermessenger.FieldIsEnabled:
 			values[i] = new(sql.NullBool)
 		case usermessenger.FieldVersion:
 			values[i] = new(sql.NullInt64)
@@ -88,6 +86,8 @@ func (*UserMessenger) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case usermessenger.FieldID, usermessenger.FieldUserID:
 			values[i] = new(uuid.UUID)
+		case usermessenger.FieldOptions:
+			values[i] = usermessenger.ValueScanner.Options.ScanValue()
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -133,19 +133,17 @@ func (_m *UserMessenger) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Version = int(value.Int64)
 			}
-		case usermessenger.FieldEnabled:
+		case usermessenger.FieldIsEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field enabled", values[i])
+				return fmt.Errorf("unexpected type %T for field isEnabled", values[i])
 			} else if value.Valid {
-				_m.Enabled = value.Bool
+				_m.IsEnabled = value.Bool
 			}
 		case usermessenger.FieldOptions:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field options", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Options); err != nil {
-					return fmt.Errorf("unmarshal field options: %w", err)
-				}
+			if value, err := usermessenger.ValueScanner.Options.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.Options = value
 			}
 		case usermessenger.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -211,8 +209,8 @@ func (_m *UserMessenger) String() string {
 	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Version))
 	builder.WriteString(", ")
-	builder.WriteString("enabled=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
+	builder.WriteString("isEnabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("options=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Options))

@@ -15,7 +15,26 @@ func ParseBody(pointer any, ginCtx *gin.Context) *Error {
 	if stdErr != nil {
 		validationErrs := validator.ValidationErrors{}
 		if !errors.As(stdErr, &validationErrs) {
-			return NewError(ErrWrapperParseBodyJson.Wrap(stdErr))
+			// We don't know much about these errors and what we can return to the client
+
+			// The uuid package doesn't provide sentinel errors and we don't know the field :(
+			if strings.Contains(stdErr.Error(), "UUID") || strings.Contains(stdErr.Error(), "urn") {
+				return NewError(ErrWrapperParseBodyJson.Wrap(stdErr)).
+					SetStatus(http.StatusBadRequest).
+					AddDetail(ErrorDetail{
+						Message: "malformed UUID in JSON body",
+						Code:    "MALFORMED_BODY_JSON_UUID",
+					}).
+					DisableLogging()
+			}
+
+			return NewError(ErrWrapperParseBodyJson.Wrap(stdErr)).
+				SetStatus(http.StatusBadRequest).
+				AddDetail(ErrorDetail{
+					Message: "unknown error in JSON body",
+					Code:    "UNKNOWN_BODY_JSON_ERROR",
+				}).
+				EnableLogging()
 		}
 
 		var builder strings.Builder
@@ -29,7 +48,7 @@ func ParseBody(pointer any, ginCtx *gin.Context) *Error {
 			SetStatus(http.StatusBadRequest).
 			AddDetail(ErrorDetail{
 				Message: builder.String(),
-				Code:    "INVALID_BODY_JSON",
+				Code:    "MALFORMED_BODY_JSON",
 			}).
 			DisableLogging()
 	}

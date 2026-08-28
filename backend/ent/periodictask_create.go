@@ -177,7 +177,7 @@ func (_c *PeriodicTaskCreate) createSpec() (*PeriodicTask, *sqlgraph.CreateSpec)
 	}
 	if value, ok := _c.mutation.LastRanAt(); ok {
 		_spec.SetField(periodictask.FieldLastRanAt, field.TypeTime, value)
-		_node.LastRanAt = value
+		_node.LastRanAt = &value
 	}
 	return _node, _spec
 }

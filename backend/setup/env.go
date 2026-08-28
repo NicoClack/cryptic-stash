@@ -39,8 +39,11 @@ func GenerateAdminSetupConstants(
 			AdminPasswordHash: base64.StdEncoding.EncodeToString(adminPasswordHash),
 			AdminPasswordSalt: base64.StdEncoding.EncodeToString(salt),
 			AdminTotpSecret:   totpSecret,
-			StashEncryptionKey: base64.StdEncoding.EncodeToString(
+			StashEncryptionKey: base64.StdEncoding.EncodeToString( // TODO: remove once the old stash encryption is removed
 				common.CryptoRandomBytes(common.EncryptionKeyLength),
+			),
+			BaseEncryptionKey: base64.StdEncoding.EncodeToString(
+				core.GenerateEncryptionKey(),
 			),
 		},
 		key.URL(),

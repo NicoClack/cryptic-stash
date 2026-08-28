@@ -2,6 +2,8 @@ package dbcommon
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/NicoClack/cryptic-stash/backend/common"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
@@ -35,6 +37,7 @@ func withRetryingTx[T any](
 	fn func(tx *ent.Tx, ctx context.Context) (T, error),
 ) (T, error) {
 	var returnValue T
+	// TODO: reduce deadline by 500ms to account for busy_timeout
 	wrappedErr := common.WithRetries(ctx, common.GetLogger(ctx, db), func() error {
 		return withTx(ctx, db, txCallback, func(tx *ent.Tx, ctx context.Context) error {
 			var stdErr error
@@ -59,7 +62,9 @@ func withTx(
 	tx, stdErr := txCallback(ctx)
 	if stdErr != nil {
 		return ErrWrapperWithTx.Wrap(
-			ErrWrapperStartTx.Wrap(stdErr),
+			ErrWrapperStartTx.Wrap(
+				common.ErrWrapperDatabase.Wrap(stdErr),
+			),
 		)
 	}
 
@@ -68,7 +73,7 @@ func withTx(
 		panicValue := recover()
 		if panicValue != nil {
 			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
+			if rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
 				common.GetLogger(ctx, db).Error(
 					"withTx: error rolling back transaction after panic",
 					"error", rollbackErr,
@@ -79,8 +84,9 @@ func withTx(
 		}
 		if callbackErr != nil {
 			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				// TODO: handle "transaction already committed or rolled back" errors? If they can still happen?
+			// Context timeouts and cancellations usually roll back the transaction, but it's best to do it explicitly
+			// so we don't accidentally leave the transaction open
+			if rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
 				common.GetLogger(ctx, db).Error(
 					"withTx: error rolling back transaction",
 					"error", rollbackErr,
@@ -98,7 +104,9 @@ func withTx(
 	stdErr = tx.Commit()
 	if stdErr != nil {
 		return ErrWrapperWithTx.Wrap(
-			ErrWrapperCommitTx.Wrap(stdErr),
+			ErrWrapperCommitTx.Wrap(
+				common.ErrWrapperDatabase.Wrap(stdErr),
+			),
 		)
 	}
 	return nil

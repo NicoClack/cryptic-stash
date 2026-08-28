@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"log"
 	"math"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -17,6 +18,19 @@ func RequireEnv(name string) string {
 	}
 
 	return value
+}
+
+func RequireURLEnv(name string) *url.URL {
+	value := strings.TrimSpace(RequireEnv(name))
+	parsedURL, stdErr := url.ParseRequestURI(value)
+	if stdErr != nil {
+		log.Fatalf("environment variable \"%s\" must be a valid absolute URL: %v", name, stdErr)
+	}
+	if parsedURL.Scheme == "" || parsedURL.Host == "" {
+		log.Fatalf("environment variable \"%s\" must include a URL scheme and host", name)
+	}
+
+	return parsedURL
 }
 
 func RequireStrArrEnv(name string) []string {
@@ -35,8 +49,8 @@ func RequireStrArrEnv(name string) []string {
 func RequireIntEnv(name string) int {
 	rawValue := RequireEnv(name)
 
-	value, err := strconv.Atoi(rawValue)
-	if err != nil {
+	value, stdErr := strconv.Atoi(rawValue)
+	if stdErr != nil {
 		log.Fatalf("couldn't parse environment variable \"%v\" into an integer", name)
 	}
 
@@ -46,8 +60,8 @@ func RequireIntEnv(name string) int {
 func RequireInt64Env(name string) int64 {
 	rawValue := RequireEnv(name)
 
-	value, err := strconv.ParseInt(rawValue, 10, 0)
-	if err != nil {
+	value, stdErr := strconv.ParseInt(rawValue, 10, 0)
+	if stdErr != nil {
 		log.Fatalf("couldn't parse environment variable \"%v\" into an int64", name)
 	}
 
@@ -109,6 +123,26 @@ func OptionalEnv(name string, defaultValue string) string {
 	} else {
 		return defaultValue
 	}
+}
+
+func OptionalURLEnv(name string, defaultValue string) *url.URL {
+	_, specified := os.LookupEnv(name)
+	if specified {
+		return RequireURLEnv(name)
+	}
+
+	trimmedDefault := strings.TrimSpace(defaultValue)
+	if trimmedDefault == "" {
+		return nil
+	}
+	parsedDefault, stdErr := url.ParseRequestURI(trimmedDefault)
+	if stdErr != nil {
+		log.Fatalf("default value for environment variable \"%s\" must be a valid absolute URL: %v", name, stdErr)
+	}
+	if parsedDefault.Scheme == "" || parsedDefault.Host == "" {
+		log.Fatalf("default value for environment variable \"%s\" must include a URL scheme and host", name)
+	}
+	return parsedDefault
 }
 
 // Mainly used for the CLI commands eg. BENCHMARK_THREAD_COUNT

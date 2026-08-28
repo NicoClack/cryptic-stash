@@ -4,14 +4,13 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/NicoClack/cryptic-stash/backend/ent/job"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
@@ -176,14 +175,8 @@ func (_u *JobUpdate) AddWeight(v int) *JobUpdate {
 }
 
 // SetBody sets the "body" field.
-func (_u *JobUpdate) SetBody(v json.RawMessage) *JobUpdate {
+func (_u *JobUpdate) SetBody(v jsontext.Value) *JobUpdate {
 	_u.mutation.SetBody(v)
-	return _u
-}
-
-// AppendBody appends value to the "body" field.
-func (_u *JobUpdate) AppendBody(v json.RawMessage) *JobUpdate {
-	_u.mutation.AppendBody(v)
 	return _u
 }
 
@@ -243,16 +236,16 @@ func (_u *JobUpdate) AddRetriedFraction(v float64) *JobUpdate {
 	return _u
 }
 
-// SetLoggedStallWarning sets the "loggedStallWarning" field.
-func (_u *JobUpdate) SetLoggedStallWarning(v bool) *JobUpdate {
-	_u.mutation.SetLoggedStallWarning(v)
+// SetHasLoggedStallWarning sets the "hasLoggedStallWarning" field.
+func (_u *JobUpdate) SetHasLoggedStallWarning(v bool) *JobUpdate {
+	_u.mutation.SetHasLoggedStallWarning(v)
 	return _u
 }
 
-// SetNillableLoggedStallWarning sets the "loggedStallWarning" field if the given value is not nil.
-func (_u *JobUpdate) SetNillableLoggedStallWarning(v *bool) *JobUpdate {
+// SetNillableHasLoggedStallWarning sets the "hasLoggedStallWarning" field if the given value is not nil.
+func (_u *JobUpdate) SetNillableHasLoggedStallWarning(v *bool) *JobUpdate {
 	if v != nil {
-		_u.SetLoggedStallWarning(*v)
+		_u.SetHasLoggedStallWarning(*v)
 	}
 	return _u
 }
@@ -365,12 +358,11 @@ func (_u *JobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.AddField(job.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Body(); ok {
-		_spec.SetField(job.FieldBody, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedBody(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, job.FieldBody, value)
-		})
+		vv, err := job.ValueScanner.Body.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(job.FieldBody, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(job.FieldStatus, field.TypeEnum, value)
@@ -387,8 +379,8 @@ func (_u *JobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedRetriedFraction(); ok {
 		_spec.AddField(job.FieldRetriedFraction, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.LoggedStallWarning(); ok {
-		_spec.SetField(job.FieldLoggedStallWarning, field.TypeBool, value)
+	if value, ok := _u.mutation.HasLoggedStallWarning(); ok {
+		_spec.SetField(job.FieldHasLoggedStallWarning, field.TypeBool, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -556,14 +548,8 @@ func (_u *JobUpdateOne) AddWeight(v int) *JobUpdateOne {
 }
 
 // SetBody sets the "body" field.
-func (_u *JobUpdateOne) SetBody(v json.RawMessage) *JobUpdateOne {
+func (_u *JobUpdateOne) SetBody(v jsontext.Value) *JobUpdateOne {
 	_u.mutation.SetBody(v)
-	return _u
-}
-
-// AppendBody appends value to the "body" field.
-func (_u *JobUpdateOne) AppendBody(v json.RawMessage) *JobUpdateOne {
-	_u.mutation.AppendBody(v)
 	return _u
 }
 
@@ -623,16 +609,16 @@ func (_u *JobUpdateOne) AddRetriedFraction(v float64) *JobUpdateOne {
 	return _u
 }
 
-// SetLoggedStallWarning sets the "loggedStallWarning" field.
-func (_u *JobUpdateOne) SetLoggedStallWarning(v bool) *JobUpdateOne {
-	_u.mutation.SetLoggedStallWarning(v)
+// SetHasLoggedStallWarning sets the "hasLoggedStallWarning" field.
+func (_u *JobUpdateOne) SetHasLoggedStallWarning(v bool) *JobUpdateOne {
+	_u.mutation.SetHasLoggedStallWarning(v)
 	return _u
 }
 
-// SetNillableLoggedStallWarning sets the "loggedStallWarning" field if the given value is not nil.
-func (_u *JobUpdateOne) SetNillableLoggedStallWarning(v *bool) *JobUpdateOne {
+// SetNillableHasLoggedStallWarning sets the "hasLoggedStallWarning" field if the given value is not nil.
+func (_u *JobUpdateOne) SetNillableHasLoggedStallWarning(v *bool) *JobUpdateOne {
 	if v != nil {
-		_u.SetLoggedStallWarning(*v)
+		_u.SetHasLoggedStallWarning(*v)
 	}
 	return _u
 }
@@ -775,12 +761,11 @@ func (_u *JobUpdateOne) sqlSave(ctx context.Context) (_node *Job, err error) {
 		_spec.AddField(job.FieldWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Body(); ok {
-		_spec.SetField(job.FieldBody, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedBody(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, job.FieldBody, value)
-		})
+		vv, err := job.ValueScanner.Body.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(job.FieldBody, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(job.FieldStatus, field.TypeEnum, value)
@@ -797,8 +782,8 @@ func (_u *JobUpdateOne) sqlSave(ctx context.Context) (_node *Job, err error) {
 	if value, ok := _u.mutation.AddedRetriedFraction(); ok {
 		_spec.AddField(job.FieldRetriedFraction, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.LoggedStallWarning(); ok {
-		_spec.SetField(job.FieldLoggedStallWarning, field.TypeBool, value)
+	if value, ok := _u.mutation.HasLoggedStallWarning(); ok {
+		_spec.SetField(job.FieldHasLoggedStallWarning, field.TypeBool, value)
 	}
 	_node = &Job{config: _u.config}
 	_spec.Assign = _node.assignValues

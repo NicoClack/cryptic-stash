@@ -42,12 +42,12 @@
 <section class="space-y-6">
 	<h2 class="text-2xl text-balance font-semibold tracking-tight">Step 2 of 4: Setup 2FA</h2>
 	<p class="text-sm text-muted-foreground md:text-base">
-		Please scan this QR code in your authenticator app (e.g., Google Authenticator, Authy) and enter
-		the 2FA code you see.
+		Please scan this QR code in your authenticator app (e.g., Google Authenticator, Authy) and enter the 2FA code
+		you see.
 	</p>
 	<p class="text-sm text-muted-foreground md:text-base">
-		Note: backup codes aren't provided because you can reset the admin auth by changing the server's
-		environment variables.
+		Note: backup codes aren't provided because you can reset the admin auth by changing the server's environment
+		variables.
 	</p>
 	<div class="h-25 w-25 overflow-hidden rounded-md border border-border bg-card p-2">
 		{#await qrcodeUrlPromise then qrcodeUrl}

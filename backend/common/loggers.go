@@ -7,7 +7,7 @@ import (
 
 func GetLogger(ctx context.Context, service HasDefaultLogger) Logger {
 	if ctx != nil {
-		logger, ok := ctx.Value(LoggerKey{}).(LoggerService)
+		logger, ok := ctx.Value(LoggerKey{}).(Logger)
 		if ok {
 			return logger
 		}

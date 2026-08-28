@@ -18,7 +18,7 @@ func TestDatabaseShutdown_HandlesConcurrentCalls(t *testing.T) {
 	app := &common.App{
 		Env: env,
 	}
-	app.Logger = services.NewLogger(app)
+	app.Logger = services.NewLogger(app, nil)
 	db := services.NewDatabase(app)
 	db.Start()
 
@@ -37,7 +37,7 @@ func TestDatabaseShutdown_NoOpWhenNotStarted(t *testing.T) {
 	app := &common.App{
 		Env: env,
 	}
-	app.Logger = services.NewLogger(app)
+	app.Logger = services.NewLogger(app, nil)
 	db := services.NewDatabase(app)
 
 	testcommon.AssertNoOp(t, db.Shutdown)
@@ -51,7 +51,7 @@ func TestDatabaseStart_SubsequentCallsAreNoOp(t *testing.T) {
 	app := &common.App{
 		Env: env,
 	}
-	app.Logger = services.NewLogger(app)
+	app.Logger = services.NewLogger(app, nil)
 	db := services.NewDatabase(app)
 	t.Cleanup(db.Shutdown)
 

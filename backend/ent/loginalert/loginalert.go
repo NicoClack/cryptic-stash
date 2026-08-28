@@ -21,8 +21,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldSentAt holds the string denoting the sentat field in the database.
 	FieldSentAt = "sent_at"
-	// FieldConfirmed holds the string denoting the confirmed field in the database.
-	FieldConfirmed = "confirmed"
+	// FieldIsConfirmed holds the string denoting the isconfirmed field in the database.
+	FieldIsConfirmed = "is_confirmed"
 	// FieldDownloadSessionID holds the string denoting the downloadsessionid field in the database.
 	FieldDownloadSessionID = "download_session_id"
 	// FieldUserMessengerID holds the string denoting the usermessengerid field in the database.
@@ -55,7 +55,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldSentAt,
-	FieldConfirmed,
+	FieldIsConfirmed,
 	FieldDownloadSessionID,
 	FieldUserMessengerID,
 }
@@ -100,9 +100,9 @@ func BySentAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSentAt, opts...).ToFunc()
 }
 
-// ByConfirmed orders the results by the confirmed field.
-func ByConfirmed(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldConfirmed, opts...).ToFunc()
+// ByIsConfirmed orders the results by the isConfirmed field.
+func ByIsConfirmed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsConfirmed, opts...).ToFunc()
 }
 
 // ByDownloadSessionID orders the results by the downloadSessionID field.

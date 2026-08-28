@@ -13,7 +13,7 @@ type Develop1Body struct {
 
 func Develop1() *messengers.Definition {
 	return &messengers.Definition{
-		ID:      "develop",
+		ID:      "develop", // TODO: capitalise to match job name format?
 		Version: 1,
 		Name:    "Develop",
 		Prepare: func(prepareCtx *messengers.PrepareContext) (any, error) {
@@ -24,7 +24,7 @@ func Develop1() *messengers.Definition {
 			return &Develop1Body{
 				FullMessage: fmt.Sprintf(
 					"\nmessage sent to user \"%v\":\n%v\n",
-					prepareCtx.Message.User.Username, formattedMessage,
+					prepareCtx.Message.User.Username, formattedMessage.Body,
 				),
 			}, nil
 		},

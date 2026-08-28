@@ -3,10 +3,12 @@
 package usermessenger
 
 import (
+	"encoding/json/jsontext"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
@@ -23,8 +25,8 @@ const (
 	FieldType = "type"
 	// FieldVersion holds the string denoting the version field in the database.
 	FieldVersion = "version"
-	// FieldEnabled holds the string denoting the enabled field in the database.
-	FieldEnabled = "enabled"
+	// FieldIsEnabled holds the string denoting the isenabled field in the database.
+	FieldIsEnabled = "is_enabled"
 	// FieldOptions holds the string denoting the options field in the database.
 	FieldOptions = "options"
 	// FieldUserID holds the string denoting the userid field in the database.
@@ -58,7 +60,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldType,
 	FieldVersion,
-	FieldEnabled,
+	FieldIsEnabled,
 	FieldOptions,
 	FieldUserID,
 }
@@ -78,10 +80,14 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	TypeValidator func(string) error
-	// DefaultEnabled holds the default value on creation for the "enabled" field.
-	DefaultEnabled bool
+	// DefaultIsEnabled holds the default value on creation for the "isEnabled" field.
+	DefaultIsEnabled bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
+	// ValueScanner of all UserMessenger fields.
+	ValueScanner struct {
+		Options field.TypeValueScanner[jsontext.Value]
+	}
 )
 
 // OrderOption defines the ordering options for the UserMessenger queries.
@@ -112,9 +118,9 @@ func ByVersion(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVersion, opts...).ToFunc()
 }
 
-// ByEnabled orders the results by the enabled field.
-func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
+// ByIsEnabled orders the results by the isEnabled field.
+func ByIsEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsEnabled, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the userID field.

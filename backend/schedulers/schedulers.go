@@ -59,7 +59,6 @@ func (engine *Engine) Run() {
 	})
 }
 func (engine *Engine) Shutdown() {
-	go engine.Run()
 	engine.shutdownOnce.Do(func() {
 		engine.App.Logger.Info("scheduler shutting down...")
 		ctx, cancel := context.WithTimeout(context.Background(), ShutdownTimeout)
@@ -68,6 +67,12 @@ func (engine *Engine) Shutdown() {
 		engine.cancelShutdownCtx = cancel
 		engine.mu.Unlock()
 		close(engine.RequestShutdownChan)
+		engine.runOnce.Do(func() {
+			<-engine.RequestShutdownChan
+			engine.mu.Lock()
+			engine.cancelShutdownCtx()
+			engine.mu.Unlock()
+		})
 
 		<-ctx.Done()
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {

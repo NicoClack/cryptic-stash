@@ -3,6 +3,7 @@
 package usermessenger
 
 import (
+	"encoding/json/jsontext"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -76,9 +77,15 @@ func Version(v int) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldEQ(FieldVersion, v))
 }
 
-// Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
-func Enabled(v bool) predicate.UserMessenger {
-	return predicate.UserMessenger(sql.FieldEQ(FieldEnabled, v))
+// IsEnabled applies equality check predicate on the "isEnabled" field. It's identical to IsEnabledEQ.
+func IsEnabled(v bool) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldIsEnabled, v))
+}
+
+// Options applies equality check predicate on the "options" field. It's identical to OptionsEQ.
+func Options(v jsontext.Value) predicate.UserMessenger {
+	vc, err := ValueScanner.Options.Value(v)
+	return predicate.UserMessengerOrErr(sql.FieldEQ(FieldOptions, vc), err)
 }
 
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
@@ -271,14 +278,88 @@ func VersionLTE(v int) predicate.UserMessenger {
 	return predicate.UserMessenger(sql.FieldLTE(FieldVersion, v))
 }
 
-// EnabledEQ applies the EQ predicate on the "enabled" field.
-func EnabledEQ(v bool) predicate.UserMessenger {
-	return predicate.UserMessenger(sql.FieldEQ(FieldEnabled, v))
+// IsEnabledEQ applies the EQ predicate on the "isEnabled" field.
+func IsEnabledEQ(v bool) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldEQ(FieldIsEnabled, v))
 }
 
-// EnabledNEQ applies the NEQ predicate on the "enabled" field.
-func EnabledNEQ(v bool) predicate.UserMessenger {
-	return predicate.UserMessenger(sql.FieldNEQ(FieldEnabled, v))
+// IsEnabledNEQ applies the NEQ predicate on the "isEnabled" field.
+func IsEnabledNEQ(v bool) predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNEQ(FieldIsEnabled, v))
+}
+
+// OptionsEQ applies the EQ predicate on the "options" field.
+func OptionsEQ(v jsontext.Value) predicate.UserMessenger {
+	vc, err := ValueScanner.Options.Value(v)
+	return predicate.UserMessengerOrErr(sql.FieldEQ(FieldOptions, vc), err)
+}
+
+// OptionsNEQ applies the NEQ predicate on the "options" field.
+func OptionsNEQ(v jsontext.Value) predicate.UserMessenger {
+	vc, err := ValueScanner.Options.Value(v)
+	return predicate.UserMessengerOrErr(sql.FieldNEQ(FieldOptions, vc), err)
+}
+
+// OptionsIn applies the In predicate on the "options" field.
+func OptionsIn(vs ...jsontext.Value) predicate.UserMessenger {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.Options.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.UserMessengerOrErr(sql.FieldIn(FieldOptions, v...), err)
+}
+
+// OptionsNotIn applies the NotIn predicate on the "options" field.
+func OptionsNotIn(vs ...jsontext.Value) predicate.UserMessenger {
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.Options.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.UserMessengerOrErr(sql.FieldNotIn(FieldOptions, v...), err)
+}
+
+// OptionsGT applies the GT predicate on the "options" field.
+func OptionsGT(v jsontext.Value) predicate.UserMessenger {
+	vc, err := ValueScanner.Options.Value(v)
+	return predicate.UserMessengerOrErr(sql.FieldGT(FieldOptions, vc), err)
+}
+
+// OptionsGTE applies the GTE predicate on the "options" field.
+func OptionsGTE(v jsontext.Value) predicate.UserMessenger {
+	vc, err := ValueScanner.Options.Value(v)
+	return predicate.UserMessengerOrErr(sql.FieldGTE(FieldOptions, vc), err)
+}
+
+// OptionsLT applies the LT predicate on the "options" field.
+func OptionsLT(v jsontext.Value) predicate.UserMessenger {
+	vc, err := ValueScanner.Options.Value(v)
+	return predicate.UserMessengerOrErr(sql.FieldLT(FieldOptions, vc), err)
+}
+
+// OptionsLTE applies the LTE predicate on the "options" field.
+func OptionsLTE(v jsontext.Value) predicate.UserMessenger {
+	vc, err := ValueScanner.Options.Value(v)
+	return predicate.UserMessengerOrErr(sql.FieldLTE(FieldOptions, vc), err)
+}
+
+// OptionsIsNil applies the IsNil predicate on the "options" field.
+func OptionsIsNil() predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldIsNull(FieldOptions))
+}
+
+// OptionsNotNil applies the NotNil predicate on the "options" field.
+func OptionsNotNil() predicate.UserMessenger {
+	return predicate.UserMessenger(sql.FieldNotNull(FieldOptions))
 }
 
 // UserIDEQ applies the EQ predicate on the "userID" field.

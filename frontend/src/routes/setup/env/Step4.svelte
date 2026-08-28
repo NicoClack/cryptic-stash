@@ -45,8 +45,6 @@
 	</RadioGroup>
 	<Textarea class="min-h-72 font-mono" readonly rows={15} value={formattedVars} />
 
-	<p class="text-sm text-muted-foreground md:text-base">
-		Once your server has restarted, click Next.
-	</p>
+	<p class="text-sm text-muted-foreground md:text-base">Once your server has restarted, click Next.</p>
 	<Button href={resolve("/")}>Next</Button>
 </section>

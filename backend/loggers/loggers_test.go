@@ -29,7 +29,10 @@ type Logger struct {
 }
 
 func NewLogger(app *common.App) *Logger {
-	handler := loggers.NewHandler(slog.LevelDebug, true, true, app)
+	handler := loggers.NewHandler(app, loggers.HandlerOptions{
+		Level:          slog.LevelDebug,
+		SaveToDatabase: true,
+	})
 	return NewLoggerWithHandler(handler, app)
 }
 func NewLoggerWithHandler(handler *loggers.Handler, app *common.App) *Logger {
@@ -70,7 +73,7 @@ func (service *Logger) AssertWritten(t *testing.T, expectedEntries []ExpectedEnt
 		require.Equal(t, expected.PublicMessage, entry.PublicMessage,
 			"%v \"PublicMessage\" properties should match", prefix,
 		)
-		require.Equal(t, expected.UserID, entry.UserID,
+		require.Equal(t, expected.UserID, common.Deref(entry.UserID, uuid.Nil),
 			"%v \"UserID\" properties should match", prefix,
 		)
 		require.Equal(t, expected.Level, entry.Level,
@@ -99,14 +102,12 @@ func (service *Logger) DeleteWrittenLogs(t *testing.T) {
 func TestLogger_SavesToDatabase(t *testing.T) {
 	t.Parallel()
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 	app := &common.App{
 		Database:        db,
 		Env:             testcommon.DefaultEnv(),
 		Clock:           clockwork.NewRealClock(),
 		ShutdownService: mocks.NewShutdownService(),
 	}
-	app.Env.PANIC_ON_ERROR = false
 	app.KeyValue = services.NewKeyValue(app)
 	logger := NewLogger(app)
 	app.Logger = logger
@@ -141,7 +142,6 @@ func TestLogger_SavesToDatabase(t *testing.T) {
 func TestLogger_UserIDNoMatch_LogsWarning(t *testing.T) {
 	t.Parallel()
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 	app := &common.App{
 		Database: db,
 		Env:      testcommon.DefaultEnv(),
@@ -203,7 +203,6 @@ func TestLogger_UserIDNoMatch_LogsWarning(t *testing.T) {
 func TestLogger_WithAttrs_and_WithGroup(t *testing.T) {
 	t.Parallel()
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 	clock := clockwork.NewRealClock()
 
 	userIDs := make([]uuid.UUID, 0, 2)
@@ -337,7 +336,6 @@ func TestLogger_WithAttrs_and_WithGroup(t *testing.T) {
 func TestLogger_SpecialAttributes(t *testing.T) {
 	t.Parallel()
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 	clock := clockwork.NewRealClock()
 
 	userIDs := make([]uuid.UUID, 0, 2)
@@ -407,7 +405,6 @@ func TestLogger_SpecialAttributes(t *testing.T) {
 func TestLogger_RetriesBulkCreateIndividually(t *testing.T) {
 	t.Parallel()
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 
 	var successfulCreateCounter atomic.Int64
 	var createAttemptCounter atomic.Int64
@@ -512,13 +509,15 @@ func TestLogger_RetriesBulkCreateIndividually(t *testing.T) {
 	require.Equal(t, int64(3), successfulCreateCounter.Load())
 }
 
-// TODO: flaky?
 func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 	t.Parallel()
-	const minCrashSignalGap = 24 * time.Hour
+	// Note: most of the logger logic uses real time because slog doesn't support clock overrides and records
+	// include a time, but this is fine as long as the logs are in the right order.
+	// However, the crash signal logic does use the clock, so we can precisely check that.
+	const minCrashSignalGap = 50 * time.Millisecond
+	// ^ Short so it can be simulated by the real time as well for slightly more accuracy
 
 	db := testcommon.CreateDB(t)
-	defer db.Shutdown()
 	clock := clockwork.NewFakeClock()
 
 	runProgram := func(expectedToCrashSignal bool, expectedLastSignal time.Time) {
@@ -529,7 +528,6 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 			Clock:           clock,
 			ShutdownService: shutdownService,
 		}
-		app.Env.PANIC_ON_ERROR = false
 		app.Env.MESSAGE_ADMIN_ON_ERROR = true // The admin user exists but doesn't have any messengers, so we'll fall back
 		app.Env.MIN_CRASH_SIGNAL_GAP = minCrashSignalGap
 		logger := NewLogger(app)
@@ -537,6 +535,8 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		logger.DeleteWrittenLogs(t) // The database is preserved between program runs, so the logs will be too
 		app.RateLimiter = services.NewRateLimiter(app)
 		app.KeyValue = services.NewKeyValue(app)
+		app.Core = services.NewCore(app)
+		app.Core.Init()
 		logger.Start()
 		app.KeyValue.Init()
 		mockMessenger := testhelpers.NewMockMessenger("MOCK_MESSENGER")
@@ -547,7 +547,6 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		}
 
 		logger.Error("an error occurred!")
-		clock.Advance(time.Millisecond)
 		logger.Shutdown()
 
 		logger.AssertWritten(t, []ExpectedEntry{
@@ -566,6 +565,7 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		} else {
 			shutdownService.AssertNotCalled(t)
 		}
+
 		lastCrashSignal := time.Time{}
 		_, stdErr := dbcommon.WithReadTx(
 			t.Context(), app.Database,
@@ -577,16 +577,78 @@ func TestLogger_AdminUserHasNoMessengers_UsesCrashSignal(t *testing.T) {
 		require.Equal(t, expectedLastSignal, lastCrashSignal)
 	}
 	startTime := clock.Now().UTC()
-	runProgram(true, startTime.Add(time.Millisecond))
+	runProgram(true, startTime)
 
-	clock.Advance(
-		time.Second -
-			time.Millisecond, // 1ms was already advanced to space out the logs
+	clock.Advance(minCrashSignalGap - time.Millisecond) // Just before the crash signal can be used again
+	time.Sleep(
+		time.Until(clock.Now()),
+		// ^ This will actually be shorter than minCrashSignalGap because
+		// the clock was frozen during the first run, but this should be accurate enough
 	)
-	runProgram(false, startTime.Add(time.Millisecond))
+	runProgram(false, startTime)
 
-	clock.Advance(
-		minCrashSignalGap - (time.Second) - time.Millisecond,
-	) // The millisecond the next crash signal is allowed
-	runProgram(true, clock.Now().UTC().Add(time.Millisecond))
+	clock.Advance(time.Millisecond)
+	runProgram(true, clock.Now().UTC())
+}
+
+func TestLogger_OnLogCalledForAllLevels(t *testing.T) {
+	t.Parallel()
+	db := testcommon.CreateDB(t)
+	app := &common.App{
+		Database: db,
+		Env:      testcommon.DefaultEnv(),
+		Clock:    clockwork.NewRealClock(),
+	}
+
+	levels := []slog.Level{}
+	handler := loggers.NewHandler(app, loggers.HandlerOptions{
+		Level: slog.LevelDebug,
+		OnLog: func(record slog.Record) {
+			// Safe because this function should be called synchronously for each log call
+			levels = append(levels, record.Level)
+		},
+	})
+	logger := NewLoggerWithHandler(handler, app)
+	app.Logger = logger
+	logger.Start()
+
+	logger.Debug("debug")
+	logger.Info("info")
+	logger.Warn("warning")
+	logger.Error("error")
+
+	logger.Shutdown()
+
+	require.Equal(t, []slog.Level{
+		slog.LevelDebug,
+		slog.LevelInfo,
+		slog.LevelWarn,
+		slog.LevelError,
+	}, levels)
+}
+
+func TestLogger_NoSaveToDatabase_DoesNotWrite(t *testing.T) {
+	t.Parallel()
+	db := testcommon.CreateDB(t)
+	app := &common.App{
+		Database: db,
+		Env:      testcommon.DefaultEnv(),
+		Clock:    clockwork.NewRealClock(),
+	}
+
+	handler := loggers.NewHandler(app, loggers.HandlerOptions{
+		Level: slog.LevelDebug,
+		// SaveToDatabase is false
+	})
+	logger := NewLoggerWithHandler(handler, app)
+	app.Logger = logger
+	logger.Start()
+
+	logger.Info("info")
+	logger.Error("error")
+
+	logger.Shutdown()
+
+	count := app.Database.Client().LogEntry.Query().CountX(t.Context())
+	require.Zero(t, count)
 }

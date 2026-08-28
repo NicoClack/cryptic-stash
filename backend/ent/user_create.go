@@ -12,9 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
 	"github.com/NicoClack/cryptic-stash/backend/ent/logentry"
-	"github.com/NicoClack/cryptic-stash/backend/ent/signuplink"
+	"github.com/NicoClack/cryptic-stash/backend/ent/passkey"
+	"github.com/NicoClack/cryptic-stash/backend/ent/session"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
@@ -47,40 +48,6 @@ func (_c *UserCreate) SetUsername(v string) *UserCreate {
 	return _c
 }
 
-// SetLocked sets the "locked" field.
-func (_c *UserCreate) SetLocked(v bool) *UserCreate {
-	_c.mutation.SetLocked(v)
-	return _c
-}
-
-// SetNillableLocked sets the "locked" field if the given value is not nil.
-func (_c *UserCreate) SetNillableLocked(v *bool) *UserCreate {
-	if v != nil {
-		_c.SetLocked(*v)
-	}
-	return _c
-}
-
-// SetLockedUntil sets the "lockedUntil" field.
-func (_c *UserCreate) SetLockedUntil(v time.Time) *UserCreate {
-	_c.mutation.SetLockedUntil(v)
-	return _c
-}
-
-// SetNillableLockedUntil sets the "lockedUntil" field if the given value is not nil.
-func (_c *UserCreate) SetNillableLockedUntil(v *time.Time) *UserCreate {
-	if v != nil {
-		_c.SetLockedUntil(*v)
-	}
-	return _c
-}
-
-// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
-func (_c *UserCreate) SetDownloadSessionsValidFrom(v time.Time) *UserCreate {
-	_c.mutation.SetDownloadSessionsValidFrom(v)
-	return _c
-}
-
 // SetID sets the "id" field.
 func (_c *UserCreate) SetID(v uuid.UUID) *UserCreate {
 	_c.mutation.SetID(v)
@@ -95,23 +62,19 @@ func (_c *UserCreate) SetNillableID(v *uuid.UUID) *UserCreate {
 	return _c
 }
 
-// SetStashID sets the "stash" edge to the Stash entity by ID.
-func (_c *UserCreate) SetStashID(id uuid.UUID) *UserCreate {
-	_c.mutation.SetStashID(id)
+// AddStashIDs adds the "stashes" edge to the Stash entity by IDs.
+func (_c *UserCreate) AddStashIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddStashIDs(ids...)
 	return _c
 }
 
-// SetNillableStashID sets the "stash" edge to the Stash entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableStashID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		_c = _c.SetStashID(*id)
+// AddStashes adds the "stashes" edges to the Stash entity.
+func (_c *UserCreate) AddStashes(v ...*Stash) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return _c
-}
-
-// SetStash sets the "stash" edge to the Stash entity.
-func (_c *UserCreate) SetStash(v *Stash) *UserCreate {
-	return _c.SetStashID(v.ID)
+	return _c.AddStashIDs(ids...)
 }
 
 // AddMessengerIDs adds the "messengers" edge to the UserMessenger entity by IDs.
@@ -129,38 +92,53 @@ func (_c *UserCreate) AddMessengers(v ...*UserMessenger) *UserCreate {
 	return _c.AddMessengerIDs(ids...)
 }
 
-// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by IDs.
-func (_c *UserCreate) AddDownloadSessionIDs(ids ...uuid.UUID) *UserCreate {
-	_c.mutation.AddDownloadSessionIDs(ids...)
+// SetInviteID sets the "invite" edge to the Invite entity by ID.
+func (_c *UserCreate) SetInviteID(id uuid.UUID) *UserCreate {
+	_c.mutation.SetInviteID(id)
 	return _c
 }
 
-// AddDownloadSessions adds the "downloadSessions" edges to the DownloadSession entity.
-func (_c *UserCreate) AddDownloadSessions(v ...*DownloadSession) *UserCreate {
+// SetNillableInviteID sets the "invite" edge to the Invite entity by ID if the given value is not nil.
+func (_c *UserCreate) SetNillableInviteID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		_c = _c.SetInviteID(*id)
+	}
+	return _c
+}
+
+// SetInvite sets the "invite" edge to the Invite entity.
+func (_c *UserCreate) SetInvite(v *Invite) *UserCreate {
+	return _c.SetInviteID(v.ID)
+}
+
+// AddPasskeyIDs adds the "passkeys" edge to the Passkey entity by IDs.
+func (_c *UserCreate) AddPasskeyIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddPasskeyIDs(ids...)
+	return _c
+}
+
+// AddPasskeys adds the "passkeys" edges to the Passkey entity.
+func (_c *UserCreate) AddPasskeys(v ...*Passkey) *UserCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddDownloadSessionIDs(ids...)
+	return _c.AddPasskeyIDs(ids...)
 }
 
-// SetSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID.
-func (_c *UserCreate) SetSignupLinkID(id uuid.UUID) *UserCreate {
-	_c.mutation.SetSignupLinkID(id)
+// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+func (_c *UserCreate) AddSessionIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddSessionIDs(ids...)
 	return _c
 }
 
-// SetNillableSignupLinkID sets the "signupLink" edge to the SignupLink entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableSignupLinkID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		_c = _c.SetSignupLinkID(*id)
+// AddSessions adds the "sessions" edges to the Session entity.
+func (_c *UserCreate) AddSessions(v ...*Session) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return _c
-}
-
-// SetSignupLink sets the "signupLink" edge to the SignupLink entity.
-func (_c *UserCreate) SetSignupLink(v *SignupLink) *UserCreate {
-	return _c.SetSignupLinkID(v.ID)
+	return _c.AddSessionIDs(ids...)
 }
 
 // AddLogIDs adds the "logs" edge to the LogEntry entity by IDs.
@@ -213,10 +191,6 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.Locked(); !ok {
-		v := user.DefaultLocked
-		_c.mutation.SetLocked(v)
-	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := user.DefaultID()
 		_c.mutation.SetID(v)
@@ -238,12 +212,6 @@ func (_c *UserCreate) check() error {
 		if err := user.UsernameValidator(v); err != nil {
 			return &ValidationError{Name: "username", err: fmt.Errorf(`ent: validator failed for field "User.username": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.Locked(); !ok {
-		return &ValidationError{Name: "locked", err: errors.New(`ent: missing required field "User.locked"`)}
-	}
-	if _, ok := _c.mutation.DownloadSessionsValidFrom(); !ok {
-		return &ValidationError{Name: "downloadSessionsValidFrom", err: errors.New(`ent: missing required field "User.downloadSessionsValidFrom"`)}
 	}
 	return nil
 }
@@ -293,24 +261,12 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
 		_node.Username = value
 	}
-	if value, ok := _c.mutation.Locked(); ok {
-		_spec.SetField(user.FieldLocked, field.TypeBool, value)
-		_node.Locked = value
-	}
-	if value, ok := _c.mutation.LockedUntil(); ok {
-		_spec.SetField(user.FieldLockedUntil, field.TypeTime, value)
-		_node.LockedUntil = &value
-	}
-	if value, ok := _c.mutation.DownloadSessionsValidFrom(); ok {
-		_spec.SetField(user.FieldDownloadSessionsValidFrom, field.TypeTime, value)
-		_node.DownloadSessionsValidFrom = value
-	}
-	if nodes := _c.mutation.StashIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.StashesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StashTable,
-			Columns: []string{user.StashColumn},
+			Table:   user.StashesTable,
+			Columns: []string{user.StashesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(stash.FieldID, field.TypeUUID),
@@ -337,15 +293,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.DownloadSessionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.InviteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.DownloadSessionsTable,
-			Columns: []string{user.DownloadSessionsColumn},
+			Table:   user.InviteTable,
+			Columns: []string{user.InviteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -353,15 +309,31 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.SignupLinkIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.PasskeysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SignupLinkTable,
-			Columns: []string{user.SignupLinkColumn},
+			Table:   user.PasskeysTable,
+			Columns: []string{user.PasskeysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(signuplink.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(passkey.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -473,48 +445,6 @@ func (u *UserUpsert) UpdateUsername() *UserUpsert {
 	return u
 }
 
-// SetLocked sets the "locked" field.
-func (u *UserUpsert) SetLocked(v bool) *UserUpsert {
-	u.Set(user.FieldLocked, v)
-	return u
-}
-
-// UpdateLocked sets the "locked" field to the value that was provided on create.
-func (u *UserUpsert) UpdateLocked() *UserUpsert {
-	u.SetExcluded(user.FieldLocked)
-	return u
-}
-
-// SetLockedUntil sets the "lockedUntil" field.
-func (u *UserUpsert) SetLockedUntil(v time.Time) *UserUpsert {
-	u.Set(user.FieldLockedUntil, v)
-	return u
-}
-
-// UpdateLockedUntil sets the "lockedUntil" field to the value that was provided on create.
-func (u *UserUpsert) UpdateLockedUntil() *UserUpsert {
-	u.SetExcluded(user.FieldLockedUntil)
-	return u
-}
-
-// ClearLockedUntil clears the value of the "lockedUntil" field.
-func (u *UserUpsert) ClearLockedUntil() *UserUpsert {
-	u.SetNull(user.FieldLockedUntil)
-	return u
-}
-
-// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
-func (u *UserUpsert) SetDownloadSessionsValidFrom(v time.Time) *UserUpsert {
-	u.Set(user.FieldDownloadSessionsValidFrom, v)
-	return u
-}
-
-// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
-func (u *UserUpsert) UpdateDownloadSessionsValidFrom() *UserUpsert {
-	u.SetExcluded(user.FieldDownloadSessionsValidFrom)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -602,55 +532,6 @@ func (u *UserUpsertOne) SetUsername(v string) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateUsername() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateUsername()
-	})
-}
-
-// SetLocked sets the "locked" field.
-func (u *UserUpsertOne) SetLocked(v bool) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetLocked(v)
-	})
-}
-
-// UpdateLocked sets the "locked" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateLocked() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateLocked()
-	})
-}
-
-// SetLockedUntil sets the "lockedUntil" field.
-func (u *UserUpsertOne) SetLockedUntil(v time.Time) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetLockedUntil(v)
-	})
-}
-
-// UpdateLockedUntil sets the "lockedUntil" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateLockedUntil() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateLockedUntil()
-	})
-}
-
-// ClearLockedUntil clears the value of the "lockedUntil" field.
-func (u *UserUpsertOne) ClearLockedUntil() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearLockedUntil()
-	})
-}
-
-// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
-func (u *UserUpsertOne) SetDownloadSessionsValidFrom(v time.Time) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetDownloadSessionsValidFrom(v)
-	})
-}
-
-// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateDownloadSessionsValidFrom() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateDownloadSessionsValidFrom()
 	})
 }
 
@@ -908,55 +789,6 @@ func (u *UserUpsertBulk) SetUsername(v string) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateUsername() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateUsername()
-	})
-}
-
-// SetLocked sets the "locked" field.
-func (u *UserUpsertBulk) SetLocked(v bool) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetLocked(v)
-	})
-}
-
-// UpdateLocked sets the "locked" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateLocked() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateLocked()
-	})
-}
-
-// SetLockedUntil sets the "lockedUntil" field.
-func (u *UserUpsertBulk) SetLockedUntil(v time.Time) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetLockedUntil(v)
-	})
-}
-
-// UpdateLockedUntil sets the "lockedUntil" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateLockedUntil() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateLockedUntil()
-	})
-}
-
-// ClearLockedUntil clears the value of the "lockedUntil" field.
-func (u *UserUpsertBulk) ClearLockedUntil() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearLockedUntil()
-	})
-}
-
-// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
-func (u *UserUpsertBulk) SetDownloadSessionsValidFrom(v time.Time) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetDownloadSessionsValidFrom(v)
-	})
-}
-
-// UpdateDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateDownloadSessionsValidFrom() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateDownloadSessionsValidFrom()
 	})
 }
 

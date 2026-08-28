@@ -21,31 +21,27 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldUsername holds the string denoting the username field in the database.
 	FieldUsername = "username"
-	// FieldLocked holds the string denoting the locked field in the database.
-	FieldLocked = "locked"
-	// FieldLockedUntil holds the string denoting the lockeduntil field in the database.
-	FieldLockedUntil = "locked_until"
-	// FieldDownloadSessionsValidFrom holds the string denoting the downloadsessionsvalidfrom field in the database.
-	FieldDownloadSessionsValidFrom = "download_sessions_valid_from"
-	// EdgeStash holds the string denoting the stash edge name in mutations.
-	EdgeStash = "stash"
+	// EdgeStashes holds the string denoting the stashes edge name in mutations.
+	EdgeStashes = "stashes"
 	// EdgeMessengers holds the string denoting the messengers edge name in mutations.
 	EdgeMessengers = "messengers"
-	// EdgeDownloadSessions holds the string denoting the downloadsessions edge name in mutations.
-	EdgeDownloadSessions = "downloadSessions"
-	// EdgeSignupLink holds the string denoting the signuplink edge name in mutations.
-	EdgeSignupLink = "signupLink"
+	// EdgeInvite holds the string denoting the invite edge name in mutations.
+	EdgeInvite = "invite"
+	// EdgePasskeys holds the string denoting the passkeys edge name in mutations.
+	EdgePasskeys = "passkeys"
+	// EdgeSessions holds the string denoting the sessions edge name in mutations.
+	EdgeSessions = "sessions"
 	// EdgeLogs holds the string denoting the logs edge name in mutations.
 	EdgeLogs = "logs"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// StashTable is the table that holds the stash relation/edge.
-	StashTable = "stashes"
-	// StashInverseTable is the table name for the Stash entity.
+	// StashesTable is the table that holds the stashes relation/edge.
+	StashesTable = "stashes"
+	// StashesInverseTable is the table name for the Stash entity.
 	// It exists in this package in order to avoid circular dependency with the "stash" package.
-	StashInverseTable = "stashes"
-	// StashColumn is the table column denoting the stash relation/edge.
-	StashColumn = "user_id"
+	StashesInverseTable = "stashes"
+	// StashesColumn is the table column denoting the stashes relation/edge.
+	StashesColumn = "user_id"
 	// MessengersTable is the table that holds the messengers relation/edge.
 	MessengersTable = "user_messengers"
 	// MessengersInverseTable is the table name for the UserMessenger entity.
@@ -53,20 +49,27 @@ const (
 	MessengersInverseTable = "user_messengers"
 	// MessengersColumn is the table column denoting the messengers relation/edge.
 	MessengersColumn = "user_id"
-	// DownloadSessionsTable is the table that holds the downloadSessions relation/edge.
-	DownloadSessionsTable = "download_sessions"
-	// DownloadSessionsInverseTable is the table name for the DownloadSession entity.
-	// It exists in this package in order to avoid circular dependency with the "downloadsession" package.
-	DownloadSessionsInverseTable = "download_sessions"
-	// DownloadSessionsColumn is the table column denoting the downloadSessions relation/edge.
-	DownloadSessionsColumn = "user_id"
-	// SignupLinkTable is the table that holds the signupLink relation/edge.
-	SignupLinkTable = "signup_links"
-	// SignupLinkInverseTable is the table name for the SignupLink entity.
-	// It exists in this package in order to avoid circular dependency with the "signuplink" package.
-	SignupLinkInverseTable = "signup_links"
-	// SignupLinkColumn is the table column denoting the signupLink relation/edge.
-	SignupLinkColumn = "user_id"
+	// InviteTable is the table that holds the invite relation/edge.
+	InviteTable = "invites"
+	// InviteInverseTable is the table name for the Invite entity.
+	// It exists in this package in order to avoid circular dependency with the "invite" package.
+	InviteInverseTable = "invites"
+	// InviteColumn is the table column denoting the invite relation/edge.
+	InviteColumn = "user_id"
+	// PasskeysTable is the table that holds the passkeys relation/edge.
+	PasskeysTable = "passkeys"
+	// PasskeysInverseTable is the table name for the Passkey entity.
+	// It exists in this package in order to avoid circular dependency with the "passkey" package.
+	PasskeysInverseTable = "passkeys"
+	// PasskeysColumn is the table column denoting the passkeys relation/edge.
+	PasskeysColumn = "user_id"
+	// SessionsTable is the table that holds the sessions relation/edge.
+	SessionsTable = "sessions"
+	// SessionsInverseTable is the table name for the Session entity.
+	// It exists in this package in order to avoid circular dependency with the "session" package.
+	SessionsInverseTable = "sessions"
+	// SessionsColumn is the table column denoting the sessions relation/edge.
+	SessionsColumn = "user_id"
 	// LogsTable is the table that holds the logs relation/edge.
 	LogsTable = "log_entries"
 	// LogsInverseTable is the table name for the LogEntry entity.
@@ -82,9 +85,6 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldUsername,
-	FieldLocked,
-	FieldLockedUntil,
-	FieldDownloadSessionsValidFrom,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -102,8 +102,6 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	UsernameValidator func(string) error
-	// DefaultLocked holds the default value on creation for the "locked" field.
-	DefaultLocked bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -131,25 +129,17 @@ func ByUsername(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUsername, opts...).ToFunc()
 }
 
-// ByLocked orders the results by the locked field.
-func ByLocked(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLocked, opts...).ToFunc()
-}
-
-// ByLockedUntil orders the results by the lockedUntil field.
-func ByLockedUntil(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLockedUntil, opts...).ToFunc()
-}
-
-// ByDownloadSessionsValidFrom orders the results by the downloadSessionsValidFrom field.
-func ByDownloadSessionsValidFrom(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDownloadSessionsValidFrom, opts...).ToFunc()
-}
-
-// ByStashField orders the results by stash field.
-func ByStashField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByStashesCount orders the results by stashes count.
+func ByStashesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newStashStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newStashesStep(), opts...)
+	}
+}
+
+// ByStashes orders the results by stashes terms.
+func ByStashes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStashesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -167,24 +157,38 @@ func ByMessengers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByDownloadSessionsCount orders the results by downloadSessions count.
-func ByDownloadSessionsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByInviteField orders the results by invite field.
+func ByInviteField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newDownloadSessionsStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newInviteStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByDownloadSessions orders the results by downloadSessions terms.
-func ByDownloadSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPasskeysCount orders the results by passkeys count.
+func ByPasskeysCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDownloadSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborsCount(s, newPasskeysStep(), opts...)
 	}
 }
 
-// BySignupLinkField orders the results by signupLink field.
-func BySignupLinkField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByPasskeys orders the results by passkeys terms.
+func ByPasskeys(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSignupLinkStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newPasskeysStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// BySessionsCount orders the results by sessions count.
+func BySessionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSessionsStep(), opts...)
+	}
+}
+
+// BySessions orders the results by sessions terms.
+func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -201,11 +205,11 @@ func ByLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newStashStep() *sqlgraph.Step {
+func newStashesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(StashInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, StashTable, StashColumn),
+		sqlgraph.To(StashesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StashesTable, StashesColumn),
 	)
 }
 func newMessengersStep() *sqlgraph.Step {
@@ -215,18 +219,25 @@ func newMessengersStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, MessengersTable, MessengersColumn),
 	)
 }
-func newDownloadSessionsStep() *sqlgraph.Step {
+func newInviteStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DownloadSessionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, DownloadSessionsTable, DownloadSessionsColumn),
+		sqlgraph.To(InviteInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, InviteTable, InviteColumn),
 	)
 }
-func newSignupLinkStep() *sqlgraph.Step {
+func newPasskeysStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SignupLinkInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, SignupLinkTable, SignupLinkColumn),
+		sqlgraph.To(PasskeysInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PasskeysTable, PasskeysColumn),
+	)
+}
+func newSessionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SessionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 	)
 }
 func newLogsStep() *sqlgraph.Step {

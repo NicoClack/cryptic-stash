@@ -44,9 +44,9 @@ func (_c *LoginAlertCreate) SetSentAt(v time.Time) *LoginAlertCreate {
 	return _c
 }
 
-// SetConfirmed sets the "confirmed" field.
-func (_c *LoginAlertCreate) SetConfirmed(v bool) *LoginAlertCreate {
-	_c.mutation.SetConfirmed(v)
+// SetIsConfirmed sets the "isConfirmed" field.
+func (_c *LoginAlertCreate) SetIsConfirmed(v bool) *LoginAlertCreate {
+	_c.mutation.SetIsConfirmed(v)
 	return _c
 }
 
@@ -138,8 +138,8 @@ func (_c *LoginAlertCreate) check() error {
 	if _, ok := _c.mutation.SentAt(); !ok {
 		return &ValidationError{Name: "sentAt", err: errors.New(`ent: missing required field "LoginAlert.sentAt"`)}
 	}
-	if _, ok := _c.mutation.Confirmed(); !ok {
-		return &ValidationError{Name: "confirmed", err: errors.New(`ent: missing required field "LoginAlert.confirmed"`)}
+	if _, ok := _c.mutation.IsConfirmed(); !ok {
+		return &ValidationError{Name: "isConfirmed", err: errors.New(`ent: missing required field "LoginAlert.isConfirmed"`)}
 	}
 	if _, ok := _c.mutation.DownloadSessionID(); !ok {
 		return &ValidationError{Name: "downloadSessionID", err: errors.New(`ent: missing required field "LoginAlert.downloadSessionID"`)}
@@ -201,9 +201,9 @@ func (_c *LoginAlertCreate) createSpec() (*LoginAlert, *sqlgraph.CreateSpec) {
 		_spec.SetField(loginalert.FieldSentAt, field.TypeTime, value)
 		_node.SentAt = value
 	}
-	if value, ok := _c.mutation.Confirmed(); ok {
-		_spec.SetField(loginalert.FieldConfirmed, field.TypeBool, value)
-		_node.Confirmed = value
+	if value, ok := _c.mutation.IsConfirmed(); ok {
+		_spec.SetField(loginalert.FieldIsConfirmed, field.TypeBool, value)
+		_node.IsConfirmed = value
 	}
 	if nodes := _c.mutation.DownloadSessionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -327,15 +327,15 @@ func (u *LoginAlertUpsert) UpdateSentAt() *LoginAlertUpsert {
 	return u
 }
 
-// SetConfirmed sets the "confirmed" field.
-func (u *LoginAlertUpsert) SetConfirmed(v bool) *LoginAlertUpsert {
-	u.Set(loginalert.FieldConfirmed, v)
+// SetIsConfirmed sets the "isConfirmed" field.
+func (u *LoginAlertUpsert) SetIsConfirmed(v bool) *LoginAlertUpsert {
+	u.Set(loginalert.FieldIsConfirmed, v)
 	return u
 }
 
-// UpdateConfirmed sets the "confirmed" field to the value that was provided on create.
-func (u *LoginAlertUpsert) UpdateConfirmed() *LoginAlertUpsert {
-	u.SetExcluded(loginalert.FieldConfirmed)
+// UpdateIsConfirmed sets the "isConfirmed" field to the value that was provided on create.
+func (u *LoginAlertUpsert) UpdateIsConfirmed() *LoginAlertUpsert {
+	u.SetExcluded(loginalert.FieldIsConfirmed)
 	return u
 }
 
@@ -453,17 +453,17 @@ func (u *LoginAlertUpsertOne) UpdateSentAt() *LoginAlertUpsertOne {
 	})
 }
 
-// SetConfirmed sets the "confirmed" field.
-func (u *LoginAlertUpsertOne) SetConfirmed(v bool) *LoginAlertUpsertOne {
+// SetIsConfirmed sets the "isConfirmed" field.
+func (u *LoginAlertUpsertOne) SetIsConfirmed(v bool) *LoginAlertUpsertOne {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.SetConfirmed(v)
+		s.SetIsConfirmed(v)
 	})
 }
 
-// UpdateConfirmed sets the "confirmed" field to the value that was provided on create.
-func (u *LoginAlertUpsertOne) UpdateConfirmed() *LoginAlertUpsertOne {
+// UpdateIsConfirmed sets the "isConfirmed" field to the value that was provided on create.
+func (u *LoginAlertUpsertOne) UpdateIsConfirmed() *LoginAlertUpsertOne {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.UpdateConfirmed()
+		s.UpdateIsConfirmed()
 	})
 }
 
@@ -752,17 +752,17 @@ func (u *LoginAlertUpsertBulk) UpdateSentAt() *LoginAlertUpsertBulk {
 	})
 }
 
-// SetConfirmed sets the "confirmed" field.
-func (u *LoginAlertUpsertBulk) SetConfirmed(v bool) *LoginAlertUpsertBulk {
+// SetIsConfirmed sets the "isConfirmed" field.
+func (u *LoginAlertUpsertBulk) SetIsConfirmed(v bool) *LoginAlertUpsertBulk {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.SetConfirmed(v)
+		s.SetIsConfirmed(v)
 	})
 }
 
-// UpdateConfirmed sets the "confirmed" field to the value that was provided on create.
-func (u *LoginAlertUpsertBulk) UpdateConfirmed() *LoginAlertUpsertBulk {
+// UpdateIsConfirmed sets the "isConfirmed" field to the value that was provided on create.
+func (u *LoginAlertUpsertBulk) UpdateIsConfirmed() *LoginAlertUpsertBulk {
 	return u.Update(func(s *LoginAlertUpsert) {
-		s.UpdateConfirmed()
+		s.UpdateIsConfirmed()
 	})
 }
 

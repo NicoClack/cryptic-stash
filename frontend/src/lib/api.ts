@@ -2,7 +2,9 @@ import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
 import { page } from "$app/state";
 import { PUBLIC_API_DOMAIN } from "$env/static/public";
+import { SvelteURL } from "svelte/reactivity";
 import { adminAuth } from "./admin/AdminAuth.svelte";
+import { userAuth } from "./auth/UserAuth.svelte";
 
 class StatusError extends Error {
 	jsonResponse: JsonResponse;
@@ -56,29 +58,55 @@ export async function fetchJson(
 	const json = await resp.json();
 
 	const jsonResponse = new JsonResponse(resp, json);
-	if (
-		resp.status === 404 &&
-		responseHasErrorCode(jsonResponse, "ENDPOINT_NOT_FOUND") &&
-		!page.route.id?.startsWith("/setup") &&
-		!urlObj.pathname.startsWith("/api/v1/setup/")
-	) {
-		if (await maybeGoToSetup(fetch)) {
-			jsonResponse.redirecting = true;
-		}
-	}
-	if (
-		(resp.status === 401 || resp.status === 403) &&
-		((page.route.id?.startsWith("/admin") && page.route.id !== "/admin/login") ||
-			page.route.id === "/setup/admin-messengers")
-	) {
-		goto(resolve("/admin/login"));
-	}
+	jsonResponse.redirecting = await handleAuthRedirects(fetch, jsonResponse, init, urlObj);
 	if (init?.throwForStatus) {
 		jsonResponse.throwForStatus();
 	}
 
 	return jsonResponse;
 }
+async function handleAuthRedirects(
+	fetch: typeof global.fetch,
+	jsonResponse: JsonResponse,
+	init: JsonResponseInit | undefined,
+	urlObj: URL,
+): Promise<boolean> {
+	if (
+		jsonResponse.status === 404 &&
+		responseHasErrorCode(jsonResponse, "ENDPOINT_NOT_FOUND") &&
+		!page.route.id?.startsWith("/setup") &&
+		!urlObj.pathname.startsWith("/api/v1/setup/")
+	) {
+		if (await maybeGoToSetup(fetch)) {
+			return true;
+		}
+	}
+	if (
+		(jsonResponse.status === 401 || jsonResponse.status === 403) &&
+		page.route.id !== "/admin/login" &&
+		page.route.id !== "/login"
+	) {
+		const authHeader = new Headers(init?.headers).get("authorization");
+
+		if (jsonResponse.status === 403 && responseHasErrorCode(jsonResponse, "SUDO_MODE_REQUIRED")) {
+			goToElevate();
+			return true;
+		}
+
+		if (page.route.id?.startsWith("/admin") || page.route.id === "/setup/admin-messengers") {
+			goToAdminLogin();
+			return true;
+		} else if (authHeader?.startsWith("Bearer ")) {
+			// TODO: ^ how do I distinguish between user and admin auth if they both use Bearer tokens?
+			// Also what about other kinds of auth like invite codes?
+			userAuth.logout();
+			goToLogin();
+			return true;
+		}
+	}
+	return false;
+}
+
 export async function fetchAdminJson(
 	fetch: typeof global.fetch,
 	url: string,
@@ -88,6 +116,25 @@ export async function fetchAdminJson(
 
 	const headers = new Headers(init?.headers);
 	const authHeader = adminAuth.getAuthHeader();
+	if (authHeader) {
+		headers.set("Authorization", authHeader);
+	}
+
+	return await fetchJson(fetch, url, {
+		...init,
+		headers: headers,
+	});
+}
+
+export async function fetchUserJson(
+	fetch: typeof global.fetch,
+	url: string,
+	init?: JsonResponseInit | undefined,
+): Promise<JsonResponse> {
+	userAuth.requireAuth();
+
+	const headers = new Headers(init?.headers);
+	const authHeader = userAuth.getAuthHeader();
 	if (authHeader) {
 		headers.set("Authorization", authHeader);
 	}
@@ -117,4 +164,19 @@ export async function maybeGoToSetup(fetch: typeof global.fetch): Promise<boolea
 		goto(resolve("/setup/admin-messengers/"));
 	}
 	return true;
+}
+export function goToAdminLogin(): void {
+	const urlObj = new SvelteURL(resolve("/admin/login"), location.origin);
+	urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
+	goto(urlObj.toString());
+}
+export function goToLogin(): void {
+	const urlObj = new SvelteURL(resolve("/login"), location.origin);
+	urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
+	goto(urlObj.toString());
+}
+export function goToElevate(): void {
+	const urlObj = new SvelteURL(resolve("/elevate"), location.origin);
+	urlObj.searchParams.set("redirectTo", page.url.pathname + page.url.search);
+	goto(urlObj.toString());
 }

@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -65,13 +65,13 @@ func (_u *KeyValueUpdate) SetNillableKey(v *string) *KeyValueUpdate {
 }
 
 // SetValue sets the "value" field.
-func (_u *KeyValueUpdate) SetValue(v json.RawMessage) *KeyValueUpdate {
+func (_u *KeyValueUpdate) SetValue(v jsontext.Value) *KeyValueUpdate {
 	_u.mutation.SetValue(v)
 	return _u
 }
 
 // AppendValue appends value to the "value" field.
-func (_u *KeyValueUpdate) AppendValue(v json.RawMessage) *KeyValueUpdate {
+func (_u *KeyValueUpdate) AppendValue(v jsontext.Value) *KeyValueUpdate {
 	_u.mutation.AppendValue(v)
 	return _u
 }
@@ -211,13 +211,13 @@ func (_u *KeyValueUpdateOne) SetNillableKey(v *string) *KeyValueUpdateOne {
 }
 
 // SetValue sets the "value" field.
-func (_u *KeyValueUpdateOne) SetValue(v json.RawMessage) *KeyValueUpdateOne {
+func (_u *KeyValueUpdateOne) SetValue(v jsontext.Value) *KeyValueUpdateOne {
 	_u.mutation.SetValue(v)
 	return _u
 }
 
 // AppendValue appends value to the "value" field.
-func (_u *KeyValueUpdateOne) AppendValue(v json.RawMessage) *KeyValueUpdateOne {
+func (_u *KeyValueUpdateOne) AppendValue(v jsontext.Value) *KeyValueUpdateOne {
 	_u.mutation.AppendValue(v)
 	return _u
 }

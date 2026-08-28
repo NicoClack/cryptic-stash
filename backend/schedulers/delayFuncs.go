@@ -14,7 +14,7 @@ import (
 
 type DelayFuncContext struct {
 	App     *common.App
-	LastRan time.Time
+	LastRan *time.Time
 	Context context.Context
 }
 
@@ -24,12 +24,13 @@ type CommitDelayFunc = func(runTime time.Time, ctx context.Context)
 
 func SimpleFixedInterval(interval time.Duration) DelayFunc {
 	return func(delayCtx *DelayFuncContext) (time.Time, func(runTime time.Time, ctx context.Context)) {
-		nextRun := delayCtx.LastRan
 		now := delayCtx.App.Clock.Now()
-		if nextRun.IsZero() {
+		var nextRun time.Time
+		if delayCtx.LastRan == nil {
 			nextRun = now
 		} else {
-			nextRun = nextRun.Add(interval)
+			nextRun = delayCtx.LastRan.Add(interval)
+			// TODO: this might overflow or lose precision
 			skippedCalls := int64(math.Floor(float64(now.UnixNano()-nextRun.UnixNano()) / float64(interval)))
 			if skippedCalls > 0 {
 				newNextRun := nextRun.Add(interval * time.Duration(skippedCalls))
@@ -97,7 +98,7 @@ func PersistentFixedInterval(periodicTaskName string, interval time.Duration) De
 			}
 		}
 
-		if lastRan.IsZero() {
+		if lastRan == nil {
 			periodicTask, stdErr := dbcommon.WithReadTx(
 				delayCtx.Context,
 				delayCtx.App.Database,
@@ -122,8 +123,12 @@ func PersistentFixedInterval(periodicTaskName string, interval time.Duration) De
 			}
 		}
 
-		nextRun := lastRan.Add(interval)
 		now := delayCtx.App.Clock.Now()
+		nextRun := now
+		if lastRan != nil {
+			nextRun = lastRan.Add(interval)
+		}
+		// TODO: this might overflow or lose precision
 		skippedCalls := int64(math.Floor(float64(now.UnixNano()-nextRun.UnixNano()) / float64(interval)))
 		if skippedCalls > 0 {
 			// TODO: this still usually results in a double run

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NicoClack/cryptic-stash/backend/ent/downloadsession"
 	"github.com/NicoClack/cryptic-stash/backend/ent/predicate"
 	"github.com/NicoClack/cryptic-stash/backend/ent/stash"
 	"github.com/NicoClack/cryptic-stash/backend/ent/user"
@@ -67,6 +68,20 @@ func (_u *StashUpdate) SetNillableLastDownloadAt(v *time.Time) *StashUpdate {
 // ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
 func (_u *StashUpdate) ClearLastDownloadAt() *StashUpdate {
 	_u.mutation.ClearLastDownloadAt()
+	return _u
+}
+
+// SetPublicName sets the "publicName" field.
+func (_u *StashUpdate) SetPublicName(v string) *StashUpdate {
+	_u.mutation.SetPublicName(v)
+	return _u
+}
+
+// SetNillablePublicName sets the "publicName" field if the given value is not nil.
+func (_u *StashUpdate) SetNillablePublicName(v *string) *StashUpdate {
+	if v != nil {
+		_u.SetPublicName(*v)
+	}
 	return _u
 }
 
@@ -157,6 +172,68 @@ func (_u *StashUpdate) AddHashThreads(v int8) *StashUpdate {
 	return _u
 }
 
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (_u *StashUpdate) SetIsSelfLocked(v bool) *StashUpdate {
+	_u.mutation.SetIsSelfLocked(v)
+	return _u
+}
+
+// SetNillableIsSelfLocked sets the "isSelfLocked" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableIsSelfLocked(v *bool) *StashUpdate {
+	if v != nil {
+		_u.SetIsSelfLocked(*v)
+	}
+	return _u
+}
+
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (_u *StashUpdate) SetIsAdminLocked(v bool) *StashUpdate {
+	_u.mutation.SetIsAdminLocked(v)
+	return _u
+}
+
+// SetNillableIsAdminLocked sets the "isAdminLocked" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableIsAdminLocked(v *bool) *StashUpdate {
+	if v != nil {
+		_u.SetIsAdminLocked(*v)
+	}
+	return _u
+}
+
+// SetSelfLockedUntil sets the "selfLockedUntil" field.
+func (_u *StashUpdate) SetSelfLockedUntil(v time.Time) *StashUpdate {
+	_u.mutation.SetSelfLockedUntil(v)
+	return _u
+}
+
+// SetNillableSelfLockedUntil sets the "selfLockedUntil" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableSelfLockedUntil(v *time.Time) *StashUpdate {
+	if v != nil {
+		_u.SetSelfLockedUntil(*v)
+	}
+	return _u
+}
+
+// ClearSelfLockedUntil clears the value of the "selfLockedUntil" field.
+func (_u *StashUpdate) ClearSelfLockedUntil() *StashUpdate {
+	_u.mutation.ClearSelfLockedUntil()
+	return _u
+}
+
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (_u *StashUpdate) SetDownloadSessionsValidFrom(v time.Time) *StashUpdate {
+	_u.mutation.SetDownloadSessionsValidFrom(v)
+	return _u
+}
+
+// SetNillableDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field if the given value is not nil.
+func (_u *StashUpdate) SetNillableDownloadSessionsValidFrom(v *time.Time) *StashUpdate {
+	if v != nil {
+		_u.SetDownloadSessionsValidFrom(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "userID" field.
 func (_u *StashUpdate) SetUserID(v uuid.UUID) *StashUpdate {
 	_u.mutation.SetUserID(v)
@@ -176,6 +253,21 @@ func (_u *StashUpdate) SetUser(v *User) *StashUpdate {
 	return _u.SetUserID(v.ID)
 }
 
+// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by IDs.
+func (_u *StashUpdate) AddDownloadSessionIDs(ids ...uuid.UUID) *StashUpdate {
+	_u.mutation.AddDownloadSessionIDs(ids...)
+	return _u
+}
+
+// AddDownloadSessions adds the "downloadSessions" edges to the DownloadSession entity.
+func (_u *StashUpdate) AddDownloadSessions(v ...*DownloadSession) *StashUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDownloadSessionIDs(ids...)
+}
+
 // Mutation returns the StashMutation object of the builder.
 func (_u *StashUpdate) Mutation() *StashMutation {
 	return _u.mutation
@@ -185,6 +277,27 @@ func (_u *StashUpdate) Mutation() *StashMutation {
 func (_u *StashUpdate) ClearUser() *StashUpdate {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearDownloadSessions clears all "downloadSessions" edges to the DownloadSession entity.
+func (_u *StashUpdate) ClearDownloadSessions() *StashUpdate {
+	_u.mutation.ClearDownloadSessions()
+	return _u
+}
+
+// RemoveDownloadSessionIDs removes the "downloadSessions" edge to DownloadSession entities by IDs.
+func (_u *StashUpdate) RemoveDownloadSessionIDs(ids ...uuid.UUID) *StashUpdate {
+	_u.mutation.RemoveDownloadSessionIDs(ids...)
+	return _u
+}
+
+// RemoveDownloadSessions removes "downloadSessions" edges to DownloadSession entities.
+func (_u *StashUpdate) RemoveDownloadSessions(v ...*DownloadSession) *StashUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDownloadSessionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -225,6 +338,11 @@ func (_u *StashUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *StashUpdate) check() error {
+	if v, ok := _u.mutation.PublicName(); ok {
+		if err := stash.PublicNameValidator(v); err != nil {
+			return &ValidationError{Name: "publicName", err: fmt.Errorf(`ent: validator failed for field "Stash.publicName": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Content(); ok {
 		if err := stash.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Stash.content": %w`, err)}
@@ -233,11 +351,6 @@ func (_u *StashUpdate) check() error {
 	if v, ok := _u.mutation.FileName(); ok {
 		if err := stash.FileNameValidator(v); err != nil {
 			return &ValidationError{Name: "fileName", err: fmt.Errorf(`ent: validator failed for field "Stash.fileName": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.EncryptionDataKey(); ok {
-		if err := stash.EncryptionDataKeyValidator(v); err != nil {
-			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.PasswordSalt(); ok {
@@ -275,6 +388,9 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.LastDownloadAtCleared() {
 		_spec.ClearField(stash.FieldLastDownloadAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.PublicName(); ok {
+		_spec.SetField(stash.FieldPublicName, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 	}
@@ -282,7 +398,11 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(stash.FieldFileName, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.EncryptionDataKey(); ok {
-		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
+		vv, err := stash.ValueScanner.EncryptionDataKey.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.PasswordSalt(); ok {
 		_spec.SetField(stash.FieldPasswordSalt, field.TypeBytes, value)
@@ -305,9 +425,24 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedHashThreads(); ok {
 		_spec.AddField(stash.FieldHashThreads, field.TypeUint8, value)
 	}
+	if value, ok := _u.mutation.IsSelfLocked(); ok {
+		_spec.SetField(stash.FieldIsSelfLocked, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IsAdminLocked(); ok {
+		_spec.SetField(stash.FieldIsAdminLocked, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SelfLockedUntil(); ok {
+		_spec.SetField(stash.FieldSelfLockedUntil, field.TypeTime, value)
+	}
+	if _u.mutation.SelfLockedUntilCleared() {
+		_spec.ClearField(stash.FieldSelfLockedUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DownloadSessionsValidFrom(); ok {
+		_spec.SetField(stash.FieldDownloadSessionsValidFrom, field.TypeTime, value)
+	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
@@ -320,13 +455,58 @@ func (_u *StashUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DownloadSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   stash.DownloadSessionsTable,
+			Columns: []string{stash.DownloadSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDownloadSessionsIDs(); len(nodes) > 0 && !_u.mutation.DownloadSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   stash.DownloadSessionsTable,
+			Columns: []string{stash.DownloadSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DownloadSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   stash.DownloadSessionsTable,
+			Columns: []string{stash.DownloadSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -391,6 +571,20 @@ func (_u *StashUpdateOne) SetNillableLastDownloadAt(v *time.Time) *StashUpdateOn
 // ClearLastDownloadAt clears the value of the "lastDownloadAt" field.
 func (_u *StashUpdateOne) ClearLastDownloadAt() *StashUpdateOne {
 	_u.mutation.ClearLastDownloadAt()
+	return _u
+}
+
+// SetPublicName sets the "publicName" field.
+func (_u *StashUpdateOne) SetPublicName(v string) *StashUpdateOne {
+	_u.mutation.SetPublicName(v)
+	return _u
+}
+
+// SetNillablePublicName sets the "publicName" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillablePublicName(v *string) *StashUpdateOne {
+	if v != nil {
+		_u.SetPublicName(*v)
+	}
 	return _u
 }
 
@@ -481,6 +675,68 @@ func (_u *StashUpdateOne) AddHashThreads(v int8) *StashUpdateOne {
 	return _u
 }
 
+// SetIsSelfLocked sets the "isSelfLocked" field.
+func (_u *StashUpdateOne) SetIsSelfLocked(v bool) *StashUpdateOne {
+	_u.mutation.SetIsSelfLocked(v)
+	return _u
+}
+
+// SetNillableIsSelfLocked sets the "isSelfLocked" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableIsSelfLocked(v *bool) *StashUpdateOne {
+	if v != nil {
+		_u.SetIsSelfLocked(*v)
+	}
+	return _u
+}
+
+// SetIsAdminLocked sets the "isAdminLocked" field.
+func (_u *StashUpdateOne) SetIsAdminLocked(v bool) *StashUpdateOne {
+	_u.mutation.SetIsAdminLocked(v)
+	return _u
+}
+
+// SetNillableIsAdminLocked sets the "isAdminLocked" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableIsAdminLocked(v *bool) *StashUpdateOne {
+	if v != nil {
+		_u.SetIsAdminLocked(*v)
+	}
+	return _u
+}
+
+// SetSelfLockedUntil sets the "selfLockedUntil" field.
+func (_u *StashUpdateOne) SetSelfLockedUntil(v time.Time) *StashUpdateOne {
+	_u.mutation.SetSelfLockedUntil(v)
+	return _u
+}
+
+// SetNillableSelfLockedUntil sets the "selfLockedUntil" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableSelfLockedUntil(v *time.Time) *StashUpdateOne {
+	if v != nil {
+		_u.SetSelfLockedUntil(*v)
+	}
+	return _u
+}
+
+// ClearSelfLockedUntil clears the value of the "selfLockedUntil" field.
+func (_u *StashUpdateOne) ClearSelfLockedUntil() *StashUpdateOne {
+	_u.mutation.ClearSelfLockedUntil()
+	return _u
+}
+
+// SetDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field.
+func (_u *StashUpdateOne) SetDownloadSessionsValidFrom(v time.Time) *StashUpdateOne {
+	_u.mutation.SetDownloadSessionsValidFrom(v)
+	return _u
+}
+
+// SetNillableDownloadSessionsValidFrom sets the "downloadSessionsValidFrom" field if the given value is not nil.
+func (_u *StashUpdateOne) SetNillableDownloadSessionsValidFrom(v *time.Time) *StashUpdateOne {
+	if v != nil {
+		_u.SetDownloadSessionsValidFrom(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "userID" field.
 func (_u *StashUpdateOne) SetUserID(v uuid.UUID) *StashUpdateOne {
 	_u.mutation.SetUserID(v)
@@ -500,6 +756,21 @@ func (_u *StashUpdateOne) SetUser(v *User) *StashUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
+// AddDownloadSessionIDs adds the "downloadSessions" edge to the DownloadSession entity by IDs.
+func (_u *StashUpdateOne) AddDownloadSessionIDs(ids ...uuid.UUID) *StashUpdateOne {
+	_u.mutation.AddDownloadSessionIDs(ids...)
+	return _u
+}
+
+// AddDownloadSessions adds the "downloadSessions" edges to the DownloadSession entity.
+func (_u *StashUpdateOne) AddDownloadSessions(v ...*DownloadSession) *StashUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDownloadSessionIDs(ids...)
+}
+
 // Mutation returns the StashMutation object of the builder.
 func (_u *StashUpdateOne) Mutation() *StashMutation {
 	return _u.mutation
@@ -509,6 +780,27 @@ func (_u *StashUpdateOne) Mutation() *StashMutation {
 func (_u *StashUpdateOne) ClearUser() *StashUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
+}
+
+// ClearDownloadSessions clears all "downloadSessions" edges to the DownloadSession entity.
+func (_u *StashUpdateOne) ClearDownloadSessions() *StashUpdateOne {
+	_u.mutation.ClearDownloadSessions()
+	return _u
+}
+
+// RemoveDownloadSessionIDs removes the "downloadSessions" edge to DownloadSession entities by IDs.
+func (_u *StashUpdateOne) RemoveDownloadSessionIDs(ids ...uuid.UUID) *StashUpdateOne {
+	_u.mutation.RemoveDownloadSessionIDs(ids...)
+	return _u
+}
+
+// RemoveDownloadSessions removes "downloadSessions" edges to DownloadSession entities.
+func (_u *StashUpdateOne) RemoveDownloadSessions(v ...*DownloadSession) *StashUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDownloadSessionIDs(ids...)
 }
 
 // Where appends a list predicates to the StashUpdate builder.
@@ -562,6 +854,11 @@ func (_u *StashUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *StashUpdateOne) check() error {
+	if v, ok := _u.mutation.PublicName(); ok {
+		if err := stash.PublicNameValidator(v); err != nil {
+			return &ValidationError{Name: "publicName", err: fmt.Errorf(`ent: validator failed for field "Stash.publicName": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Content(); ok {
 		if err := stash.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Stash.content": %w`, err)}
@@ -570,11 +867,6 @@ func (_u *StashUpdateOne) check() error {
 	if v, ok := _u.mutation.FileName(); ok {
 		if err := stash.FileNameValidator(v); err != nil {
 			return &ValidationError{Name: "fileName", err: fmt.Errorf(`ent: validator failed for field "Stash.fileName": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.EncryptionDataKey(); ok {
-		if err := stash.EncryptionDataKeyValidator(v); err != nil {
-			return &ValidationError{Name: "encryptionDataKey", err: fmt.Errorf(`ent: validator failed for field "Stash.encryptionDataKey": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.PasswordSalt(); ok {
@@ -629,6 +921,9 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 	if _u.mutation.LastDownloadAtCleared() {
 		_spec.ClearField(stash.FieldLastDownloadAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.PublicName(); ok {
+		_spec.SetField(stash.FieldPublicName, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(stash.FieldContent, field.TypeBytes, value)
 	}
@@ -636,7 +931,11 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 		_spec.SetField(stash.FieldFileName, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.EncryptionDataKey(); ok {
-		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, value)
+		vv, err := stash.ValueScanner.EncryptionDataKey.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(stash.FieldEncryptionDataKey, field.TypeBytes, vv)
 	}
 	if value, ok := _u.mutation.PasswordSalt(); ok {
 		_spec.SetField(stash.FieldPasswordSalt, field.TypeBytes, value)
@@ -659,9 +958,24 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 	if value, ok := _u.mutation.AddedHashThreads(); ok {
 		_spec.AddField(stash.FieldHashThreads, field.TypeUint8, value)
 	}
+	if value, ok := _u.mutation.IsSelfLocked(); ok {
+		_spec.SetField(stash.FieldIsSelfLocked, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IsAdminLocked(); ok {
+		_spec.SetField(stash.FieldIsAdminLocked, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SelfLockedUntil(); ok {
+		_spec.SetField(stash.FieldSelfLockedUntil, field.TypeTime, value)
+	}
+	if _u.mutation.SelfLockedUntilCleared() {
+		_spec.ClearField(stash.FieldSelfLockedUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DownloadSessionsValidFrom(); ok {
+		_spec.SetField(stash.FieldDownloadSessionsValidFrom, field.TypeTime, value)
+	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
@@ -674,13 +988,58 @@ func (_u *StashUpdateOne) sqlSave(ctx context.Context) (_node *Stash, err error)
 	}
 	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   stash.UserTable,
 			Columns: []string{stash.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DownloadSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   stash.DownloadSessionsTable,
+			Columns: []string{stash.DownloadSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDownloadSessionsIDs(); len(nodes) > 0 && !_u.mutation.DownloadSessionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   stash.DownloadSessionsTable,
+			Columns: []string{stash.DownloadSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DownloadSessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   stash.DownloadSessionsTable,
+			Columns: []string{stash.DownloadSessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(downloadsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

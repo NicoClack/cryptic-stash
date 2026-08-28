@@ -3,7 +3,6 @@ package messengers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/ent/usermessenger"
 	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ListMessengersResponse struct {
@@ -33,16 +33,12 @@ type Messenger struct {
 }
 
 func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
-	return servercommon.NewHandler(func(ginCtx *gin.Context) error {
-		userID, ctxErr := servercommon.ParseObjectID(ginCtx.Param("id"))
-		if ctxErr != nil {
-			return ctxErr
-		}
+	return servercommon.NewObjectIDHandler(func(id uuid.UUID, ginCtx *gin.Context) error {
 		userOb, stdErr := dbcommon.WithReadTx(
 			ginCtx.Request.Context(), app.Database,
 			func(tx *ent.Tx, ctx context.Context) (*ent.User, error) {
 				return tx.User.Query().
-					Where(user.ID(userID)).
+					Where(user.ID(id)).
 					WithMessengers(func(messengerQuery *ent.UserMessengerQuery) {
 						messengerQuery.Order(
 							ent.Asc(usermessenger.FieldType),
@@ -63,11 +59,14 @@ func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
 			versionedType := common.GetVersionedType(messengerOb.Type, messengerOb.Version)
 			definition, ok := app.Messengers.GetPublicDefinition(versionedType)
 			if !ok {
-				return fmt.Errorf(
-					"user %v has %v messenger configured but it has no definition",
+				app.Logger.Warn(
+					"user has messenger configured but it has no definition. was that provider removed?",
+					"userID",
 					userOb.ID,
+					"messengerType",
 					versionedType,
 				)
+				continue
 			}
 
 			createdMessengerTypes[versionedType] = struct{}{}
@@ -77,9 +76,9 @@ func ListMessengers(app *servercommon.ServerApp) gin.HandlerFunc {
 				VersionedType: versionedType,
 				Name:          definition.Name,
 				Created:       true,
-				Enabled:       messengerOb.Enabled,
-				CreatedAt:     common.Pointer(messengerOb.CreatedAt),
-				UpdatedAt:     common.Pointer(messengerOb.UpdatedAt),
+				Enabled:       messengerOb.IsEnabled,
+				CreatedAt:     &messengerOb.CreatedAt,
+				UpdatedAt:     &messengerOb.UpdatedAt,
 				Options:       messengerOb.Options,
 				OptionsSchema: definition.OptionsSchema,
 			})

@@ -1,13 +1,7 @@
 <script lang="ts">
 	import type { AdminEnvVars } from "$lib/admin/setup";
 	import PageMain from "$lib/components/PageMain.svelte";
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from "$lib/components/ui/card";
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card";
 	import Step1 from "./Step1.svelte";
 	import Step2 from "./Step2.svelte";
 	import Step3 from "./Step3.svelte";
@@ -37,8 +31,8 @@
 				<h1>Welcome to Cryptic Stash</h1>
 			</CardTitle>
 			<CardDescription class="text-base">
-				Before you can set up users and stashes, you need to configure some security-related
-				environment variables.
+				Before you can set up users and stashes, you need to configure some security-related environment
+				variables.
 			</CardDescription>
 		</CardHeader>
 		<CardContent>

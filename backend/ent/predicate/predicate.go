@@ -9,8 +9,44 @@ import (
 // DownloadSession is the predicate function for downloadsession builders.
 type DownloadSession func(*sql.Selector)
 
+// DownloadSessionOrErr calls the predicate only if the error is not nit.
+func DownloadSessionOrErr(p DownloadSession, err error) DownloadSession {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
+// Invite is the predicate function for invite builders.
+type Invite func(*sql.Selector)
+
+// InviteOrErr calls the predicate only if the error is not nit.
+func InviteOrErr(p Invite, err error) Invite {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // Job is the predicate function for job builders.
 type Job func(*sql.Selector)
+
+// JobOrErr calls the predicate only if the error is not nit.
+func JobOrErr(p Job, err error) Job {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
 
 // KeyValue is the predicate function for keyvalue builders.
 type KeyValue func(*sql.Selector)
@@ -21,14 +57,50 @@ type LogEntry func(*sql.Selector)
 // LoginAlert is the predicate function for loginalert builders.
 type LoginAlert func(*sql.Selector)
 
+// Passkey is the predicate function for passkey builders.
+type Passkey func(*sql.Selector)
+
+// PasskeyOrErr calls the predicate only if the error is not nit.
+func PasskeyOrErr(p Passkey, err error) Passkey {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // PeriodicTask is the predicate function for periodictask builders.
 type PeriodicTask func(*sql.Selector)
 
-// SignupLink is the predicate function for signuplink builders.
-type SignupLink func(*sql.Selector)
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
+
+// SessionOrErr calls the predicate only if the error is not nit.
+func SessionOrErr(p Session, err error) Session {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
 
 // Stash is the predicate function for stash builders.
 type Stash func(*sql.Selector)
+
+// StashOrErr calls the predicate only if the error is not nit.
+func StashOrErr(p Stash, err error) Stash {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
 
 // TwoFactorAction is the predicate function for twofactoraction builders.
 type TwoFactorAction func(*sql.Selector)
@@ -38,3 +110,14 @@ type User func(*sql.Selector)
 
 // UserMessenger is the predicate function for usermessenger builders.
 type UserMessenger func(*sql.Selector)
+
+// UserMessengerOrErr calls the predicate only if the error is not nit.
+func UserMessengerOrErr(p UserMessenger, err error) UserMessenger {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}

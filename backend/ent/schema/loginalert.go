@@ -21,7 +21,7 @@ func (LoginAlert) Fields() []ent.Field {
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
 		field.Time("sentAt"),
-		field.Bool("confirmed"),
+		field.Bool("isConfirmed"),
 		field.UUID("downloadSessionID", uuid.Nil),
 		field.UUID("userMessengerID", uuid.Nil),
 	}

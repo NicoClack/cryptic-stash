@@ -22,25 +22,23 @@ func (User) Fields() []ent.Field {
 		field.UUID("id", uuid.Nil).Default(uuid.New),
 		field.Time("createdAt"),
 		field.Time("updatedAt").UpdateDefault(time.Now),
-		field.String("username").Unique().NotEmpty(),
-		// Admins might be able to be locked in the future
-		field.Bool("locked").Default(false),
-		field.Time("lockedUntil").Nillable().Optional(),
-		field.Time("downloadSessionsValidFrom"),
+		field.String("username").Unique().MinLen(3).MaxLen(128),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("stash", Stash.Type).
-			Annotations(entsql.OnDelete(entsql.Cascade)).Unique(),
+		edge.To("stashes", Stash.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("messengers", UserMessenger.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To("downloadSessions", DownloadSession.Type).
-			Annotations(entsql.OnDelete(entsql.Cascade)),
-		edge.To("signupLink", SignupLink.Type).
+		edge.To("invite", Invite.Type).
 			Annotations(entsql.OnDelete(entsql.Cascade)).Unique(),
+		edge.To("passkeys", Passkey.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("sessions", Session.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("logs", LogEntry.Type).
 			Annotations(entsql.OnDelete(entsql.SetNull)),
 	}

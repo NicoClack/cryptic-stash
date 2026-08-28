@@ -22,9 +22,7 @@
 	{#snippet children({ checked })}
 		<div data-slot="radio-group-indicator" class="relative flex items-center justify-center">
 			{#if checked}
-				<CircleIcon
-					class="fill-primary absolute start-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2"
-				/>
+				<CircleIcon class="fill-primary absolute start-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2" />
 			{/if}
 		</div>
 	{/snippet}

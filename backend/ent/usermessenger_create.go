@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"time"
@@ -51,22 +51,22 @@ func (_c *UserMessengerCreate) SetVersion(v int) *UserMessengerCreate {
 	return _c
 }
 
-// SetEnabled sets the "enabled" field.
-func (_c *UserMessengerCreate) SetEnabled(v bool) *UserMessengerCreate {
-	_c.mutation.SetEnabled(v)
+// SetIsEnabled sets the "isEnabled" field.
+func (_c *UserMessengerCreate) SetIsEnabled(v bool) *UserMessengerCreate {
+	_c.mutation.SetIsEnabled(v)
 	return _c
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_c *UserMessengerCreate) SetNillableEnabled(v *bool) *UserMessengerCreate {
+// SetNillableIsEnabled sets the "isEnabled" field if the given value is not nil.
+func (_c *UserMessengerCreate) SetNillableIsEnabled(v *bool) *UserMessengerCreate {
 	if v != nil {
-		_c.SetEnabled(*v)
+		_c.SetIsEnabled(*v)
 	}
 	return _c
 }
 
 // SetOptions sets the "options" field.
-func (_c *UserMessengerCreate) SetOptions(v json.RawMessage) *UserMessengerCreate {
+func (_c *UserMessengerCreate) SetOptions(v jsontext.Value) *UserMessengerCreate {
 	_c.mutation.SetOptions(v)
 	return _c
 }
@@ -146,9 +146,9 @@ func (_c *UserMessengerCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserMessengerCreate) defaults() {
-	if _, ok := _c.mutation.Enabled(); !ok {
-		v := usermessenger.DefaultEnabled
-		_c.mutation.SetEnabled(v)
+	if _, ok := _c.mutation.IsEnabled(); !ok {
+		v := usermessenger.DefaultIsEnabled
+		_c.mutation.SetIsEnabled(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := usermessenger.DefaultID()
@@ -175,11 +175,8 @@ func (_c *UserMessengerCreate) check() error {
 	if _, ok := _c.mutation.Version(); !ok {
 		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "UserMessenger.version"`)}
 	}
-	if _, ok := _c.mutation.Enabled(); !ok {
-		return &ValidationError{Name: "enabled", err: errors.New(`ent: missing required field "UserMessenger.enabled"`)}
-	}
-	if _, ok := _c.mutation.Options(); !ok {
-		return &ValidationError{Name: "options", err: errors.New(`ent: missing required field "UserMessenger.options"`)}
+	if _, ok := _c.mutation.IsEnabled(); !ok {
+		return &ValidationError{Name: "isEnabled", err: errors.New(`ent: missing required field "UserMessenger.isEnabled"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "UserMessenger.userID"`)}
@@ -194,7 +191,10 @@ func (_c *UserMessengerCreate) sqlSave(ctx context.Context) (*UserMessenger, err
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -213,7 +213,7 @@ func (_c *UserMessengerCreate) sqlSave(ctx context.Context) (*UserMessenger, err
 	return _node, nil
 }
 
-func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpec) {
+func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &UserMessenger{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(usermessenger.Table, sqlgraph.NewFieldSpec(usermessenger.FieldID, field.TypeUUID))
@@ -239,12 +239,16 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 		_spec.SetField(usermessenger.FieldVersion, field.TypeInt, value)
 		_node.Version = value
 	}
-	if value, ok := _c.mutation.Enabled(); ok {
-		_spec.SetField(usermessenger.FieldEnabled, field.TypeBool, value)
-		_node.Enabled = value
+	if value, ok := _c.mutation.IsEnabled(); ok {
+		_spec.SetField(usermessenger.FieldIsEnabled, field.TypeBool, value)
+		_node.IsEnabled = value
 	}
 	if value, ok := _c.mutation.Options(); ok {
-		_spec.SetField(usermessenger.FieldOptions, field.TypeJSON, value)
+		vv, err := usermessenger.ValueScanner.Options.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(usermessenger.FieldOptions, field.TypeBytes, vv)
 		_node.Options = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
@@ -280,7 +284,7 @@ func (_c *UserMessengerCreate) createSpec() (*UserMessenger, *sqlgraph.CreateSpe
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	return _node, _spec
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -386,20 +390,20 @@ func (u *UserMessengerUpsert) AddVersion(v int) *UserMessengerUpsert {
 	return u
 }
 
-// SetEnabled sets the "enabled" field.
-func (u *UserMessengerUpsert) SetEnabled(v bool) *UserMessengerUpsert {
-	u.Set(usermessenger.FieldEnabled, v)
+// SetIsEnabled sets the "isEnabled" field.
+func (u *UserMessengerUpsert) SetIsEnabled(v bool) *UserMessengerUpsert {
+	u.Set(usermessenger.FieldIsEnabled, v)
 	return u
 }
 
-// UpdateEnabled sets the "enabled" field to the value that was provided on create.
-func (u *UserMessengerUpsert) UpdateEnabled() *UserMessengerUpsert {
-	u.SetExcluded(usermessenger.FieldEnabled)
+// UpdateIsEnabled sets the "isEnabled" field to the value that was provided on create.
+func (u *UserMessengerUpsert) UpdateIsEnabled() *UserMessengerUpsert {
+	u.SetExcluded(usermessenger.FieldIsEnabled)
 	return u
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsert) SetOptions(v json.RawMessage) *UserMessengerUpsert {
+func (u *UserMessengerUpsert) SetOptions(v jsontext.Value) *UserMessengerUpsert {
 	u.Set(usermessenger.FieldOptions, v)
 	return u
 }
@@ -407,6 +411,12 @@ func (u *UserMessengerUpsert) SetOptions(v json.RawMessage) *UserMessengerUpsert
 // UpdateOptions sets the "options" field to the value that was provided on create.
 func (u *UserMessengerUpsert) UpdateOptions() *UserMessengerUpsert {
 	u.SetExcluded(usermessenger.FieldOptions)
+	return u
+}
+
+// ClearOptions clears the value of the "options" field.
+func (u *UserMessengerUpsert) ClearOptions() *UserMessengerUpsert {
+	u.SetNull(usermessenger.FieldOptions)
 	return u
 }
 
@@ -533,22 +543,22 @@ func (u *UserMessengerUpsertOne) UpdateVersion() *UserMessengerUpsertOne {
 	})
 }
 
-// SetEnabled sets the "enabled" field.
-func (u *UserMessengerUpsertOne) SetEnabled(v bool) *UserMessengerUpsertOne {
+// SetIsEnabled sets the "isEnabled" field.
+func (u *UserMessengerUpsertOne) SetIsEnabled(v bool) *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.SetEnabled(v)
+		s.SetIsEnabled(v)
 	})
 }
 
-// UpdateEnabled sets the "enabled" field to the value that was provided on create.
-func (u *UserMessengerUpsertOne) UpdateEnabled() *UserMessengerUpsertOne {
+// UpdateIsEnabled sets the "isEnabled" field to the value that was provided on create.
+func (u *UserMessengerUpsertOne) UpdateIsEnabled() *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.UpdateEnabled()
+		s.UpdateIsEnabled()
 	})
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertOne) SetOptions(v json.RawMessage) *UserMessengerUpsertOne {
+func (u *UserMessengerUpsertOne) SetOptions(v jsontext.Value) *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})
@@ -558,6 +568,13 @@ func (u *UserMessengerUpsertOne) SetOptions(v json.RawMessage) *UserMessengerUps
 func (u *UserMessengerUpsertOne) UpdateOptions() *UserMessengerUpsertOne {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.UpdateOptions()
+	})
+}
+
+// ClearOptions clears the value of the "options" field.
+func (u *UserMessengerUpsertOne) ClearOptions() *UserMessengerUpsertOne {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.ClearOptions()
 	})
 }
 
@@ -643,7 +660,10 @@ func (_c *UserMessengerCreateBulk) Save(ctx context.Context) ([]*UserMessenger, 
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -853,22 +873,22 @@ func (u *UserMessengerUpsertBulk) UpdateVersion() *UserMessengerUpsertBulk {
 	})
 }
 
-// SetEnabled sets the "enabled" field.
-func (u *UserMessengerUpsertBulk) SetEnabled(v bool) *UserMessengerUpsertBulk {
+// SetIsEnabled sets the "isEnabled" field.
+func (u *UserMessengerUpsertBulk) SetIsEnabled(v bool) *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.SetEnabled(v)
+		s.SetIsEnabled(v)
 	})
 }
 
-// UpdateEnabled sets the "enabled" field to the value that was provided on create.
-func (u *UserMessengerUpsertBulk) UpdateEnabled() *UserMessengerUpsertBulk {
+// UpdateIsEnabled sets the "isEnabled" field to the value that was provided on create.
+func (u *UserMessengerUpsertBulk) UpdateIsEnabled() *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
-		s.UpdateEnabled()
+		s.UpdateIsEnabled()
 	})
 }
 
 // SetOptions sets the "options" field.
-func (u *UserMessengerUpsertBulk) SetOptions(v json.RawMessage) *UserMessengerUpsertBulk {
+func (u *UserMessengerUpsertBulk) SetOptions(v jsontext.Value) *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.SetOptions(v)
 	})
@@ -878,6 +898,13 @@ func (u *UserMessengerUpsertBulk) SetOptions(v json.RawMessage) *UserMessengerUp
 func (u *UserMessengerUpsertBulk) UpdateOptions() *UserMessengerUpsertBulk {
 	return u.Update(func(s *UserMessengerUpsert) {
 		s.UpdateOptions()
+	})
+}
+
+// ClearOptions clears the value of the "options" field.
+func (u *UserMessengerUpsertBulk) ClearOptions() *UserMessengerUpsertBulk {
+	return u.Update(func(s *UserMessengerUpsert) {
+		s.ClearOptions()
 	})
 }
 

@@ -21,9 +21,9 @@ func NewRateLimiter(app *common.App) *RateLimiter {
 }
 
 func (service *RateLimiter) RequestSession(
-	eventName string, amount int, userID string,
+	eventName string, amount int, identifier string,
 ) (common.LimiterSession, common.WrappedError) {
-	session, wrappedErr := service.Limiter.RequestSession(eventName, amount, userID)
+	session, wrappedErr := service.Limiter.RequestSession(eventName, amount, identifier)
 	if session == nil { // Avoid wrapping nil sessions in a non-nil interface
 		return nil, wrappedErr
 	}

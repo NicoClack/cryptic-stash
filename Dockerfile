@@ -25,7 +25,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Stage 3: Final lightweight image
 FROM alpine:latest
-# Install ca-certificates for HTTPS and sqlite runtime
+# Install ca-certificates for HTTPS and sqlite runtime # TODO: remove?
 RUN apk --no-cache add ca-certificates sqlite-libs
 
 WORKDIR /root/

@@ -1,0 +1,113 @@
+package invites_test
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"testing"
+	"time"
+
+	"github.com/NicoClack/cryptic-stash/backend/common/testcommon"
+	"github.com/NicoClack/cryptic-stash/backend/ent/invite"
+	"github.com/NicoClack/cryptic-stash/backend/server/endpoints/v1/invites"
+	"github.com/NicoClack/cryptic-stash/backend/server/servercommon"
+	"github.com/NicoClack/cryptic-stash/backend/testhelpers"
+	"github.com/descope/virtualwebauthn"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
+)
+
+func TestCreateUser_NoWebAuthnSession_SendsBadRequest(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	inviteOb, code := createInvite(t, app, "test@example.com", app.Clock.Now().Add(time.Hour))
+
+	vAuthenticator := virtualwebauthn.NewAuthenticator()
+	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
+	vAuthenticator.AddCredential(credential)
+	credentialJSON := virtualwebauthn.CreateAttestationResponse(
+		testcommon.NewWebAuthnRelyingParty(app.Env),
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AttestationOptions{
+			Challenge: []byte("12345"),
+		},
+	)
+
+	var payload invites.CreateUserPayload
+	stdErr := json.Unmarshal([]byte(credentialJSON), &payload)
+	require.NoError(t, stdErr)
+	payload.CredentialName = "Test Key"
+
+	// The WebAuthn session is normally created for an invite by the generate options endpoint, which isn't called here
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
+		payload,
+		testcommon.WithBearerToken(code),
+	)
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusBadRequest,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{
+				{
+					Message: "WebAuthn session expired, please refresh the page",
+					Code:    "NO_WEBAUTHN_SESSION",
+				},
+			},
+		},
+	)
+}
+
+func TestCreateUser_UsernameTaken(t *testing.T) {
+	t.Parallel()
+
+	app := testhelpers.NewApp(t, nil)
+	dbClient := app.Database.Client()
+	email := "taken@example.com"
+
+	dbClient.User.Create().
+		SetUsername(email).
+		SetCreatedAt(app.Clock.Now()).
+		SetUpdatedAt(app.Clock.Now()).
+		SaveX(t.Context())
+	inviteOb, code := createInvite(t, app, email, app.Clock.Now().Add(time.Hour))
+
+	// The username is checked before the passkey, so this can be a dummy
+	vAuthenticator := virtualwebauthn.NewAuthenticator()
+	credential := virtualwebauthn.NewCredential(virtualwebauthn.KeyTypeEC2)
+	vAuthenticator.AddCredential(credential)
+	credentialJSON := virtualwebauthn.CreateAttestationResponse(
+		testcommon.NewWebAuthnRelyingParty(app.Env),
+		vAuthenticator,
+		credential,
+		virtualwebauthn.AttestationOptions{
+			Challenge: []byte("12345"),
+		},
+	)
+
+	var createUserPayload invites.CreateUserPayload
+	stdErr := json.Unmarshal([]byte(credentialJSON), &createUserPayload)
+	require.NoError(t, stdErr)
+	createUserPayload.CredentialName = "Test Key"
+
+	respRecorder := testcommon.Post(
+		t, app.Server,
+		fmt.Sprintf("/api/v1/invites/%s/create-user/", inviteOb.ID),
+		createUserPayload,
+		testcommon.WithBearerToken(code),
+	)
+	testcommon.AssertJSONResponse(
+		t, respRecorder,
+		http.StatusUnauthorized,
+		gin.H{
+			"errors": []servercommon.ErrorDetail{}, // Don't reveal to the client
+		},
+	)
+
+	inviteOb = dbClient.Invite.Query().OnlyX(t.Context())
+	require.NotNil(t, inviteOb.ExpiredReason)
+	require.Equal(t, invite.ExpiredReason("username_taken"), *inviteOb.ExpiredReason)
+}

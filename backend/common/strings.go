@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -36,8 +37,8 @@ func ParseVersionedType(versionedType string) (string, int, WrappedError) {
 	if separatorIndex == -1 {
 		return "", 0, ErrWrapperParseVersionedType.Wrap(ErrMalformedVersionedType)
 	}
-	version, err := strconv.Atoi(versionedType[separatorIndex+1:])
-	if err != nil {
+	version, stdErr := strconv.Atoi(versionedType[separatorIndex+1:])
+	if stdErr != nil {
 		return "", 0, ErrWrapperParseVersionedType.Wrap(ErrMalformedVersionedType)
 	}
 
@@ -87,4 +88,14 @@ func SanitizeFilename(filename string, defaultFilename string) string {
 	}
 
 	return sanitizedFilename
+}
+
+// Removes trailing slashes
+func NormalizeBaseURL(parsedURL *url.URL) *url.URL {
+	if parsedURL == nil {
+		return nil
+	}
+	normalizedURL := *parsedURL
+	normalizedURL.Path = strings.TrimSuffix(normalizedURL.Path, "/")
+	return &normalizedURL
 }

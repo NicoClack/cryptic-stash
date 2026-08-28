@@ -14,6 +14,7 @@ import (
 	"github.com/NicoClack/cryptic-stash/backend/common/globals"
 	"github.com/NicoClack/cryptic-stash/backend/ent"
 	"github.com/NicoClack/cryptic-stash/backend/ent/migrate"
+	"github.com/NicoClack/cryptic-stash/backend/ent/schema"
 	_ "github.com/NicoClack/cryptic-stash/backend/entps"
 	"github.com/pressly/goose/v3"
 )
@@ -45,7 +46,11 @@ func (service *Database) Start() {
 			log.Fatalf("couldn't create storage directory. error:\n%v", stdErr)
 		}
 
-		db, stdErr := sql.Open("sqlite3", filepath.Join(service.app.Env.MOUNT_PATH, "database.sqlite3"))
+		db, stdErr := sql.Open(
+			"sqlite3",
+			filepath.Join(service.app.Env.MOUNT_PATH, "database.sqlite3")+
+				"?_txlock=immediate",
+		)
 		if stdErr != nil {
 			log.Fatalf("couldn't start database. error:\n%v", stdErr)
 		}
@@ -53,6 +58,10 @@ func (service *Database) Start() {
 		db.SetMaxIdleConns(5)
 		db.SetMaxOpenConns(100)
 		db.SetConnMaxLifetime(time.Hour)
+
+		if len(service.app.Env.BASE_ENCRYPTION_KEY) > 0 {
+			schema.Init(service.app.Env.BASE_ENCRYPTION_KEY)
+		}
 		driver := ent.Driver(entsql.OpenDB("sqlite3", db))
 		client := ent.NewClient(driver)
 

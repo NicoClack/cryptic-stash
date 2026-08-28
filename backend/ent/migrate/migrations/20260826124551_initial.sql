@@ -1,0 +1,135 @@
+-- +goose Up
+-- create "download_sessions" table
+CREATE TABLE `download_sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_auth_code` blob NOT NULL, `valid_from` datetime NOT NULL, `valid_until` datetime NOT NULL, `user_agent` blob NOT NULL, `ip` blob NOT NULL, `stash_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `download_sessions_stashes_downloadSessions` FOREIGN KEY (`stash_id`) REFERENCES `stashes` (`id`) ON DELETE CASCADE);
+-- create index "download_sessions_hashed_auth_code_key" to table: "download_sessions"
+CREATE UNIQUE INDEX `download_sessions_hashed_auth_code_key` ON `download_sessions` (`hashed_auth_code`);
+-- create index "downloadsession_hashed_auth_code_stash_id" to table: "download_sessions"
+CREATE INDEX `downloadsession_hashed_auth_code_stash_id` ON `download_sessions` (`hashed_auth_code`, `stash_id`);
+-- create "invites" table
+CREATE TABLE `invites` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `email` text NOT NULL, `hashed_code` blob NOT NULL, `expires_at` datetime NOT NULL, `expired_reason` text NULL, `web_authn_session` blob NULL, `user_agent` blob NULL, `ip` blob NULL, `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `invites_users_invite` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+-- create index "invites_hashed_code_key" to table: "invites"
+CREATE UNIQUE INDEX `invites_hashed_code_key` ON `invites` (`hashed_code`);
+-- create index "invites_user_id_key" to table: "invites"
+CREATE UNIQUE INDEX `invites_user_id_key` ON `invites` (`user_id`);
+-- create index "invite_hashed_code" to table: "invites"
+CREATE INDEX `invite_hashed_code` ON `invites` (`hashed_code`);
+-- create index "invite_created_at" to table: "invites"
+CREATE INDEX `invite_created_at` ON `invites` (`created_at`);
+-- create "jobs" table
+CREATE TABLE `jobs` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `due_at` datetime NOT NULL, `originally_due_at` datetime NOT NULL, `started_at` datetime NULL, `type` text NOT NULL, `version` integer NOT NULL, `priority` integer NOT NULL, `weight` integer NOT NULL, `body` blob NOT NULL, `status` text NOT NULL DEFAULT ('pending'), `retries` integer NOT NULL DEFAULT (0), `retried_fraction` real NOT NULL DEFAULT (0), `has_logged_stall_warning` bool NOT NULL DEFAULT (false), PRIMARY KEY (`id`));
+-- create index "job_status_priority_due_at" to table: "jobs"
+CREATE INDEX `job_status_priority_due_at` ON `jobs` (`status`, `priority`, `due_at`);
+-- create index "job_due_at" to table: "jobs"
+CREATE INDEX `job_due_at` ON `jobs` (`due_at`);
+-- create "key_values" table
+CREATE TABLE `key_values` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `key` text NOT NULL, `value` json NOT NULL, PRIMARY KEY (`id`));
+-- create index "keyvalue_key" to table: "key_values"
+CREATE UNIQUE INDEX `keyvalue_key` ON `key_values` (`key`);
+-- create "log_entries" table
+CREATE TABLE `log_entries` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `logged_at` datetime NOT NULL, `logged_at_known` bool NOT NULL, `level` integer NOT NULL, `message` text NOT NULL, `attributes` json NOT NULL, `source_file` text NOT NULL, `source_function` text NOT NULL, `source_line` integer NOT NULL, `public_message` text NOT NULL, `user_id` uuid NULL, PRIMARY KEY (`id`), CONSTRAINT `log_entries_users_logs` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL);
+-- create index "logentry_logged_at" to table: "log_entries"
+CREATE INDEX `logentry_logged_at` ON `log_entries` (`logged_at`);
+-- create "login_alerts" table
+CREATE TABLE `login_alerts` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `sent_at` datetime NOT NULL, `is_confirmed` bool NOT NULL, `download_session_id` uuid NOT NULL, `user_messenger_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `login_alerts_download_sessions_loginAlerts` FOREIGN KEY (`download_session_id`) REFERENCES `download_sessions` (`id`) ON DELETE CASCADE, CONSTRAINT `login_alerts_user_messengers_loginAlerts` FOREIGN KEY (`user_messenger_id`) REFERENCES `user_messengers` (`id`) ON DELETE CASCADE);
+-- create "passkeys" table
+CREATE TABLE `passkeys` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `last_used_at` datetime NULL, `name` text NOT NULL, `allow_sudo` bool NOT NULL, `credential_id` blob NOT NULL, `credential` blob NOT NULL, `is_second_group` bool NOT NULL DEFAULT (false), `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `passkeys_users_passkeys` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+-- create index "passkeys_credential_id_key" to table: "passkeys"
+CREATE UNIQUE INDEX `passkeys_credential_id_key` ON `passkeys` (`credential_id`);
+-- create index "passkey_user_id_credential_id" to table: "passkeys"
+CREATE INDEX `passkey_user_id_credential_id` ON `passkeys` (`user_id`, `credential_id`);
+-- create index "passkey_user_id_name" to table: "passkeys"
+CREATE UNIQUE INDEX `passkey_user_id_name` ON `passkeys` (`user_id`, `name`);
+-- create "periodic_tasks" table
+CREATE TABLE `periodic_tasks` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `name` text NOT NULL, `last_ran_at` datetime NULL, PRIMARY KEY (`id`));
+-- create index "periodic_tasks_name_key" to table: "periodic_tasks"
+CREATE UNIQUE INDEX `periodic_tasks_name_key` ON `periodic_tasks` (`name`);
+-- create "sessions" table
+CREATE TABLE `sessions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `hashed_token` blob NOT NULL, `expires_at` datetime NOT NULL, `is_sudo` bool NOT NULL DEFAULT (false), `user_agent` blob NOT NULL, `ip` blob NOT NULL, `passkey_id` uuid NOT NULL, `elevation_passkey_id` uuid NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `sessions_passkeys_sessions` FOREIGN KEY (`passkey_id`) REFERENCES `passkeys` (`id`) ON DELETE CASCADE, CONSTRAINT `sessions_passkeys_elevatedSessions` FOREIGN KEY (`elevation_passkey_id`) REFERENCES `passkeys` (`id`) ON DELETE CASCADE, CONSTRAINT `sessions_users_sessions` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+-- create index "sessions_hashed_token_key" to table: "sessions"
+CREATE UNIQUE INDEX `sessions_hashed_token_key` ON `sessions` (`hashed_token`);
+-- create "stashes" table
+CREATE TABLE `stashes` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `last_download_at` datetime NULL, `public_name` text NOT NULL, `content` blob NOT NULL, `file_name` blob NOT NULL, `encryption_data_key` blob NOT NULL, `password_salt` blob NOT NULL, `hash_time` integer NOT NULL, `hash_memory` integer NOT NULL, `hash_threads` integer NOT NULL, `is_self_locked` bool NOT NULL DEFAULT (false), `is_admin_locked` bool NOT NULL DEFAULT (false), `self_locked_until` datetime NULL, `download_sessions_valid_from` datetime NOT NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `stashes_users_stashes` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+-- create index "stash_user_id_public_name" to table: "stashes"
+CREATE UNIQUE INDEX `stash_user_id_public_name` ON `stashes` (`user_id`, `public_name`);
+-- create "two_factor_actions" table
+CREATE TABLE `two_factor_actions` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `type` text NOT NULL, `version` integer NOT NULL, `body` json NOT NULL, `expires_at` datetime NOT NULL, `code` text NOT NULL, PRIMARY KEY (`id`));
+-- create index "twofactoraction_code" to table: "two_factor_actions"
+CREATE INDEX `twofactoraction_code` ON `two_factor_actions` (`code`);
+-- create "users" table
+CREATE TABLE `users` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `username` text NOT NULL, PRIMARY KEY (`id`));
+-- create index "users_username_key" to table: "users"
+CREATE UNIQUE INDEX `users_username_key` ON `users` (`username`);
+-- create index "user_created_at" to table: "users"
+CREATE INDEX `user_created_at` ON `users` (`created_at`);
+-- create "user_messengers" table
+CREATE TABLE `user_messengers` (`id` uuid NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `type` text NOT NULL, `version` integer NOT NULL, `is_enabled` bool NOT NULL DEFAULT (true), `options` blob NULL, `user_id` uuid NOT NULL, PRIMARY KEY (`id`), CONSTRAINT `user_messengers_users_messengers` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE);
+-- create index "usermessenger_user_id_type_version" to table: "user_messengers"
+CREATE UNIQUE INDEX `usermessenger_user_id_type_version` ON `user_messengers` (`user_id`, `type`, `version`);
+
+-- +goose Down
+-- reverse: create index "usermessenger_user_id_type_version" to table: "user_messengers"
+DROP INDEX `usermessenger_user_id_type_version`;
+-- reverse: create "user_messengers" table
+DROP TABLE `user_messengers`;
+-- reverse: create index "user_created_at" to table: "users"
+DROP INDEX `user_created_at`;
+-- reverse: create index "users_username_key" to table: "users"
+DROP INDEX `users_username_key`;
+-- reverse: create "users" table
+DROP TABLE `users`;
+-- reverse: create index "twofactoraction_code" to table: "two_factor_actions"
+DROP INDEX `twofactoraction_code`;
+-- reverse: create "two_factor_actions" table
+DROP TABLE `two_factor_actions`;
+-- reverse: create index "stash_user_id_public_name" to table: "stashes"
+DROP INDEX `stash_user_id_public_name`;
+-- reverse: create "stashes" table
+DROP TABLE `stashes`;
+-- reverse: create index "sessions_hashed_token_key" to table: "sessions"
+DROP INDEX `sessions_hashed_token_key`;
+-- reverse: create "sessions" table
+DROP TABLE `sessions`;
+-- reverse: create index "periodic_tasks_name_key" to table: "periodic_tasks"
+DROP INDEX `periodic_tasks_name_key`;
+-- reverse: create "periodic_tasks" table
+DROP TABLE `periodic_tasks`;
+-- reverse: create index "passkey_user_id_name" to table: "passkeys"
+DROP INDEX `passkey_user_id_name`;
+-- reverse: create index "passkey_user_id_credential_id" to table: "passkeys"
+DROP INDEX `passkey_user_id_credential_id`;
+-- reverse: create index "passkeys_credential_id_key" to table: "passkeys"
+DROP INDEX `passkeys_credential_id_key`;
+-- reverse: create "passkeys" table
+DROP TABLE `passkeys`;
+-- reverse: create "login_alerts" table
+DROP TABLE `login_alerts`;
+-- reverse: create index "logentry_logged_at" to table: "log_entries"
+DROP INDEX `logentry_logged_at`;
+-- reverse: create "log_entries" table
+DROP TABLE `log_entries`;
+-- reverse: create index "keyvalue_key" to table: "key_values"
+DROP INDEX `keyvalue_key`;
+-- reverse: create "key_values" table
+DROP TABLE `key_values`;
+-- reverse: create index "job_due_at" to table: "jobs"
+DROP INDEX `job_due_at`;
+-- reverse: create index "job_status_priority_due_at" to table: "jobs"
+DROP INDEX `job_status_priority_due_at`;
+-- reverse: create "jobs" table
+DROP TABLE `jobs`;
+-- reverse: create index "invite_created_at" to table: "invites"
+DROP INDEX `invite_created_at`;
+-- reverse: create index "invite_hashed_code" to table: "invites"
+DROP INDEX `invite_hashed_code`;
+-- reverse: create index "invites_user_id_key" to table: "invites"
+DROP INDEX `invites_user_id_key`;
+-- reverse: create index "invites_hashed_code_key" to table: "invites"
+DROP INDEX `invites_hashed_code_key`;
+-- reverse: create "invites" table
+DROP TABLE `invites`;
+-- reverse: create index "downloadsession_hashed_auth_code_stash_id" to table: "download_sessions"
+DROP INDEX `downloadsession_hashed_auth_code_stash_id`;
+-- reverse: create index "download_sessions_hashed_auth_code_key" to table: "download_sessions"
+DROP INDEX `download_sessions_hashed_auth_code_key`;
+-- reverse: create "download_sessions" table
+DROP TABLE `download_sessions`;

@@ -71,6 +71,11 @@ func LastDownloadAt(v time.Time) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldLastDownloadAt, v))
 }
 
+// PublicName applies equality check predicate on the "publicName" field. It's identical to PublicNameEQ.
+func PublicName(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldPublicName, v))
+}
+
 // Content applies equality check predicate on the "content" field. It's identical to ContentEQ.
 func Content(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldContent, v))
@@ -83,7 +88,8 @@ func FileName(v []byte) predicate.Stash {
 
 // EncryptionDataKey applies equality check predicate on the "encryptionDataKey" field. It's identical to EncryptionDataKeyEQ.
 func EncryptionDataKey(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldEncryptionDataKey, v))
+	vc, err := ValueScanner.EncryptionDataKey.Value(v)
+	return predicate.StashOrErr(sql.FieldEQ(FieldEncryptionDataKey, vc), err)
 }
 
 // PasswordSalt applies equality check predicate on the "passwordSalt" field. It's identical to PasswordSaltEQ.
@@ -104,6 +110,26 @@ func HashMemory(v uint32) predicate.Stash {
 // HashThreads applies equality check predicate on the "hashThreads" field. It's identical to HashThreadsEQ.
 func HashThreads(v uint8) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldHashThreads, v))
+}
+
+// IsSelfLocked applies equality check predicate on the "isSelfLocked" field. It's identical to IsSelfLockedEQ.
+func IsSelfLocked(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsSelfLocked, v))
+}
+
+// IsAdminLocked applies equality check predicate on the "isAdminLocked" field. It's identical to IsAdminLockedEQ.
+func IsAdminLocked(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsAdminLocked, v))
+}
+
+// SelfLockedUntil applies equality check predicate on the "selfLockedUntil" field. It's identical to SelfLockedUntilEQ.
+func SelfLockedUntil(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldSelfLockedUntil, v))
+}
+
+// DownloadSessionsValidFrom applies equality check predicate on the "downloadSessionsValidFrom" field. It's identical to DownloadSessionsValidFromEQ.
+func DownloadSessionsValidFrom(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldDownloadSessionsValidFrom, v))
 }
 
 // UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
@@ -241,6 +267,71 @@ func LastDownloadAtNotNil() predicate.Stash {
 	return predicate.Stash(sql.FieldNotNull(FieldLastDownloadAt))
 }
 
+// PublicNameEQ applies the EQ predicate on the "publicName" field.
+func PublicNameEQ(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldPublicName, v))
+}
+
+// PublicNameNEQ applies the NEQ predicate on the "publicName" field.
+func PublicNameNEQ(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldPublicName, v))
+}
+
+// PublicNameIn applies the In predicate on the "publicName" field.
+func PublicNameIn(vs ...string) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldPublicName, vs...))
+}
+
+// PublicNameNotIn applies the NotIn predicate on the "publicName" field.
+func PublicNameNotIn(vs ...string) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldPublicName, vs...))
+}
+
+// PublicNameGT applies the GT predicate on the "publicName" field.
+func PublicNameGT(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldPublicName, v))
+}
+
+// PublicNameGTE applies the GTE predicate on the "publicName" field.
+func PublicNameGTE(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldPublicName, v))
+}
+
+// PublicNameLT applies the LT predicate on the "publicName" field.
+func PublicNameLT(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldPublicName, v))
+}
+
+// PublicNameLTE applies the LTE predicate on the "publicName" field.
+func PublicNameLTE(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldPublicName, v))
+}
+
+// PublicNameContains applies the Contains predicate on the "publicName" field.
+func PublicNameContains(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldContains(FieldPublicName, v))
+}
+
+// PublicNameHasPrefix applies the HasPrefix predicate on the "publicName" field.
+func PublicNameHasPrefix(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldHasPrefix(FieldPublicName, v))
+}
+
+// PublicNameHasSuffix applies the HasSuffix predicate on the "publicName" field.
+func PublicNameHasSuffix(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldHasSuffix(FieldPublicName, v))
+}
+
+// PublicNameEqualFold applies the EqualFold predicate on the "publicName" field.
+func PublicNameEqualFold(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldEqualFold(FieldPublicName, v))
+}
+
+// PublicNameContainsFold applies the ContainsFold predicate on the "publicName" field.
+func PublicNameContainsFold(v string) predicate.Stash {
+	return predicate.Stash(sql.FieldContainsFold(FieldPublicName, v))
+}
+
 // ContentEQ applies the EQ predicate on the "content" field.
 func ContentEQ(v []byte) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldContent, v))
@@ -323,42 +414,66 @@ func FileNameLTE(v []byte) predicate.Stash {
 
 // EncryptionDataKeyEQ applies the EQ predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyEQ(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldEQ(FieldEncryptionDataKey, v))
+	vc, err := ValueScanner.EncryptionDataKey.Value(v)
+	return predicate.StashOrErr(sql.FieldEQ(FieldEncryptionDataKey, vc), err)
 }
 
 // EncryptionDataKeyNEQ applies the NEQ predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyNEQ(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldNEQ(FieldEncryptionDataKey, v))
+	vc, err := ValueScanner.EncryptionDataKey.Value(v)
+	return predicate.StashOrErr(sql.FieldNEQ(FieldEncryptionDataKey, vc), err)
 }
 
 // EncryptionDataKeyIn applies the In predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyIn(vs ...[]byte) predicate.Stash {
-	return predicate.Stash(sql.FieldIn(FieldEncryptionDataKey, vs...))
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.EncryptionDataKey.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.StashOrErr(sql.FieldIn(FieldEncryptionDataKey, v...), err)
 }
 
 // EncryptionDataKeyNotIn applies the NotIn predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyNotIn(vs ...[]byte) predicate.Stash {
-	return predicate.Stash(sql.FieldNotIn(FieldEncryptionDataKey, vs...))
+	var (
+		err error
+		v   = make([]any, len(vs))
+	)
+	for i := range v {
+		if v[i], err = ValueScanner.EncryptionDataKey.Value(vs[i]); err != nil {
+			break
+		}
+	}
+	return predicate.StashOrErr(sql.FieldNotIn(FieldEncryptionDataKey, v...), err)
 }
 
 // EncryptionDataKeyGT applies the GT predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyGT(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldGT(FieldEncryptionDataKey, v))
+	vc, err := ValueScanner.EncryptionDataKey.Value(v)
+	return predicate.StashOrErr(sql.FieldGT(FieldEncryptionDataKey, vc), err)
 }
 
 // EncryptionDataKeyGTE applies the GTE predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyGTE(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldGTE(FieldEncryptionDataKey, v))
+	vc, err := ValueScanner.EncryptionDataKey.Value(v)
+	return predicate.StashOrErr(sql.FieldGTE(FieldEncryptionDataKey, vc), err)
 }
 
 // EncryptionDataKeyLT applies the LT predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyLT(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldLT(FieldEncryptionDataKey, v))
+	vc, err := ValueScanner.EncryptionDataKey.Value(v)
+	return predicate.StashOrErr(sql.FieldLT(FieldEncryptionDataKey, vc), err)
 }
 
 // EncryptionDataKeyLTE applies the LTE predicate on the "encryptionDataKey" field.
 func EncryptionDataKeyLTE(v []byte) predicate.Stash {
-	return predicate.Stash(sql.FieldLTE(FieldEncryptionDataKey, v))
+	vc, err := ValueScanner.EncryptionDataKey.Value(v)
+	return predicate.StashOrErr(sql.FieldLTE(FieldEncryptionDataKey, vc), err)
 }
 
 // PasswordSaltEQ applies the EQ predicate on the "passwordSalt" field.
@@ -521,6 +636,116 @@ func HashThreadsLTE(v uint8) predicate.Stash {
 	return predicate.Stash(sql.FieldLTE(FieldHashThreads, v))
 }
 
+// IsSelfLockedEQ applies the EQ predicate on the "isSelfLocked" field.
+func IsSelfLockedEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsSelfLocked, v))
+}
+
+// IsSelfLockedNEQ applies the NEQ predicate on the "isSelfLocked" field.
+func IsSelfLockedNEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldIsSelfLocked, v))
+}
+
+// IsAdminLockedEQ applies the EQ predicate on the "isAdminLocked" field.
+func IsAdminLockedEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldIsAdminLocked, v))
+}
+
+// IsAdminLockedNEQ applies the NEQ predicate on the "isAdminLocked" field.
+func IsAdminLockedNEQ(v bool) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldIsAdminLocked, v))
+}
+
+// SelfLockedUntilEQ applies the EQ predicate on the "selfLockedUntil" field.
+func SelfLockedUntilEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilNEQ applies the NEQ predicate on the "selfLockedUntil" field.
+func SelfLockedUntilNEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilIn applies the In predicate on the "selfLockedUntil" field.
+func SelfLockedUntilIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldSelfLockedUntil, vs...))
+}
+
+// SelfLockedUntilNotIn applies the NotIn predicate on the "selfLockedUntil" field.
+func SelfLockedUntilNotIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldSelfLockedUntil, vs...))
+}
+
+// SelfLockedUntilGT applies the GT predicate on the "selfLockedUntil" field.
+func SelfLockedUntilGT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilGTE applies the GTE predicate on the "selfLockedUntil" field.
+func SelfLockedUntilGTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilLT applies the LT predicate on the "selfLockedUntil" field.
+func SelfLockedUntilLT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilLTE applies the LTE predicate on the "selfLockedUntil" field.
+func SelfLockedUntilLTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldSelfLockedUntil, v))
+}
+
+// SelfLockedUntilIsNil applies the IsNil predicate on the "selfLockedUntil" field.
+func SelfLockedUntilIsNil() predicate.Stash {
+	return predicate.Stash(sql.FieldIsNull(FieldSelfLockedUntil))
+}
+
+// SelfLockedUntilNotNil applies the NotNil predicate on the "selfLockedUntil" field.
+func SelfLockedUntilNotNil() predicate.Stash {
+	return predicate.Stash(sql.FieldNotNull(FieldSelfLockedUntil))
+}
+
+// DownloadSessionsValidFromEQ applies the EQ predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldEQ(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromNEQ applies the NEQ predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromNEQ(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNEQ(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromIn applies the In predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldIn(FieldDownloadSessionsValidFrom, vs...))
+}
+
+// DownloadSessionsValidFromNotIn applies the NotIn predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromNotIn(vs ...time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldNotIn(FieldDownloadSessionsValidFrom, vs...))
+}
+
+// DownloadSessionsValidFromGT applies the GT predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromGT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGT(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromGTE applies the GTE predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromGTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldGTE(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromLT applies the LT predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromLT(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLT(FieldDownloadSessionsValidFrom, v))
+}
+
+// DownloadSessionsValidFromLTE applies the LTE predicate on the "downloadSessionsValidFrom" field.
+func DownloadSessionsValidFromLTE(v time.Time) predicate.Stash {
+	return predicate.Stash(sql.FieldLTE(FieldDownloadSessionsValidFrom, v))
+}
+
 // UserIDEQ applies the EQ predicate on the "userID" field.
 func UserIDEQ(v uuid.UUID) predicate.Stash {
 	return predicate.Stash(sql.FieldEQ(FieldUserID, v))
@@ -546,7 +771,7 @@ func HasUser() predicate.Stash {
 	return predicate.Stash(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -556,6 +781,29 @@ func HasUser() predicate.Stash {
 func HasUserWith(preds ...predicate.User) predicate.Stash {
 	return predicate.Stash(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDownloadSessions applies the HasEdge predicate on the "downloadSessions" edge.
+func HasDownloadSessions() predicate.Stash {
+	return predicate.Stash(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DownloadSessionsTable, DownloadSessionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDownloadSessionsWith applies the HasEdge predicate on the "downloadSessions" edge with a given conditions (other predicates).
+func HasDownloadSessionsWith(preds ...predicate.DownloadSession) predicate.Stash {
+	return predicate.Stash(func(s *sql.Selector) {
+		step := newDownloadSessionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
